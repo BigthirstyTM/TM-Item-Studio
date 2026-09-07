@@ -1,0 +1,1275 @@
+@page "/"
+@using GBX.NET
+@using GBX.NET.Engines.Game
+@using GBX.NET.Engines.GameData
+@using GBX.NET.Engines.Plug
+@using GBX.NET.Engines.MwFoundations
+@using System.IO
+@using System.Text
+@using System.Globalization
+@using System.Reflection
+@inject IJSRuntime JS
+
+<PageTitle>Trackmania 2020 Item Studio</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="mb-0">Trackmania 2020 Item Studio</h3>
+        <small class="text-muted">Interactieve 3D editor voor Trackmania .Item.Gbx bestanden</small>
+    </div>
+    <div style="width: 320px;">
+        <InputFile OnChange="LoadFile" accept=".gbx" class="form-control form-control-sm" />
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="alert alert-info py-2">
+        <em>Item inladen, geometrie, pivots, lichten en metadata analyseren...</em>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger py-2">
+        <strong>Fout:</strong> @errorMessage
+    </div>
+}
+
+@if (itemModel != null)
+{
+    <div style="display: grid; grid-template-columns: 1fr 450px; gap: 20px;">
+        
+        <!-- ================= LINKERKOLOM: 3D VIEWPORT ================= -->
+        <div>
+            <div style="background: #111; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);">
+                
+                <!-- Viewport Toolbar -->
+                <div style="padding: 8px 12px; background: #1f1f23; border-bottom: 1px solid #2d2d32; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <!-- Laag-toggles -->
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn @(showMeshes ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("meshes"))">
+                            Meshes
+                        </button>
+                        <button class="btn @(showPivots ? "btn-warning text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("pivots"))">
+                            Pivots (@detectedPivots.Count)
+                        </button>
+                        <button class="btn @(showLights ? "btn-info text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("lights"))">
+                            Lichten (@detectedLights.Count)
+                        </button>
+                        <button class="btn @(showSockets ? "btn-success" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("sockets"))">
+                            Sockets (@detectedSockets.Count)
+                        </button>
+                    </div>
+
+                    <!-- Animatie & Algemene functies -->
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        @if (isMovingItem)
+                        {
+                            <button class="btn btn-sm @(isPlaying ? "btn-warning" : "btn-success")" @onclick="ToggleAnimation">
+                                @(isPlaying ? "⏸" : "▶")
+                            </button>
+                            <select class="form-select form-select-sm" style="width: auto;" value="@detectedAxis" @onchange="OnAxisChanged">
+                                <option value="y">Y-As</option>
+                                <option value="x">X-As</option>
+                                <option value="z">Z-As</option>
+                            </select>
+                        }
+                        <button class="btn btn-sm btn-outline-light" @onclick="ToggleWireframe">Wire</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset</button>
+                        @if (!string.IsNullOrEmpty(rawObj))
+                        {
+                            <button class="btn btn-sm btn-outline-success" @onclick="DownloadObj">.OBJ</button>
+                        }
+                    </div>
+                </div>
+                
+                <!-- 3D Canvas container -->
+                <div id="threeContainer" style="width: 100%; height: 550px; position: relative;">
+                    @if (!hasMesh && detectedPivots.Count == 0 && detectedLights.Count == 0)
+                    {
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #888; text-align: center;">
+                            <p>Geen visuele elementen gevonden in dit item.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="mt-2 d-flex justify-content-between text-muted small flex-wrap">
+                <div>
+                    <span><span style="color: #2563eb;">■</span> Basis</span>
+                    @if (isMovingItem) { <span class="ms-2"><span style="color: #f59e0b;">■</span> Bewegend</span> }
+                    <span class="ms-2"><span style="color: #facc15;">●</span> Pivot</span>
+                    <span class="ms-2"><span style="color: #fffbeb;">💡</span> Licht</span>
+                    <span class="ms-2"><span style="color: #06b6d4;">⭕</span> Socket</span>
+                </div>
+                <div>
+                    <em>Tip: Klik op een gizmo in 3D om deze te verplaatsen met de pijlen!</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
+        <div style="border: 1px solid #ddd; border-radius: 8px; background: #fff; display: flex; flex-direction: column; height: 620px;">
+            
+            <ul class="nav nav-tabs px-2 pt-2 bg-light border-bottom" style="font-size: 0.85em;">
+                <li class="nav-item">
+                    <button class="nav-link @(activeTab == "general" ? "active" : "")" @onclick="@(() => activeTab = "general")">
+                        Algemeen
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @(activeTab == "placement" ? "active" : "")" @onclick="@(() => activeTab = "placement")">
+                        Placement & Pivots
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @(activeTab == "gameplay" ? "active" : "")" @onclick="@(() => activeTab = "gameplay")">
+                        Gameplay & Type
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @(activeTab == "lights" ? "active" : "")" @onclick="@(() => activeTab = "lights")">
+                        Lichten (@detectedLights.Count)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @(activeTab == "sockets" ? "active" : "")" @onclick="@(() => activeTab = "sockets")">
+                        Sockets (@detectedSockets.Count)
+                    </button>
+                </li>
+            </ul>
+
+            <div class="p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
+                
+                @if (activeTab == "general")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">1. Identificatie & Metadata</h6>
+                    <div class="mb-2">
+                        <label class="form-label mb-0 fw-bold">Item ID / Bestandsnaam</label>
+                        <input type="text" class="form-control form-control-sm" @bind="identId" @bind:after="UpdateIdent" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-0 fw-bold">Auteur</label>
+                        <input type="text" class="form-control form-control-sm" @bind="identAuthor" @bind:after="UpdateIdent" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-0 fw-bold">Collection</label>
+                        <input type="text" class="form-control form-control-sm" @bind="identCollection" @bind:after="UpdateIdent" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-0 fw-bold">Operationeel Model (ItemType)</label>
+                        <select class="form-select form-select-sm" @bind="itemModel.ItemType">
+                            @foreach (var type in Enum.GetValues<CGameItemModel.EItemType>())
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-0 fw-bold">Archetype / Mapmap</label>
+                        <input type="text" class="form-control form-control-sm" value="@(itemModel.ArchetypeRef ?? "Geen")" readonly />
+                    </div>
+                }
+
+                @if (activeTab == "placement")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">2. Grid Snapping & Positie</h6>
+                    @if (itemModel.DefaultPlacement != null)
+                    {
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">GridSnap H Step (m)</label>
+                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapHStep" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">GridSnap V Step (m)</label>
+                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapVStep" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">GridSnap H Offset</label>
+                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapHOffset" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">GridSnap V Offset</label>
+                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapVOffset" />
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">Fly V Step</label>
+                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.FlyVStep" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">Fly V Offset</label>
+                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.FlyVOffset" />
+                            </div>
+                        </div>
+
+                        <h6 class="border-bottom pb-1 mt-3 text-primary">Rotatie Gedrag</h6>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" id="yawOnly" @bind="itemModel.DefaultPlacement.YawOnly" />
+                            <label class="form-check-label small" for="yawOnly">Alleen Yaw rotatie (Geen Pitch/Roll)</label>
+                        </div>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" id="notOnObject" @bind="itemModel.DefaultPlacement.NotOnObject" />
+                            <label class="form-check-label small" for="notOnObject">Niet op ander object plaatsen</label>
+                        </div>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" id="autoRot" @bind="itemModel.DefaultPlacement.AutoRotation" />
+                            <label class="form-check-label small" for="autoRot">Automatisch roteren op ondergrond</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="switchPivot" @bind="itemModel.DefaultPlacement.SwitchPivotManually" />
+                            <label class="form-check-label small" for="switchPivot">Handmatig van pivot wisselen</label>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                            <h6 class="mb-0 text-primary">Pivots (@detectedPivots.Count)</h6>
+                            <button class="btn btn-xs btn-outline-primary" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddPivot">
+                                + Alternate Pivot
+                            </button>
+                        </div>
+
+                        @for (int i = 0; i < detectedPivots.Count; i++)
+                        {
+                            var p = detectedPivots[i];
+                            int pIdx = i;
+                            <div class="card p-2 bg-light mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="small">Pivot @p.Index @(pIdx == 0 ? "(Standaard Nulpunt)" : "")</strong>
+                                    <div>
+                                        <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("pivot", pIdx))">
+                                            Selecteer in 3D
+                                        </button>
+                                        @if (pIdx > 0)
+                                        {
+                                            <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemovePivot(pIdx))">✕</button>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row g-1">
+                                    <div class="col-4">
+                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="p.X" @bind:after="@(() => OnPivotChanged(pIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="p.Y" @bind:after="@(() => OnPivotChanged(pIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="p.Z" @bind:after="@(() => OnPivotChanged(pIdx))" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+                @if (activeTab == "gameplay")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">4. Waypoint & Trigger Modus</h6>
+                    <div class="mb-3">
+                        <label class="form-label mb-0 fw-bold">Waypoint Type</label>
+                        <select class="form-select form-select-sm" @bind="itemModel.WaypointType">
+                            @foreach (var wp in Enum.GetValues<CGameItemModel.EWaypointType>())
+                            {
+                                <option value="@wp">@wp</option>
+                            }
+                        </select>
+                        <small class="text-muted">
+                            Start, Finish, Checkpoint, Turbo, FreeWheeling, Fragile, NoBrakes, SlowMotion, etc.
+                        </small>
+                    </div>
+
+                    <h6 class="border-bottom pb-1 mt-4 text-primary">Conversie: Statisch ⇄ Kinetisch</h6>
+                    <div class="card p-3 bg-light mb-3">
+                        @if (!isMovingItem)
+                        {
+                            <p class="small text-muted mb-2">
+                                Dit item is momenteel <strong>Statisch</strong>. Je kunt het omzetten naar een <strong>Kinetisch bewegend item</strong> zodat het kan roteren of oscilleren.
+                            </p>
+                            <button class="btn btn-sm btn-outline-warning text-dark fw-bold" @onclick="ConvertToKinematic">
+                                ⚙️ Zet om naar Kinetisch Item
+                            </button>
+                        }
+                        else
+                        {
+                            <p class="small text-muted mb-2">
+                                Dit item is momenteel <strong>Kinetisch / Bewegend</strong>.
+                            </p>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label mb-0 small fw-bold">Type Animatie</label>
+                                    <select class="form-select form-select-sm" value="@(isOscillating ? "osc" : "spin")" @onchange="OnAnimTypeChanged">
+                                        <option value="spin">Continue 360° Rotatie</option>
+                                        <option value="osc">Oscilleren (Heen en weer)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label mb-0 small fw-bold">Draai-as</label>
+                                    <select class="form-select form-select-sm" value="@detectedAxis" @onchange="OnAxisChanged">
+                                        <option value="y">Y-As (Horizontaal)</option>
+                                        <option value="x">X-As (Verticaal)</option>
+                                        <option value="z">Z-As (Diepte)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            @if (isOscillating)
+                            {
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 small">Min Hoek (°)</label>
+                                        <input type="number" step="5" class="form-control form-control-sm" @bind="minAngle" @bind:after="UpdateScenePayload" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 small">Max Hoek (°)</label>
+                                        <input type="number" step="5" class="form-control form-control-sm" @bind="maxAngle" @bind:after="UpdateScenePayload" />
+                                    </div>
+                                </div>
+                            }
+                            <button class="btn btn-sm btn-outline-secondary mt-2" @onclick="ConvertToStatic">
+                                ⏹ Zet terug om naar Statisch Item
+                            </button>
+                        }
+                    </div>
+                }
+
+                @if (activeTab == "lights")
+                {
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                        <h6 class="mb-0 text-primary">Real-time Lichtbronnen (@detectedLights.Count)</h6>
+                        <button class="btn btn-xs btn-primary" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddLight">
+                            + Nieuw Licht
+                        </button>
+                    </div>
+
+                    @if (detectedLights.Count > 0)
+                    {
+                        @for (int i = 0; i < detectedLights.Count; i++)
+                        {
+                            var light = detectedLights[i];
+                            int lIdx = i;
+                            <div class="card p-2 mb-2 bg-light small">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong>Licht @(lIdx + 1) (@light.Type)</strong>
+                                    <div>
+                                        <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("light", lIdx))">
+                                            Selecteer in 3D
+                                        </button>
+                                        <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemoveLight(lIdx))">✕</button>
+                                    </div>
+                                </div>
+
+                                <div class="row g-1 mb-1">
+                                    <div class="col-4">
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">X</label>
+                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="light.X" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Y</label>
+                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="light.Y" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Z</label>
+                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="light.Z" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                    </div>
+                                </div>
+
+                                <div class="row g-1 align-items-center">
+                                    <div class="col-4">
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Kleur</label>
+                                        <input type="color" class="form-control form-control-color w-100 p-0" style="height: 28px;" @bind="light.ColorHtml" @bind:after="@(() => OnLightColorChanged(lIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Intensiteit</label>
+                                        <input type="number" step="0.5" class="form-control form-control-sm" @bind="light.Intensity" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Radius (m)</label>
+                                        <input type="number" step="1.0" class="form-control form-control-sm" @bind="light.Radius" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Geen lichtbronnen in dit item. Klik op <strong>+ Nieuw Licht</strong> om er een toe te voegen!</p>
+                    }
+                }
+
+                @if (activeTab == "sockets")
+                {
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                        <h6 class="mb-0 text-primary">Magneet Sockets (@detectedSockets.Count)</h6>
+                        <button class="btn btn-xs btn-success" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddSocket">
+                            + Nieuwe Socket
+                        </button>
+                    </div>
+
+                    @if (detectedSockets.Count > 0)
+                    {
+                        @for (int i = 0; i < detectedSockets.Count; i++)
+                        {
+                            var socket = detectedSockets[i];
+                            int sIdx = i;
+                            <div class="card p-2 mb-2 bg-light small">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <input type="text" class="form-control form-control-sm fw-bold me-2" style="width: 140px;" @bind="socket.Tag" placeholder="Tag (bv Road)" />
+                                    <div>
+                                        <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("socket", sIdx))">
+                                            Selecteer in 3D
+                                        </button>
+                                        <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemoveSocket(sIdx))">✕</button>
+                                    </div>
+                                </div>
+                                <div class="row g-1">
+                                    <div class="col-4">
+                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="socket.X" @bind:after="@(() => OnSocketChanged(sIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="socket.Y" @bind:after="@(() => OnSocketChanged(sIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="socket.Z" @bind:after="@(() => OnSocketChanged(sIdx))" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Geen magneet sockets. Klik op <strong>+ Nieuwe Socket</strong> om een connectiepunt toe te voegen.</p>
+                    }
+                }
+
+            </div>
+            
+            <div class="p-2 border-top bg-light d-flex justify-content-between align-items-center">
+                <small class="text-muted">Item Studio v1.5</small>
+                <button class="btn btn-sm btn-primary" @onclick="ExportGbx">
+                    💾 Exporteer .Item.Gbx
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private CGameItemModel? itemModel;
+    private Gbx<CGameItemModel>? gbxFile;
+    private bool isLoading = false;
+    private string? errorMessage;
+    private bool hasMesh = false;
+    private bool isMovingItem = false;
+    private bool isPlaying = true;
+    private int vertexCount = 0;
+    private string? rawObj;
+    private bool isViewerInitialized = false;
+    private string activeTab = "general";
+    private DotNetObjectReference<Home>? dotNetHelper;
+
+    // Bewerkbare Ident velden
+    private string identId = "";
+    private string identAuthor = "";
+    private string identCollection = "";
+
+    // Viewport layer status
+    private bool showMeshes = true;
+    private bool showPivots = true;
+    private bool showLights = true;
+    private bool showSockets = true;
+
+    // Animatie
+    private string detectedAxis = "y";
+    private bool isOscillating = false;
+    private float minAngle = 0;
+    private float maxAngle = 0;
+
+    public class ModelPart
+    {
+        public string Name { get; set; } = "";
+        public bool IsMoving { get; set; }
+        public float[] Positions { get; set; } = Array.Empty<float>();
+        public int[] Indices { get; set; } = Array.Empty<int>();
+    }
+
+    public class PivotDto
+    {
+        public int Index { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+    }
+
+    public class LightDto
+    {
+        public string Type { get; set; } = "PointLight";
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+        public string ColorHtml { get; set; } = "#fffbeb";
+        public int ColorHex { get; set; } = 0xfffbeb;
+        public float Intensity { get; set; } = 2.0f;
+        public float Radius { get; set; } = 15.0f;
+        public object? SourceNode { get; set; }
+    }
+
+    public class SocketDto
+    {
+        public string Tag { get; set; } = "";
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+    }
+
+    private List<ModelPart> modelParts = new();
+    private List<PivotDto> detectedPivots = new();
+    private List<LightDto> detectedLights = new();
+    private List<SocketDto> detectedSockets = new();
+    private List<string> debugLog = new();
+
+    protected override void OnInitialized()
+    {
+        dotNetHelper = DotNetObjectReference.Create(this);
+    }
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        errorMessage = null;
+        itemModel = null;
+        hasMesh = false;
+        isMovingItem = false;
+        rawObj = null;
+        modelParts.Clear();
+        detectedPivots.Clear();
+        detectedLights.Clear();
+        detectedSockets.Clear();
+        debugLog.Clear();
+        detectedAxis = "y";
+        isOscillating = false;
+        minAngle = 0;
+        maxAngle = 0;
+        StateHasChanged();
+
+        try
+        {
+            using var memoryStream = new MemoryStream();
+            await e.File.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            gbxFile = Gbx.Parse<CGameItemModel>(memoryStream);
+            itemModel = gbxFile.Node;
+
+            if (itemModel != null)
+            {
+                identId = itemModel.Ident?.Id ?? "";
+                identAuthor = itemModel.Ident?.Author ?? "";
+                identCollection = itemModel.Ident != null ? itemModel.Ident.Collection.ToString() : "";
+
+                ExtractParts(itemModel);
+                ExtractPivotsAndSockets(itemModel);
+
+                if (modelParts.Count > 0)
+                {
+                    hasMesh = true;
+                    vertexCount = modelParts.Sum(p => p.Positions.Length / 3);
+
+                    var sb = new StringBuilder();
+                    sb.AppendLine("# Trackmania Item Studio OBJ Export");
+                    int totalIndexOffset = 0;
+                    foreach (var part in modelParts)
+                    {
+                        sb.AppendLine($"o {part.Name}");
+                        for (int i = 0; i < part.Positions.Length; i += 3)
+                        {
+                            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "v {0:F4} {1:F4} {2:F4}", part.Positions[i], part.Positions[i+1], part.Positions[i+2]));
+                        }
+                        for (int i = 0; i < part.Indices.Length; i += 3)
+                        {
+                            sb.AppendLine($"f {part.Indices[i] + totalIndexOffset + 1} {part.Indices[i+1] + totalIndexOffset + 1} {part.Indices[i+2] + totalIndexOffset + 1}");
+                        }
+                        totalIndexOffset += part.Positions.Length / 3;
+                    }
+                    rawObj = sb.ToString();
+                }
+
+                StateHasChanged();
+                await Task.Delay(100);
+
+                if (!isViewerInitialized)
+                {
+                    await JS.InvokeVoidAsync("init3DViewer", "threeContainer", dotNetHelper);
+                    isViewerInitialized = true;
+                }
+
+                await UpdateScenePayload();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Fout bij verwerken van bestand: " + ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateScenePayload()
+    {
+        var scenePayload = new
+        {
+            parts = modelParts,
+            pivots = detectedPivots,
+            lights = detectedLights,
+            sockets = detectedSockets,
+            animAxis = detectedAxis,
+            isOscillating = isOscillating,
+            minAngle = minAngle,
+            maxAngle = maxAngle
+        };
+
+        await JS.InvokeVoidAsync("renderStudioScene", scenePayload);
+    }
+
+    [JSInvokable]
+    public void OnGizmoMoved(string type, int index, float x, float y, float z)
+    {
+        if (type == "pivot" && index >= 0 && index < detectedPivots.Count)
+        {
+            detectedPivots[index].X = (float)Math.Round(x, 2);
+            detectedPivots[index].Y = (float)Math.Round(y, 2);
+            detectedPivots[index].Z = (float)Math.Round(z, 2);
+            SyncPivotsToGbx();
+        }
+        else if (type == "light" && index >= 0 && index < detectedLights.Count)
+        {
+            detectedLights[index].X = (float)Math.Round(x, 2);
+            detectedLights[index].Y = (float)Math.Round(y, 2);
+            detectedLights[index].Z = (float)Math.Round(z, 2);
+            SyncLightsToGbx(index);
+        }
+        else if (type == "socket" && index >= 0 && index < detectedSockets.Count)
+        {
+            detectedSockets[index].X = (float)Math.Round(x, 2);
+            detectedSockets[index].Y = (float)Math.Round(y, 2);
+            detectedSockets[index].Z = (float)Math.Round(z, 2);
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnGizmoSelected(string type, int index)
+    {
+        if (type == "pivot") activeTab = "placement";
+        else if (type == "light") activeTab = "lights";
+        else if (type == "socket") activeTab = "sockets";
+        StateHasChanged();
+    }
+
+    private async Task SelectGizmoIn3D(string type, int index)
+    {
+        await JS.InvokeVoidAsync("selectGizmoFromUI", type, index);
+    }
+
+    private async Task OnLightChanged(int idx)
+    {
+        if (idx >= 0 && idx < detectedLights.Count)
+        {
+            var l = detectedLights[idx];
+            SyncLightsToGbx(idx);
+            await JS.InvokeVoidAsync("updateLightRealtime", idx, l.ColorHex, l.Intensity, l.Radius, l.X, l.Y, l.Z);
+        }
+    }
+
+    private async Task OnLightColorChanged(int idx)
+    {
+        if (idx >= 0 && idx < detectedLights.Count)
+        {
+            var l = detectedLights[idx];
+            if (l.ColorHtml.StartsWith("#") && l.ColorHtml.Length == 7)
+            {
+                l.ColorHex = int.Parse(l.ColorHtml.Substring(1), NumberStyles.HexNumber);
+                SyncLightsToGbx(idx);
+                await JS.InvokeVoidAsync("updateLightRealtime", idx, l.ColorHex, l.Intensity, l.Radius);
+            }
+        }
+    }
+
+    private async Task OnPivotChanged(int idx)
+    {
+        if (idx >= 0 && idx < detectedPivots.Count)
+        {
+            var p = detectedPivots[idx];
+            SyncPivotsToGbx();
+            await JS.InvokeVoidAsync("updatePivotRealtime", idx, p.X, p.Y, p.Z);
+        }
+    }
+
+    private async Task OnSocketChanged(int idx)
+    {
+        if (idx >= 0 && idx < detectedSockets.Count)
+        {
+            var s = detectedSockets[idx];
+            await JS.InvokeVoidAsync("updateSocketRealtime", idx, s.X, s.Y, s.Z);
+        }
+    }
+
+    private void AddLight()
+    {
+        detectedLights.Add(new LightDto
+        {
+            Type = "PointLight",
+            X = 0,
+            Y = 2.0f,
+            Z = 0,
+            ColorHtml = "#f59e0b",
+            ColorHex = 0xf59e0b,
+            Intensity = 3.0f,
+            Radius = 16.0f
+        });
+        _ = UpdateScenePayload();
+    }
+
+    private void RemoveLight(int idx)
+    {
+        if (idx >= 0 && idx < detectedLights.Count)
+        {
+            detectedLights.RemoveAt(idx);
+            _ = UpdateScenePayload();
+        }
+    }
+
+    private void AddPivot()
+    {
+        detectedPivots.Add(new PivotDto
+        {
+            Index = detectedPivots.Count,
+            X = 0,
+            Y = 0,
+            Z = 0
+        });
+        SyncPivotsToGbx();
+        _ = UpdateScenePayload();
+    }
+
+    private void RemovePivot(int idx)
+    {
+        if (idx > 0 && idx < detectedPivots.Count)
+        {
+            detectedPivots.RemoveAt(idx);
+            SyncPivotsToGbx();
+            _ = UpdateScenePayload();
+        }
+    }
+
+    private void AddSocket()
+    {
+        detectedSockets.Add(new SocketDto
+        {
+            Tag = "Road",
+            X = 0,
+            Y = 1.0f,
+            Z = 0
+        });
+        _ = UpdateScenePayload();
+    }
+
+    private void RemoveSocket(int idx)
+    {
+        if (idx >= 0 && idx < detectedSockets.Count)
+        {
+            detectedSockets.RemoveAt(idx);
+            _ = UpdateScenePayload();
+        }
+    }
+
+    private async Task ConvertToKinematic()
+    {
+        if (itemModel != null)
+        {
+            if (Enum.TryParse<CGameItemModel.EItemType>("Kinematic", true, out var kin) ||
+                Enum.TryParse<CGameItemModel.EItemType>("KinematicObject", true, out kin))
+            {
+                itemModel.ItemType = kin;
+            }
+
+            isMovingItem = true;
+            isPlaying = true;
+
+            if (modelParts.Count > 0)
+            {
+                modelParts.Last().IsMoving = true;
+            }
+
+            await UpdateScenePayload();
+        }
+    }
+
+    private async Task ConvertToStatic()
+    {
+        if (itemModel != null)
+        {
+            if (Enum.TryParse<CGameItemModel.EItemType>("Static", true, out var stat) ||
+                Enum.TryParse<CGameItemModel.EItemType>("StaticObject", true, out stat))
+            {
+                itemModel.ItemType = stat;
+            }
+
+            isMovingItem = false;
+            foreach (var part in modelParts) part.IsMoving = false;
+            await UpdateScenePayload();
+        }
+    }
+
+    private void OnAnimTypeChanged(ChangeEventArgs e)
+    {
+        isOscillating = e.Value?.ToString() == "osc";
+        if (isOscillating && minAngle == 0 && maxAngle == 0)
+        {
+            minAngle = -45;
+            maxAngle = 45;
+        }
+        _ = UpdateScenePayload();
+    }
+
+    private void UpdateIdent()
+    {
+        if (itemModel != null)
+        {
+            try
+            {
+                itemModel.Ident = new Ident(identId, identCollection, identAuthor);
+            }
+            catch { }
+        }
+    }
+
+    private void SyncPivotsToGbx()
+    {
+        if (itemModel?.DefaultPlacement != null)
+        {
+            var vecs = detectedPivots.Select(p => new Vec3(p.X, p.Y, p.Z)).ToArray();
+            itemModel.DefaultPlacement.PivotPositions = vecs;
+        }
+    }
+
+    private void SyncLightsToGbx(int idx)
+    {
+        if (idx >= 0 && idx < detectedLights.Count)
+        {
+            var lightDto = detectedLights[idx];
+            if (lightDto.SourceNode is CPlugLightUserModel lightModel)
+            {
+                float r = ((lightDto.ColorHex >> 16) & 0xFF) / 255.0f;
+                float g = ((lightDto.ColorHex >> 8) & 0xFF) / 255.0f;
+                float b = (lightDto.ColorHex & 0xFF) / 255.0f;
+                lightModel.Color = new Vec3(r, g, b);
+                lightModel.Intensity = lightDto.Intensity;
+                lightModel.Distance = lightDto.Radius;
+            }
+        }
+    }
+
+    private void ExtractPivotsAndSockets(CGameItemModel item)
+    {
+        if (item.DefaultPlacement == null) return;
+
+        if (item.DefaultPlacement.PivotPositions != null && item.DefaultPlacement.PivotPositions.Length > 0)
+        {
+            int pIndex = 0;
+            foreach (var p in item.DefaultPlacement.PivotPositions)
+            {
+                detectedPivots.Add(new PivotDto { Index = pIndex++, X = p.X, Y = p.Y, Z = p.Z });
+            }
+        }
+        else
+        {
+            detectedPivots.Add(new PivotDto { Index = 0, X = 0, Y = 0, Z = 0 });
+        }
+
+        var socketsProp = item.DefaultPlacement.GetType().GetProperty("Sockets");
+        if (socketsProp != null)
+        {
+            var socketsVal = socketsProp.GetValue(item.DefaultPlacement) as System.Collections.IEnumerable;
+            if (socketsVal != null)
+            {
+                foreach (var s in socketsVal)
+                {
+                    try
+                    {
+                        var posProp = s.GetType().GetProperty("Position");
+                        var tagProp = s.GetType().GetProperty("Tag") ?? s.GetType().GetProperty("SocketId");
+                        if (posProp != null && posProp.GetValue(s) is Vec3 pos)
+                        {
+                            detectedSockets.Add(new SocketDto
+                            {
+                                Tag = tagProp?.GetValue(s)?.ToString() ?? "",
+                                X = pos.X,
+                                Y = pos.Y,
+                                Z = pos.Z
+                            });
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+    }
+
+    private void ExtractParts(CGameItemModel item)
+    {
+        CPlugPrefab? prefab = null;
+        FindPrefab(item, ref prefab, new HashSet<object>(), 0);
+
+        if (prefab != null && prefab.Ents != null)
+        {
+            isMovingItem = true;
+            int modelEntityIndex = 0;
+
+            foreach (var ent in prefab.Ents)
+            {
+                if (ent.Model != null && ent.Model.GetType().Name.Contains("KinematicConstraint"))
+                {
+                    InspectConstraint(ent.Model);
+                }
+
+                if (ent.Model != null)
+                {
+                    var positions = new List<float>();
+                    var indices = new List<int>();
+                    var visited = new HashSet<object>();
+
+                    CrawlNode(ent.Model, positions, indices, visited, 0, ent.Position, ent.Rotation);
+
+                    if (positions.Count > 0)
+                    {
+                        bool isMoving = modelEntityIndex > 0;
+                        modelParts.Add(new ModelPart
+                        {
+                            Name = isMoving ? $"Bewegend Deel {modelEntityIndex}" : "Vaste Basis",
+                            IsMoving = isMoving,
+                            Positions = positions.ToArray(),
+                            Indices = indices.ToArray()
+                        });
+                        modelEntityIndex++;
+                    }
+                }
+            }
+        }
+
+        if (modelParts.Count == 0)
+        {
+            var positions = new List<float>();
+            var indices = new List<int>();
+            var visited = new HashSet<object>();
+
+            CrawlNode(item, positions, indices, visited, 0, null, null);
+
+            if (positions.Count > 0)
+            {
+                modelParts.Add(new ModelPart
+                {
+                    Name = "Statisch Model",
+                    IsMoving = false,
+                    Positions = positions.ToArray(),
+                    Indices = indices.ToArray()
+                });
+            }
+        }
+    }
+
+    private void InspectConstraint(object constraint)
+    {
+        try
+        {
+            var rotAxisProp = constraint.GetType().GetProperty("RotAxis");
+            var minAngleProp = constraint.GetType().GetProperty("AngleMinDeg");
+            var maxAngleProp = constraint.GetType().GetProperty("AngleMaxDeg");
+
+            if (rotAxisProp != null)
+            {
+                var val = rotAxisProp.GetValue(constraint)?.ToString();
+                if (val != null) detectedAxis = val.ToLower();
+            }
+
+            if (minAngleProp != null && maxAngleProp != null)
+            {
+                minAngle = Convert.ToSingle(minAngleProp.GetValue(constraint));
+                maxAngle = Convert.ToSingle(maxAngleProp.GetValue(constraint));
+                isOscillating = Math.Abs(minAngle - maxAngle) > 0.01f && !(minAngle == 0 && maxAngle == 360);
+            }
+        }
+        catch { }
+    }
+
+    private void FindPrefab(object? obj, ref CPlugPrefab? found, HashSet<object> visited, int depth)
+    {
+        if (obj == null || depth > 8 || visited.Contains(obj) || found != null) return;
+        visited.Add(obj);
+
+        if (obj is CPlugPrefab prefab)
+        {
+            found = prefab;
+            return;
+        }
+
+        foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+            if (typeof(CMwNod).IsAssignableFrom(prop.PropertyType))
+            {
+                try
+                {
+                    var child = prop.GetValue(obj);
+                    FindPrefab(child, ref found, visited, depth + 1);
+                }
+                catch { }
+            }
+        }
+    }
+
+    private void CrawlNode(object? obj, List<float> positions, List<int> indices, HashSet<object> visited, int depth, Vec3? offsetPos, Quat? offsetRot)
+    {
+        if (obj == null || depth > 12 || visited.Contains(obj)) return;
+        visited.Add(obj);
+
+        if (obj is CPlugLightUserModel lightModel)
+        {
+            int r = (int)Math.Clamp(lightModel.Color.X * 255, 0, 255);
+            int g = (int)Math.Clamp(lightModel.Color.Y * 255, 0, 255);
+            int b = (int)Math.Clamp(lightModel.Color.Z * 255, 0, 255);
+            string hexColor = $"#{r:X2}{g:X2}{b:X2}";
+            int colorInt = (r << 16) | (g << 8) | b;
+
+            detectedLights.Add(new LightDto
+            {
+                Type = "PointLight",
+                X = offsetPos?.X ?? 0,
+                Y = (offsetPos?.Y ?? 0) + 1.2f,
+                Z = offsetPos?.Z ?? 0,
+                ColorHtml = hexColor,
+                ColorHex = colorInt,
+                Intensity = lightModel.Intensity > 0 ? lightModel.Intensity : 2.0f,
+                Radius = lightModel.Distance > 0 ? lightModel.Distance : 15.0f,
+                SourceNode = lightModel
+            });
+            return;
+        }
+
+        if (obj is CPlugPrefab prefab)
+        {
+            if (prefab.Ents != null)
+            {
+                foreach (var ent in prefab.Ents)
+                {
+                    if (ent.Model != null)
+                        CrawlNode(ent.Model, positions, indices, visited, depth + 1, ent.Position, ent.Rotation);
+                }
+            }
+            return;
+        }
+
+        if (obj is CPlugVisualIndexedTriangles mesh)
+        {
+            ExtractMeshFromVisual(mesh, positions, indices, offsetPos, offsetRot);
+            return;
+        }
+
+        if (obj is CPlugTree tree)
+        {
+            if (tree.Visual != null)
+                CrawlNode(tree.Visual, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+
+            if (tree.Children != null)
+            {
+                foreach (var child in tree.Children)
+                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+            }
+            return;
+        }
+
+        var props = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        foreach (var prop in props)
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+
+            if (typeof(CMwNod).IsAssignableFrom(prop.PropertyType))
+            {
+                try
+                {
+                    var child = prop.GetValue(obj);
+                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                }
+                catch { }
+            }
+            else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(prop.PropertyType) && 
+                     prop.PropertyType != typeof(string) && 
+                     prop.PropertyType != typeof(byte[]))
+            {
+                try
+                {
+                    var collection = prop.GetValue(obj) as System.Collections.IEnumerable;
+                    if (collection != null)
+                    {
+                        foreach (var item in collection)
+                            if (item != null && !item.GetType().IsPrimitive && item is not string)
+                                CrawlNode(item, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                    }
+                }
+                catch { }
+            }
+        }
+    }
+
+    private int ExtractMeshFromVisual(CPlugVisualIndexedTriangles mesh, List<float> positions, List<int> indices, Vec3? offsetPos, Quat? offsetRot)
+    {
+        int count = 0;
+        int indexOffset = positions.Count / 3;
+
+        if (mesh.VertexStreams != null)
+        {
+            foreach (var stream in mesh.VertexStreams)
+            {
+                if (stream.Positions != null && stream.Positions.Length > 0)
+                {
+                    foreach (var p in stream.Positions)
+                    {
+                        var transformed = TransformVertex(p, offsetPos, offsetRot);
+                        positions.Add(transformed.X);
+                        positions.Add(transformed.Y);
+                        positions.Add(transformed.Z);
+                        count++;
+                    }
+
+                    if (mesh.IndexBuffer?.Indices != null)
+                    {
+                        foreach (var idx in mesh.IndexBuffer.Indices)
+                            indices.Add(idx + indexOffset);
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (count == 0 && mesh.Vertices != null && mesh.Vertices.Length > 0)
+        {
+            foreach (var v in mesh.Vertices)
+            {
+                var transformed = TransformVertex(v.Position, offsetPos, offsetRot);
+                positions.Add(transformed.X);
+                positions.Add(transformed.Y);
+                positions.Add(transformed.Z);
+                count++;
+            }
+
+            if (mesh.IndexBuffer?.Indices != null)
+            {
+                foreach (var idx in mesh.IndexBuffer.Indices)
+                    indices.Add(idx + indexOffset);
+            }
+        }
+
+        return count;
+    }
+
+    private Vec3 TransformVertex(Vec3 v, Vec3? pos, Quat? rot)
+    {
+        Vec3 result = v;
+
+        if (rot.HasValue && (rot.Value.X != 0 || rot.Value.Y != 0 || rot.Value.Z != 0 || rot.Value.W != 0))
+        {
+            float qx = rot.Value.X, qy = rot.Value.Y, qz = rot.Value.Z, qw = rot.Value.W;
+            float tx = 2 * (qy * v.Z - qz * v.Y);
+            float ty = 2 * (qz * v.X - qx * v.Z);
+            float tz = 2 * (qx * v.Y - qy * v.X);
+
+            result = new Vec3(
+                v.X + qw * tx + (qy * tz - qz * ty),
+                v.Y + qw * ty + (qz * tx - qx * tz),
+                v.Z + qw * tz + (qx * ty - qy * tx)
+            );
+        }
+
+        if (pos.HasValue)
+        {
+            result = new Vec3(result.X + pos.Value.X, result.Y + pos.Value.Y, result.Z + pos.Value.Z);
+        }
+
+        return result;
+    }
+
+    private async Task ToggleLayer(string layerName)
+    {
+        bool visible = await JS.InvokeAsync<bool>("toggleLayer", layerName);
+        if (layerName == "meshes") showMeshes = visible;
+        else if (layerName == "pivots") showPivots = visible;
+        else if (layerName == "lights") showLights = visible;
+        else if (layerName == "sockets") showSockets = visible;
+    }
+
+    private async Task ToggleAnimation()
+    {
+        isPlaying = !isPlaying;
+        await JS.InvokeVoidAsync("setAnimationPlaying", isPlaying);
+    }
+
+    private async Task OnSpeedChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+            await JS.InvokeVoidAsync("setAnimationSpeed", e.Value.ToString());
+    }
+
+    private async Task OnAxisChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            detectedAxis = e.Value.ToString() ?? "y";
+            await JS.InvokeVoidAsync("setAnimationAxis", detectedAxis);
+        }
+    }
+
+    private async Task ToggleWireframe() => await JS.InvokeVoidAsync("toggleWireframe");
+    private async Task ResetCamera() => await JS.InvokeVoidAsync("resetCamera");
+    
+    private async Task DownloadObj()
+    {
+        if (!string.IsNullOrEmpty(rawObj))
+        {
+            string filename = (itemModel?.Ident?.Id ?? "item") + ".obj";
+            await JS.InvokeVoidAsync("downloadObjFile", filename, rawObj);
+        }
+    }
+
+    private async Task ExportGbx()
+    {
+        if (gbxFile != null && itemModel != null)
+        {
+            try
+            {
+                UpdateIdent();
+                SyncPivotsToGbx();
+                for (int i = 0; i < detectedLights.Count; i++) SyncLightsToGbx(i);
+
+                using var memoryStream = new MemoryStream();
+                gbxFile.Save(memoryStream);
+                var bytes = memoryStream.ToArray();
+
+                string filename = (string.IsNullOrEmpty(identId) ? "CustomItem" : identId) + ".Item.Gbx";
+                await JS.InvokeVoidAsync("downloadBinaryGbx", filename, Convert.ToBase64String(bytes));
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "Fout bij exporteren van .Item.Gbx: " + ex.Message;
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
+    }
+}
