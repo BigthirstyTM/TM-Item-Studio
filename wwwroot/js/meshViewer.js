@@ -22,6 +22,8 @@ let hasTranslationMotion = false;
 let translationMin = [0, 0, 0];
 let translationMax = [0, 0, 0];
 let lastFrameTime = null;
+let animationFrameId = null;
+let resizeHandler = null;
 
 let showMeshes = true;
 let showPivots = true;
@@ -60,10 +62,11 @@ window.renderIconPreview = function (canvasId, pixels, width, height) {
 };
 
 window.init3DViewer = function (containerId, dotNetRef) {
-    dotNetHelper = dotNetRef;
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    window.dispose3DViewer();
+    dotNetHelper = dotNetRef;
     container.innerHTML = '';
 
     const width = container.clientWidth || 800;
@@ -155,8 +158,14 @@ window.init3DViewer = function (containerId, dotNetRef) {
     scene.add(lightsGroup);
     scene.add(socketsGroup);
 
+    staticGroup.visible = movingGroup.visible = showMeshes;
+    pivotsGroup.visible = showPivots;
+    lightsGroup.visible = showLights;
+    socketsGroup.visible = showSockets;
+
     function animate(timestamp) {
-        requestAnimationFrame(animate);
+        if (!renderer) return;
+        animationFrameId = requestAnimationFrame(animate);
         controls.update();
 
         const deltaSeconds = lastFrameTime === null
@@ -198,14 +207,53 @@ window.init3DViewer = function (containerId, dotNetRef) {
 
         renderer.render(scene, camera);
     }
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
-    window.addEventListener('resize', () => {
-        if (!container) return;
+    resizeHandler = () => {
+        if (!container.isConnected || !renderer || !camera) return;
         camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    window.addEventListener('resize', resizeHandler);
+};
+
+function disposeObjectResources(root) {
+    const geometries = new Set();
+    const materials = new Set();
+    root.traverse(child => {
+        if (child.geometry) geometries.add(child.geometry);
+        if (child.material) {
+            const values = Array.isArray(child.material) ? child.material : [child.material];
+            values.forEach(material => materials.add(material));
+        }
     });
+    geometries.forEach(geometry => geometry.dispose());
+    materials.forEach(material => material.dispose());
+}
+
+window.dispose3DViewer = function () {
+    if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+    selectedGizmo = dotNetHelper = null;
+    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+    resizeHandler = null;
+    if (transformControls) {
+        transformControls.detach();
+        transformControls.dispose();
+        if (scene) scene.remove(transformControls);
+    }
+    if (controls) controls.dispose();
+    if (scene) disposeObjectResources(scene);
+    if (renderer) {
+        renderer.dispose();
+        renderer.domElement.remove();
+    }
+    renderer = scene = camera = controls = transformControls = null;
+    staticGroup = movingGroup = pivotsGroup = lightsGroup = socketsGroup = null;
+    gridHelper = null;
+    animTime = 0;
+    lastFrameTime = null;
 };
 
 function selectGizmo(obj) {
@@ -246,11 +294,7 @@ window.renderStudioScene = function (payloadJson) {
         while (group.children.length > 0) {
             const obj = group.children[0];
             group.remove(obj);
-            if (obj.geometry) obj.geometry.dispose();
-            if (obj.material) {
-                if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
-                else obj.material.dispose();
-            }
+            disposeObjectResources(obj);
         }
     });
 
@@ -411,13 +455,7 @@ window.clearViewerScene = function () {
         while (group.children.length > 0) {
             const object = group.children[0];
             group.remove(object);
-            object.traverse(child => {
-                if (child.geometry) child.geometry.dispose();
-                if (child.material) {
-                    if (Array.isArray(child.material)) child.material.forEach(material => material.dispose());
-                    else child.material.dispose();
-                }
-            });
+            disposeObjectResources(object);
         }
     });
 };
