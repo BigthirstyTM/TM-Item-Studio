@@ -80,8 +80,10 @@ public static class ItemEdits
 
     private static void EnsurePivotChunk(CGameItemPlacementParam placement)
     {
-        if (placement.Chunks.Get(0x2E020001) is { } chunk && chunk is not CGameItemPlacementParam.Chunk2E020001)
-            throw new NotSupportedException("Pivot chunk is opaque; editing would overwrite unsupported data.");
+        // SafeSkippableChunks can retain Data on a recognized typed chunk after partial decoding.
+        // The serializer writes that buffer instead of properties, so never clear it or accept edits.
+        if (placement.Chunks.Get(0x2E020001) is { } chunk && chunk is not CGameItemPlacementParam.Chunk2E020001 { Data: null })
+            throw new NotSupportedException("Pivot chunk is opaque or retains raw data; no edit was applied.");
         placement.CreateChunk<CGameItemPlacementParam.Chunk2E020001>();
     }
 
