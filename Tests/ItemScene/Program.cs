@@ -251,7 +251,7 @@ Check("light zero values and explicit socket ownership", () =>
 
 Check("collision mesh, compound transform, cycle and generated status", () =>
 {
-    var mesh = new CPlugSurface.Mesh { Vertices = new[] { new Vec3(1, 0, 0), new Vec3(0, 1, 0), new Vec3(0, 0, 0) },
+    var mesh = new CPlugSurface.Mesh { Version = 6, Vertices = new[] { new Vec3(1, 0, 0), new Vec3(0, 1, 0), new Vec3(0, 0, 0) },
         Triangles = new[] { new CPlugSurface.Mesh.Triangle(new Int3(0, 1, 2), 0, 0, 0) } };
     var compound = new CPlugSurface.Compound { Surfs = new CPlugSurface.ISurf[] { mesh },
         SurfLocs = new[] { new Iso4(0, -1, 0, 1, 0, 0, 0, 0, 1, 2, 0, 0) } };
@@ -262,6 +262,102 @@ Check("collision mesh, compound transform, cycle and generated status", () =>
     Require(Has(ItemScene.Build(new CPlugSurface { Surf = compound }, 0).Preview, "collision-cycle-or-limit"), "Collision cycle not handled.");
     var generated = ItemScene.Build(new CPlugStaticObjectModel { Mesh = Solid(), IsMeshCollidable = true }, 0).Preview;
     Require(generated.Collisions.Single().State == ItemSceneState.Unsupported && Has(generated, "generated-collision"), "Generated collision claimed absent or verified.");
+});
+
+Check("tree roots, solid wrappers and nested affine locations", () =>
+{
+    var visual = CpuVisual();
+    var tree = new CPlugTree { Visual = visual, Location = Iso4.Identity with { TX = 10 } };
+    Near(ItemScene.Build(tree, 0).Preview.Geometry.Single().Positions.Take(3), 11, 0, 0);
+    Near(ItemScene.Build(new CPlugSolid { Tree = tree }, 0).Preview.Geometry.Single().Positions.Take(3), 11, 0, 0);
+    var child = new CPlugTree { Visual = visual, Location = new Iso4(0, -1, 0, 1, 0, 0, 0, 0, 1, 2, 0, 0) };
+    var parent = new CPlugTree { Children = [child], Location = new Iso4(0, -1, 0, 1, 0, 0, 0, 0, 1, 10, 0, 0) };
+    var result = ItemScene.Build(new CPlugPrefab { Ents = [Ent(new CPlugSolid { Tree = parent }, new(20, 0, 0))] }, 0);
+    var mesh = result.Preview.Geometry.Single();
+    Near(mesh.Positions, 29, 2, 0, 30, 1, 0, 30, 2, 0);
+    Near(mesh.Normals!.Take(3), -1, 0, 0);
+    Require(mesh.Path.EndsWith("/tree/children:0/visual") && mesh.EntityPath!.EndsWith("/ent:0"), "Tree visual occurrence/entry ownership lost.");
+    Require(ReferenceEquals(result.Handles.Visuals.Single().Source, visual), "Tree traversal cloned visual.");
+    parent.Location = Iso4.Identity with { XX = 2, YY = 1 };
+    child.Location = null;
+    visual.Vertices = [new(new(1, 0, 0), new Vec3(1, 1, 0), null, null, null, null, null), Vertex(new(0, 1, 0)), Vertex(Vec3.Zero)];
+    Near(ItemScene.Build(parent, 0).Preview.Geometry.Single().Normals!.Take(3), 1 / MathF.Sqrt(5), 2 / MathF.Sqrt(5), 0);
+    parent.Location = Iso4.Zero;
+    var invalid = ItemScene.Build(parent, 0).Preview;
+    Require(invalid.Geometry.Count == 0 && Has(invalid, "invalid-tree-transform"), "Singular tree location accepted.");
+});
+
+Check("shared trees, cycles and unsupported subclasses preserve base graph", () =>
+{
+    var shared = new CPlugTree { Visual = CpuVisual() };
+    var root = new CPlugTree { Children = [shared, shared] };
+    shared.Children.Add(root);
+    var result = ItemScene.Build(root, 0).Preview;
+    Require(result.Geometry.Count == 2 && result.Nodes.Count(n => n.State == ItemSceneState.Cycle) == 2, "Tree traversal globally deduplicated or recursed through cycle.");
+    Require(result.Geometry[0].SourceId == result.Geometry[1].SourceId && result.Geometry[0].Path != result.Geometry[1].Path, "Repeated tree occurrence identity lost.");
+    var subclass = ItemScene.Build(new CPlugTreeVisualMip { Visual = CpuVisual(), Children = [new() { Visual = CpuVisual() }] }, 0).Preview;
+    Require(subclass.Geometry.Count == 2 && Has(subclass, "tree-subclass"), "Unsupported subclass lost supported base visual/children.");
+});
+
+Check("tree external slots never resolve", () =>
+{
+    var calls = 0;
+    var table = new GbxRefTable();
+    table.ExternalNodes["external-tree.Gbx"] = () => { calls++; throw new Exception("Unexpected tree resolution"); };
+    var file = new GbxRefTableFile(table, 0, false, "external-tree.Gbx");
+    var solid = new CPlugSolid { TreeFile = file, Tree = new CPlugTree { Visual = CpuVisual() } };
+    var result = ItemScene.Build(solid, 0).Preview;
+    Require(result.Geometry.Count == 0 && result.Nodes.Single(n => n.Path.EndsWith("/tree")).State == ItemSceneState.Unresolved, "External TreeFile was followed or lost.");
+    var treeResult = ItemScene.Build(new CPlugTree { Visual = CpuVisual(), ShaderFile = file, FuncTreeFile = file }, 0).Preview;
+    Require(treeResult.Geometry.Count == 1 && treeResult.Diagnostics.Count(d => d.Code == "external-reference") == 2 && calls == 0, "Tree resolving getter invoked.");
+    try { _ = new CPlugSolid { TreeFile = file }.Tree; } catch (Exception) { }
+    Require(calls == 1, "External tree trap was not active.");
+});
+
+Check("collision versions select serialized cooked or ordinary triangles", () =>
+{
+    foreach (var version in new[] { 1, 2, 3, 5, 6, 7 })
+    {
+        var mesh = new CPlugSurface.Mesh { Version = version, Vertices = [new(1, 0, 0), new(0, 1, 0), Vec3.Zero] };
+        if (version <= 5) mesh.CookedTriangles = [new(default, new(0, 1, 2), 0, 0, 0)];
+        else mesh.Triangles = [new(new(0, 1, 2), 0, 0, 0)];
+        var parsed = ReopenSurface(mesh);
+        var result = ItemScene.Build(parsed, 0).Preview;
+        Require(result.Collisions.Single().State == ItemSceneState.Present, $"Supported mesh version {version} rejected.");
+        Near(result.Geometry.Single().Positions, 1, 0, 0, 0, 1, 0, 0, 0, 0);
+        Require(result.Geometry.Single().Indices.SequenceEqual(new[] { 0, 1, 2 }), "Wrong triangle layout decoded.");
+    }
+});
+
+Check("collision unknown, ambiguous, missing and invalid layouts are distinguished", () =>
+{
+    foreach (var version in new[] { 0, 4, 99 })
+    {
+        var mesh = new CPlugSurface.Mesh { Version = version };
+        var result = ItemScene.Build(ReopenSurface(mesh), 0).Preview;
+        Require(result.Collisions.Single().State == ItemSceneState.Unsupported && Has(result, "collision-mesh-version"), "Undecoded collision version reported absent.");
+        mesh.Vertices = [new(1, 0, 0), new(0, 1, 0), Vec3.Zero]; mesh.Triangles = [new(new(0, 1, 2), 0, 0, 0)];
+        result = ItemScene.Build(new CPlugSurface { Surf = mesh }, 0).Preview;
+        Require(result.Geometry.Count == 0 && result.Collisions.Single().State == ItemSceneState.Unsupported, "Unknown version arrays accepted.");
+    }
+    foreach (var version in new[] { 5, 6 })
+    {
+        var mesh = new CPlugSurface.Mesh { Version = version, Vertices = [new(1, 0, 0), new(0, 1, 0), Vec3.Zero],
+            Triangles = [new(new(0, 1, 2), 0, 0, 0)], CookedTriangles = [new(default, new(0, 1, 2), 0, 0, 0)] };
+        var result = ItemScene.Build(new CPlugSurface { Surf = mesh }, 0).Preview;
+        Require(result.Geometry.Count == 0 && result.Collisions.Single().State == ItemSceneState.Invalid && Has(result, "collision-mesh-layout"), "Ambiguous layout accepted.");
+        if (version == 5) mesh.CookedTriangles = null; else mesh.Triangles = null;
+        result = ItemScene.Build(new CPlugSurface { Surf = mesh }, 0).Preview;
+        Require(result.Geometry.Count == 0 && result.Collisions.Single().State == ItemSceneState.Invalid, "Wrong alternate array substituted.");
+    }
+    Require(ItemScene.Build(new CPlugSurface { Surf = new CPlugSurface.Mesh { Version = 6 } }, 0).Preview.Collisions.Single().State == ItemSceneState.Invalid, "Missing supported array not distinguished.");
+    Require(ItemScene.Build(ReopenSurface(new CPlugSurface.Mesh { Version = 6, Triangles = [] }), 0).Preview.Collisions.Single().State == ItemSceneState.Absent, "Supported empty mesh should be absent.");
+    var invalidMesh = new CPlugSurface.Mesh { Version = 6, Vertices = [Vec3.Zero], Triangles = [new(new(0, 1, 2), 0, 0, 0)] };
+    var invalid = ItemScene.Build(new CPlugSurface { Surf = invalidMesh }, 0).Preview;
+    Require(invalid.Geometry.Count == 0 && invalid.Collisions.Single().State == ItemSceneState.Invalid && Has(invalid, "invalid-indices"), "Invalid triangles labelled supported.");
+    invalidMesh.Triangles = []; invalidMesh.Vertices = [new(float.NaN, 0, 0)];
+    invalid = ItemScene.Build(new CPlugSurface { Surf = invalidMesh }, 0).Preview;
+    Require(invalid.Collisions.Single().State == ItemSceneState.Invalid && Has(invalid, "nonfinite-position"), "Invalid empty mesh labelled absent.");
 });
 
 Console.WriteLine($"{passed} passed, {failed} failed.");
@@ -281,6 +377,16 @@ static void Near(IEnumerable<float> actual, params float[] expected)
         $"Expected [{string.Join(',', expected)}], got [{string.Join(',', values)}]");
 }
 static Quat Z90() => new(0, 0, MathF.Sqrt(.5f), MathF.Sqrt(.5f));
+static CPlugVisualIndexedTriangles CpuVisual() => new() { Vertices = [Vertex(new(1, 0, 0)), Vertex(new(0, 1, 0)), Vertex(Vec3.Zero)], IndexBuffer = new() { Indices = [0, 1, 2] } };
+static CPlugSurface ReopenSurface(CPlugSurface.Mesh mesh)
+{
+    var surface = new CPlugSurface { Surf = mesh };
+    surface.CreateChunk<CPlugSurface.Chunk0900C003>().Version = 2;
+    using var stream = new MemoryStream();
+    new Gbx<CPlugSurface>(surface) { BodyCompression = GbxCompression.Uncompressed }.Save(stream);
+    stream.Position = 0;
+    return Gbx.Parse<CPlugSurface>(stream).Node;
+}
 static CPlugPrefab.EntRef Ent(CMwNod? model, Vec3 position = default, Quat? rotation = null) =>
     new() { Model = model, Position = position, Rotation = rotation ?? new Quat(0, 0, 0, 1) };
 static CPlugVisual3D.Vertex Vertex(Vec3 p) => new(p, new Vec3(1, 0, 0), null, null, null, null, null);
