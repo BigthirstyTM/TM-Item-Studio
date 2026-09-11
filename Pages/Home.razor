@@ -16,13 +16,14 @@
 
 <PageTitle>Trackmania 2020 Item Studio</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="studio-header d-flex justify-content-between align-items-center mb-3">
     <div>
         <h3 class="mb-0">Trackmania 2020 Item Studio</h3>
         <small class="text-muted">Interactive 3D editor for Trackmania .Item.Gbx files</small>
     </div>
-    <div style="width: 320px;">
-        <InputFile OnChange="LoadFiles" multiple accept=".gbx" class="form-control form-control-sm" />
+    <div class="studio-upload">
+        <label for="item-upload" class="small fw-bold">Open item files</label>
+        <InputFile id="item-upload" OnChange="LoadFiles" multiple accept=".gbx" class="form-control form-control-sm" />
     </div>
 </div>
 
@@ -58,7 +59,7 @@
 
 @if (itemModel != null)
 {
-    <div style="display: grid; grid-template-columns: 1fr 450px; gap: 20px;">
+    <div class="studio-workspace">
         
         <!-- ================= 3D VIEWPORT ================= -->
         <div>
@@ -130,7 +131,7 @@
         </div>
 
         <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
-        <div style="border: 1px solid #ddd; border-radius: 8px; background: #fff; display: flex; flex-direction: column; height: 620px;">
+        <div class="studio-inspector">
             
             <div class="d-flex flex-column gap-1 p-2 bg-light border-bottom" style="font-size: 0.85em;">
                 <div>

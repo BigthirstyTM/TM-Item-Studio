@@ -6,10 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TM Item Studio</title>
     <base href="/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="TM-Item-Studio.styles.css" rel="stylesheet" />
+    <script src="js/theme.js"></script>
 
     <!-- Three.js 3D Engine, OrbitControls, TransformControls & OBJLoader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -21,10 +19,10 @@
 
 <body>
     <div id="app">
-        <p style="padding: 20px; font-family: sans-serif;">Laden van Item Studio...</p>
+        <p role="status" style="padding: 20px;">Loading Item Studio...</p>
     </div>
 
-    <div id="blazor-error-ui">
+    <div id="blazor-error-ui" role="alert">
         An error occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
