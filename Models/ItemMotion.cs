@@ -141,9 +141,9 @@ public static class ItemMotion
         var totalMicroseconds = total * 1000;
         var scaledTime = seconds * 1_000_000;
         if (scaledTime > 9007199254740991d)
-            // Reduce huge finite times by an integer-second modulus equal to 1000 cycles.
-            // Even the largest accepted duration then scales below 2.147484e15: a safe JS integer.
-            scaledTime = (seconds % total) * 1_000_000;
+            // Reduce huge finite times by the timeline period expressed in seconds.
+            // Storage durations are milliseconds, so convert before applying the modulus.
+            scaledTime = (seconds % (total / 1000d)) * 1_000_000;
         var timeMicroseconds = (long)Math.Round(scaledTime, MidpointRounding.AwayFromZero);
         var phaseMicroseconds = (long)Math.Round(phase * totalMicroseconds, MidpointRounding.AwayFromZero);
         // Integer reduction/addition keeps the time-plus-phase boundary exact. The modulo inputs
