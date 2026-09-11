@@ -52,6 +52,22 @@ dotnet run
 
 The development server uses the URL configured in `Properties/launchSettings.json`.
 
+## Viewer regression checks
+
+With the app running locally:
+
+```bash
+npm ci --prefix Tests/Browser
+cd Tests/Browser
+npx playwright install chromium
+npm test
+```
+
+Set `STUDIO_BASE_URL` when using a URL other than `http://127.0.0.1:5183/`.
+The checks load two distinct synthetic items, exercise a failed load and recovery,
+check recursive gizmo cleanup, and navigate away to verify renderer/listener teardown.
+No Trackmania installation or third-party item files are required.
+
 ## Notes
 
 The project includes a compatibility-patched `GBX.NET` assembly. Editor++

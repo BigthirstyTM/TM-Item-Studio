@@ -1,4 +1,5 @@
 @page "/"
+@implements IAsyncDisposable
 @using GBX.NET
 @using GBX.NET.Engines.Game
 @using GBX.NET.Engines.GameData
@@ -910,12 +911,16 @@
         originalConstraintType = "Not found";
         originalMotionSettings.Clear();
         originalMotionAvailable = false;
-        if (isViewerInitialized)
-            await JS.InvokeVoidAsync("clearViewerScene");
         StateHasChanged();
 
         try
         {
+            if (isViewerInitialized)
+            {
+                isViewerInitialized = false;
+                await JS.InvokeVoidAsync("dispose3DViewer");
+            }
+
             foreach (var file in e.GetMultipleFiles(maximumFileCount: 16))
             {
                 using var memoryStream = new MemoryStream();
@@ -1967,8 +1972,18 @@
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        dotNetHelper?.Dispose();
+        try
+        {
+            if (isViewerInitialized)
+                await JS.InvokeVoidAsync("dispose3DViewer");
+        }
+        catch (JSDisconnectedException) { }
+        finally
+        {
+            isViewerInitialized = false;
+            dotNetHelper?.Dispose();
+        }
     }
 }

@@ -3,3 +3,4 @@ obj/
 *.Item.Gbx
 ParseProbe-output.Item.Gbx
 .vscode/
+node_modules/

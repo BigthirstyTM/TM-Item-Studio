@@ -1,0 +1,6 @@
+{
+  "name": "tm-item-studio-browser-checks",
+  "private": true,
+  "scripts": { "test": "node viewer-lifecycle.cjs" },
+  "devDependencies": { "playwright": "1.61.1" }
+}
