@@ -1044,7 +1044,8 @@
             animationPhaseSeconds = animationPhaseSeconds,
             pivotOffset = new[] { pivotOffsetX, pivotOffsetY, pivotOffsetZ },
             harmonicEasing = harmonicEasing,
-            invertMotion = invertMotion
+            invertMotion = invertMotion,
+            playing = isPlaying
         };
 
         await JS.InvokeVoidAsync("renderStudioScene", scenePayload);
