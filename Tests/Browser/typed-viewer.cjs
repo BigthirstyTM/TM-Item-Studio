@@ -65,7 +65,7 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             check('nonidentity parent and child rest transforms compose without framing offsets', () => {
                 const rest = new THREE.Matrix4().makeTranslation(10, 0, 0).multiply(new THREE.Matrix4().makeRotationZ(Math.PI / 2)).toArray();
                 renderStudioScene({ parts: [part('rest', 'child', { positions: [10, 1, 0, 9, 0, 0, 10, 0, 0] })], motions: [motion({
-                    parentPath: 'fixed-parent', parentRest: new THREE.Matrix4().makeTranslation(5, 0, 0).toArray(), childRest: rest,
+                    parentPath: null, parentRest: new THREE.Matrix4().identity().toArray(), childRest: rest,
                     fields: fields({ translationMin: 2, translationMax: 2, translation: empty(), angleMinDegrees: 90, rotation: empty() }) })] });
                 near(vertex('rest'), [9, 2, 0]); near(staticGroup.position.toArray(), [0, 0, 0]);
             });
@@ -128,6 +128,9 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                 for (const item of bad) reject(() => setTypedMotionPreview({ motions: [item] }));
                 reject(() => setTypedMotionPreview({ motions: [motion(), motion({ path: 'second' })] }));
                 reject(() => setTypedMotionPreview({ motions: [motion({ parentPath: 'child' })] }));
+                const beforeUnresolved = mesh('mesh');
+                reject(() => setTypedMotionPreview({ motions: [motion({ parentPath: 'missing-parent' })] }));
+                require(mesh('mesh') === beforeUnresolved, 'Unresolved parent replaced live scene');
                 reject(() => renderStudioScene({ parts: [part('staged'), part('bad', 'other', { indices: [99, 1, 2] })] }));
                 reject(() => renderStudioScene({ parts: [], lights: [{ colorHex: 0 }] }));
                 require(mesh('mesh') === previous && previous.parent !== null, 'Rejected update replaced live scene');

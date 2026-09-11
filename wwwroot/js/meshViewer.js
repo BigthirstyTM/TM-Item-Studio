@@ -78,6 +78,9 @@ function compileMotions(sources) {
             inverseChild: childRest.clone().invert(), inverseParent: parentRest.clone().invert(), live: childRest.clone(),
             translation: timeline(fields.translation), rotation: timeline(fields.rotation) });
     }
+    for (const motion of byChild.values())
+        if (motion.parentPath != null && !byChild.has(motion.parentPath))
+            throw new Error('Motion parent path is unresolved.');
     const ordered = [], visiting = new Set(), visited = new Set();
     function visit(motion) {
         if (visited.has(motion)) return;
