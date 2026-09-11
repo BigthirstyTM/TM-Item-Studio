@@ -95,8 +95,12 @@ Archetype is explicitly readonly. Visual/LOD, extras, original-motion property l
 
 All methods validate before source assignment and throw `ArgumentException`/`NotSupportedException` on refusal. Catch those at the UI boundary, show the message and reload rejected preview values from source. Treat persistence capability as operation-specific, not a single “editable” boolean. Save does not run edit operations. Missing placement/light records remain absent rather than being created through a fallback DTO.
 
+Opaque pivot refusal includes a recognized `Chunk2E020001` with non-null `Data`, as can result from `SafeSkippableChunks` partial recovery. GBX.NET serializes this raw buffer instead of interpreted properties. All four pivot mutation methods refuse it without clearing raw bytes, replacing arrays, or changing chunk membership; a successful read of interpreted positions is not sufficient evidence that they are writable. The other edit targets use non-skippable `Chunk090F9000` / `Chunk090BB000` or direct prefab/variant serialization, so this specific typed retained-buffer path does not apply to their own serializers. Discovery must still certify reachability through serializable owner edges before offering any source handle for editing.
+
 ## Verification and limits
 
 Run `DOTNET_ROLL_FORWARD=Major dotnet run --project Tests/ItemEdits -m:2` (under the shared build lock during coordinated work). The standalone net8.0 project links production module sources and uses the unchanged bundled DLL. Synthetic source/save/reparse assertions cover zero/paired pivots, middle/last deletion, absent and mismatched rotations, invalid inputs and byte-identical rejected writes, shared light owners, owner transforms, unknown fields, tags/manual-cycle flags and shared entity topology. No private assets are required.
+
+Raw-data regressions cover all pivot operations with a typed retained buffer and an actual safe-recovered malformed rotation array. They assert refusal, stable source/chunk references, byte-identical export, and preserved save/reparse results.
 
 This module does not wire the UI, certify in-game light/placement behavior, expose skeleton sockets, add/remove lights, convert physics/kinematics, regenerate collision, or claim persistence for legacy/general controls whose chunks are absent. Those limits must remain visible after integration.

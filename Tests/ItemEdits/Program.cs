@@ -63,6 +63,48 @@ opaquePlacement.Chunks.Add(new SkippableChunk(0x2E020001) { Data = [0, 0, 0, 0, 
 Unchanged(opaquePlacement, () => ItemEdits.EditPivotPosition(opaquePlacement, 0, new(1, 2, 3)));
 Unchanged(opaquePlacement, () => ItemEdits.AddPivot(opaquePlacement, new(Vec3.Zero, Quat.Identity)));
 
+// A recognized typed chunk may still save its raw Data in preference to interpreted fields.
+var rawPlacement = new CGameItemPlacementParam { PivotPositions = [new(1, 2, 3)], PivotRotations = [Quat.Identity] };
+var rawChunk = rawPlacement.CreateChunk<CGameItemPlacementParam.Chunk2E020001>();
+using var rawBytes = new MemoryStream();
+using (var writer = new BinaryWriter(rawBytes, System.Text.Encoding.UTF8, true))
+{
+    writer.Write(1); writer.Write(1f); writer.Write(2f); writer.Write(3f);
+    writer.Write(1); writer.Write(0f); writer.Write(0f); writer.Write(0f); writer.Write(1f);
+}
+rawChunk.Data = rawBytes.ToArray();
+var originalPositions = rawPlacement.PivotPositions;
+var originalRotations = rawPlacement.PivotRotations;
+var originalRaw = rawChunk.Data;
+foreach (var operation in new Action[]
+{
+    () => ItemEdits.AddPivot(rawPlacement, new(Vec3.Zero, Quat.Identity)),
+    () => ItemEdits.EditPivot(rawPlacement, 0, new(Vec3.Zero, Quat.Identity)),
+    () => ItemEdits.RemovePivot(rawPlacement, 0),
+    () => ItemEdits.EditPivotPosition(rawPlacement, 0, Vec3.Zero)
+})
+{
+    Unchanged(rawPlacement, operation);
+    Check(ReferenceEquals(originalPositions, rawPlacement.PivotPositions) && ReferenceEquals(originalRotations, rawPlacement.PivotRotations)
+        && ReferenceEquals(originalRaw, rawChunk.Data) && rawPlacement.Chunks.Count == 1
+        && ReferenceEquals(rawChunk, rawPlacement.Chunks.Get(0x2E020001)), "Raw-backed refusal changed source arrays/chunks");
+    Check(rawPlacement.PivotPositions is [var rawPosition] && rawPosition == new Vec3(1, 2, 3)
+        && rawPlacement.PivotRotations is [var rawRotation] && rawRotation == Quat.Identity
+        && rawChunk.Data!.SequenceEqual(rawBytes.ToArray()), "Raw-backed refusal modified array contents");
+    var roundtrip = Reopen(rawPlacement);
+    Check(roundtrip.PivotPositions![0] == new Vec3(1, 2, 3) && roundtrip.PivotRotations![0] == Quat.Identity, "Raw-backed refusal changed parsed result");
+}
+// Exercise the actual SafeSkippableChunks recovery path, not just a manually retained buffer.
+rawChunk.Data = rawChunk.Data[..20];
+System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(rawChunk.Data.AsSpan(16), -2);
+var recoveredPlacement = Gbx.Parse<CGameItemPlacementParam>(new MemoryStream(Save(rawPlacement)), new GbxReadSettings { SafeSkippableChunks = true }).Node;
+Check(recoveredPlacement.Chunks.Get<CGameItemPlacementParam.Chunk2E020001>()!.Data is { Length: 20 }, "Fixture did not recover a typed raw chunk");
+var recoveredPositions = recoveredPlacement.PivotPositions;
+Unchanged(recoveredPlacement, () => ItemEdits.EditPivotPosition(recoveredPlacement, 0, Vec3.Zero));
+Check(ReferenceEquals(recoveredPositions, recoveredPlacement.PivotPositions), "Recovered raw edit changed interpreted source");
+var recoveredAgain = Gbx.Parse<CGameItemPlacementParam>(new MemoryStream(Save(recoveredPlacement)), new GbxReadSettings { SafeSkippableChunks = true }).Node;
+Check(recoveredAgain.PivotPositions![0] == new Vec3(1, 2, 3) && recoveredAgain.Chunks.Get<CGameItemPlacementParam.Chunk2E020001>()!.Data!.SequenceEqual(rawChunk.Data), "Recovered raw source did not survive save/reparse");
+
 var light = new CPlugLightUserModel { Color = new(2, 3, 4), Intensity = 4, Distance = 12, PointEmissionRadius = 8, NightOnly = true };
 var lightChunk = light.CreateChunk<CPlugLightUserModel.Chunk090F9000>(); lightChunk.Version = 1; lightChunk.U01 = 123;
 var entry = new CPlugPrefab.EntRef { Model = light, Position = new(1, 2, 3), Rotation = Quat.Identity, U01 = "owner metadata" };
