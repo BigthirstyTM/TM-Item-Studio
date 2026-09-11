@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests/**/*.cs" />
+    <Content Remove="Tests/**" />
+    <None Remove="Tests/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="GBX.NET.LZO" Version="2.1.6">
       <ExcludeAssets>compile;runtime</ExcludeAssets>
     </PackageReference>
