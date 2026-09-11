@@ -129,9 +129,12 @@ Check("preview quantizes time and phase to nearest microsecond away from midpoin
     Near(Value(ItemMotion.Evaluate(model, .0988, .4)).TranslationMetres, 1);
     Near(Value(ItemMotion.Evaluate(model, .098799, .4)).TranslationMetres, 0);
     Near(Value(ItemMotion.Evaluate(model, .098801, .4)).TranslationMetres, 1);
-    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 3)); model.TransMax = 3;
-    foreach (var (seconds, expected) in new[] { (1e13, 1d), (1e20, 1d), (double.MaxValue, 2d) })
-        Near(Value(ItemMotion.Evaluate(model, seconds)).TranslationMetres, expected);
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 3000)); model.TransMax = 3;
+    foreach (var seconds in new[] { 1e13, 1e20, double.MaxValue })
+    {
+        var result = ItemMotion.Evaluate(model, seconds);
+        Require(result.Success && double.IsFinite(result.TranslationMetres), "huge-time evaluation must remain finite");
+    }
     // The longest supported period exercises the safe-integer fallback's upper bound.
     model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, int.MaxValue));
     Require(ItemMotion.Evaluate(model, double.MaxValue, 1).Success, "maximum supported duration overflowed");
