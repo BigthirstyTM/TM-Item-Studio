@@ -136,8 +136,17 @@ public static class ItemMotion
         if (timeline.Keys.Count == 0) return min;
         var total = timeline.Keys.Sum(k => (long)k.DurationMilliseconds);
         if (total == 0) return 0; // Distinct from an empty key array: native signal early-out ignores min/max.
-        // Reduce in seconds before multiplying, avoiding overflow at large finite preview times.
-        var position = ((seconds % (total / 1000d)) * 1000d + phase * total) % total;
+        // Convert ordinary times to authored millisecond units before periodic reduction. Modulo
+        // by a fractional-second period can misclassify exact boundaries such as .6s / .1s.
+        var milliseconds = seconds * 1000;
+        if (milliseconds <= 9007199254740991d)
+            milliseconds = ScaleAtIntegerBoundaries(seconds, 1000);
+        else
+            // An integer-second modulus is exactly 1000 periods, so it avoids both overflow
+            // and division by an inexact fractional period at very large finite times.
+            milliseconds = (seconds % total) * 1000;
+        var phaseMilliseconds = phase == 1 ? 0 : ScaleAtIntegerBoundaries(phase, total);
+        var position = ((milliseconds % total) + phaseMilliseconds) % total;
         foreach (var key in timeline.Keys)
         {
             if (key.DurationMilliseconds == 0) continue;
@@ -156,6 +165,21 @@ public static class ItemMotion
             return (float)((1 - u) * min + u * max);
         }
         return min;
+    }
+
+    private static double ScaleAtIntegerBoundaries(double input, double scale)
+    {
+        var scaled = input * scale;
+        var integer = Math.Round(scaled);
+        var boundary = integer / scale;
+        // Exact round-trip equality recognizes the double representing a requested integer
+        // millisecond boundary (e.g. 1.001s), without an epsilon that would snap nearby times.
+        if (input == boundary) return integer;
+        if (scaled == integer)
+            // Multiplication itself may round a neighboring representable input onto the
+            // boundary. Retain which side it came from instead of changing the key interval.
+            return input < boundary ? Math.BitDecrement(integer) : Math.BitIncrement(integer);
+        return scaled;
     }
 
     private static Vector3 Axis(KC.EAxis axis) => axis switch

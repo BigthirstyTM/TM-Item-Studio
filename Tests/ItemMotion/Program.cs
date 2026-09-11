@@ -76,6 +76,40 @@ Check("key boundary, zero-duration skip, wrap, constant reverse", () =>
     Require(ItemMotion.Evaluate(model, double.MaxValue).Success, "large finite times overflowed");
 });
 
+Check("fractional-second exact loop boundaries", () =>
+{
+    var model = Model(); model.TransMin = 0; model.TransMax = 1;
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 100));
+    foreach (var seconds in new[] { .3, .6, .7 })
+        foreach (var phase in new[] { 0d, 1d })
+        {
+            Near(Value(ItemMotion.Evaluate(model, seconds, phase)).TranslationMetres, 0);
+            Require(Value(ItemMotion.Evaluate(model, Math.BitDecrement(seconds), phase)).TranslationMetres > .99f,
+                "immediately preceding representable time snapped forward");
+            Require(Value(ItemMotion.Evaluate(model, Math.BitIncrement(seconds), phase)).TranslationMetres > 0,
+                "immediately following representable time snapped backward");
+        }
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 1));
+    Near(Value(ItemMotion.Evaluate(model, 1.001)).TranslationMetres, 0); // 1001 ms; binary seconds*1000 is just below 1001.
+});
+
+Check("fractional-second step boundaries and phase retain neighboring intervals", () =>
+{
+    var model = Model(); model.TransMin = 0; model.TransMax = 1;
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Constant, 100), Key(KC.AnimEase.Constant, 100, true));
+    foreach (var (seconds, phase, expected) in new[] { (.6, 0d, 0d), (.7, 0d, 1d),
+        (.6, 1d, 0d), (.7, 1d, 1d), (.6, .5, 1d), (.7, .5, 0d), (.55, .25, 0d), (.65, .25, 1d) })
+    {
+        Near(Value(ItemMotion.Evaluate(model, seconds, phase)).TranslationMetres, expected);
+        foreach (var before in new[] { Math.BitDecrement(seconds), seconds - 1e-9 })
+            Near(Value(ItemMotion.Evaluate(model, before, phase)).TranslationMetres, 1 - expected);
+        foreach (var after in new[] { Math.BitIncrement(seconds), seconds + 1e-9 })
+            Near(Value(ItemMotion.Evaluate(model, after, phase)).TranslationMetres, expected);
+    }
+    // Huge finite times still yield a finite sample; integer seconds are exact 100 ms loop boundaries.
+    Near(Value(ItemMotion.Evaluate(model, double.MaxValue)).TranslationMetres, 0);
+});
+
 Check("unsupported modes and missing data stay visible", () =>
 {
     var model = Model();
