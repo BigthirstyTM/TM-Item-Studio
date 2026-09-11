@@ -7,10 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GBX.NET" Version="2.4.4" />
-    <PackageReference Include="GBX.NET.LZO" Version="2.1.6" />
+    <PackageReference Include="GBX.NET.LZO" Version="2.1.6">
+      <ExcludeAssets>compile;runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
+    <PackageReference Include="TmEssentials" Version="2.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="GBX.NET">
+      <HintPath>lib/GBX.NET.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GBX.NET.LZO">
+      <HintPath>$(NuGetPackageRoot)gbx.net.lzo/2.1.6/lib/net8.0/GBX.NET.LZO.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

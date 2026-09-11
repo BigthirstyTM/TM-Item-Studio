@@ -4,6 +4,8 @@
 @using GBX.NET.Engines.GameData
 @using GBX.NET.Engines.Plug
 @using GBX.NET.Engines.MwFoundations
+@using GBX.NET.Engines.Meta
+@using GBX.NET.Engines.MetaNotPersistent
 @using System.IO
 @using System.Text
 @using System.Globalization
@@ -15,24 +17,40 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h3 class="mb-0">Trackmania 2020 Item Studio</h3>
-        <small class="text-muted">Interactieve 3D editor voor Trackmania .Item.Gbx bestanden</small>
+        <small class="text-muted">Interactive 3D editor for Trackmania .Item.Gbx files</small>
     </div>
     <div style="width: 320px;">
-        <InputFile OnChange="LoadFile" accept=".gbx" class="form-control form-control-sm" />
+        <InputFile OnChange="LoadFiles" multiple accept=".gbx" class="form-control form-control-sm" />
     </div>
 </div>
+
+@if (variantSources.Count > 0)
+{
+    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <strong>Variants (@variantSources.Count)</strong>
+        @for (int i = 0; i < variantSources.Count; i++)
+        {
+            var variantIndex = i;
+            <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick="@(() => SelectVariant(variantIndex))">
+                @(variantIndex + 1). @variantSources[variantIndex].Name
+            </button>
+        }
+        <span class="text-muted small">The Middle Mouse Button switches these variants in Trackmania after export.</span>
+    </div>
+}
 
 @if (isLoading)
 {
     <div class="alert alert-info py-2">
-        <em>Item inladen, geometrie, pivots, lichten en metadata analyseren...</em>
+        <em>Loading item, analysing geometry, PivotPositions, lights and metadata...</em>
     </div>
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
     <div class="alert alert-danger py-2">
-        <strong>Fout:</strong> @errorMessage
+        <strong>Error:</strong> @errorMessage
     </div>
 }
 
@@ -40,13 +58,13 @@
 {
     <div style="display: grid; grid-template-columns: 1fr 450px; gap: 20px;">
         
-        <!-- ================= LINKERKOLOM: 3D VIEWPORT ================= -->
+        <!-- ================= 3D VIEWPORT ================= -->
         <div>
             <div style="background: #111; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);">
                 
                 <!-- Viewport Toolbar -->
                 <div style="padding: 8px 12px; background: #1f1f23; border-bottom: 1px solid #2d2d32; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <!-- Laag-toggles -->
+                    <!-- Layer toggles -->
                     <div class="btn-group btn-group-sm">
                         <button class="btn @(showMeshes ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("meshes"))">
                             Meshes
@@ -55,14 +73,14 @@
                             Pivots (@detectedPivots.Count)
                         </button>
                         <button class="btn @(showLights ? "btn-info text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("lights"))">
-                            Lichten (@detectedLights.Count)
+                            Lights (@detectedLights.Count)
                         </button>
                         <button class="btn @(showSockets ? "btn-success" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("sockets"))">
                             Sockets (@detectedSockets.Count)
                         </button>
                     </div>
 
-                    <!-- Animatie & Algemene functies -->
+                    <!-- Animation and general controls -->
                     <div style="display: flex; gap: 6px; align-items: center;">
                         @if (isMovingItem)
                         {
@@ -70,13 +88,13 @@
                                 @(isPlaying ? "⏸" : "▶")
                             </button>
                             <select class="form-select form-select-sm" style="width: auto;" value="@detectedAxis" @onchange="OnAxisChanged">
-                                <option value="y">Y-As</option>
-                                <option value="x">X-As</option>
-                                <option value="z">Z-As</option>
+                                <option value="y">Y Axis</option>
+                                <option value="x">X Axis</option>
+                                <option value="z">Z Axis</option>
                             </select>
                         }
                         <button class="btn btn-sm btn-outline-light" @onclick="ToggleWireframe">Wire</button>
-                        <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset Camera</button>
                         @if (!string.IsNullOrEmpty(rawObj))
                         {
                             <button class="btn btn-sm btn-outline-success" @onclick="DownloadObj">.OBJ</button>
@@ -89,7 +107,7 @@
                     @if (!hasMesh && detectedPivots.Count == 0 && detectedLights.Count == 0)
                     {
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #888; text-align: center;">
-                            <p>Geen visuele elementen gevonden in dit item.</p>
+                            <p>No visual elements found in this item.</p>
                         </div>
                     }
                 </div>
@@ -97,14 +115,14 @@
             
             <div class="mt-2 d-flex justify-content-between text-muted small flex-wrap">
                 <div>
-                    <span><span style="color: #2563eb;">■</span> Basis</span>
-                    @if (isMovingItem) { <span class="ms-2"><span style="color: #f59e0b;">■</span> Bewegend</span> }
+                    <span><span style="color: #2563eb;">■</span> Static</span>
+                    @if (isMovingItem) { <span class="ms-2"><span style="color: #f59e0b;">■</span> Moving</span> }
                     <span class="ms-2"><span style="color: #facc15;">●</span> Pivot</span>
-                    <span class="ms-2"><span style="color: #fffbeb;">💡</span> Licht</span>
+                    <span class="ms-2"><span style="color: #fffbeb;">💡</span> Light</span>
                     <span class="ms-2"><span style="color: #06b6d4;">⭕</span> Socket</span>
                 </div>
                 <div>
-                    <em>Tip: Klik op een gizmo in 3D om deze te verplaatsen met de pijlen!</em>
+                    <em>Tip: Select a 3D gizmo and move it with the transform arrows.</em>
                 </div>
             </div>
         </div>
@@ -112,53 +130,68 @@
         <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
         <div style="border: 1px solid #ddd; border-radius: 8px; background: #fff; display: flex; flex-direction: column; height: 620px;">
             
-            <ul class="nav nav-tabs px-2 pt-2 bg-light border-bottom" style="font-size: 0.85em;">
-                <li class="nav-item">
-                    <button class="nav-link @(activeTab == "general" ? "active" : "")" @onclick="@(() => activeTab = "general")">
-                        Algemeen
+            <div class="d-flex flex-column gap-1 p-2 bg-light border-bottom" style="font-size: 0.85em;">
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "general" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("general"))">
+                        <span>Item Identification & Collector Metadata</span><span>@(activeTab == "general" ? "−" : "+")</span>
                     </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link @(activeTab == "placement" ? "active" : "")" @onclick="@(() => activeTab = "placement")">
-                        Placement & Pivots
+                </div>
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "placement" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("placement"))">
+                        <span>Placement Parameters & PivotPositions</span><span>@(activeTab == "placement" ? "−" : "+")</span>
                     </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link @(activeTab == "gameplay" ? "active" : "")" @onclick="@(() => activeTab = "gameplay")">
-                        Gameplay & Type
+                </div>
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "gameplay" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("gameplay"))">
+                        <span>WaypointType, Gameplay & Kinematics</span><span>@(activeTab == "gameplay" ? "−" : "+")</span>
                     </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link @(activeTab == "lights" ? "active" : "")" @onclick="@(() => activeTab = "lights")">
-                        Lichten (@detectedLights.Count)
+                </div>
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "lights" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("lights"))">
+                        <span>Dynamic Real-Time Lights (@detectedLights.Count)</span><span>@(activeTab == "lights" ? "−" : "+")</span>
                     </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link @(activeTab == "sockets" ? "active" : "")" @onclick="@(() => activeTab = "sockets")">
-                        Sockets (@detectedSockets.Count)
+                </div>
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
+                        <span>Socket Positions (@detectedSockets.Count)</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
                     </button>
-                </li>
-            </ul>
+                </div>
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "physics" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("physics"))">
+                        <span>PhyModel, CPlugSurface & Collision</span><span>@(activeTab == "physics" ? "−" : "+")</span>
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "visual" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("visual"))">
+                        <span>VisModel, Materials & LOD</span><span>@(activeTab == "visual" ? "−" : "+")</span>
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "extras" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("extras"))">
+                        <span>Audio, CPlugFx & MediaTracker Triggers</span><span>@(activeTab == "extras" ? "−" : "+")</span>
+                    </button>
+                </div>
+            </div>
 
             <div class="p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
                 
                 @if (activeTab == "general")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">1. Identificatie & Metadata</h6>
+                    <h6 class="border-bottom pb-1 text-primary">1. Ident (Id, Author, Collection) <span class="text-muted" title="Defines the item's internal ID, author and context collection.">?</span></h6>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Item ID / Bestandsnaam</label>
+                        <label class="form-label mb-0 fw-bold">Ident.Id / File name</label>
                         <input type="text" class="form-control form-control-sm" @bind="identId" @bind:after="UpdateIdent" />
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Auteur</label>
+                        <label class="form-label mb-0 fw-bold">Ident.Author</label>
                         <input type="text" class="form-control form-control-sm" @bind="identAuthor" @bind:after="UpdateIdent" />
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Collection</label>
+                        <label class="form-label mb-0 fw-bold">Ident.Collection</label>
                         <input type="text" class="form-control form-control-sm" @bind="identCollection" @bind:after="UpdateIdent" />
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Operationeel Model (ItemType)</label>
+                        <label class="form-label mb-0 fw-bold">ItemType (EItemType)</label>
                         <select class="form-select form-select-sm" @bind="itemModel.ItemType">
                             @foreach (var type in Enum.GetValues<CGameItemModel.EItemType>())
                             {
@@ -167,16 +200,139 @@
                         </select>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Archetype / Mapmap</label>
-                        <input type="text" class="form-control form-control-sm" value="@(itemModel.ArchetypeRef ?? "Geen")" readonly />
+                        <label class="form-label mb-0 fw-bold">Archetype / Inventory Path</label>
+                        <input type="text" class="form-control form-control-sm" value="@(itemModel.ArchetypeRef ?? "None")" readonly />
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-8">
+                            <label class="form-label mb-0 fw-bold">Name</label>
+                            <input type="text" class="form-control form-control-sm" @bind="itemModel.Name" />
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label mb-0 fw-bold">CopperPrice</label>
+                            <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.CopperPrice" />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-0 fw-bold">Description</label>
+                        <textarea class="form-control form-control-sm" rows="2" @bind="itemModel.Description"></textarea>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label mb-0 small fw-bold">PageName</label>
+                            <input type="text" class="form-control form-control-sm" @bind="itemModel.PageName" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-0 small fw-bold">CatalogPosition</label>
+                            <input type="number" class="form-control form-control-sm" @bind="itemModel.CatalogPosition" />
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label mb-0 small fw-bold">NbAvailableMin</label>
+                            <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.NbAvailableMin" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-0 small fw-bold">NbAvailableMax</label>
+                            <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.NbAvailableMax" />
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" id="internalItem" @bind="itemModel.IsInternal" />
+                        <label class="form-check-label small" for="internalItem">IsInternal</label>
+                    </div>
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" id="needUnlock" @bind="itemModel.NeedUnlock" />
+                        <label class="form-check-label small" for="needUnlock">NeedUnlock</label>
+                    </div>
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" id="advancedItem" @bind="itemModel.IsAdvanced" />
+                        <label class="form-check-label small" for="advancedItem">IsAdvanced</label>
+                    </div>
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" id="autoIcon" @bind="itemModel.IconUseAutoRender" />
+                        <label class="form-check-label small" for="autoIcon">IconUseAutoRender</label>
+                    </div>
+                    <div class="row g-2 mb-2 mt-1">
+                        <div class="col-8">
+                            <label class="form-label mb-0 small fw-bold">SkinDirectory</label>
+                            <input type="text" class="form-control form-control-sm" @bind="itemModel.SkinDirectory" />
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label mb-0 small fw-bold">IconQuarterRotationY</label>
+                            <input type="number" min="0" max="3" class="form-control form-control-sm" @bind="itemModel.IconQuarterRotationY" />
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-8">
+                            <label class="form-label mb-0 small fw-bold">DefaultWeaponName</label>
+                            <input type="text" class="form-control form-control-sm" @bind="itemModel.DefaultWeaponName" />
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label mb-0 small fw-bold">DefaultCamIndex</label>
+                            <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.DefaultCamIndex" />
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" id="disableLightmap" @bind="itemModel.DisableLightmap" />
+                        <label class="form-check-label small" for="disableLightmap">DisableLightmap</label>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-0 fw-bold">Icon (CPlugBitmap / DXT buffer)</label>
+                        <div class="mb-2 p-2 bg-dark rounded text-center">
+                            <canvas id="iconPreviewCanvas" width="128" height="128" style="width:128px;height:128px;image-rendering:auto;background:#20242a;border:1px solid #495057;"></canvas>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <InputFile OnChange="UploadIcon" accept="image/jpeg,image/png,image/webp" class="form-control" />
+                            <span class="input-group-text" title="The image is center-cropped and resized to the 64x64 RGBA Icon format used by the item model.">?</span>
+                        </div>
+                        <small class="text-muted">JPG, PNG or WebP. The image is normalized to 64x64. @iconFileName</small>
+                        @if (!string.IsNullOrWhiteSpace(iconStatus))
+                        {
+                            <small class="d-block text-info">@iconStatus</small>
+                        }
                     </div>
                 }
 
                 @if (activeTab == "placement")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">2. Grid Snapping & Positie</h6>
+                    <h6 class="border-bottom pb-1 text-primary">2. CGameItemPlacementParam <span class="text-muted" title="Controls placement, snapping and PivotPositions in the Trackmania editor.">?</span></h6>
                     @if (itemModel.DefaultPlacement != null)
                     {
+                        <div class="row g-2 mb-2">
+                            <div class="col-4">
+                                <label class="form-label mb-0 small fw-bold">GroundPoint X</label>
+                                <input type="number" step="0.1" class="form-control form-control-sm" value="@itemModel.GroundPoint.X" @onchange="@(e => UpdateGroundPoint(0, e.Value))" />
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label mb-0 small fw-bold">GroundPoint Y</label>
+                                <input type="number" step="0.1" class="form-control form-control-sm" value="@itemModel.GroundPoint.Y" @onchange="@(e => UpdateGroundPoint(1, e.Value))" />
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label mb-0 small fw-bold">GroundPoint Z</label>
+                                <input type="number" step="0.1" class="form-control form-control-sm" value="@itemModel.GroundPoint.Z" @onchange="@(e => UpdateGroundPoint(2, e.Value))" />
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">PainterGroundMargin (m)</label>
+                                <input type="number" step="0.01" class="form-control form-control-sm" @bind="itemModel.PainterGroundMargin" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">OrbitalCenterHeightFromGround (m)</label>
+                                <input type="number" step="0.1" class="form-control form-control-sm" @bind="itemModel.OrbitalCenterHeightFromGround" />
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">OrbitalRadiusBase (m)</label>
+                                <input type="number" step="0.1" class="form-control form-control-sm" @bind="itemModel.OrbitalRadiusBase" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-0 small fw-bold">OrbitalPreviewAngle</label>
+                                <input type="number" step="0.01" class="form-control form-control-sm" @bind="itemModel.OrbitalPreviewAngle" />
+                            </div>
+                        </div>
                         <div class="row g-2 mb-2">
                             <div class="col-6">
                                 <label class="form-label mb-0 small fw-bold">GridSnap H Step (m)</label>
@@ -207,28 +363,28 @@
                             </div>
                         </div>
 
-                        <h6 class="border-bottom pb-1 mt-3 text-primary">Rotatie Gedrag</h6>
+                        <h6 class="border-bottom pb-1 mt-3 text-primary">Rotation placement flags</h6>
                         <div class="form-check form-switch mb-1">
                             <input class="form-check-input" type="checkbox" id="yawOnly" @bind="itemModel.DefaultPlacement.YawOnly" />
-                            <label class="form-check-label small" for="yawOnly">Alleen Yaw rotatie (Geen Pitch/Roll)</label>
+                            <label class="form-check-label small" for="yawOnly">YawOnly</label>
                         </div>
                         <div class="form-check form-switch mb-1">
                             <input class="form-check-input" type="checkbox" id="notOnObject" @bind="itemModel.DefaultPlacement.NotOnObject" />
-                            <label class="form-check-label small" for="notOnObject">Niet op ander object plaatsen</label>
+                            <label class="form-check-label small" for="notOnObject">NotOnObject</label>
                         </div>
                         <div class="form-check form-switch mb-1">
                             <input class="form-check-input" type="checkbox" id="autoRot" @bind="itemModel.DefaultPlacement.AutoRotation" />
-                            <label class="form-check-label small" for="autoRot">Automatisch roteren op ondergrond</label>
+                            <label class="form-check-label small" for="autoRot">AutoRotation</label>
                         </div>
                         <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" id="switchPivot" @bind="itemModel.DefaultPlacement.SwitchPivotManually" />
-                            <label class="form-check-label small" for="switchPivot">Handmatig van pivot wisselen</label>
+                            <label class="form-check-label small" for="switchPivot">SwitchPivotManually</label>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
                             <h6 class="mb-0 text-primary">Pivots (@detectedPivots.Count)</h6>
                             <button class="btn btn-xs btn-outline-primary" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddPivot">
-                                + Alternate Pivot
+                                + PivotPosition
                             </button>
                         </div>
 
@@ -238,10 +394,10 @@
                             int pIdx = i;
                             <div class="card p-2 bg-light mb-2">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="small">Pivot @p.Index @(pIdx == 0 ? "(Standaard Nulpunt)" : "")</strong>
+                                    <strong class="small">PivotPosition @p.Index @(pIdx == 0 ? "(Default)" : "")</strong>
                                     <div>
                                         <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("pivot", pIdx))">
-                                            Selecteer in 3D
+                                            Select in 3D
                                         </button>
                                         @if (pIdx > 0)
                                         {
@@ -267,7 +423,7 @@
 
                 @if (activeTab == "gameplay")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">4. Waypoint & Trigger Modus</h6>
+                    <h6 class="border-bottom pb-1 text-primary">3. WaypointType & Kinematics <span class="text-muted" title="WaypointType and CPlugAnim/CPlugTrajectory settings control gameplay and moving parts.">?</span></h6>
                     <div class="mb-3">
                         <label class="form-label mb-0 fw-bold">Waypoint Type</label>
                         <select class="form-select form-select-sm" @bind="itemModel.WaypointType">
@@ -281,36 +437,62 @@
                         </small>
                     </div>
 
-                    <h6 class="border-bottom pb-1 mt-4 text-primary">Conversie: Statisch ⇄ Kinetisch</h6>
+                    <h6 class="border-bottom pb-1 mt-4 text-primary">ItemType conversion</h6>
                     <div class="card p-3 bg-light mb-3">
                         @if (!isMovingItem)
                         {
                             <p class="small text-muted mb-2">
-                                Dit item is momenteel <strong>Statisch</strong>. Je kunt het omzetten naar een <strong>Kinetisch bewegend item</strong> zodat het kan roteren of oscilleren.
+                                This item is currently <strong>StaticObject</strong>. Convert it to a <strong>KinematicObject</strong> to use animation and trajectory nodes.
                             </p>
                             <button class="btn btn-sm btn-outline-warning text-dark fw-bold" @onclick="ConvertToKinematic">
-                                ⚙️ Zet om naar Kinetisch Item
+                                ⚙️ Convert to KinematicObject
                             </button>
                         }
                         else
                         {
                             <p class="small text-muted mb-2">
-                                Dit item is momenteel <strong>Kinetisch / Bewegend</strong>.
+                                This item is currently <strong>KinematicObject / DynamicalObject</strong>.
                             </p>
+                            <button class="btn btn-sm @(showOriginalMotion ? "btn-info" : "btn-outline-info") mb-2" @onclick="ToggleOriginalMotion">
+                                @(showOriginalMotion ? "Original motion active" : "Show original motion in viewport")
+                            </button>
+                            @if (showOriginalMotion)
+                            {
+                                <div class="card border-info bg-white mb-3">
+                                    <div class="card-header py-1 text-info fw-bold">Original engine settings</div>
+                                    <div class="card-body p-2">
+                                        <div class="small text-muted mb-2">Constraint: @originalConstraintType</div>
+                                        @if (originalMotionSettings.Count == 0)
+                                        {
+                                            <div class="small text-muted">No readable kinematic properties found.</div>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var setting in originalMotionSettings)
+                                            {
+                                                <div class="d-flex justify-content-between gap-2 border-bottom py-1 small">
+                                                    <span class="fw-bold">@setting.Name</span>
+                                                    <span class="text-break text-end">@setting.Value</span>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
                             <div class="row g-2 mb-2">
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small fw-bold">Type Animatie</label>
+                                    <label class="form-label mb-0 small fw-bold">Animation type</label>
                                     <select class="form-select form-select-sm" value="@(isOscillating ? "osc" : "spin")" @onchange="OnAnimTypeChanged">
-                                        <option value="spin">Continue 360° Rotatie</option>
-                                        <option value="osc">Oscilleren (Heen en weer)</option>
+                                        <option value="spin">Continuous rotation</option>
+                                        <option value="osc">PingPong / oscillation</option>
                                     </select>
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small fw-bold">Draai-as</label>
+                                    <label class="form-label mb-0 small fw-bold">RotAxis</label>
                                     <select class="form-select form-select-sm" value="@detectedAxis" @onchange="OnAxisChanged">
-                                        <option value="y">Y-As (Horizontaal)</option>
-                                        <option value="x">X-As (Verticaal)</option>
-                                        <option value="z">Z-As (Diepte)</option>
+                                        <option value="y">Y Axis</option>
+                                        <option value="x">X Axis</option>
+                                        <option value="z">Z Axis</option>
                                     </select>
                                 </div>
                             </div>
@@ -318,17 +500,63 @@
                             {
                                 <div class="row g-2 mb-2">
                                     <div class="col-6">
-                                        <label class="form-label mb-0 small">Min Hoek (°)</label>
-                                        <input type="number" step="5" class="form-control form-control-sm" @bind="minAngle" @bind:after="UpdateScenePayload" />
+                                        <label class="form-label mb-0 small">AngleMinDeg (°)</label>
+                                        <input type="number" step="5" class="form-control form-control-sm" @bind="minAngle" @bind:after="OnKinematicChanged" />
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label mb-0 small">Max Hoek (°)</label>
-                                        <input type="number" step="5" class="form-control form-control-sm" @bind="maxAngle" @bind:after="UpdateScenePayload" />
+                                        <label class="form-label mb-0 small">AngleMaxDeg (°)</label>
+                                        <input type="number" step="5" class="form-control form-control-sm" @bind="maxAngle" @bind:after="OnKinematicChanged" />
                                     </div>
                                 </div>
                             }
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label mb-0 small">Period / Duration (sec)</label>
+                                    <input type="number" min="0.01" step="0.05" class="form-control form-control-sm" @bind="animationPeriodSeconds" @bind:after="OnKinematicChanged" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label mb-0 small">Phase offset (sec)</label>
+                                    <input type="number" step="0.05" class="form-control form-control-sm" @bind="animationPhaseSeconds" @bind:after="OnKinematicChanged" />
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label mb-0 small">TransAxis</label>
+                                    <select class="form-select form-select-sm" @bind="translationAxis" @bind:after="OnKinematicChanged">
+                                        <option value="x">X Axis</option>
+                                        <option value="y">Y Axis</option>
+                                        <option value="z">Z Axis</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label mb-0 small">Translation distance (m)</label>
+                                    <input type="number" step="0.05" class="form-control form-control-sm" @bind="translationDistance" @bind:after="OnKinematicChanged" />
+                                </div>
+                            </div>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="harmonicMotion" @bind="harmonicEasing" @bind:after="OnKinematicChanged" />
+                                <label class="form-check-label small" for="harmonicMotion">Harmonic easing</label>
+                            </div>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="invertMotion" @bind="invertMotion" @bind:after="OnKinematicChanged" />
+                                <label class="form-check-label small" for="invertMotion">Invert direction</label>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <label class="form-label mb-0 small">Pivot offset X</label>
+                                    <input type="number" step="0.05" class="form-control form-control-sm" @bind="pivotOffsetX" @bind:after="OnKinematicChanged" />
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label mb-0 small">Pivot offset Y</label>
+                                    <input type="number" step="0.05" class="form-control form-control-sm" @bind="pivotOffsetY" @bind:after="OnKinematicChanged" />
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label mb-0 small">Pivot offset Z</label>
+                                    <input type="number" step="0.05" class="form-control form-control-sm" @bind="pivotOffsetZ" @bind:after="OnKinematicChanged" />
+                                </div>
+                            </div>
                             <button class="btn btn-sm btn-outline-secondary mt-2" @onclick="ConvertToStatic">
-                                ⏹ Zet terug om naar Statisch Item
+                                ⏹ Convert to StaticObject
                             </button>
                         }
                     </div>
@@ -337,9 +565,9 @@
                 @if (activeTab == "lights")
                 {
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
-                        <h6 class="mb-0 text-primary">Real-time Lichtbronnen (@detectedLights.Count)</h6>
+                            <h6 class="mb-0 text-primary">Dynamic lights (@detectedLights.Count) <span class="text-muted" title="CPlugLightPoint and CPlugLightSpot values are updated in the viewport and stored in the GBX model.">?</span></h6>
                         <button class="btn btn-xs btn-primary" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddLight">
-                            + Nieuw Licht
+                            + Add Light
                         </button>
                     </div>
 
@@ -351,10 +579,10 @@
                             int lIdx = i;
                             <div class="card p-2 mb-2 bg-light small">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong>Licht @(lIdx + 1) (@light.Type)</strong>
+                                    <strong>Light @(lIdx + 1) (@light.Type)</strong>
                                     <div>
                                         <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("light", lIdx))">
-                                            Selecteer in 3D
+                                            Select in 3D
                                         </button>
                                         <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemoveLight(lIdx))">✕</button>
                                     </div>
@@ -377,11 +605,11 @@
 
                                 <div class="row g-1 align-items-center">
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Kleur</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Color</label>
                                         <input type="color" class="form-control form-control-color w-100 p-0" style="height: 28px;" @bind="light.ColorHtml" @bind:after="@(() => OnLightColorChanged(lIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Intensiteit</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Intensity</label>
                                         <input type="number" step="0.5" class="form-control form-control-sm" @bind="light.Intensity" @bind:after="@(() => OnLightChanged(lIdx))" />
                                     </div>
                                     <div class="col-4">
@@ -394,16 +622,16 @@
                     }
                     else
                     {
-                        <p class="text-muted small">Geen lichtbronnen in dit item. Klik op <strong>+ Nieuw Licht</strong> om er een toe te voegen!</p>
+                        <p class="text-muted small">No light emitters found. Click <strong>+ Add Light</strong> to add one.</p>
                     }
                 }
 
                 @if (activeTab == "sockets")
                 {
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
-                        <h6 class="mb-0 text-primary">Magneet Sockets (@detectedSockets.Count)</h6>
+                        <h6 class="mb-0 text-primary">Socket Positions (@detectedSockets.Count) <span class="text-muted" title="Socket positions and tags define magnetic connections between objects.">?</span></h6>
                         <button class="btn btn-xs btn-success" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddSocket">
-                            + Nieuwe Socket
+                            + Add Socket
                         </button>
                     </div>
 
@@ -415,10 +643,10 @@
                             int sIdx = i;
                             <div class="card p-2 mb-2 bg-light small">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <input type="text" class="form-control form-control-sm fw-bold me-2" style="width: 140px;" @bind="socket.Tag" placeholder="Tag (bv Road)" />
+                                    <input type="text" class="form-control form-control-sm fw-bold me-2" style="width: 140px;" @bind="socket.Tag" placeholder="SocketTag (e.g. Road)" />
                                     <div>
                                         <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("socket", sIdx))">
-                                            Selecteer in 3D
+                                            Select in 3D
                                         </button>
                                         <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemoveSocket(sIdx))">✕</button>
                                     </div>
@@ -439,8 +667,43 @@
                     }
                     else
                     {
-                        <p class="text-muted small">Geen magneet sockets. Klik op <strong>+ Nieuwe Socket</strong> om een connectiepunt toe te voegen.</p>
+                        <p class="text-muted small">No Socket Positions found. Click <strong>+ Add Socket</strong> to add one.</p>
                     }
+                }
+
+                @if (activeTab == "physics")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">PhyModel, CPlugSurface & Collision <span class="text-muted" title="These nodes define collision, physics surfaces and vehicle interaction.">?</span></h6>
+                    <div class="alert @(HasNode("CPlugSurface", "PhyModel", "CPlugSolid") ? "alert-success" : "alert-secondary") small">
+                        @(HasNode("CPlugSurface", "PhyModel", "CPlugSolid") ? "A physical model was found in this item." : "No recognised physical model was found in this item.")
+                    </div>
+                    <p class="small text-muted">Material, collision and a separate collision hull are shown only when the corresponding GBX node exists.</p>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="collisionInfo" disabled="@(!HasNode("CPlugSurface", "PhyModel"))" />
+                        <label class="form-check-label small" for="collisionInfo">CollisionEnabled</label>
+                    </div>
+                }
+
+                @if (activeTab == "visual")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">VisModel, Materials & LOD <span class="text-muted" title="Visual geometry, materials, UV data and LOD nodes belong to the visual model.">?</span></h6>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6"><div class="card bg-light p-2 small"><strong>Visual geometry</strong><br />@vertexCount vertices</div></div>
+                        <div class="col-6"><div class="card bg-light p-2 small"><strong>LOD</strong><br />@(HasNode("LOD", "Lod") ? "Present" : "Not found")</div></div>
+                    </div>
+                    <p class="small text-muted">Materials, UV sets and LOD levels remain part of the original GBX model. Only supported public GBX.NET properties are edited.</p>
+                }
+
+                @if (activeTab == "extras")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">Audio, CPlugFx & MediaTracker Triggers <span class="text-muted" title="Audio, particle systems and MediaTracker zones are optional GBX nodes.">?</span></h6>
+                    <div class="list-group small">
+                        <div class="list-group-item d-flex justify-content-between"><span>WaypointType</span><strong>@itemModel.WaypointType</strong></div>
+                        <div class="list-group-item d-flex justify-content-between"><span>Audio</span><strong>@(HasNode("CPlugSound", "CAudioSound") ? "Present" : "Not found")</strong></div>
+                        <div class="list-group-item d-flex justify-content-between"><span>Particle system / CPlugFx</span><strong>@(HasNode("Particle", "CPlugFx") ? "Present" : "Not found")</strong></div>
+                        <div class="list-group-item d-flex justify-content-between"><span>CGameCtnZone / MediaClip</span><strong>@(HasNode("CGameCtnZone", "MediaClip") ? "Present" : "Not found")</strong></div>
+                    </div>
+                    <p class="small text-muted mt-2">Trigger functions require the corresponding collision or zone node in the GBX file.</p>
                 }
 
             </div>
@@ -448,7 +711,7 @@
             <div class="p-2 border-top bg-light d-flex justify-content-between align-items-center">
                 <small class="text-muted">Item Studio v1.5</small>
                 <button class="btn btn-sm btn-primary" @onclick="ExportGbx">
-                    💾 Exporteer .Item.Gbx
+                    💾 @(variantSources.Count > 1 ? "Export Item with variants" : "Export .Item.Gbx")
                 </button>
             </div>
         </div>
@@ -468,8 +731,13 @@
     private bool isViewerInitialized = false;
     private string activeTab = "general";
     private DotNetObjectReference<Home>? dotNetHelper;
+    private readonly List<VariantSource> variantSources = new();
+    private int activeVariantIndex;
+    private string? iconFileName;
+    private string? iconStatus;
+    private bool iconPreviewPending;
 
-    // Bewerkbare Ident velden
+    // Editable identification fields.
     private string identId = "";
     private string identAuthor = "";
     private string identCollection = "";
@@ -480,11 +748,40 @@
     private bool showLights = true;
     private bool showSockets = true;
 
-    // Animatie
+    // Animation.
     private string detectedAxis = "y";
     private bool isOscillating = false;
     private float minAngle = 0;
     private float maxAngle = 0;
+    private string translationAxis = "y";
+    private float translationDistance = 0;
+    private float animationPeriodSeconds = 2;
+    private float animationPhaseSeconds = 0;
+    private float pivotOffsetX;
+    private float pivotOffsetY;
+    private float pivotOffsetZ;
+    private bool harmonicEasing;
+    private bool invertMotion;
+    private bool hasTranslationMotion;
+    private float[] translationMin = new float[3];
+    private float[] translationMax = new float[3];
+    private object? activeKinematicConstraint;
+    private bool showOriginalMotion;
+    private string originalConstraintType = "Not found";
+    private readonly List<OriginalMotionSetting> originalMotionSettings = new();
+    private bool originalMotionAvailable;
+    private string originalAnimAxis = "y";
+    private bool originalIsOscillating;
+    private float originalMinAngle;
+    private float originalMaxAngle;
+    private string originalTranslationAxis = "y";
+    private float originalTranslationDistance;
+    private float originalAnimationPeriodSeconds = 2;
+    private float originalAnimationPhaseSeconds;
+    private bool originalHasTranslationMotion;
+    private float[] originalTranslationMin = new float[3];
+    private float[] originalTranslationMax = new float[3];
+    private float[] originalPivotOffset = new float[3];
 
     public class ModelPart
     {
@@ -523,21 +820,67 @@
         public float Z { get; set; }
     }
 
+    private sealed class VariantSource
+    {
+        public string Name { get; init; } = "Variant";
+        public Gbx<CGameItemModel> GbxFile { get; init; } = null!;
+        public CGameItemModel Model { get; init; } = null!;
+        public CPlugPrefab? Prefab { get; init; }
+        public object? EntityModel { get; init; }
+    }
+
+    private sealed class OriginalMotionSetting
+    {
+        public string Name { get; init; } = "";
+        public string Value { get; init; } = "";
+    }
+
+    private sealed class NormalizedIcon
+    {
+        public int[] Pixels { get; set; } = Array.Empty<int>();
+        public string WebPBase64 { get; set; } = "";
+    }
+
     private List<ModelPart> modelParts = new();
     private List<PivotDto> detectedPivots = new();
     private List<LightDto> detectedLights = new();
     private List<SocketDto> detectedSockets = new();
     private List<string> debugLog = new();
+    private readonly HashSet<string> detectedNodeTypes = new(StringComparer.OrdinalIgnoreCase);
 
     protected override void OnInitialized()
     {
         dotNetHelper = DotNetObjectReference.Create(this);
     }
 
-    private async Task LoadFile(InputFileChangeEventArgs e)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (itemModel == null || isViewerInitialized)
+        {
+            if (iconPreviewPending && itemModel != null)
+            {
+                await RenderIconPreview();
+                iconPreviewPending = false;
+            }
+            return;
+        }
+
+        await JS.InvokeVoidAsync("init3DViewer", "threeContainer", dotNetHelper);
+        isViewerInitialized = true;
+        await UpdateScenePayload();
+        if (iconPreviewPending)
+        {
+            await RenderIconPreview();
+            iconPreviewPending = false;
+        }
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
     {
         isLoading = true;
         errorMessage = null;
+        variantSources.Clear();
+        activeVariantIndex = 0;
         itemModel = null;
         hasMesh = false;
         isMovingItem = false;
@@ -546,76 +889,165 @@
         detectedPivots.Clear();
         detectedLights.Clear();
         detectedSockets.Clear();
+        detectedNodeTypes.Clear();
         debugLog.Clear();
         detectedAxis = "y";
         isOscillating = false;
         minAngle = 0;
         maxAngle = 0;
+        translationAxis = "y";
+        translationDistance = 0;
+        animationPeriodSeconds = 2;
+        animationPhaseSeconds = 0;
+        pivotOffsetX = pivotOffsetY = pivotOffsetZ = 0;
+        harmonicEasing = false;
+        invertMotion = false;
+        hasTranslationMotion = false;
+        translationMin = new float[3];
+        translationMax = new float[3];
+        activeKinematicConstraint = null;
+        showOriginalMotion = false;
+        originalConstraintType = "Not found";
+        originalMotionSettings.Clear();
+        originalMotionAvailable = false;
+        if (isViewerInitialized)
+            await JS.InvokeVoidAsync("clearViewerScene");
         StateHasChanged();
 
         try
         {
-            using var memoryStream = new MemoryStream();
-            await e.File.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-
-            gbxFile = Gbx.Parse<CGameItemModel>(memoryStream);
-            itemModel = gbxFile.Node;
-
-            if (itemModel != null)
+            foreach (var file in e.GetMultipleFiles(maximumFileCount: 16))
             {
-                identId = itemModel.Ident?.Id ?? "";
-                identAuthor = itemModel.Ident?.Author ?? "";
-                identCollection = itemModel.Ident != null ? itemModel.Ident.Collection.ToString() : "";
+                using var memoryStream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+                var parsedGbx = Gbx.Parse<CGameItemModel>(memoryStream);
+                var parsedModel = parsedGbx.Node;
+                if (parsedModel == null) continue;
 
-                ExtractParts(itemModel);
-                ExtractPivotsAndSockets(itemModel);
-
-                if (modelParts.Count > 0)
+                if (parsedModel.EntityModel is NPlugItem_SVariantList variantList && variantList.Variants != null)
                 {
-                    hasMesh = true;
-                    vertexCount = modelParts.Sum(p => p.Positions.Length / 3);
-
-                    var sb = new StringBuilder();
-                    sb.AppendLine("# Trackmania Item Studio OBJ Export");
-                    int totalIndexOffset = 0;
-                    foreach (var part in modelParts)
+                    var variantNumber = 1;
+                    foreach (var variant in variantList.Variants)
                     {
-                        sb.AppendLine($"o {part.Name}");
-                        for (int i = 0; i < part.Positions.Length; i += 3)
+                        if (variant.EntityModel == null) continue;
+
+                        CPlugPrefab? variantPrefab = null;
+                        FindPrefab(variant.EntityModel, ref variantPrefab, new HashSet<object>(), 0);
+                        variantSources.Add(new VariantSource
                         {
-                            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "v {0:F4} {1:F4} {2:F4}", part.Positions[i], part.Positions[i+1], part.Positions[i+2]));
-                        }
-                        for (int i = 0; i < part.Indices.Length; i += 3)
-                        {
-                            sb.AppendLine($"f {part.Indices[i] + totalIndexOffset + 1} {part.Indices[i+1] + totalIndexOffset + 1} {part.Indices[i+2] + totalIndexOffset + 1}");
-                        }
-                        totalIndexOffset += part.Positions.Length / 3;
+                            Name = $"{Path.GetFileNameWithoutExtension(file.Name)} {variantNumber++}",
+                            GbxFile = parsedGbx,
+                            Model = parsedModel,
+                            Prefab = variantPrefab,
+                            EntityModel = variant.EntityModel
+                        });
                     }
-                    rawObj = sb.ToString();
                 }
-
-                StateHasChanged();
-                await Task.Delay(100);
-
-                if (!isViewerInitialized)
+                else
                 {
-                    await JS.InvokeVoidAsync("init3DViewer", "threeContainer", dotNetHelper);
-                    isViewerInitialized = true;
+                    CPlugPrefab? prefab = null;
+                    FindPrefab(parsedModel, ref prefab, new HashSet<object>(), 0);
+                    variantSources.Add(new VariantSource
+                    {
+                        Name = Path.GetFileNameWithoutExtension(file.Name),
+                        GbxFile = parsedGbx,
+                        Model = parsedModel,
+                        Prefab = prefab,
+                        EntityModel = parsedModel.EntityModel
+                    });
                 }
+            }
 
-                await UpdateScenePayload();
+            if (variantSources.Count > 0)
+            {
+                await SelectVariant(0);
             }
         }
         catch (Exception ex)
         {
-            errorMessage = "Fout bij verwerken van bestand: " + ex.Message;
+            errorMessage = "Error while processing the file: " + ex.Message;
         }
         finally
         {
             isLoading = false;
             StateHasChanged();
         }
+    }
+
+    private async Task SelectVariant(int index)
+    {
+        if (index < 0 || index >= variantSources.Count) return;
+
+        activeVariantIndex = index;
+        var source = variantSources[index];
+        itemModel = source.Model;
+        gbxFile = source.GbxFile;
+        if (source.EntityModel is CMwNod entityModel)
+            itemModel.EntityModel = entityModel;
+        hasMesh = false;
+        isMovingItem = false;
+        rawObj = null;
+        modelParts.Clear();
+        detectedPivots.Clear();
+        detectedLights.Clear();
+        detectedSockets.Clear();
+        detectedNodeTypes.Clear();
+        detectedAxis = "y";
+        isOscillating = false;
+        minAngle = 0;
+        maxAngle = 0;
+        translationAxis = "y";
+        translationDistance = 0;
+        animationPeriodSeconds = 2;
+        animationPhaseSeconds = 0;
+        pivotOffsetX = pivotOffsetY = pivotOffsetZ = 0;
+        harmonicEasing = false;
+        invertMotion = false;
+        hasTranslationMotion = false;
+        translationMin = new float[3];
+        translationMax = new float[3];
+        activeKinematicConstraint = null;
+        showOriginalMotion = false;
+        originalConstraintType = "Not found";
+        originalMotionSettings.Clear();
+        originalMotionAvailable = false;
+        iconPreviewPending = true;
+
+        identId = itemModel.Ident?.Id ?? "";
+        identAuthor = itemModel.Ident?.Author ?? "";
+        identCollection = itemModel.Ident?.Collection.ToString() ?? "";
+        ExtractParts(itemModel);
+        ExtractPivotsAndSockets(itemModel);
+
+        if (modelParts.Count > 0)
+        {
+            hasMesh = true;
+            vertexCount = modelParts.Sum(p => p.Positions.Length / 3);
+            rawObj = BuildObjExport();
+        }
+
+        if (isViewerInitialized)
+            await UpdateScenePayload();
+        else
+            StateHasChanged();
+    }
+
+    private string BuildObjExport()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("# Trackmania Item Studio OBJ Export");
+        var totalIndexOffset = 0;
+        foreach (var part in modelParts)
+        {
+            sb.AppendLine($"o {part.Name}");
+            for (var i = 0; i < part.Positions.Length; i += 3)
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "v {0:F4} {1:F4} {2:F4}", part.Positions[i], part.Positions[i + 1], part.Positions[i + 2]));
+            for (var i = 0; i + 2 < part.Indices.Length; i += 3)
+                sb.AppendLine($"f {part.Indices[i] + totalIndexOffset + 1} {part.Indices[i + 1] + totalIndexOffset + 1} {part.Indices[i + 2] + totalIndexOffset + 1}");
+            totalIndexOffset += part.Positions.Length / 3;
+        }
+        return sb.ToString();
     }
 
     private async Task UpdateScenePayload()
@@ -629,10 +1061,119 @@
             animAxis = detectedAxis,
             isOscillating = isOscillating,
             minAngle = minAngle,
-            maxAngle = maxAngle
+            maxAngle = maxAngle,
+            translationAxis = translationAxis,
+            translationDistance = translationDistance,
+            hasTranslationMotion = hasTranslationMotion,
+            translationMin = translationMin,
+            translationMax = translationMax,
+            animationPeriodSeconds = animationPeriodSeconds,
+            animationPhaseSeconds = animationPhaseSeconds,
+            pivotOffset = new[] { pivotOffsetX, pivotOffsetY, pivotOffsetZ },
+            harmonicEasing = harmonicEasing,
+            invertMotion = invertMotion
         };
 
         await JS.InvokeVoidAsync("renderStudioScene", scenePayload);
+    }
+
+    private void ToggleTab(string tab)
+    {
+        activeTab = activeTab == tab ? string.Empty : tab;
+    }
+
+    private bool HasNode(params string[] names)
+    {
+        return detectedNodeTypes.Any(found => names.Any(name => found.Contains(name, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private async Task UploadIcon(InputFileChangeEventArgs e)
+    {
+        if (itemModel == null || e.File == null) return;
+
+        var extension = Path.GetExtension(e.File.Name).ToLowerInvariant();
+        if (extension is not ".jpg" and not ".jpeg" and not ".png" and not ".webp")
+        {
+            iconStatus = "Use a JPG, PNG or WebP image.";
+            return;
+        }
+
+        if (e.File.Size > 2 * 1024 * 1024)
+        {
+            iconStatus = "Het pictogram mag maximaal 2 MB groot zijn.";
+            return;
+        }
+
+        using var stream = new MemoryStream();
+        await e.File.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024).CopyToAsync(stream);
+        var normalized = await JS.InvokeAsync<NormalizedIcon>("normalizeIcon", stream.ToArray(), 64);
+        ApplyIconPixels(normalized.Pixels, 64, 64);
+        iconFileName = e.File.Name;
+        itemModel.IconWebP = Convert.FromBase64String(normalized.WebPBase64);
+        iconStatus = "Icon normalized to 64x64 and stored in the item model.";
+        iconPreviewPending = true;
+        StateHasChanged();
+    }
+
+    private async Task RenderIconPreview()
+    {
+        if (itemModel?.Icon == null) return;
+        var pixels = new int[64 * 64 * 4];
+        for (var y = 0; y < 64; y++)
+        {
+            for (var x = 0; x < 64; x++)
+            {
+                var color = itemModel.Icon[y, x];
+                var offset = (y * 64 + x) * 4;
+                pixels[offset] = (int)Math.Clamp(color.R, 0, 255);
+                pixels[offset + 1] = (int)Math.Clamp(color.G, 0, 255);
+                pixels[offset + 2] = (int)Math.Clamp(color.B, 0, 255);
+                pixels[offset + 3] = (int)Math.Clamp(color.A, 0, 255);
+            }
+        }
+        await JS.InvokeVoidAsync("renderIconPreview", "iconPreviewCanvas", pixels, 64, 64);
+    }
+
+    private void ApplyIconPixels(int[] pixels, int width, int height)
+    {
+        var icon = new GBX.NET.Color[width, height];
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var offset = (y * width + x) * 4;
+                icon[y, x] = new GBX.NET.Color(
+                    pixels[offset], pixels[offset + 1], pixels[offset + 2], pixels[offset + 3]);
+            }
+        }
+        itemModel!.Icon = icon;
+    }
+
+    private async Task ToggleOriginalMotion()
+    {
+        showOriginalMotion = !showOriginalMotion;
+        if (showOriginalMotion && originalMotionAvailable)
+        {
+            await JS.InvokeVoidAsync("setMotionPreview", new
+            {
+                animAxis = originalAnimAxis,
+                isOscillating = originalIsOscillating,
+                minAngle = originalMinAngle,
+                maxAngle = originalMaxAngle,
+                translationAxis = originalTranslationAxis,
+                translationDistance = originalTranslationDistance,
+                animationPeriodSeconds = originalAnimationPeriodSeconds,
+                animationPhaseSeconds = originalAnimationPhaseSeconds,
+                hasTranslationMotion = originalHasTranslationMotion,
+                translationMin = originalTranslationMin,
+                translationMax = originalTranslationMax,
+                pivotOffset = originalPivotOffset
+            });
+        }
+        else
+        {
+            await UpdateScenePayload();
+        }
     }
 
     [JSInvokable]
@@ -825,7 +1366,7 @@
         }
     }
 
-    private void OnAnimTypeChanged(ChangeEventArgs e)
+    private async Task OnAnimTypeChanged(ChangeEventArgs e)
     {
         isOscillating = e.Value?.ToString() == "osc";
         if (isOscillating && minAngle == 0 && maxAngle == 0)
@@ -833,7 +1374,7 @@
             minAngle = -45;
             maxAngle = 45;
         }
-        _ = UpdateScenePayload();
+        await OnKinematicChanged();
     }
 
     private void UpdateIdent()
@@ -855,6 +1396,20 @@
             var vecs = detectedPivots.Select(p => new Vec3(p.X, p.Y, p.Z)).ToArray();
             itemModel.DefaultPlacement.PivotPositions = vecs;
         }
+    }
+
+    private void UpdateGroundPoint(int axis, object? value)
+    {
+        if (itemModel == null || !float.TryParse(value?.ToString(), CultureInfo.InvariantCulture, out var number))
+            return;
+
+        var point = itemModel.GroundPoint;
+        itemModel.GroundPoint = axis switch
+        {
+            0 => new Vec3(number, point.Y, point.Z),
+            1 => new Vec3(point.X, number, point.Z),
+            _ => new Vec3(point.X, point.Y, number)
+        };
     }
 
     private void SyncLightsToGbx(int idx)
@@ -929,14 +1484,22 @@
         {
             isMovingItem = true;
             int modelEntityIndex = 0;
+            bool constraintSeen = prefab.Ents.Any(ent => ent.Model?.GetType().Name.Contains("KinematicConstraint", StringComparison.OrdinalIgnoreCase) == true);
 
             foreach (var ent in prefab.Ents)
             {
-                if (ent.Model != null && ent.Model.GetType().Name.Contains("KinematicConstraint"))
+                if (ent.Model?.GetType().Name.Contains("KinematicConstraint", StringComparison.OrdinalIgnoreCase) == true)
                 {
+                    pivotOffsetX = ent.Position.X;
+                    pivotOffsetY = ent.Position.Y;
+                    pivotOffsetZ = ent.Position.Z;
                     InspectConstraint(ent.Model);
+                    break;
                 }
+            }
 
+            foreach (var ent in prefab.Ents)
+            {
                 if (ent.Model != null)
                 {
                     var positions = new List<float>();
@@ -947,10 +1510,11 @@
 
                     if (positions.Count > 0)
                     {
-                        bool isMoving = modelEntityIndex > 0;
+                        bool isDynaEntity = ent.Model.GetType().Name.Contains("Dyna", StringComparison.OrdinalIgnoreCase);
+                        bool isMoving = (constraintSeen && (isDynaEntity || modelEntityIndex > 0)) || modelEntityIndex > 0;
                         modelParts.Add(new ModelPart
                         {
-                            Name = isMoving ? $"Bewegend Deel {modelEntityIndex}" : "Vaste Basis",
+                            Name = isMoving ? $"Moving Part {modelEntityIndex}" : "Static Base",
                             IsMoving = isMoving,
                             Positions = positions.ToArray(),
                             Indices = indices.ToArray()
@@ -973,7 +1537,7 @@
             {
                 modelParts.Add(new ModelPart
                 {
-                    Name = "Statisch Model",
+                    Name = "Static Model",
                     IsMoving = false,
                     Positions = positions.ToArray(),
                     Indices = indices.ToArray()
@@ -986,9 +1550,36 @@
     {
         try
         {
+            activeKinematicConstraint = constraint;
+            originalConstraintType = constraint.GetType().FullName ?? constraint.GetType().Name;
+            originalMotionSettings.Clear();
+            foreach (var property in constraint.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (!property.CanRead || property.GetIndexParameters().Length > 0 || !IsMotionProperty(property.Name))
+                    continue;
+
+                try
+                {
+                    var value = property.GetValue(constraint);
+                    originalMotionSettings.Add(new OriginalMotionSetting
+                    {
+                        Name = property.Name,
+                        Value = value?.ToString() ?? "null"
+                    });
+                }
+                catch { }
+            }
+
             var rotAxisProp = constraint.GetType().GetProperty("RotAxis");
             var minAngleProp = constraint.GetType().GetProperty("AngleMinDeg");
             var maxAngleProp = constraint.GetType().GetProperty("AngleMaxDeg");
+            var transAxisProp = constraint.GetType().GetProperty("TransAxis");
+            var periodProp = FindProperty(constraint, "RotPeriod", "Period", "Duration", "CycleDuration");
+            var translationPeriodProp = FindProperty(constraint, "TransPeriod", "TranslationPeriod", "TransDuration");
+            var phaseProp = FindProperty(constraint, "Phase", "PhaseOffset", "AnimPhaseOffset");
+            var distanceProp = FindProperty(constraint, "TransDist", "TranslationDistance", "Distance");
+            var transMinProp = constraint.GetType().GetProperty("TransMin");
+            var transMaxProp = constraint.GetType().GetProperty("TransMax");
 
             if (rotAxisProp != null)
             {
@@ -1002,6 +1593,141 @@
                 maxAngle = Convert.ToSingle(maxAngleProp.GetValue(constraint));
                 isOscillating = Math.Abs(minAngle - maxAngle) > 0.01f && !(minAngle == 0 && maxAngle == 360);
             }
+
+            if (transAxisProp != null)
+            {
+                translationAxis = NormalizeAxis(transAxisProp.GetValue(constraint)?.ToString(), translationAxis);
+                hasTranslationMotion = true;
+            }
+            if (translationPeriodProp != null)
+            {
+                hasTranslationMotion = true;
+                if (periodProp == null)
+                    periodProp = translationPeriodProp;
+            }
+            if (periodProp != null)
+                animationPeriodSeconds = NormalizePeriod(Convert.ToSingle(periodProp.GetValue(constraint)));
+            if (phaseProp != null)
+                animationPhaseSeconds = Convert.ToSingle(phaseProp.GetValue(constraint));
+            if (distanceProp != null)
+            {
+                translationDistance = Convert.ToSingle(distanceProp.GetValue(constraint));
+                hasTranslationMotion = hasTranslationMotion || Math.Abs(translationDistance) > 0.0001f;
+            }
+            if (transMinProp != null && transMaxProp != null
+                && TryReadVec3(transMinProp.GetValue(constraint), out var min)
+                && TryReadVec3(transMaxProp.GetValue(constraint), out var max))
+            {
+                translationMin = new[] { min.X, min.Y, min.Z };
+                translationMax = new[] { max.X, max.Y, max.Z };
+                hasTranslationMotion = true;
+                translationDistance = Math.Max(
+                    Math.Abs(max.X - min.X),
+                    Math.Max(Math.Abs(max.Y - min.Y), Math.Abs(max.Z - min.Z)));
+                translationAxis = Math.Abs(max.X - min.X) >= Math.Abs(max.Y - min.Y) && Math.Abs(max.X - min.X) >= Math.Abs(max.Z - min.Z)
+                    ? "x"
+                    : Math.Abs(max.Z - min.Z) >= Math.Abs(max.Y - min.Y) ? "z" : "y";
+                if (translationPeriodProp != null)
+                    animationPeriodSeconds = NormalizePeriod(Convert.ToSingle(translationPeriodProp.GetValue(constraint)));
+            }
+
+            originalAnimAxis = detectedAxis;
+            originalIsOscillating = isOscillating;
+            originalMinAngle = minAngle;
+            originalMaxAngle = maxAngle;
+            originalTranslationAxis = translationAxis;
+            originalTranslationDistance = translationDistance;
+            originalAnimationPeriodSeconds = animationPeriodSeconds;
+            originalAnimationPhaseSeconds = animationPhaseSeconds;
+            originalHasTranslationMotion = hasTranslationMotion;
+            originalTranslationMin = (float[])translationMin.Clone();
+            originalTranslationMax = (float[])translationMax.Clone();
+            originalPivotOffset = new[] { pivotOffsetX, pivotOffsetY, pivotOffsetZ };
+            originalMotionAvailable = true;
+        }
+        catch { }
+    }
+
+    private static bool TryReadVec3(object? value, out Vec3 vector)
+    {
+        if (value is Vec3 typed)
+        {
+            vector = typed;
+            return true;
+        }
+
+        vector = default;
+        return false;
+    }
+
+    private static bool IsMotionProperty(string name)
+    {
+        return name.Contains("Axis", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Angle", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Period", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Duration", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Phase", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Trans", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Rot", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Offset", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Distance", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Easing", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Loop", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static PropertyInfo? FindProperty(object value, params string[] names)
+    {
+        return names.Select(value.GetType().GetProperty).FirstOrDefault(property => property != null && property.CanRead);
+    }
+
+    private static string NormalizeAxis(string? value, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return fallback;
+        var axis = value.Trim().ToLowerInvariant();
+        return axis.Contains('x') ? "x" : axis.Contains('z') ? "z" : "y";
+    }
+
+    private static float NormalizePeriod(float value)
+    {
+        return value > 20 ? value / 1000f : Math.Max(0.01f, value);
+    }
+
+    private async Task OnKinematicChanged()
+    {
+        ApplyKinematicProperty("AngleMinDeg", minAngle);
+        ApplyKinematicProperty("AngleMaxDeg", maxAngle);
+        ApplyKinematicProperty("TransDist", translationDistance);
+        ApplyKinematicProperty("TranslationDistance", translationDistance);
+        ApplyKinematicProperty("Period", animationPeriodSeconds);
+        ApplyKinematicProperty("Duration", animationPeriodSeconds);
+        ApplyKinematicProperty("Phase", animationPhaseSeconds);
+        ApplyKinematicProperty("PhaseOffset", animationPhaseSeconds);
+        ApplyKinematicAxis("RotAxis", detectedAxis);
+        ApplyKinematicAxis("TransAxis", translationAxis);
+        await UpdateScenePayload();
+    }
+
+    private void ApplyKinematicProperty(string name, float value)
+    {
+        var property = activeKinematicConstraint?.GetType().GetProperty(name);
+        if (property?.CanWrite == true)
+        {
+            try { property.SetValue(activeKinematicConstraint, Convert.ChangeType(value, property.PropertyType)); }
+            catch { }
+        }
+    }
+
+    private void ApplyKinematicAxis(string name, string value)
+    {
+        var property = activeKinematicConstraint?.GetType().GetProperty(name);
+        if (property?.CanWrite != true) return;
+        try
+        {
+            var axisName = value.ToUpperInvariant();
+            var axisValue = property.PropertyType.IsEnum
+                ? Enum.Parse(property.PropertyType, axisName, true)
+                : Convert.ChangeType(axisName, property.PropertyType);
+            property.SetValue(activeKinematicConstraint, axisValue);
         }
         catch { }
     }
@@ -1036,6 +1762,7 @@
     {
         if (obj == null || depth > 12 || visited.Contains(obj)) return;
         visited.Add(obj);
+        detectedNodeTypes.Add(obj.GetType().Name);
 
         if (obj is CPlugLightUserModel lightModel)
         {
@@ -1228,6 +1955,7 @@
         if (e.Value != null)
         {
             detectedAxis = e.Value.ToString() ?? "y";
+            ApplyKinematicAxis("RotAxis", detectedAxis);
             await JS.InvokeVoidAsync("setAnimationAxis", detectedAxis);
         }
     }
@@ -1254,16 +1982,38 @@
                 SyncPivotsToGbx();
                 for (int i = 0; i < detectedLights.Count; i++) SyncLightsToGbx(i);
 
+                var exportAsVariants = variantSources.Count > 1;
+                if (exportAsVariants)
+                {
+                    var variantModels = variantSources
+                        .Where(source => source.Prefab != null)
+                        .Select(source => new NPlugItem_SVariant
+                        {
+                            Tags = new Dictionary<string, string>(),
+                            EntityModel = source.Prefab!
+                        })
+                        .ToArray();
+
+                    if (variantModels.Length < 2)
+                        throw new InvalidOperationException("Minstens twee bestanden met een CPlugPrefab zijn nodig voor varianten. Controleer of elk item een prefab bevat.");
+
+                    itemModel.EntityModel = new NPlugItem_SVariantList
+                    {
+                        Version = 0,
+                        Variants = variantModels
+                    };
+                }
+
                 using var memoryStream = new MemoryStream();
                 gbxFile.Save(memoryStream);
                 var bytes = memoryStream.ToArray();
 
-                string filename = (string.IsNullOrEmpty(identId) ? "CustomItem" : identId) + ".Item.Gbx";
+                string filename = (string.IsNullOrEmpty(identId) ? "CustomItem" : identId) + (exportAsVariants ? "_Variants" : "") + ".Item.Gbx";
                 await JS.InvokeVoidAsync("downloadBinaryGbx", filename, Convert.ToBase64String(bytes));
             }
             catch (Exception ex)
             {
-                errorMessage = "Fout bij exporteren van .Item.Gbx: " + ex.Message;
+                errorMessage = "Error while exporting .Item.Gbx: " + ex.Message;
             }
         }
     }

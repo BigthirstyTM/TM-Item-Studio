@@ -11,11 +11,53 @@ let isOscillating = false;
 let minAngle = 0;
 let maxAngle = 0;
 let animTime = 0;
+let animationPeriodSeconds = 2;
+let animationPhaseSeconds = 0;
+let translationAxis = 'y';
+let translationDistance = 0;
+let pivotOffset = [0, 0, 0];
+let harmonicEasing = false;
+let invertMotion = false;
+let hasTranslationMotion = false;
+let translationMin = [0, 0, 0];
+let translationMax = [0, 0, 0];
+let lastFrameTime = null;
 
 let showMeshes = true;
 let showPivots = true;
 let showLights = true;
 let showSockets = true;
+
+window.normalizeIcon = async function (bytes, size) {
+    const blob = new Blob([bytes]);
+    const bitmap = await createImageBitmap(blob);
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    const scale = Math.max(size / bitmap.width, size / bitmap.height);
+    const width = bitmap.width * scale;
+    const height = bitmap.height * scale;
+    context.clearRect(0, 0, size, size);
+    context.drawImage(bitmap, (size - width) / 2, (size - height) / 2, width, height);
+    const pixels = context.getImageData(0, 0, size, size).data;
+    bitmap.close();
+    return {
+        pixels: Array.from(pixels),
+        webPBase64: canvas.toDataURL('image/webp', 0.9).split(',')[1]
+    };
+};
+
+window.renderIconPreview = function (canvasId, pixels, width, height) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    const image = context.createImageData(width, height);
+    image.data.set(new Uint8ClampedArray(pixels));
+    context.putImageData(image, 0, 0);
+};
 
 window.init3DViewer = function (containerId, dotNetRef) {
     dotNetHelper = dotNetRef;
@@ -113,24 +155,45 @@ window.init3DViewer = function (containerId, dotNetRef) {
     scene.add(lightsGroup);
     scene.add(socketsGroup);
 
-    function animate() {
+    function animate(timestamp) {
         requestAnimationFrame(animate);
         controls.update();
 
-        if (isPlaying && movingGroup && movingGroup.children.length > 0) {
-            animTime += 0.03 * animSpeed;
+        const deltaSeconds = lastFrameTime === null
+            ? 0
+            : Math.min(Math.max((timestamp - lastFrameTime) / 1000, 0), 0.05);
+        lastFrameTime = timestamp;
 
-            let currentAngle = 0;
-            if (isOscillating) {
-                const t = (Math.sin(animTime) + 1) / 2;
-                currentAngle = THREE.MathUtils.degToRad(minAngle + t * (maxAngle - minAngle));
-            } else {
-                currentAngle = animTime;
-            }
+        const animatedGroup = movingGroup && movingGroup.children.length > 0 ? movingGroup : staticGroup;
+        if (isPlaying && animatedGroup && animatedGroup.children.length > 0) {
+            animTime += deltaSeconds * animSpeed;
 
-            if (animAxis === 'x') movingGroup.rotation.set(currentAngle, 0, 0);
-            else if (animAxis === 'y') movingGroup.rotation.set(0, currentAngle, 0);
-            else if (animAxis === 'z') movingGroup.rotation.set(0, 0, currentAngle);
+            const period = Math.max(animationPeriodSeconds, 0.01);
+            const phase = ((animTime + animationPhaseSeconds) / period) * Math.PI * 2;
+            let t = (Math.sin(phase) + 1) / 2;
+            if (harmonicEasing) t = t * t * (3 - 2 * t);
+            if (invertMotion) t = 1 - t;
+            const currentAngle = isOscillating
+                ? THREE.MathUtils.degToRad(minAngle + t * (maxAngle - minAngle))
+                : (phase * (invertMotion ? -1 : 1));
+
+            if (animAxis === 'x') animatedGroup.rotation.set(currentAngle, 0, 0);
+            else if (animAxis === 'y') animatedGroup.rotation.set(0, currentAngle, 0);
+            else if (animAxis === 'z') animatedGroup.rotation.set(0, 0, currentAngle);
+
+            const distance = hasTranslationMotion ? (t - 0.5) * translationDistance : 0;
+            const translation = hasTranslationMotion && dataHasTranslationRange()
+                ? translationMin.map((value, index) => value + (translationMax[index] - value) * t)
+                : [
+                    translationAxis === 'x' ? distance : 0,
+                    translationAxis === 'y' ? distance : 0,
+                    translationAxis === 'z' ? distance : 0
+                ];
+            animatedGroup.position.set(
+                pivotOffset[0] + translation[0],
+                pivotOffset[1] + translation[1],
+                pivotOffset[2] + translation[2]
+            );
         }
 
         renderer.render(scene, camera);
@@ -178,6 +241,8 @@ window.renderStudioScene = function (payloadJson) {
     const data = typeof payloadJson === 'string' ? JSON.parse(payloadJson) : payloadJson;
 
     [staticGroup, movingGroup, pivotsGroup, lightsGroup, socketsGroup].forEach(group => {
+        group.position.set(0, 0, 0);
+        group.rotation.set(0, 0, 0);
         while (group.children.length > 0) {
             const obj = group.children[0];
             group.remove(obj);
@@ -193,7 +258,18 @@ window.renderStudioScene = function (payloadJson) {
     isOscillating = data.isOscillating || false;
     minAngle = data.minAngle || 0;
     maxAngle = data.maxAngle || 0;
+    animationPeriodSeconds = Math.max(Number(data.animationPeriodSeconds) || 2, 0.01);
+    animationPhaseSeconds = Number(data.animationPhaseSeconds) || 0;
+    translationAxis = (data.translationAxis || 'y').toLowerCase();
+    translationDistance = Number(data.translationDistance) || 0;
+    hasTranslationMotion = data.hasTranslationMotion || Math.abs(translationDistance) > 0.0001;
+    translationMin = data.translationMin || [0, 0, 0];
+    translationMax = data.translationMax || [0, 0, 0];
+    pivotOffset = data.pivotOffset || [0, 0, 0];
+    harmonicEasing = data.harmonicEasing || false;
+    invertMotion = data.invertMotion || false;
     animTime = 0;
+    lastFrameTime = null;
 
     let totalBox = new THREE.Box3();
 
@@ -207,7 +283,10 @@ window.renderStudioScene = function (payloadJson) {
             if (!pos || pos.length === 0) return;
 
             const geometry = new THREE.BufferGeometry();
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            const positions = isMoving
+                ? pos.map((value, vertexIndex) => value - pivotOffset[vertexIndex % 3])
+                : pos;
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
             if (idx && idx.length > 0) geometry.setIndex(idx);
             geometry.computeVertexNormals();
 
@@ -227,6 +306,8 @@ window.renderStudioScene = function (payloadJson) {
             totalBox.expandByObject(mesh);
         });
     }
+
+    movingGroup.position.set(pivotOffset[0], pivotOffset[1], pivotOffset[2]);
 
     // 2. Pivots
     if (data.pivots && data.pivots.length > 0) {
@@ -319,6 +400,49 @@ window.renderStudioScene = function (payloadJson) {
         controls.update();
     }
 };
+
+window.clearViewerScene = function () {
+    if (!scene || !transformControls) return;
+    transformControls.detach();
+    selectedGizmo = null;
+    [staticGroup, movingGroup, pivotsGroup, lightsGroup, socketsGroup].forEach(group => {
+        group.position.set(0, 0, 0);
+        group.rotation.set(0, 0, 0);
+        while (group.children.length > 0) {
+            const object = group.children[0];
+            group.remove(object);
+            object.traverse(child => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) child.material.forEach(material => material.dispose());
+                    else child.material.dispose();
+                }
+            });
+        }
+    });
+};
+
+window.setMotionPreview = function (motion) {
+    if (!motion) return;
+    animAxis = (motion.animAxis || 'y').toLowerCase();
+    isOscillating = Boolean(motion.isOscillating);
+    minAngle = Number(motion.minAngle) || 0;
+    maxAngle = Number(motion.maxAngle) || 0;
+    animationPeriodSeconds = Math.max(Number(motion.animationPeriodSeconds) || 2, 0.01);
+    animationPhaseSeconds = Number(motion.animationPhaseSeconds) || 0;
+    translationAxis = (motion.translationAxis || 'y').toLowerCase();
+    translationDistance = Number(motion.translationDistance) || 0;
+    hasTranslationMotion = Boolean(motion.hasTranslationMotion) || Math.abs(translationDistance) > 0.0001;
+    translationMin = motion.translationMin || [0, 0, 0];
+    translationMax = motion.translationMax || [0, 0, 0];
+    pivotOffset = motion.pivotOffset || [0, 0, 0];
+    animTime = 0;
+    lastFrameTime = null;
+};
+
+function dataHasTranslationRange() {
+    return translationMin.some((value, index) => Math.abs(value - translationMax[index]) > 0.000001);
+}
 
 window.updateLightRealtime = function (index, hexColor, intensity, radius, x, y, z) {
     if (index >= 0 && index < lightsGroup.children.length) {

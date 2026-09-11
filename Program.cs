@@ -10,7 +10,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-// Gebruik de zuivere C# MiniLZO decompressor
+// Use the pure C# MiniLZO decompressor.
 Gbx.LZO = new MiniLZO();
 
 await builder.Build().RunAsync();
