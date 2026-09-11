@@ -1963,6 +1963,11 @@
                     variantSources[activeVariantIndex].Save(memoryStream);
                 var bytes = memoryStream.ToArray();
 
+                // Refuse to download an archive that cannot be reopened by the
+                // same parser used for import. This catches serializer damage
+                // before the file reaches the game/editor.
+                _ = Gbx.Parse<CGameItemModel>(new MemoryStream(bytes));
+
                 var exportId = combineFiles ? variantSources[0].Model.Ident?.Id : identId;
                 string filename = (string.IsNullOrEmpty(exportId) ? "CustomItem" : exportId) + (combineFiles ? "_Variants" : "") + ".Item.Gbx";
                 await JS.InvokeVoidAsync("downloadBinaryGbx", filename, Convert.ToBase64String(bytes));
