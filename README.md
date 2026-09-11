@@ -13,6 +13,31 @@ kinematics, lights, sockets, physics and visual information.
 - Export edited items, including multi-variant items.
 - Export visible geometry as OBJ.
 
+## Exporting files and variants
+
+Selecting a variant changes the preview. **Export selected file** saves the complete
+original item, including its other variants, placement tags and manual-cycle flags.
+It also preserves variants whose external entity is not available for preview.
+
+When multiple files are loaded, **Combine loaded files as variants** creates a new
+variant list. The first loaded file supplies item-level metadata, icon and placement;
+the preview selection does not change that choice. Non-prefab entities and existing
+variant tags/flags are retained. Files with external references cannot currently be
+combined, because their dependency paths would need to be resolved against a shared
+output location; they can still be exported separately. Empty variant lists and
+legacy items without an entity model can also be exported separately.
+
+## Regression checks
+
+```bash
+dotnet run --project Tests/VariantExport
+```
+
+The checks construct synthetic items and parse, save and reparse them with the
+bundled GBX.NET assembly. They cover variant metadata, non-prefab and unresolved
+entities, empty/single lists, combination, and source restoration after failed output.
+No game assets are needed. These checks do not establish in-game compatibility.
+
 ## Requirements
 
 - .NET 8 SDK with the Blazor WebAssembly workload.

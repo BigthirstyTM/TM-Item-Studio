@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../TM-Item-Studio.csproj" />
+    <Reference Include="GBX.NET"><HintPath>../../lib/GBX.NET.dll</HintPath></Reference>
+    <Reference Include="GBX.NET.LZO"><HintPath>$(NuGetPackageRoot)gbx.net.lzo/2.1.6/lib/net8.0/GBX.NET.LZO.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>
