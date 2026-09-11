@@ -5,6 +5,7 @@ let isWireframe = false, isPlaying = true, animSpeed = 1;
 let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler = null;
 let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showSockets = true;
 let typedMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
+let legacyMotion = null;
 let sceneFilter = { materialIndex: null, materialPath: null, lodMask: null };
 
 window.normalizeIcon = async function (bytes, size) {
@@ -135,6 +136,18 @@ function applyTypedMotion() {
         for (const group of motionGroups.get(motion.childPath) || []) { group.matrix.copy(motion.live); group.matrixWorldNeedsUpdate = true; }
     }
 }
+function applyLegacyMotion() {
+    if (!legacyMotion) return;
+    const m = legacyMotion, period = Math.max(Number(m.period) || 2, .01);
+    const t = (Math.sin(((animTime / 1000 + (Number(m.phase) || 0)) / period) * Math.PI * 2) + 1) / 2;
+    const eased = m.harmonic ? t * t * (3 - 2 * t) : t;
+    const value = m.oscillating ? (Number(m.min) || 0) + eased * ((Number(m.max) || 0) - (Number(m.min) || 0)) : eased * 360;
+    const axis = ['x', 'y', 'z'].includes(m.axis) ? m.axis : 'y';
+    movingGroup.rotation.set(0, 0, 0); movingGroup.rotation[axis] = THREE.MathUtils.degToRad(value);
+    const distance = (eased - .5) * (Number(m.distance) || 0);
+    movingGroup.position.set(0, 0, 0);
+    if (m.translation) movingGroup.position[m.translation] = distance;
+}
 window.init3DViewer = function (containerId, dotNetRef) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -178,7 +191,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
         const delta = lastFrameTime === null ? 0 : Math.min(Math.max(timestamp - lastFrameTime, 0), 50);
         lastFrameTime = timestamp;
         if (isPlaying) animTime += delta * animSpeed;
-        applyTypedMotion(); controls.update(); renderer.render(scene, camera);
+        applyTypedMotion(); applyLegacyMotion(); controls.update(); renderer.render(scene, camera);
     }
     animationFrameId = requestAnimationFrame(animate);
     resizeHandler = () => {
@@ -274,6 +287,11 @@ function renderPayload(input, preserveCamera) {
     const data = structuredClone(typeof input === 'string' ? JSON.parse(input) : input);
     if (!data || typeof data !== 'object') throw new Error('Scene payload required.');
     isPlaying = data.playing !== false;
+    legacyMotion = (data.motions?.length ?? 0) === 0 && (data.hasTranslationMotion || data.isOscillating)
+        ? { period: data.animationPeriodSeconds, phase: data.animationPhaseSeconds, min: data.minAngle, max: data.maxAngle,
+            axis: data.animAxis, oscillating: data.isOscillating, distance: data.translationDistance,
+            translation: data.hasTranslationMotion ? data.translationAxis : null, harmonic: data.harmonicEasing }
+        : null;
     const motions = compileMotions(data.motions ?? []), offset = phase(data.previewPhase01 ?? 0), owners = new Map(motions.map(m => [m.childPath, m]));
     const staged = Array.from({ length: 6 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
     // Stage before replacing: rejected payloads leave the current scene and playback intact.
