@@ -303,7 +303,8 @@ function renderPayload(input, preserveCamera) {
         }
         for (const part of data.parts ?? []) {
             const owner = owners.get(part.entityPath), mesh = makePart(part, owner);
-            if (owner) groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh); else staged[part.isCollision ? 2 : 0].add(mesh);
+            if (owner) groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
+            else staged[part.isCollision ? 2 : (part.isMoving ? 1 : 0)].add(mesh);
             const authored = part.positions ?? part.Positions;
             for (let i = 0; i < authored.length; i += 3) bounds.expandByPoint(new THREE.Vector3().fromArray(authored, i));
         }
