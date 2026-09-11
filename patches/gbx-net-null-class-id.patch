@@ -1,0 +1,9 @@
+diff --git a/Src/GBX.NET/Serialization/GbxReader.cs b/Src/GBX.NET/Serialization/GbxReader.cs
+--- a/Src/GBX.NET/Serialization/GbxReader.cs
++++ b/Src/GBX.NET/Serialization/GbxReader.cs
+@@ -1068,4 +1068,4 @@
+-        if (encapsulation is not null && rawClassId == uint.MaxValue)
++        if (rawClassId == uint.MaxValue)
+         {
+             return default;
+         }
