@@ -80,6 +80,8 @@ public static class ItemMotion
     /// <summary>
     /// Deterministic visual preview, not physics/game parity. previewPhase01 is a preview-only runtime phase,
     /// NOT an interpretation of persisted SInstanceParams.Phase01. Time is seconds; loops advance independently.
+    /// Time and each timeline's phase offset are independently rounded to integer microseconds, with midpoint
+    /// away from zero. Sub-microsecond/adjacent-double ordering is not preserved by this visual preview clock.
     /// </summary>
     public static ItemMotionResult<ItemMotionSample> Evaluate(KC source, double seconds, double previewPhase01 = 0)
     {
@@ -136,22 +138,23 @@ public static class ItemMotion
         if (timeline.Keys.Count == 0) return min;
         var total = timeline.Keys.Sum(k => (long)k.DurationMilliseconds);
         if (total == 0) return 0; // Distinct from an empty key array: native signal early-out ignores min/max.
-        // Convert ordinary times to authored millisecond units before periodic reduction. Modulo
-        // by a fractional-second period can misclassify exact boundaries such as .6s / .1s.
-        var milliseconds = seconds * 1000;
-        if (milliseconds <= 9007199254740991d)
-            milliseconds = ScaleAtIntegerBoundaries(seconds, 1000);
-        else
-            // An integer-second modulus is exactly 1000 periods, so it avoids both overflow
-            // and division by an inexact fractional period at very large finite times.
-            milliseconds = (seconds % total) * 1000;
-        var phaseMilliseconds = phase == 1 ? 0 : ScaleAtIntegerBoundaries(phase, total);
-        var position = ((milliseconds % total) + phaseMilliseconds) % total;
+        var totalMicroseconds = total * 1000;
+        var scaledTime = seconds * 1_000_000;
+        if (scaledTime > 9007199254740991d)
+            // Reduce huge finite times by an integer-second modulus equal to 1000 cycles.
+            // Even the largest accepted duration then scales below 2.147484e15: a safe JS integer.
+            scaledTime = (seconds % total) * 1_000_000;
+        var timeMicroseconds = (long)Math.Round(scaledTime, MidpointRounding.AwayFromZero);
+        var phaseMicroseconds = (long)Math.Round(phase * totalMicroseconds, MidpointRounding.AwayFromZero);
+        // Integer reduction/addition keeps the time-plus-phase boundary exact. The modulo inputs
+        // remain safe integers in the JS analogue too; phase 1 naturally wraps to phase 0.
+        var position = ((timeMicroseconds % totalMicroseconds) + phaseMicroseconds) % totalMicroseconds;
         foreach (var key in timeline.Keys)
         {
             if (key.DurationMilliseconds == 0) continue;
-            if (position >= key.DurationMilliseconds) { position -= key.DurationMilliseconds; continue; }
-            var x = position / key.DurationMilliseconds;
+            var keyMicroseconds = (long)key.DurationMilliseconds * 1000;
+            if (position >= keyMicroseconds) { position -= keyMicroseconds; continue; }
+            var x = (double)position / keyMicroseconds;
             var u = key.Ease switch
             {
                 KC.AnimEase.Constant => 0,
@@ -165,21 +168,6 @@ public static class ItemMotion
             return (float)((1 - u) * min + u * max);
         }
         return min;
-    }
-
-    private static double ScaleAtIntegerBoundaries(double input, double scale)
-    {
-        var scaled = input * scale;
-        var integer = Math.Round(scaled);
-        var boundary = integer / scale;
-        // Exact round-trip equality recognizes the double representing a requested integer
-        // millisecond boundary (e.g. 1.001s), without an epsilon that would snap nearby times.
-        if (input == boundary) return integer;
-        if (scaled == integer)
-            // Multiplication itself may round a neighboring representable input onto the
-            // boundary. Retain which side it came from instead of changing the key interval.
-            return input < boundary ? Math.BitDecrement(integer) : Math.BitIncrement(integer);
-        return scaled;
     }
 
     private static Vector3 Axis(KC.EAxis axis) => axis switch

@@ -18,6 +18,15 @@ edit preserves that authored timeline, including unknown keys. Source edits affe
 all instances that share the source node. Translation is metres, angles are degrees,
 key storage is integral milliseconds, and evaluator time is seconds.
 
+The visual preview uses an **integer-microsecond clock**. Time in seconds and each
+timeline's phase offset are independently rounded to the nearest microsecond, with
+midpoints rounded away from zero. Modulo, phase addition and key selection then use
+exact integers; phase 1 wraps to phase 0. Thus sub-microsecond differences may display
+the same pose. Continuous adjacent-double ordering and native physics precision are
+not promised. Very large finite times are reduced by an integer-second multiple of
+the period before scaling to avoid overflow; the input double's precision still limits
+the available clock resolution. This preview policy does not quantize stored edits.
+
 `ItemMotionBindings.Resolve` returns raw parent/child slots, the filtered slot table,
 original entity-array indexes, scoped occurrence paths and non-serialized source
 handles. Flat root prefabs use filtered original order. A world parent is scoped to

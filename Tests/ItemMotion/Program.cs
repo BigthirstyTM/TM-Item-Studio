@@ -84,16 +84,18 @@ Check("fractional-second exact loop boundaries", () =>
         foreach (var phase in new[] { 0d, 1d })
         {
             Near(Value(ItemMotion.Evaluate(model, seconds, phase)).TranslationMetres, 0);
-            Require(Value(ItemMotion.Evaluate(model, Math.BitDecrement(seconds), phase)).TranslationMetres > .99f,
-                "immediately preceding representable time snapped forward");
-            Require(Value(ItemMotion.Evaluate(model, Math.BitIncrement(seconds), phase)).TranslationMetres > 0,
-                "immediately following representable time snapped backward");
+            Require(Value(ItemMotion.Evaluate(model, seconds - .000001, phase)).TranslationMetres > .99f,
+                "preceding microsecond selected the wrong loop");
+            Require(Value(ItemMotion.Evaluate(model, seconds + .000001, phase)).TranslationMetres > 0,
+                "following microsecond selected the wrong loop");
+            Near(Value(ItemMotion.Evaluate(model, seconds - .0000001, phase)).TranslationMetres, 0);
+            Near(Value(ItemMotion.Evaluate(model, seconds + .0000001, phase)).TranslationMetres, 0);
         }
     model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 1));
     Near(Value(ItemMotion.Evaluate(model, 1.001)).TranslationMetres, 0); // 1001 ms; binary seconds*1000 is just below 1001.
 });
 
-Check("fractional-second step boundaries and phase retain neighboring intervals", () =>
+Check("microsecond step boundaries and phase retain neighboring intervals", () =>
 {
     var model = Model(); model.TransMin = 0; model.TransMax = 1;
     model.TransAnimFunc = Timeline(Key(KC.AnimEase.Constant, 100), Key(KC.AnimEase.Constant, 100, true));
@@ -101,13 +103,38 @@ Check("fractional-second step boundaries and phase retain neighboring intervals"
         (.6, 1d, 0d), (.7, 1d, 1d), (.6, .5, 1d), (.7, .5, 0d), (.55, .25, 0d), (.65, .25, 1d) })
     {
         Near(Value(ItemMotion.Evaluate(model, seconds, phase)).TranslationMetres, expected);
-        foreach (var before in new[] { Math.BitDecrement(seconds), seconds - 1e-9 })
-            Near(Value(ItemMotion.Evaluate(model, before, phase)).TranslationMetres, 1 - expected);
-        foreach (var after in new[] { Math.BitIncrement(seconds), seconds + 1e-9 })
-            Near(Value(ItemMotion.Evaluate(model, after, phase)).TranslationMetres, expected);
+        Near(Value(ItemMotion.Evaluate(model, seconds - .000001, phase)).TranslationMetres, 1 - expected);
+        Near(Value(ItemMotion.Evaluate(model, seconds + .000001, phase)).TranslationMetres, expected);
+        Near(Value(ItemMotion.Evaluate(model, seconds - .0000001, phase)).TranslationMetres, expected);
+        Near(Value(ItemMotion.Evaluate(model, seconds + .0000001, phase)).TranslationMetres, expected);
     }
     // Huge finite times still yield a finite sample; integer seconds are exact 100 ms loop boundaries.
     Near(Value(ItemMotion.Evaluate(model, double.MaxValue)).TranslationMetres, 0);
+});
+
+Check("preview quantizes time and phase to nearest microsecond away from midpoint zero", () =>
+{
+    var model = Model(); model.TransMin = 0; model.TransMax = 1000;
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 1));
+    foreach (var (seconds, expected) in new[] { (.00000049, 0d), (.0000005, 1d), (.00000051, 1d), (.0000015, 2d) })
+        Near(Value(ItemMotion.Evaluate(model, seconds)).TranslationMetres, expected);
+    foreach (var (phase, expected) in new[] { (.00049, 0d), (.0005, 1d), (.00051, 1d), (.0015, 2d), (1d, 0d) })
+        Near(Value(ItemMotion.Evaluate(model, 0, phase)).TranslationMetres, expected);
+    // Quantize clock and phase separately, so .49us + .49us remains 0us, not a rounded 1us sum.
+    Near(Value(ItemMotion.Evaluate(model, .00000049, .00049)).TranslationMetres, 0);
+    Near(Value(ItemMotion.Evaluate(model, .0000005, .0005)).TranslationMetres, 2);
+    model.TransMax = 1;
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Constant, 1), Key(KC.AnimEase.Constant, 2, true));
+    // 98800us + .4*3000us = 100000us; modulo 3000 is exactly the second key's start (1000us).
+    Near(Value(ItemMotion.Evaluate(model, .0988, .4)).TranslationMetres, 1);
+    Near(Value(ItemMotion.Evaluate(model, .098799, .4)).TranslationMetres, 0);
+    Near(Value(ItemMotion.Evaluate(model, .098801, .4)).TranslationMetres, 1);
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 3)); model.TransMax = 3;
+    foreach (var (seconds, expected) in new[] { (1e13, 1d), (1e20, 1d), (double.MaxValue, 2d) })
+        Near(Value(ItemMotion.Evaluate(model, seconds)).TranslationMetres, expected);
+    // The longest supported period exercises the safe-integer fallback's upper bound.
+    model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, int.MaxValue));
+    Require(ItemMotion.Evaluate(model, double.MaxValue, 1).Success, "maximum supported duration overflowed");
 });
 
 Check("unsupported modes and missing data stay visible", () =>
