@@ -7,7 +7,7 @@ using GBX.NET.Engines.Plug;
 namespace TM_Item_Studio.Models;
 
 public enum ItemSceneState { Present, Absent, Unsupported, Unresolved, Invalid, Cycle }
-public enum ItemSceneKind { Item, Variant, Prefab, Entity, StaticObject, DynamicObject, Solid, Visual, Collision, Light, Constraint, Other }
+public enum ItemSceneKind { Item, Variant, Prefab, Entity, StaticObject, DynamicObject, Solid, Visual, Collision, Light, Constraint, Other, Tree }
 
 public sealed record ItemSceneDiagnostic(string Path, string Code, ItemSceneState State, string Message);
 public sealed record ItemSceneNode(string Path, string? ParentPath, int? SourceId, ItemSceneKind Kind,

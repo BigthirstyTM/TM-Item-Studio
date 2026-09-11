@@ -169,10 +169,7 @@ public static partial class ItemScene
                 switch (surf)
                 {
                     case CPlugSurface.Mesh mesh:
-                        var indices = mesh.Triangles?.SelectMany(x => new[] { x.Indices.X, x.Indices.Y, x.Indices.Z }).ToArray()
-                            ?? mesh.CookedTriangles?.SelectMany(x => new[] { x.Indices.X, x.Indices.Y, x.Indices.Z }).ToArray();
-                        collisions.Add(new(path, entry?.Path, "Mesh", indices is null ? ItemSceneState.Absent : ItemSceneState.Present));
-                        if (indices is not null) EmitGeometry(path, entry?.Path, mesh, true, mesh.Vertices, null, new(), indices, world);
+                        CollisionMesh(mesh, path, world, entry);
                         break;
                     case CPlugSurface.Compound compound:
                         collisions.Add(new(path, entry?.Path, "Compound", ItemSceneState.Present));
@@ -193,6 +190,53 @@ public static partial class ItemScene
                 }
             }
             finally { ancestors.Remove(surf); }
+        }
+
+        private void CollisionMesh(CPlugSurface.Mesh mesh, string path, Matrix4x4? world, ItemSceneEntryHandle? entry)
+        {
+            if (mesh.Version is not (1 or 2 or 3 or 5 or 6 or 7))
+            {
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Unsupported));
+                Issue(path, "collision-mesh-version", ItemSceneState.Unsupported, mesh.Version == 4
+                    ? "Mesh version 4 has no decoded geometry payload in the bundled serializer; native collision meaning is not established."
+                    : $"Unsupported collision mesh version {mesh.Version}; array absence does not establish absent collision.");
+                return;
+            }
+            var cooked = mesh.Version is 1 or 2 or 3 or 5;
+            if (mesh.Vertices is null || (cooked
+                ? mesh.CookedTriangles is null || mesh.Triangles is not null
+                : mesh.Triangles is null || mesh.CookedTriangles is not null))
+            {
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid));
+                Issue(path, "collision-mesh-layout", ItemSceneState.Invalid, "Collision mesh has missing arrays or arrays incompatible with its serialized version; no alternate layout is inferred.");
+                return;
+            }
+            var indices = cooked
+                ? mesh.CookedTriangles!.SelectMany(x => new[] { x.Indices.X, x.Indices.Y, x.Indices.Z }).ToArray()
+                : mesh.Triangles!.SelectMany(x => new[] { x.Indices.X, x.Indices.Y, x.Indices.Z }).ToArray();
+            if (mesh.Vertices.Any(p => !Finite(V(p))))
+            {
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid));
+                Issue(path, "nonfinite-position", ItemSceneState.Invalid, "Collision mesh contains nonfinite vertices.");
+                return;
+            }
+            if (indices.Length == 0)
+            {
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Absent));
+                Issue(path, "empty-collision-mesh", ItemSceneState.Absent, "Supported collision layout contains zero triangles.");
+                return;
+            }
+            if (mesh.Vertices.Length == 0)
+            {
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid));
+                Issue(path, "collision-mesh-layout", ItemSceneState.Invalid, "Collision triangles have no vertices.");
+                return;
+            }
+            var diagnosticOffset = diagnostics.Count;
+            EmitGeometry(path, entry?.Path, mesh, true, mesh.Vertices, null, new(), indices, world);
+            var state = diagnostics.Skip(diagnosticOffset).Any(d => d.State == ItemSceneState.Invalid)
+                ? ItemSceneState.Invalid : ItemSceneState.Present;
+            collisions.Add(new(path, entry?.Path, "Mesh", state));
         }
     }
 }

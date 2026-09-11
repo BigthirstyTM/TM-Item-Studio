@@ -73,6 +73,18 @@ public static partial class ItemScene
             }
             try
             {
+                if (source is CPlugTree { Location: { } location })
+                {
+                    var treeLocal = FromIso4(location);
+                    local = local.HasValue ? treeLocal * local.Value : null;
+                    world = world.HasValue ? treeLocal * world.Value : null;
+                    if (!local.HasValue || !ValidTransform(local.Value) || !world.HasValue || !ValidTransform(world.Value))
+                    {
+                        local = null;
+                        world = null;
+                        Issue(path, "invalid-tree-transform", ItemSceneState.Invalid, "Tree location is nonfinite, singular or overflows its parent transform; geometry omitted.");
+                    }
+                }
                 Node(path, parent, source, Kind(source), Kind(source) == ItemSceneKind.Other ? ItemSceneState.Unsupported
                     : world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid, local, world);
                 switch (source)
@@ -156,6 +168,28 @@ public static partial class ItemScene
                     case CPlugSolid2Model solid:
                         Solid(solid, path, world, entry, depth);
                         break;
+                    case CPlugSolid solid:
+                        Edge(solid.TreeFile, () => solid.Tree, path + "/tree", path, world, entry, depth);
+                        break;
+                    case CPlugTree tree:
+                        // Derived tree LOD/animation semantics are not inferred from ordinary child order.
+                        // Their supported base graph remains visible with an explicit partial-support diagnostic.
+                        if (tree.GetType() != typeof(CPlugTree))
+                            Issue(path, "tree-subclass", ItemSceneState.Unsupported, $"Only base Visual/Children/Location are interpreted for {tree.GetType().Name}; subclass LOD/animation semantics are unsupported.");
+                        Visit(tree.Visual, path + "/visual", path, Matrix4x4.Identity, world, entry, depth + 1);
+                        Visit(tree.Surface, path + "/surface", path, Matrix4x4.Identity, world, entry, depth + 1);
+                        TreeAuxiliary(tree.ShaderFile, () => tree.Shader, path + "/shader", path, world);
+                        TreeAuxiliary(tree.FuncTreeFile, () => tree.FuncTree, path + "/funcTree", path, world);
+                        if (tree.Generator is not null)
+                            Issue(path + "/generator", "tree-generator", ItemSceneState.Unsupported, "Tree generator is retained but not evaluated.");
+                        var children = tree.Children;
+                        for (var i = 0; children is not null && i < children.Count; i++)
+                        {
+                            if (nodes.Count >= 100000)
+                            { Issue(path, "traversal-limit", ItemSceneState.Unsupported, "Occurrence budget reached; remaining tree children not inspected."); break; }
+                            Visit(children[i], path + $"/children:{i}", path, Matrix4x4.Identity, world, entry, depth + 1);
+                        }
+                        break;
                     case CPlugVisual visual:
                         Visual(visual, path, world, entry, null, null);
                         break;
@@ -180,7 +214,8 @@ public static partial class ItemScene
         {
             CGameItemModel => ItemSceneKind.Item, NPlugItem_SVariant or NPlugItem_SVariantList => ItemSceneKind.Variant,
             CPlugPrefab => ItemSceneKind.Prefab, CPlugStaticObjectModel => ItemSceneKind.StaticObject,
-            CPlugDynaObjectModel => ItemSceneKind.DynamicObject, CPlugSolid2Model => ItemSceneKind.Solid,
+            CPlugDynaObjectModel => ItemSceneKind.DynamicObject, CPlugSolid2Model or CPlugSolid => ItemSceneKind.Solid,
+            CPlugTree => ItemSceneKind.Tree,
             CPlugVisual => ItemSceneKind.Visual, CPlugSurface => ItemSceneKind.Collision,
             CPlugLightUserModel => ItemSceneKind.Light, NPlugDyna_SKinematicConstraint => ItemSceneKind.Constraint,
             CGameCommonItemEntityModel => ItemSceneKind.Entity, _ => ItemSceneKind.Other
@@ -192,6 +227,20 @@ public static partial class ItemScene
             if (file is not null) collisions.Add(new(path, entry?.Path, "External shape", ItemSceneState.Unresolved));
             else if (inline() is null) collisions.Add(new(path, entry?.Path, "No shape", ItemSceneState.Absent));
             Edge(file, inline, path, parent, world, entry, depth);
+        }
+
+        private void TreeAuxiliary(GbxRefTableFile? file, Func<CMwNod?> inline, string path, string parent, Matrix4x4? world)
+        {
+            if (file is not null)
+            {
+                Node(path, parent, file, ItemSceneKind.Other, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
+                Issue(path, "external-reference", ItemSceneState.Unresolved, $"External tree auxiliary reference: {file.FilePath}");
+            }
+            else if (inline() is { } source)
+            {
+                Node(path, parent, source, ItemSceneKind.Other, ItemSceneState.Unsupported, Matrix4x4.Identity, world);
+                Issue(path, "tree-auxiliary", ItemSceneState.Unsupported, "Tree shader/function data retained; rendering, material mapping and animation semantics are not interpreted.");
+            }
         }
 
         private void Solid(CPlugSolid2Model solid, string path, Matrix4x4? world, ItemSceneEntryHandle? entry, int depth)
