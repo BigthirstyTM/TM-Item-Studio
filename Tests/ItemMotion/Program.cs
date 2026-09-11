@@ -133,7 +133,7 @@ Check("preview quantizes time and phase to nearest microsecond away from midpoin
     foreach (var seconds in new[] { 1e13, 1e20, double.MaxValue })
     {
         var result = ItemMotion.Evaluate(model, seconds);
-        Require(result.Success && double.IsFinite(result.TranslationMetres), "huge-time evaluation must remain finite");
+        Require(result.Success && double.IsFinite(Value(result).TranslationMetres), "huge-time evaluation must remain finite");
     }
     // The longest supported period exercises the safe-integer fallback's upper bound.
     model.TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, int.MaxValue));
