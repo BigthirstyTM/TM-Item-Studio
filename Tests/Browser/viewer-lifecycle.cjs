@@ -35,6 +35,15 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
         await page.waitForFunction(() => typeof renderer !== 'undefined' && renderer?.domElement.isConnected);
         assert.equal(await page.locator('#threeContainer canvas').count(), 1);
 
+        // Re-rendering a scene must preserve the UI playback state.
+        const playbackState = await page.evaluate(() => {
+            renderStudioScene({ playing: false, parts: [], pivots: [], lights: [], sockets: [] });
+            const paused = isPlaying;
+            renderStudioScene({ playing: true, parts: [], pivots: [], lights: [], sockets: [] });
+            return { paused, resumed: isPlaying };
+        });
+        assert.deepEqual(playbackState, { paused: false, resumed: true });
+
         const resources = await page.evaluate(() => {
             renderStudioScene({ parts: [], pivots: [{ x: 0, y: 0, z: 0 }], lights: [{ x: 0, y: 1, z: 0 }], sockets: [{ x: 0, y: 0, z: 0 }] });
             let expected = 0, disposed = 0;

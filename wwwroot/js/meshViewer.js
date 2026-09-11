@@ -273,6 +273,7 @@ function renderPayload(input, preserveCamera) {
     if (!scene) return;
     const data = structuredClone(typeof input === 'string' ? JSON.parse(input) : input);
     if (!data || typeof data !== 'object') throw new Error('Scene payload required.');
+    isPlaying = data.playing !== false;
     const motions = compileMotions(data.motions ?? []), offset = phase(data.previewPhase01 ?? 0), owners = new Map(motions.map(m => [m.childPath, m]));
     const staged = Array.from({ length: 6 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
     // Stage before replacing: rejected payloads leave the current scene and playback intact.
