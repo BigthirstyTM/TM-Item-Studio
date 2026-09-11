@@ -120,6 +120,15 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                 setTypedMotionPreview({ previewPhase01: .25 }); near(vertex('mesh'), [3.5, 0, 0]);
                 near(camera.position.toArray(), [21, 22, 23]); near(controls.target.toArray(), target);
             });
+            check('legacy kinematic parts are staged in the moving group and animate', () => {
+                renderStudioScene({ playing: true, hasTranslationMotion: false, isOscillating: true,
+                    minAngle: 0, maxAngle: 90, animationPeriodSeconds: 1,
+                    parts: [part('legacy-moving', null, { isMoving: true })] });
+                advance(250);
+                require(movingGroup.children.length === 1, 'Legacy moving part was staged as static');
+                const pose = vertex('legacy-moving');
+                require(Math.abs(pose[0] - 1) > 0.01 || Math.abs(pose[1]) > 0.01, 'Legacy moving part did not animate');
+            });
             check('invalid modes, keys, matrices, duplicate writers and cycles reject atomically', () => {
                 renderStudioScene({ parts: [part()], motions: [motion()] }); const previous = mesh('mesh');
                 const bad = [motion({ fields: fields({ translation: null }) }), motion({ fields: fields({ translationAxis: 4 }) }),
