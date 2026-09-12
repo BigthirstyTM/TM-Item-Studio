@@ -1306,11 +1306,9 @@
     {
         if (itemModel != null)
         {
-            if (Enum.TryParse<CGameItemModel.EItemType>("Kinematic", true, out var kin) ||
-                Enum.TryParse<CGameItemModel.EItemType>("KinematicObject", true, out kin))
-            {
-                itemModel.ItemType = kin;
-            }
+            // GBX.NET names the dynamic/static item kinds PickUp and Ornament;
+            // there are no Kinematic/Static enum values.
+            itemModel.ItemType = CGameItemModel.EItemType.PickUp;
 
             isMovingItem = true;
             isPlaying = true;
@@ -1328,11 +1326,7 @@
     {
         if (itemModel != null)
         {
-            if (Enum.TryParse<CGameItemModel.EItemType>("Static", true, out var stat) ||
-                Enum.TryParse<CGameItemModel.EItemType>("StaticObject", true, out stat))
-            {
-                itemModel.ItemType = stat;
-            }
+            itemModel.ItemType = CGameItemModel.EItemType.Ornament;
 
             isMovingItem = false;
             foreach (var part in modelParts) part.IsMoving = false;
