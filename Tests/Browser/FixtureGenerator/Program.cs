@@ -16,26 +16,37 @@ foreach (var staticFirst in new[] { true, false })
     var moving = Entry(false);
     var constraint = new NPlugDyna_SKinematicConstraint
     {
+        SubVersion = 3,
         TransAxis = NPlugDyna_SKinematicConstraint.EAxis.X,
         TransMin = 0,
         TransMax = 10,
         TransAnimFunc = new()
         {
-            SubFuncs = [new() { Ease = NPlugDyna_SKinematicConstraint.AnimEase.Linear, Duration = new TimeInt32(1000) }]
-        }
+            IsDuration = true,
+            SubFuncs = [new() { Ease = NPlugDyna_SKinematicConstraint.AnimEase.Linear, Duration = new TimeInt32(1000) },
+                new() { Ease = NPlugDyna_SKinematicConstraint.AnimEase.Linear, Reverse = true }, new(), new()]
+        },
+        RotAxis = NPlugDyna_SKinematicConstraint.EAxis.Z,
+        RotAnimFunc = new() { IsDuration = true, SubFuncs = [new() { Duration = new TimeInt32(1000) }, new(), new(), new()] }
     };
     var constraintEntry = new CPlugPrefab.EntRef
     {
         Model = constraint,
         Rotation = new Quat(0, 0, 0, 1),
-        Params = new NPlugDyna_SPrefabConstraintParams { Ent1 = staticFirst ? 0 : 1, Ent2 = staticFirst ? 1 : 0 }
+        // Targets index the kinematic-body table, not the prefab entity array.
+        // There is exactly one kinematic body, with the world as its parent.
+        Params = new NPlugDyna_SPrefabConstraintParams { Ent1 = -1, Ent2 = 0 }
     };
     var item = new CGameItemModel
     {
-        ItemType = CGameItemModel.EItemType.Ornament,
-        EntityModel = new CPlugPrefab { Ents = staticFirst ? [stationary, moving, constraintEntry] : [moving, stationary, constraintEntry] }
+        Ident = new Ident("BespokeAnimation", 26, "FixtureGenerator"),
+        ItemType = CGameItemModel.EItemType.PickUp,
+        EntityModel = new CPlugPrefab { Version = 11, Ents = staticFirst ? [stationary, moving, constraintEntry] : [moving, stationary, constraintEntry] }
     };
+    item.CreateChunk<CGameCtnCollector.HeaderChunk2E001003>().Version = 8;
     item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+    item.CreateChunk<CGameItemModel.Chunk2E002015>();
+    item.ItemTypeE = CGameItemModel.EItemType.PickUp;
     item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
     using var bytes = new MemoryStream();
     new Gbx<CGameItemModel>(item) { BodyCompression = GbxCompression.Uncompressed }.Save(bytes);
@@ -61,7 +72,8 @@ static CPlugPrefab.EntRef Entry(bool isStatic) => new()
 {
     Position = new Vec3(isStatic ? 0 : 2, 0, 0),
     Rotation = new Quat(0, 0, 0, 1),
-    Model = new CPlugDynaObjectModel { Version = 2, IsStatic = isStatic, DynamizeOnSpawn = !isStatic, Mass = 1, Mesh = Solid() }
+    Params = isStatic ? null : new NPlugDynaObjectModel_SInstanceParams { Version = 0, IsKinematic = true },
+    Model = new CPlugDynaObjectModel { Version = 13, IsStatic = isStatic, Mass = 10, BreakSpeedKmh = 100, Mesh = Solid() }
 };
 
 static CPlugSolid2Model Solid()
@@ -72,21 +84,27 @@ static CPlugSolid2Model Solid()
     const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
     var declaration = new CPlugVertexStream.DataDecl();
     typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
-        (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9));
+        (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
     typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
     typeof(CPlugVertexStream).GetField("count", flags)!.SetValue(stream, 3);
     stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
     var indexBuffer = new CPlugIndexBuffer { Indices = [0, 1, 2] };
     indexBuffer.CreateChunk<CPlugIndexBuffer.Chunk09057000>();
-    var visual = new CPlugVisualIndexedTriangles { VertexStreams = [stream], IndexBuffer = indexBuffer };
-    visual.CreateChunk<CPlugVisual.Chunk0900600A>();
+    var visual = new CPlugVisualIndexedTriangles
+    {
+        VertexStreams = [stream], IndexBuffer = indexBuffer,
+        IsGeometryStatic = true, IsIndexationStatic = true,
+        BoundingBox = new BoxAligned(0, 0, 0, 1, 1, 0)
+    };
+    typeof(CPlugVisual).GetProperty("Count", flags)!.SetValue(visual, 3);
+    visual.CreateChunk<CPlugVisual.Chunk0900600F>().Version = 6;
     visual.CreateChunk<CPlugVisualIndexed.Chunk0906A001>();
     var solid = new CPlugSolid2Model
     {
         Visuals = [visual],
-        CustomMaterials = [new()],
-        ShadedGeoms = [new() { VisualIndex = 0, MaterialIndex = 0, LodMask = 1 }]
+        CustomMaterials = [],
+        ShadedGeoms = []
     };
-    solid.CreateChunk<CPlugSolid2Model.Chunk090BB000>().Version = 6;
+    solid.CreateChunk<CPlugSolid2Model.Chunk090BB000>().Version = 34;
     return solid;
 }
