@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test": "node viewer-lifecycle.cjs",
-    "test:animation-upload": "node animation-upload.cjs"
+    "test:animation-upload": "node run-animation-upload.cjs"
   },
   "devDependencies": { "playwright": "1.61.1" }
 }
