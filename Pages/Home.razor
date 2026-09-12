@@ -1306,11 +1306,9 @@
     {
         if (itemModel != null)
         {
-            if (Enum.TryParse<CGameItemModel.EItemType>("Kinematic", true, out var kin) ||
-                Enum.TryParse<CGameItemModel.EItemType>("KinematicObject", true, out kin))
-            {
-                itemModel.ItemType = kin;
-            }
+            // GBX.NET names the dynamic/static item kinds PickUp and Ornament;
+            // there are no Kinematic/Static enum values.
+            itemModel.ItemType = CGameItemModel.EItemType.PickUp;
 
             isMovingItem = true;
             isPlaying = true;
@@ -1328,11 +1326,7 @@
     {
         if (itemModel != null)
         {
-            if (Enum.TryParse<CGameItemModel.EItemType>("Static", true, out var stat) ||
-                Enum.TryParse<CGameItemModel.EItemType>("StaticObject", true, out stat))
-            {
-                itemModel.ItemType = stat;
-            }
+            itemModel.ItemType = CGameItemModel.EItemType.Ornament;
 
             isMovingItem = false;
             foreach (var part in modelParts) part.IsMoving = false;
@@ -1484,8 +1478,13 @@
 
                     if (positions.Count > 0)
                     {
-                        bool isDynaEntity = ent.Model.GetType().Name.Contains("Dyna", StringComparison.OrdinalIgnoreCase);
-                        bool isMoving = (constraintSeen && (isDynaEntity || modelEntityIndex > 0)) || modelEntityIndex > 0;
+                        // A CPlugDynaObjectModel can still be authored as a static
+                        // body. Do not classify it as moving solely because its
+                        // CLR type contains "Dyna"; IsStatic is the authoritative
+                        // flag for the serialized model.
+                        bool isMoving = ent.Model is CPlugDynaObjectModel dyna
+                            ? !dyna.IsStatic && (constraintSeen || modelEntityIndex > 0)
+                            : modelEntityIndex > 0 || (constraintSeen && ent.Model.GetType().Name.Contains("Dyna", StringComparison.OrdinalIgnoreCase));
                         modelParts.Add(new ModelPart
                         {
                             Name = isMoving ? $"Moving Part {modelEntityIndex}" : "Static Base",
