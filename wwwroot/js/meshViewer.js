@@ -302,7 +302,10 @@ function renderPayload(input, preserveCamera) {
             staged[1].add(pair[0]); staged[2].add(pair[1]); groups.set(motion.childPath, pair);
         }
         for (const part of data.parts ?? []) {
-            const owner = owners.get(part.entityPath), mesh = makePart(part, owner);
+            // Parts without an authored entity path must remain in their
+            // static/moving staging group; never let a missing path match a
+            // motion entry whose child path is also absent.
+            const owner = part.entityPath ? owners.get(part.entityPath) : null, mesh = makePart(part, owner);
             if (owner) groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
             else staged[part.isCollision ? 2 : (part.isMoving ? 1 : 0)].add(mesh);
             const authored = part.positions ?? part.Positions;
