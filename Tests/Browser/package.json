@@ -1,6 +1,9 @@
 {
   "name": "tm-item-studio-browser-checks",
   "private": true,
-  "scripts": { "test": "node viewer-lifecycle.cjs" },
+  "scripts": {
+    "test": "node viewer-lifecycle.cjs",
+    "test:animation-upload": "node animation-upload.cjs"
+  },
   "devDependencies": { "playwright": "1.61.1" }
 }

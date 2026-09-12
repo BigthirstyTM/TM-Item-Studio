@@ -1482,10 +1482,9 @@
                         // body. Do not classify it as moving solely because its
                         // CLR type contains "Dyna"; IsStatic is the authoritative
                         // flag for the serialized model.
-                        bool isDynaEntity = ent.Model is CPlugDynaObjectModel dyna
-                            ? !dyna.IsStatic
-                            : ent.Model.GetType().Name.Contains("Dyna", StringComparison.OrdinalIgnoreCase);
-                        bool isMoving = (constraintSeen && (isDynaEntity || modelEntityIndex > 0)) || modelEntityIndex > 0;
+                        bool isMoving = ent.Model is CPlugDynaObjectModel dyna
+                            ? !dyna.IsStatic && (constraintSeen || modelEntityIndex > 0)
+                            : modelEntityIndex > 0 || (constraintSeen && ent.Model.GetType().Name.Contains("Dyna", StringComparison.OrdinalIgnoreCase));
                         modelParts.Add(new ModelPart
                         {
                             Name = isMoving ? $"Moving Part {modelEntityIndex}" : "Static Base",
