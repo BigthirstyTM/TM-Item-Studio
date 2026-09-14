@@ -33,6 +33,10 @@ const path = require('node:path');
             await page.screenshot({ path: path.join(process.env.STUDIO_LAYOUT_EVIDENCE, `${name}.png`), fullPage: true });
         }
         await capture('desktop-dark');
+        if (process.env.STUDIO_LAYOUT_EVIDENCE) {
+            await page.locator('.studio-header').screenshot({ path: path.join(process.env.STUDIO_LAYOUT_EVIDENCE, 'header-detail.png') });
+            await page.locator('.motion-constraint').first().screenshot({ path: path.join(process.env.STUDIO_LAYOUT_EVIDENCE, 'kinematics-detail.png') });
+        }
         assert.ok(initial.canvas.y <= 120, `Viewport starts too low: ${initial.canvas.y}`);
         assert.ok(initial.canvas.height >= 780, `Viewport too short: ${initial.canvas.height}`);
         assert.ok(initial.inspector.height >= 850, `Inspector too short: ${initial.inspector.height}`);
