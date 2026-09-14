@@ -101,3 +101,9 @@ input[type="checkbox"] { accent-color: var(--accent); min-width: 16px; min-heigh
     .studio-inspector > .p-3 { padding: 12px; }
     .btn { min-height: 38px; }
 }
+/* Keep the document name once, with compact, keyboard-accessible variant choices. */
+.studio-variants { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.studio-variant-file { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; }
+.studio-variant-filename { max-width: 100%; overflow-wrap: anywhere; }
+.studio-variant-buttons { display: flex; flex-wrap: wrap; gap: .25rem; min-width: 0; }
+.studio-variant-buttons .btn { min-width: 2.25rem; }

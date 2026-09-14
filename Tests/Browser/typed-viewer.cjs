@@ -42,6 +42,28 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             const vertex = path => { scene.updateMatrixWorld(true); const obj = mesh(path); return new THREE.Vector3().fromBufferAttribute(obj.geometry.attributes.position, 0).applyMatrix4(obj.matrixWorld).toArray(); };
             const reject = action => { let rejected = false; try { action(); } catch { rejected = true; } require(rejected, 'Expected unsupported/invalid payload rejection'); };
 
+            check('binary geometry preserves positions, normals and indices; corrupt buffers reject', () => {
+                // Independent writer for the documented little-endian float32/int32 wire format.
+                const bytes = (values, integer = false) => {
+                    const result = new Uint8Array(values.length * 4), view = new DataView(result.buffer);
+                    values.forEach((value, i) => integer ? view.setInt32(i * 4, value, true) : view.setFloat32(i * 4, value, true));
+                    return result;
+                };
+                const packed = { path: 'packed', entityPath: 'child', positionsBytes: bytes([1, 0, 0, 0, 1, 0, 0, 0, 0]),
+                    indicesBytes: bytes([0, 1, 2], true), normalsBytes: bytes([0, 0, 1, 0, 0, 1, 0, 0, 1]) };
+                const original = [...packed.positionsBytes];
+                renderStudioScene({ parts: [packed] });
+                near(vertex('packed'), [1, 0, 0]);
+                near(Array.from(mesh('packed').geometry.index.array), [0, 1, 2]);
+                near(Array.from(mesh('packed').geometry.attributes.normal.array), [0, 0, 1, 0, 0, 1, 0, 0, 1]);
+                near(Array.from(packed.positionsBytes), original);
+                const previous = mesh('packed');
+                for (const patch of [{ positionsBytes: packed.positionsBytes.subarray(1) },
+                    { indicesBytes: bytes([0, 1, 99], true) }, { indicesBytes: bytes([-1, 1, 2], true) },
+                    { normalsBytes: bytes([0, 0, 1]) }, { positionsBytes: bytes([NaN, 0, 0]) }])
+                    reject(() => renderStudioScene({ parts: [{ ...packed, ...patch }] }));
+                require(mesh('packed') === previous, 'Corrupt binary payload replaced live geometry');
+            });
             check('duration and endpoint storage produce equivalent motion without mutation', () => {
                 for (const isDuration of [true, false]) {
                     const source = { isDuration, keys: [{ ease: 1, reverse: false, durationMilliseconds: 1000 },

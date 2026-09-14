@@ -38,7 +38,7 @@ function phase(value) {
     return value;
 }
 function buffer(values, name, stride) {
-    if (!Array.isArray(values) || values.length % stride || values.some(x => typeof x !== 'number' || !Number.isFinite(x) || !Number.isFinite(Math.fround(x))))
+    if (!(Array.isArray(values) || values instanceof Float32Array) || values.length % stride || values.some(x => typeof x !== 'number' || !Number.isFinite(x) || !Number.isFinite(Math.fround(x))))
         throw new Error(`${name} must be a finite ${stride}-component buffer.`);
     return values;
 }
@@ -243,14 +243,26 @@ function mapping(value) {
     if (value.materialPath != null && (typeof value.materialPath !== 'string' || !value.materialPath)) throw new Error('Invalid material path.');
     return { materialIndex: value.materialIndex ?? null, lodMask: value.lodMask ?? null, materialPath: value.materialPath ?? null };
 }
-function makePart(part, owner) {
-    const positions = buffer(part.positions ?? part.Positions, 'Positions', 3), indices = part.indices ?? part.Indices;
-    if (!Array.isArray(indices) || indices.length % 3 || indices.some(x => !Number.isInteger(x) || x < 0 || x >= positions.length / 3)) throw new Error('Invalid triangle indices.');
-    for (const [key, stride] of [['normals', 3], ['uvs', 2]])
-        if (part[key] != null && buffer(part[key], key, stride).length / stride !== positions.length / 3) throw new Error(`${key} count does not match vertices.`);
+function geometryWords(bytes, integer = false) {
+    if (!(bytes instanceof Uint8Array) || bytes.byteLength % 4) throw new Error('Invalid binary geometry buffer.');
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const values = integer ? new Int32Array(bytes.byteLength / 4) : new Float32Array(bytes.byteLength / 4);
+    for (let i = 0; i < values.length; i++) values[i] = integer ? view.getInt32(i * 4, true) : view.getFloat32(i * 4, true);
+    return values;
+}
+function makePart(part, owner, bounds) {
+    const positions = buffer(part.positionsBytes == null ? part.positions ?? part.Positions : geometryWords(part.positionsBytes), 'Positions', 3);
+    const indices = part.indicesBytes == null ? part.indices ?? part.Indices : geometryWords(part.indicesBytes, true);
+    const normals = part.normalsBytes == null ? part.normals : geometryWords(part.normalsBytes);
+    if (!(Array.isArray(indices) || indices instanceof Int32Array) || indices.length % 3 || indices.some(x => !Number.isInteger(x) || x < 0 || x >= positions.length / 3)) throw new Error('Invalid triangle indices.');
+    for (const [value, key, stride] of [[normals, 'normals', 3], [part.uvs, 'uvs', 2]])
+        if (value != null && buffer(value, key, stride).length / stride !== positions.length / 3) throw new Error(`${key} count does not match vertices.`);
     const mappings = part.mappings == null ? [mapping(part)] : part.mappings.map(mapping);
-    const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geometry.setIndex(indices);
-    if (part.normals != null) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(part.normals, 3)); else geometry.computeVertexNormals();
+    const vertex = new THREE.Vector3();
+    for (let i = 0; i < positions.length; i += 3) bounds.expandByPoint(vertex.fromArray(positions, i));
+    const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices instanceof Int32Array ? new THREE.BufferAttribute(new Uint32Array(indices), 1) : indices);
+    if (normals != null) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); else geometry.computeVertexNormals();
     if (part.uvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(part.uvs, 2));
     if (owner) geometry.applyMatrix4(owner.inverseChild);
     if ([...geometry.attributes.position.array, ...geometry.attributes.normal.array].some(x => !Number.isFinite(x))) { geometry.dispose(); throw new Error('Rest transform overflows geometry.'); }
@@ -307,11 +319,9 @@ function renderPayload(input, preserveCamera) {
             staged[1].add(pair[0]); staged[2].add(pair[1]); groups.set(motion.childPath, pair);
         }
         for (const part of data.parts ?? []) {
-            const owner = owners.get(part.entityPath), mesh = makePart(part, owner);
+            const owner = owners.get(part.entityPath), mesh = makePart(part, owner, bounds);
             if (owner) groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
             else staged[part.isCollision ? 2 : (part.isMoving ? 1 : 0)].add(mesh);
-            const authored = part.positions ?? part.Positions;
-            for (let i = 0; i < authored.length; i += 3) bounds.expandByPoint(new THREE.Vector3().fromArray(authored, i));
         }
         for (const [property, type, target] of [['pivots', 'pivot', 3], ['lights', 'light', 4], ['sockets', 'socket', 5]])
             (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type); staged[target].add(group); bounds.expandByPoint(group.position); });

@@ -4,7 +4,8 @@
   "scripts": {
     "test": "node viewer-lifecycle.cjs",
     "test:animation-upload": "node run-animation-upload.cjs",
-    "test:kinematic-preservation": "node run-kinematic-preservation.cjs"
+    "test:kinematic-preservation": "node run-kinematic-preservation.cjs",
+    "test:variant-navigation": "node run-kinematic-preservation.cjs --variants"
   },
   "devDependencies": { "playwright": "1.61.1" }
 }

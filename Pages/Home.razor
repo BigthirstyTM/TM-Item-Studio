@@ -29,17 +29,26 @@
 
 @if (variantSources.Count > 0)
 {
-    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-        <strong>Variants (@variantSources.Count)</strong>
-        @for (int i = 0; i < variantSources.Count; i++)
+    <div class="studio-variants mb-3" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
+        @foreach (var file in variantSources.Select((source, index) => (Source: source, Index: index)).GroupBy(v => v.Source.GbxFile))
         {
-            var variantIndex = i;
-            <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="@(() => SelectVariant(variantIndex))">
-                @(variantIndex + 1). @variantSources[variantIndex].Name
-            </button>
+            <div class="studio-variant-file" role="group" aria-label="@file.First().Source.FileName">
+                <strong class="studio-variant-filename" title="@file.First().Source.FileName">@file.First().Source.FileName</strong>
+                <div class="studio-variant-buttons">
+                    @foreach (var entry in file)
+                    {
+                        var variantIndex = entry.Index;
+                        <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
+                                aria-label="@($"{variantIndex + 1}. {entry.Source.Name}")" title="@entry.Source.Name"
+                                aria-pressed="@((variantIndex == activeVariantIndex).ToString().ToLowerInvariant())"
+                                disabled="@isSelectingVariant" @onclick="@(() => SelectVariant(variantIndex))">
+                            @entry.Source.VariantNumber
+                        </button>
+                    }
+                </div>
+            </div>
         }
-        <span class="text-muted small">Select an item or variant to preview. Export preserves every variant in the selected file.</span>
+        <span class="text-muted small" role="status">@(isSelectingVariant ? "Loading variant…" : "Select a variant to preview. Export preserves every variant in the selected file.")</span>
     </div>
 }
 
@@ -101,7 +110,7 @@
                         }
                         <button class="btn btn-sm btn-outline-light" @onclick="ToggleWireframe">Wire</button>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset Camera</button>
-                        @if (!string.IsNullOrEmpty(rawObj))
+                        @if (hasMesh)
                         {
                             <button class="btn btn-sm btn-outline-success" @onclick="DownloadObj">.OBJ</button>
                         }
@@ -753,7 +762,7 @@
     private bool isMovingItem = false;
     private bool isPlaying = true;
     private int vertexCount = 0;
-    private string? rawObj;
+    private bool isSelectingVariant;
     private bool isViewerInitialized = false;
     private string activeTab = "general";
     private DotNetObjectReference<Home>? dotNetHelper;
@@ -888,7 +897,7 @@
 
         await JS.InvokeVoidAsync("init3DViewer", "threeContainer", dotNetHelper);
         isViewerInitialized = true;
-        await UpdateScenePayload();
+        await UpdateScenePayload(authoredMotionScene);
         if (iconPreviewPending)
         {
             await RenderIconPreview();
@@ -905,7 +914,6 @@
         itemModel = null;
         hasMesh = false;
         isMovingItem = false;
-        rawObj = null;
         modelParts.Clear();
         detectedPivots.Clear();
         detectedLights.Clear();
@@ -974,15 +982,27 @@
 
     private async Task SelectVariant(int index)
     {
-        if (index < 0 || index >= variantSources.Count) return;
+        if (isSelectingVariant || index < 0 || index >= variantSources.Count) return;
+        isSelectingVariant = true;
+        errorMessage = null;
+        try
+        {
+            StateHasChanged();
+            await Task.Yield();
+            await LoadVariant(index);
+        }
+        catch (Exception ex) { errorMessage = "Error while loading variant: " + ex.Message; }
+        finally { isSelectingVariant = false; }
+    }
 
+    private async Task LoadVariant(int index)
+    {
         activeVariantIndex = index;
         var source = variantSources[index];
         itemModel = source.Model;
         gbxFile = source.GbxFile;
         hasMesh = false;
         isMovingItem = false;
-        rawObj = null;
         modelParts.Clear();
         detectedPivots.Clear();
         detectedLights.Clear();
@@ -1024,11 +1044,10 @@
         {
             hasMesh = true;
             vertexCount = modelParts.Sum(p => p.Positions.Length / 3);
-            rawObj = BuildObjExport();
         }
 
         if (isViewerInitialized)
-            await UpdateScenePayload();
+            await UpdateScenePayload(authoredMotionScene);
         else
             StateHasChanged();
     }
@@ -1059,12 +1078,15 @@
         return ItemScene.Build(source.PreviewRoot, document, variant);
     }
 
-    private async Task UpdateScenePayload()
+    private Task UpdateScenePayload() => UpdateScenePayload(null);
+
+    private async Task UpdateScenePayload(ItemSceneResult? selectedScene)
     {
         if (authoredMotionScene is { } authoredScene && authoredConstraints.Count > 0)
         {
-            // Other editor panels may have changed geometry since selection.
-            authoredScene = ReadSelectedScene();
+            // Selection already built a fresh snapshot. Other edit callers must
+            // rebuild it; no cross-selection cache can hide edits to shared sources.
+            authoredScene = selectedScene ?? ReadSelectedScene();
             authoredMotionScene = authoredScene;
             var motion = AuthoredMotionPreview.Build(authoredScene);
             motionDiagnostics = motion.Diagnostics;
@@ -1072,8 +1094,9 @@
             {
                 parts = authoredScene.Preview.Geometry.Select(g => new
                 {
-                    path = g.Path, entityPath = g.EntityPath, positions = g.Positions,
-                    indices = g.Indices, normals = g.Normals, isCollision = g.IsCollision
+                    path = g.Path, entityPath = g.EntityPath, positionsBytes = ViewerBuffers.Pack(g.Positions),
+                    indicesBytes = ViewerBuffers.Pack(g.Indices), normalsBytes = g.Normals is null ? null : ViewerBuffers.Pack(g.Normals),
+                    isCollision = g.IsCollision
                 }),
                 motions = motion.Tracks,
                 pivots = detectedPivots, lights = detectedLights, sockets = detectedSockets,
@@ -1083,7 +1106,8 @@
         }
         var scenePayload = new
         {
-            parts = modelParts,
+            parts = modelParts.Select(p => new { p.Name, p.IsMoving,
+                positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices) }),
             pivots = detectedPivots,
             lights = detectedLights,
             sockets = detectedSockets,
@@ -1997,10 +2021,10 @@
     
     private async Task DownloadObj()
     {
-        if (!string.IsNullOrEmpty(rawObj))
+        if (hasMesh)
         {
             string filename = (itemModel?.Ident?.Id ?? "item") + ".obj";
-            await JS.InvokeVoidAsync("downloadObjFile", filename, rawObj);
+            await JS.InvokeVoidAsync("downloadObjFile", filename, BuildObjExport());
         }
     }
 

@@ -10,14 +10,18 @@ namespace TM_Item_Studio.Models;
 public sealed class ItemVariantSource
 {
     public string Name { get; }
+    public string FileName { get; }
+    public int VariantNumber { get; }
     public Gbx<CGameItemModel> GbxFile { get; }
     public CGameItemModel Model => GbxFile.Node;
     public NPlugItem_SVariant? Variant { get; }
     public CMwNod? PreviewRoot => Variant is null ? Model : Variant.EntityModel;
 
-    private ItemVariantSource(string name, Gbx<CGameItemModel> file, NPlugItem_SVariant? variant)
+    private ItemVariantSource(string name, Gbx<CGameItemModel> file, NPlugItem_SVariant? variant, int? variantNumber = null)
     {
-        Name = name;
+        FileName = name;
+        VariantNumber = variantNumber ?? 1;
+        Name = variantNumber.HasValue ? $"{name} {variantNumber}" : name;
         GbxFile = file;
         Variant = variant;
     }
@@ -28,7 +32,7 @@ public sealed class ItemVariantSource
         {
             // Keep unresolved and null entity references: they are still authored variants.
             return list.Variants.Select((variant, index) =>
-                new ItemVariantSource($"{name} {index + 1}", file, variant)).ToArray();
+                new ItemVariantSource(name, file, variant, index + 1)).ToArray();
         }
 
         // An empty variant list is still an editable/exportable document.
