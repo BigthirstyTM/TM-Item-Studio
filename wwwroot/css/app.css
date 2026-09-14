@@ -52,6 +52,7 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 16px 0; }
 .studio-inspector-tabs { flex-shrink: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
 .studio-inspector-tabs .btn { height: 100%; }
 .studio-inspector > :last-child { flex-shrink: 0; }
+.studio-inspector > .p-2.border-top { max-height: 126px; overflow-y: auto; overflow-wrap: anywhere; flex-shrink: 0; }
 .studio-inspector .text-start { width: 100%; }
 .studio-inspector .btn { white-space: normal; }
 .studio-inspector [style*="background: #fff"] { background: var(--panel) !important; }
@@ -132,13 +133,14 @@ input[type="checkbox"] { accent-color: var(--accent); min-width: 16px; min-heigh
     .btn { min-height: 38px; }
 }
 /* Keep the document name once, with compact, keyboard-accessible variant choices. */
-.studio-variants { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.studio-variants { display: flex; flex-direction: column; gap: .5rem; min-width: 0; max-height: 112px; overflow-y: auto; }
 .studio-variant-file { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; }
 .studio-variant-filename { max-width: 100%; overflow-wrap: anywhere; }
 .studio-variant-group-label { color: var(--muted); font-size: 11px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .studio-variant-buttons { display: flex; flex-wrap: wrap; gap: .25rem; min-width: 0; }
 .studio-variant-buttons .btn { min-width: 1.9rem; padding-inline: 7px; }
 .studio-variant-buttons .btn[aria-disabled="true"] { cursor: progress; opacity: .65; }
+.studio-variant-buttons .btn:focus-visible { outline-offset: -3px; }
 .motion-constraint { margin: 0 0 12px; padding: 8px; min-width: 0; border: 1px solid var(--border); border-radius: 5px; }
 .motion-channel + .motion-channel { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; }
 .motion-channel h6 { margin: 0 0 5px; font-size: 13px; }

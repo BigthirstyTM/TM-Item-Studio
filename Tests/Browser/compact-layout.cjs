@@ -54,6 +54,18 @@ const path = require('node:path');
         assert.equal(mobile.overflow, false, 'Narrow layout must not overflow horizontally');
         for (const button of await page.getByRole('button', { name: /^\d+\. SnowCarTraffic/ }).all()) assert.ok(await button.isVisible());
         await capture('narrow');
+        // Long names and many files must not push the canvas/export off-screen.
+        await page.setViewportSize({ width: 1280, height: 720 });
+        const cube = fs.readFileSync(path.join(__dirname, 'Fixtures/Approved/TM2020/Item.Item.Gbx'));
+        await page.getByLabel('Open item files').setInputFiles(Array.from({ length: 16 }, (_, i) => ({
+            name: `File${i}-${'long-name-'.repeat(20)}.Item.Gbx`, mimeType: 'application/octet-stream', buffer: cube
+        })));
+        await page.getByRole('button', { name: /^16\. File15/ }).click();
+        const multiple = await measure();
+        assert.equal(multiple.overflow, false, 'Long filenames must not overflow the page');
+        assert.ok(multiple.canvas.height >= 400 && multiple.inspector.bottom <= 720, JSON.stringify(multiple));
+        assert.ok(await page.getByRole('button', { name: 'Export selected file' }).isVisible());
+        await capture('multiple-files');
         assert.deepEqual(errors, []);
         console.log('PASS: compact desktop header, toolbar variants, growing viewport/inspector, responsive canvas and narrow layout.');
     } finally { await browser.close(); }
