@@ -76,3 +76,17 @@ backups**, so this reopen failure must not be attributed to the item exports or
 the Save anyway action. The repaired Cat/Bretzel cases remain **placement/rendering
 passes, not map-round-trip passes**. The backups remained byte-identical.
 Screenshots and the native receipt are retained outside git.
+
+## Additional approved browser batch
+
+A fresh local build combining this parser update and PR #18's diagnostics passed
+real upload, UI export, and reupload for `DeathPit.Item.gbx`,
+`getting_over_it_hammer.Item.Gbx`, `DTC_Firework200.Item.Gbx`, `Item.Item.Gbx`,
+`SnowCarTraffic_60kph.Item.gbx`, and `SupportConnectorX6.Item.Gbx`. All six retained
+their archive identity, produced no browser page errors, and displayed geometry
+with the neutral material. Upload screenshots were visually inspected, and
+live debug reports and reopen screenshots were captured outside git.
+
+These are browser results only. This batch does not yet establish native preload,
+map placement, collision behavior, or all-variant animation correctness for those
+six additional items.
