@@ -66,16 +66,42 @@ placed far from its original item, whose properties remained unchanged; block
 count remained 2306 and item count increased from 1 to 3. No map was replaced to
 perform the placement checks.
 
-**Remaining limitation:** TM reported `Error while saving items into the map file`
+**Initial embedding result:** TM reported `Error while saving items into the map file`
 for both repaired legacy items. A separate local test map was saved with the
 visible **Save anyway** action. This does not demonstrate portable embedding:
 the map requires locally installed item dependencies. Reopening this unembedded
 test save failed on missing pre-existing custom-block resources. Subsequent
 checks found the **same missing-resource failure in both untouched pre-test
 backups**, so this reopen failure must not be attributed to the item exports or
-the Save anyway action. The repaired Cat/Bretzel cases remain **placement/rendering
-passes, not map-round-trip passes**. The backups remained byte-identical.
+the Save anyway action. At that stage the repaired Cat/Bretzel cases were
+**placement/rendering passes, not map-round-trip passes**. The backups remained byte-identical.
 Screenshots and the native receipt are retained outside git.
+
+### Recovery-copy and embedded-dependency follow-up
+
+With explicit permission, two nonpersistent probe-block records were removed
+from separate recovery copies. Both original backups stayed byte-identical.
+Offline verification checked that item archive bytes, the embedded ZIP, other
+block records, and all 2304 baked ground blocks were unchanged by that removal.
+The original one-item recovery copy then opened successfully in TM2020.
+
+A second copy retained all three items and combined the backup's existing
+embedded file with the exact Cat/Bretzel UI exports and five available dependency
+files, using GBX.NET's `UpdateEmbeddedZipData`. All eight embedded entries were
+verified byte-for-byte before native testing. The copy opened with all three
+items at their original positions. A native save completed without an embedding
+prompt, and that saved map reopened with all three items retained. Cat and Bretzel
+were visually confirmed after reopening.
+
+The native writer retained seven ZIP entries: three items plus the four referenced
+Cat/Bretzel mesh/shape files. The extra, unreferenced trigger-shape file was not
+retained. This is not a promise to preserve arbitrary unused ZIP entries.
+
+**Test configuration matters:** E++'s experimental **allow cross-tree fid-refs**
+patch was visibly active during these successful saves. These are warm-session
+save/reopen results; a cold start with local dependencies unavailable, vanilla
+save compatibility, collision behavior, and server upload validation remain
+unverified. No native patch or map-packaging feature was added to Studio by this PR.
 
 ## Additional approved browser batch
 
