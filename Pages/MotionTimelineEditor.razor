@@ -1,0 +1,60 @@
+@using System.Globalization
+@using TmEssentials
+@using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
+
+<fieldset class="mt-2">
+    <legend class="small fw-bold">@Name timeline</legend>
+    @if (Source?.SubFuncs is not { } keys)
+    {
+        <p class="small text-muted">Absent timeline; preserved without creating default keys.</p>
+    }
+    else
+    {
+        <p class="small text-muted">IsDuration=@Source.IsDuration.ToString().ToLowerInvariant() (preserved). Durations are stored in milliseconds.</p>
+        @if (keys.Length == 0) { <p class="small text-muted">Empty key array (preserved).</p> }
+        @for (var i = 0; i < keys.Length; i++)
+        {
+            var key = keys[i];
+            var prefix = $"{Name} key {i + 1}";
+            if (key is null) { <p class="small text-muted">@prefix is absent (preserved).</p> }
+            else
+            {
+                <div class="row g-1 mb-2">
+                    <label class="col-6 small">@prefix duration (ms)
+                        <input type="number" min="0" max="2147483647" step="1" class="form-control form-control-sm"
+                               value="@key.Duration.TotalMilliseconds" @onchange="e => SetDuration(key, e)" />
+                    </label>
+                    <label class="col-6 small">@prefix easing
+                        <select class="form-select form-select-sm" @bind="key.Ease" @bind:after="NotifyChanged">
+                            @if (!Enum.IsDefined(key.Ease)) { <option value="@key.Ease">Unknown (@key.Ease)</option> }
+                            @foreach (var ease in Enum.GetValues<KC.AnimEase>()) { <option value="@ease">@ease</option> }
+                        </select>
+                    </label>
+                    <label class="small"><input type="checkbox" @bind="key.Reverse" @bind:after="NotifyChanged" /> @prefix reverse</label>
+                </div>
+            }
+        }
+        @if (validationError is not null) { <p role="alert" class="small text-danger">@validationError</p> }
+    }
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "Motion";
+    [Parameter] public KC.AnimFunc? Source { get; set; }
+    [Parameter] public EventCallback Changed { get; set; }
+    private string? validationError;
+
+    private async Task SetDuration(KC.SubAnimFunc key, ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var ms) || ms < 0)
+        {
+            validationError = "Duration must be a nonnegative whole number of milliseconds. Stored value unchanged.";
+            return;
+        }
+        validationError = null;
+        key.Duration = new TimeInt32(ms);
+        await NotifyChanged();
+    }
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+}

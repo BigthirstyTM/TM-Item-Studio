@@ -1,0 +1,43 @@
+@using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
+
+<fieldset class="card p-2 mb-3">
+    <legend class="small fw-bold">@Name</legend>
+    <div class="row g-2">
+        <label class="col-6 small">Translation axis
+            <select class="form-select form-select-sm" @bind="Source.TransAxis" @bind:after="NotifyChanged">
+                @if (!Enum.IsDefined(Source.TransAxis)) { <option value="@Source.TransAxis">Unknown (@Source.TransAxis)</option> }
+                @foreach (var axis in Enum.GetValues<KC.EAxis>()) { <option value="@axis">@axis</option> }
+            </select>
+        </label>
+        <label class="col-6 small">Rotation axis
+            <select class="form-select form-select-sm" @bind="Source.RotAxis" @bind:after="NotifyChanged">
+                @if (!Enum.IsDefined(Source.RotAxis)) { <option value="@Source.RotAxis">Unknown (@Source.RotAxis)</option> }
+                @foreach (var axis in Enum.GetValues<KC.EAxis>()) { <option value="@axis">@axis</option> }
+            </select>
+        </label>
+        <label class="col-6 small">Translation minimum (m)
+            <input type="number" step="any" class="form-control form-control-sm" @bind="Source.TransMin" @bind:after="NotifyChanged" />
+        </label>
+        <label class="col-6 small">Translation maximum (m)
+            <input type="number" step="any" class="form-control form-control-sm" @bind="Source.TransMax" @bind:after="NotifyChanged" />
+        </label>
+        <label class="col-6 small">Rotation minimum (degrees)
+            <input type="number" step="any" class="form-control form-control-sm" @bind="Source.AngleMinDeg" @bind:after="NotifyChanged" />
+        </label>
+        <label class="col-6 small">Rotation maximum (degrees)
+            <input type="number" step="any" class="form-control form-control-sm" @bind="Source.AngleMaxDeg" @bind:after="NotifyChanged" />
+        </label>
+    </div>
+    <MotionTimelineEditor Name="Translation" Source="Source.TransAnimFunc" Changed="Changed" />
+    <MotionTimelineEditor Name="Rotation" Source="Source.RotAnimFunc" Changed="Changed" />
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "Constraint";
+    [Parameter, EditorRequired] public KC Source { get; set; } = null!;
+    [Parameter] public EventCallback Changed { get; set; }
+
+    // A control updates only its bound authored field. No defaults, reconstructed
+    // timelines or edits to a different constraint are applied as a side effect.
+    private Task NotifyChanged() => Changed.InvokeAsync();
+}

@@ -90,11 +90,14 @@
                             <button class="btn btn-sm @(isPlaying ? "btn-warning" : "btn-success")" @onclick="ToggleAnimation">
                                 @(isPlaying ? "⏸" : "▶")
                             </button>
-                            <select class="form-select form-select-sm" style="width: auto;" value="@detectedAxis" @onchange="OnAxisChanged">
-                                <option value="y">Y Axis</option>
-                                <option value="x">X Axis</option>
-                                <option value="z">Z Axis</option>
-                            </select>
+                            @if (authoredConstraints.Count == 0)
+                            {
+                                <select class="form-select form-select-sm" style="width: auto;" value="@detectedAxis" @onchange="OnAxisChanged">
+                                    <option value="y">Y Axis</option>
+                                    <option value="x">X Axis</option>
+                                    <option value="z">Z Axis</option>
+                                </select>
+                            }
                         }
                         <button class="btn btn-sm btn-outline-light" @onclick="ToggleWireframe">Wire</button>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset Camera</button>
@@ -440,7 +443,7 @@
                         </small>
                     </div>
 
-                    <h6 class="border-bottom pb-1 mt-4 text-primary">ItemType conversion</h6>
+                    <h6 class="border-bottom pb-1 mt-4 text-primary">@(authoredConstraints.Count > 0 ? "Authored kinematic controls" : "ItemType conversion")</h6>
                     <div class="card p-3 bg-light mb-3">
                         @if (!isMovingItem)
                         {
@@ -450,6 +453,19 @@
                             <button class="btn btn-sm btn-outline-warning text-dark fw-bold" @onclick="ConvertToKinematic">
                                 ⚙️ Convert to KinematicObject
                             </button>
+                        }
+                        else if (authoredConstraints.Count > 0)
+                        {
+                            <p role="status" class="small fw-bold text-info">Using authored motion settings</p>
+                            <p class="small text-muted">Authored ranges, axes and independent timelines are retained. Only explicit field edits change the file; shared source constraints affect all their instances.</p>
+                            @foreach (var diagnostic in motionDiagnostics)
+                            {
+                                <p role="status" class="small text-warning">Preview unavailable: @diagnostic</p>
+                            }
+                            @for (var i = 0; i < authoredConstraints.Count; i++)
+                            {
+                                <AuthoredMotionEditor @key="authoredConstraints[i]" Name="@($"Constraint {i + 1}")" Source="authoredConstraints[i]" Changed="UpdateScenePayload" />
+                            }
                         }
                         else
                         {
@@ -777,6 +793,9 @@
     private float[] translationMin = new float[3];
     private float[] translationMax = new float[3];
     private object? activeKinematicConstraint;
+    private ItemSceneResult? authoredMotionScene;
+    private readonly List<NPlugDyna_SKinematicConstraint> authoredConstraints = new();
+    private IReadOnlyList<string> motionDiagnostics = Array.Empty<string>();
     private bool showOriginalMotion;
     private string originalConstraintType = "Not found";
     private readonly List<OriginalMotionSetting> originalMotionSettings = new();
@@ -908,6 +927,9 @@
         translationMin = new float[3];
         translationMax = new float[3];
         activeKinematicConstraint = null;
+        authoredMotionScene = null;
+        authoredConstraints.Clear();
+        motionDiagnostics = Array.Empty<string>();
         showOriginalMotion = false;
         originalConstraintType = "Not found";
         originalMotionSettings.Clear();
@@ -992,6 +1014,11 @@
         identCollection = itemModel.Ident?.Collection.ToString() ?? "";
         ExtractParts(source.PreviewRoot);
         ExtractPivotsAndSockets(itemModel);
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        isMovingItem = isMovingItem || authoredConstraints.Count > 0;
+        motionDiagnostics = AuthoredMotionPreview.Build(authoredMotionScene).Diagnostics;
 
         if (modelParts.Count > 0)
         {
@@ -1023,8 +1050,37 @@
         return sb.ToString();
     }
 
+    private ItemSceneResult ReadSelectedScene()
+    {
+        var source = variantSources[activeVariantIndex];
+        var document = variantSources.Select(s => s.GbxFile).Distinct().ToList().IndexOf(source.GbxFile);
+        int? variant = source.Model.EntityModel is NPlugItem_SVariantList { Variants: { } variants } && source.Variant is { } selected
+            ? Array.IndexOf(variants, selected) : null;
+        return ItemScene.Build(source.PreviewRoot, document, variant);
+    }
+
     private async Task UpdateScenePayload()
     {
+        if (authoredMotionScene is { } authoredScene && authoredConstraints.Count > 0)
+        {
+            // Other editor panels may have changed geometry since selection.
+            authoredScene = ReadSelectedScene();
+            authoredMotionScene = authoredScene;
+            var motion = AuthoredMotionPreview.Build(authoredScene);
+            motionDiagnostics = motion.Diagnostics;
+            await JS.InvokeVoidAsync("renderStudioScene", new
+            {
+                parts = authoredScene.Preview.Geometry.Select(g => new
+                {
+                    path = g.Path, entityPath = g.EntityPath, positions = g.Positions,
+                    indices = g.Indices, normals = g.Normals, isCollision = g.IsCollision
+                }),
+                motions = motion.Tracks,
+                pivots = detectedPivots, lights = detectedLights, sockets = detectedSockets,
+                playing = isPlaying
+            });
+            return;
+        }
         var scenePayload = new
         {
             parts = modelParts,
@@ -1617,6 +1673,7 @@
             originalTranslationMax = (float[])translationMax.Clone();
             originalPivotOffset = new[] { pivotOffsetX, pivotOffsetY, pivotOffsetZ };
             originalMotionAvailable = true;
+            showOriginalMotion = true;
         }
         catch { }
     }
@@ -1667,6 +1724,7 @@
 
     private async Task OnKinematicChanged()
     {
+        if (authoredConstraints.Count > 0) return;
         ApplyKinematicProperty("AngleMinDeg", minAngle);
         ApplyKinematicProperty("AngleMaxDeg", maxAngle);
         ApplyKinematicProperty("TransDist", translationDistance);
@@ -1925,6 +1983,7 @@
 
     private async Task OnAxisChanged(ChangeEventArgs e)
     {
+        if (authoredConstraints.Count > 0) return;
         if (e.Value != null)
         {
             detectedAxis = e.Value.ToString() ?? "y";
