@@ -4,6 +4,7 @@ const http = require('node:http');
 const os = require('node:os');
 const path = require('node:path');
 const checkCollection = require('./collection-export.cjs');
+const assert = require('node:assert/strict');
 
 const root = path.resolve(__dirname, '../..');
 const env = { ...process.env, DOTNET_ROLL_FORWARD: process.env.DOTNET_ROLL_FORWARD || 'Major' };
@@ -19,6 +20,9 @@ function run(args) {
     let server;
     try {
         run(['build', 'Tests/Browser/CollectionArchive', '-v:q']);
+        assert.deepEqual(fs.readFileSync(path.join(__dirname, 'CollectionArchive/bin/Debug/net8.0/GBX.NET.dll')),
+            fs.readFileSync(path.join(root, 'lib/GBX.NET.dll')),
+            'Archive checker must use Studio\'s bundled parser, not a transitive NuGet copy');
         run(['publish', 'TM-Item-Studio.csproj', '-v:q', '-o', path.join(work, 'app')]);
         const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
             '.wasm': 'application/wasm', '.css': 'text/css', '.svg': 'image/svg+xml' };

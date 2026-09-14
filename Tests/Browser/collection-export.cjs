@@ -26,18 +26,21 @@ module.exports = async function checkCollection(baseUrl, work) {
             { name: 'clear collection', kind: 'number', value: '26', editCollection: '', number: null, text: null },
             { name: 'public static reproduction repair', source: 'CustomItem_Static.Item.Gbx', editCollection: '26', number: 26, text: null, id: '', author: '-oTBhm4_S1-UxnlnBizUDA' },
             { name: 'public kinematic reproduction repair', source: 'CustomItem_Kinematic.Item.Gbx', editCollection: '26', number: 26, text: null, id: '', author: 'BigthirstyTM' },
+            { name: 'approved convex-surface pusher no-op', source: 'ObstaclePusher4mLevel1.Item.Gbx',
+                fixtureDirectory: 'Fixtures/Approved', number: 26, text: null, id: '', author: 'Ci0bwEqqQ3Sy2z1WG9qxyQ', requireGeometry: true },
         ];
         for (const test of cases) {
             const page = await browser.newPage();
             const errors = [];
             page.on('pageerror', error => errors.push(error.message));
             await page.goto(baseUrl, { waitUntil: 'networkidle' });
-            const input = test.source ? path.resolve(__dirname, '../../Test Exported items', test.source) : path.join(work, 'input.Item.Gbx');
+            const input = test.source ? path.resolve(__dirname, test.fixtureDirectory || '../../Test Exported items', test.source) : path.join(work, 'input.Item.Gbx');
             if (!test.source)
                 archive('prepare', path.join(__dirname, 'Fixtures/animation-static-first.Item.Gbx'), input, test.kind, test.value);
             await page.getByLabel('Open item files').setInputFiles(input);
             const exportButton = page.getByRole('button', { name: 'Export selected file' });
             await exportButton.waitFor();
+            if (test.requireGeometry) await page.getByRole('button', { name: '.OBJ', exact: true }).waitFor();
             const field = label => page.getByLabel(label);
             if (test.editIdentity) {
                 await field(/^Ident.Id \/ File name$/).fill('RenamedBespoke');
@@ -73,6 +76,16 @@ module.exports = async function checkCollection(baseUrl, work) {
             assert.equal(await field(/^Ident.Author$/).inputValue(), test.editIdentity ? 'EditedAuthor' : test.author ?? 'FixtureGenerator');
             assert.equal(await page.locator('.alert-danger').count(), 0, 'Reopen must succeed');
             assert.deepEqual(errors, [], 'Upload/export/reopen must not raise page errors');
+            if (test.requireGeometry) {
+                const objDownload = page.waitForEvent('download');
+                await page.getByRole('button', { name: '.OBJ', exact: true }).click();
+                const obj = await objDownload;
+                const objPath = path.join(work, 'reopened.obj');
+                await obj.saveAs(objPath);
+                const text = fs.readFileSync(objPath, 'utf8');
+                assert.match(text, /^v /m, 'Reopened pusher must contain vertices');
+                assert.match(text, /^f /m, 'Reopened pusher must contain faces');
+            }
             if (test.source && process.env.STUDIO_COLLECTION_EXPORTS) {
                 fs.mkdirSync(process.env.STUDIO_COLLECTION_EXPORTS, { recursive: true });
                 fs.copyFileSync(exported, path.join(process.env.STUDIO_COLLECTION_EXPORTS, test.source));
