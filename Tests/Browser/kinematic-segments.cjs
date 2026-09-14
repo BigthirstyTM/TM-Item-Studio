@@ -46,6 +46,14 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync('dotnet',
         assert.equal(await page.getByLabel('Rotation segment count', { exact: true }).inputValue(), '4');
         assert.equal(await page.getByLabel('Translation key 2 duration (ms)', { exact: true }).inputValue(), '1000');
         assert.deepEqual(inspect(await download()), inspect(fixture, edits));
+        await page.getByLabel('Translation segment count', { exact: true }).selectOption('1');
+        await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).fill('2147483647');
+        await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).press('Tab');
+        const beforeRejected = inspect(await download());
+        await page.getByLabel('Translation segment count', { exact: true }).selectOption('2');
+        await page.getByRole('alert').filter({ hasText: 'Total duration exceeds' }).waitFor();
+        assert.equal(await page.getByLabel('Translation segment count', { exact: true }).inputValue(), '1', 'Rejected count must reset the visible selector');
+        assert.deepEqual(inspect(await download()), beforeRejected, 'Rejected count must leave the archive unchanged');
         assert.deepEqual(errors, []);
         console.log('PASS: real upload, segment counts, retained functions, independent timelines, exact archive comparison, export and reopen.');
     } finally { await browser.close(); fs.rmSync(work, { recursive: true, force: true }); }
