@@ -70,7 +70,9 @@ perform the placement checks.
 for both repaired legacy items. A separate local test map was saved with the
 visible **Save anyway** action. This does not demonstrate portable embedding:
 the map requires locally installed item dependencies. Reopening this unembedded
-test save failed because existing custom-block resources were also no longer
-embedded. Therefore the repaired Cat/Bretzel cases are **placement/rendering
-passes, not map-round-trip passes**. The backup remained byte-identical.
+test save failed on missing pre-existing custom-block resources. Subsequent
+checks found the **same missing-resource failure in both untouched pre-test
+backups**, so this reopen failure must not be attributed to the item exports or
+the Save anyway action. The repaired Cat/Bretzel cases remain **placement/rendering
+passes, not map-round-trip passes**. The backups remained byte-identical.
 Screenshots and the native receipt are retained outside git.
