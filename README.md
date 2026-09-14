@@ -40,6 +40,14 @@ numeric ID `26` is displayed as `Stadium2020`, but must remain numeric when it
 is not edited; writing that display name as a string prevents native collection
 resolution. Enter `26` to deliberately set the TM2020 numeric collection.
 
+This collection repair is necessary but not sufficient for every item. If the
+loaded archive is not byte-exact after a no-edit GBX.NET save, the serializer
+changes native data outside the currently supported model. Such an export can
+preload temporarily through Editor++ yet still be omitted from the normal map
+editor inventory. Studio refuses that standalone export and offers the native
+pivot request workflow instead; autonomous support requires a byte-preserving
+writer for the changed chunks.
+
 Before enabling edits, the studio checks whether the unedited source archive
 round-trips byte-for-byte through its available serializer. If it does not,
 export is refused rather than downloading an archive that may load but be
