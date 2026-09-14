@@ -40,27 +40,32 @@ numeric ID `26` is displayed as `Stadium2020`, but must remain numeric when it
 is not edited; writing that display name as a string prevents native collection
 resolution. Enter `26` to deliberately set the TM2020 numeric collection.
 
-This collection repair is necessary but not sufficient for every item. If the
-loaded archive is not byte-exact after a no-edit GBX.NET save, the serializer
-changes native data outside the currently supported model. Such an export can
-preload temporarily through Editor++ yet still be omitted from the normal map
-editor inventory. Studio refuses that standalone export and offers the native
-pivot request workflow instead; autonomous support requires a byte-preserving
-writer for the changed chunks.
+This collection repair is necessary but not sufficient for every item. The
+studio reports when an imported archive is not byte-exact after a no-edit
+GBX.NET save. Re-encoding is not automatically invalid: the writer has been
+verified in a fresh Trackmania session with a Blendermania pivot item, where
+the output was inventory-visible and placeable. Other source families can
+still preload yet be omitted from the normal map editor inventory.
 
-Before enabling edits, the studio checks whether the unedited source archive
-round-trips byte-for-byte through its available serializer. If it does not,
-export is refused rather than downloading an archive that may load but be
-silently omitted from Trackmania's inventory. For pivot changes, use the
-**Native Trackmania pivot export** request in the Studio with the included
-Openplanet bridge; it delegates the write and inventory registration to
-Editor++ and Trackmania. See `Tests/Openplanet/TMItemStudioNativeBridge/README.md`.
-For other changes, use Editor++ to save the item or start with an item that
-round-trips exactly.
+For a re-encoded source, Studio requires an explicit confirmation before it
+downloads a standalone export. Confirm only when the source's output will be
+tested in a fresh Trackmania map editor session. For pivot changes on an
+unverified source, use the **Native Trackmania pivot export** request with the
+included Openplanet bridge; it delegates the write and inventory registration
+to Editor++ and Trackmania. See
+`Tests/Openplanet/TMItemStudioNativeBridge/README.md`.
 
 These checks protect the metadata that the studio can verify. They do not turn
 an arbitrary legacy or synthetic GBX archive into a native-placeable item.
 Use a Trackmania-native-valid source item when creating a placeable export.
+
+## Writer compatibility probe
+
+`Tests/WriterCompatibility` runs the same parse/save path with a chosen
+GBX.NET assembly against a user-supplied item, optionally changing only an
+existing pivot X coordinate. It is intended for controlled Trackmania A/B
+tests and does not include user item assets. See
+`Tests/WriterCompatibility/README.md`.
 
 ## Regression checks
 

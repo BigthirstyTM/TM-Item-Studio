@@ -16,7 +16,9 @@ public sealed class ItemVariantSource
     public CGameItemModel Model => GbxFile.Node;
     public NPlugItem_SVariant? Variant { get; }
     public CMwNod? PreviewRoot => Variant is null ? Model : Variant.EntityModel;
+    /// <summary>Explains when saving re-encodes an imported archive instead of preserving its bytes.</summary>
     public string? SerializationWarning { get; }
+    public bool RequiresReencodingAcknowledgement => SerializationWarning is not null;
 
     private ItemVariantSource(string name, Gbx<CGameItemModel> file, NPlugItem_SVariant? variant, int? variantNumber, string? serializationWarning)
     {
@@ -44,7 +46,6 @@ public sealed class ItemVariantSource
 
     public void Save(Stream destination)
     {
-        EnsureSerializerCanPreserveSource();
         GbxFile.Save(destination);
     }
 
@@ -55,7 +56,6 @@ public sealed class ItemVariantSource
             throw new InvalidOperationException("Choose at least two item files to combine.");
 
         var documents = sources.Select(source => source.GbxFile).Distinct().ToArray();
-        foreach (var source in sources) source.EnsureSerializerCanPreserveSource();
         if (documents.Any(file => file.RefTable?.Files.Count > 0 || file.RefTable?.Resources.Count > 0))
             throw new InvalidOperationException("Combining files with external references is not supported. Export each file separately to preserve its dependencies.");
 
@@ -100,12 +100,6 @@ public sealed class ItemVariantSource
         }
     }
 
-    private void EnsureSerializerCanPreserveSource()
-    {
-        if (SerializationWarning is not null)
-            throw new InvalidOperationException(SerializationWarning);
-    }
-
     private static string? GetSerializationWarning(Gbx<CGameItemModel> file, byte[]? originalBytes)
     {
         if (originalBytes is null) return null;
@@ -114,6 +108,6 @@ public sealed class ItemVariantSource
         file.Save(output);
         return output.ToArray().SequenceEqual(originalBytes)
             ? null
-            : "This item cannot be exported safely: the available GBX serializer changes its bytes even before edits. Use Editor++ to save the edited item, or choose a source item that round-trips byte-for-byte.";
+            : "Saving this item re-encodes native GBX data before edits. Some items are valid after re-encoding, but Trackmania compatibility must be verified for this source.";
     }
 }

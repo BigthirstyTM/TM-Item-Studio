@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GbxAssemblyPath Condition="'$(GbxAssemblyPath)' == ''">$(MSBuildThisFileDirectory)../../lib/GBX.NET.dll</GbxAssemblyPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
+    <PackageReference Include="TmEssentials" Version="2.7.0" />
+    <Reference Include="GBX.NET">
+      <HintPath>$(GbxAssemblyPath)</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <PackageReference Include="GBX.NET.LZO" Version="2.1.6" ExcludeAssets="compile;runtime" />
+    <Reference Include="GBX.NET.LZO">
+      <HintPath>$(NuGetPackageRoot)gbx.net.lzo/2.1.6/lib/net8.0/GBX.NET.LZO.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
