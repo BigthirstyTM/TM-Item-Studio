@@ -12,6 +12,17 @@ This standalone console suite links the production `Models/ItemScene*.cs` files 
 
 Paths are scoped to the loaded document and selected original variant slot. The root is `doc:0/variant:none/root`; prefab entries append `/ent:originalIndex`. Property edges append explicit property names and indexed tables append segments such as `/visual:2`. Paths identify occurrences. Source IDs identify shared objects only within the returned snapshot. They must not be treated as stable IDs across builds, selection changes or reloads.
 
+The optional fourth `Build` argument is an `ItemSceneGeometryCache` owned by the
+loaded-document session. It keys buffers by actual parsed-node reference identity
+and world transform, retaining fresh occurrence paths and handles on every build.
+`GeometryId` is stable only within that cache's `Epoch`; it is not `SourceId`.
+Call `Clear()` after any authored edit (including in-place array changes) and on
+document replacement. Cached snapshot arrays are read-only to consumers, although
+they remain separate from authored GBX arrays. The default uncached build still
+returns independent mutable snapshots. Partial/invalid geometry is not pooled.
+The cache regression covers distinct transforms, revisits, unrelated documents,
+fresh paths and invalidation after editing a shared source in place.
+
 The suite checks nested rotations, repeated prefabs, original entry slots, path-local cycles, save/reparse topology and unchanged serialized bytes, independent attribute streams, CPU indexed attributes, normals/UV0/UV1, material/LOD mappings, invalid indices/values/transforms, collision ownership and generated status, external-resolution traps, selected variants, zero-valued lights and socket ownership.
 
 Supported geometry is the bundled `CPlugVisualIndexedTriangles` with one unambiguous decoded position channel, optional normal/UV channels, and an index buffer. Both inherited CPU arrays and decoded vertex streams are supported separately. Separate streams supply attributes for the same vertices; they are not concatenated. Collision triangle meshes and compound transforms are exposed separately from visual geometry. Normals use inverse transpose, and invalid geometry or attribute channels produce diagnostics. Preview arrays are copies; source handles retain authored arrays for a separate validated editor.

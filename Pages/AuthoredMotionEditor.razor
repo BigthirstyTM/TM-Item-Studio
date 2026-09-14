@@ -1,0 +1,49 @@
+@using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
+
+<fieldset class="motion-constraint">
+    <legend class="small fw-bold">@Name</legend>
+    <section class="motion-channel" aria-label="Translation controls">
+        <h6>Translation <span class="small text-muted">m</span></h6>
+        <div class="motion-range">
+            <label class="small">Axis
+                <select aria-label="Translation axis" class="form-select form-select-sm" @bind="Source.TransAxis" @bind:after="NotifyChanged">
+                    @if (!Enum.IsDefined(Source.TransAxis)) { <option value="@Source.TransAxis">Unknown (@Source.TransAxis)</option> }
+                    @foreach (var axis in Enum.GetValues<KC.EAxis>()) { <option value="@axis">@axis</option> }
+                </select>
+            </label>
+            <label class="small">From
+                <input aria-label="Translation minimum (m)" type="number" step="any" class="form-control form-control-sm" @bind="Source.TransMin" @bind:after="NotifyChanged" />
+            </label>
+            <label class="small">To
+                <input aria-label="Translation maximum (m)" type="number" step="any" class="form-control form-control-sm" @bind="Source.TransMax" @bind:after="NotifyChanged" />
+            </label>
+        </div>
+        <MotionTimelineEditor Name="Translation" Source="Source.TransAnimFunc" Changed="Changed" />
+    </section>
+    <section class="motion-channel" aria-label="Rotation controls">
+        <h6>Rotation <span class="small text-muted">°</span></h6>
+        <div class="motion-range">
+            <label class="small">Axis
+                <select aria-label="Rotation axis" class="form-select form-select-sm" @bind="Source.RotAxis" @bind:after="NotifyChanged">
+                    @if (!Enum.IsDefined(Source.RotAxis)) { <option value="@Source.RotAxis">Unknown (@Source.RotAxis)</option> }
+                    @foreach (var axis in Enum.GetValues<KC.EAxis>()) { <option value="@axis">@axis</option> }
+                </select>
+            </label>
+            <label class="small">From
+                <input aria-label="Rotation minimum (degrees)" type="number" step="any" class="form-control form-control-sm" @bind="Source.AngleMinDeg" @bind:after="NotifyChanged" />
+            </label>
+            <label class="small">To
+                <input aria-label="Rotation maximum (degrees)" type="number" step="any" class="form-control form-control-sm" @bind="Source.AngleMaxDeg" @bind:after="NotifyChanged" />
+            </label>
+        </div>
+        <MotionTimelineEditor Name="Rotation" Source="Source.RotAnimFunc" Changed="Changed" />
+    </section>
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "Constraint";
+    [Parameter, EditorRequired] public KC Source { get; set; } = null!;
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+}

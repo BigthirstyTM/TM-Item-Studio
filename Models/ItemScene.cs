@@ -24,7 +24,8 @@ public sealed record ItemSceneCollision(string Path, string? EntityPath, string 
 /// <summary>Snapshot buffers, separate from authored arrays. Positions are before viewer framing.</summary>
 public sealed record ItemSceneGeometry(string Path, string? EntityPath, int SourceId, bool IsCollision,
     float[] LocalPositions, float[] Positions, int[] Indices, float[]? LocalNormals, float[]? Normals,
-    IReadOnlyDictionary<int, float[]> UVs, float[] BoundsMin, float[] BoundsMax);
+    IReadOnlyDictionary<int, float[]> UVs, float[] BoundsMin, float[] BoundsMax,
+    int? GeometryId = null, float[]? WorldTransform = null);
 
 /// <summary>Only this DTO crosses the JS/JSON boundary. It contains no GBX object handles.</summary>
 public sealed record ItemScenePreview(IReadOnlyList<ItemSceneNode> Nodes, IReadOnlyList<ItemSceneGeometry> Geometry,
@@ -63,11 +64,12 @@ public static partial class ItemScene
     /// Traverse an explicitly selected root. If passed an item containing a variant list, variantOrdinal
     /// must select its original slot. External slots are inventoried without invoking resolving getters.
     /// </summary>
-    public static ItemSceneResult Build(CMwNod? selectedRoot, int documentOrdinal, int? variantOrdinal = null)
+    public static ItemSceneResult Build(CMwNod? selectedRoot, int documentOrdinal, int? variantOrdinal = null,
+        ItemSceneGeometryCache? geometryCache = null)
     {
         if (documentOrdinal < 0) throw new ArgumentOutOfRangeException(nameof(documentOrdinal));
         if (variantOrdinal < 0) throw new ArgumentOutOfRangeException(nameof(variantOrdinal));
-        var builder = new Builder(variantOrdinal);
+        var builder = new Builder(variantOrdinal, geometryCache);
         builder.Visit(selectedRoot, $"doc:{documentOrdinal}/variant:{variantOrdinal?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "none"}/root",
             null, Matrix4x4.Identity, Matrix4x4.Identity, null, 0);
         return builder.Result();
@@ -113,7 +115,14 @@ public static partial class ItemScene
     private static float[] Pack(Matrix4x4 m) => new[] { m.M11, m.M12, m.M13, m.M14, m.M21, m.M22, m.M23, m.M24,
         m.M31, m.M32, m.M33, m.M34, m.M41, m.M42, m.M43, m.M44 };
     private static float[] Pack(Vector3 v) => new[] { v.X, v.Y, v.Z };
-    private static float[] Pack(IEnumerable<Vector3> values) => values.SelectMany(Pack).ToArray();
+    private static float[] Pack(IEnumerable<Vector3> values)
+    {
+        var vertices = values as Vector3[] ?? values.ToArray();
+        var packed = new float[vertices.Length * 3];
+        for (var i = 0; i < vertices.Length; i++)
+        { packed[i * 3] = vertices[i].X; packed[i * 3 + 1] = vertices[i].Y; packed[i * 3 + 2] = vertices[i].Z; }
+        return packed;
+    }
     private static bool ValidTransform(Matrix4x4 m) => Pack(m).All(float.IsFinite) && Matrix4x4.Invert(m, out var inverse)
         && Pack(inverse).All(float.IsFinite);
 }

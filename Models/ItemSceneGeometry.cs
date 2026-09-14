@@ -90,6 +90,12 @@ public static partial class ItemScene
         {
             if (!world.HasValue || !ValidTransform(world.Value))
             { Issue(path, "invalid-geometry-transform", ItemSceneState.Invalid, "Geometry has no finite invertible world transform."); return; }
+            if (geometryCache?.Find(source, world.Value) is { } cached)
+            {
+                geometry.Add(cached with { Path = path, EntityPath = entityPath, SourceId = Id(source) });
+                return;
+            }
+            var diagnosticStart = diagnostics.Count;
             if (positions.Length == 0)
             { Issue(path, "empty-geometry", ItemSceneState.Absent, "No geometry vertices."); return; }
             if (positions.Any(x => !Finite(V(x))))
@@ -128,16 +134,25 @@ public static partial class ItemScene
             {
                 if (channel < 0 || values is null || values.Length != positions.Length || values.Any(x => !float.IsFinite(x.X) || !float.IsFinite(x.Y)))
                     Issue(path, "invalid-uv", ItemSceneState.Invalid, $"UV{channel} must be finite and match the vertex count; channel omitted.");
-                else channels.Add(channel, values.SelectMany(x => new[] { x.X, x.Y }).ToArray());
+                else
+                {
+                    var packed = new float[values.Length * 2];
+                    for (var i = 0; i < values.Length; i++) { packed[i * 2] = values[i].X; packed[i * 2 + 1] = values[i].Y; }
+                    channels.Add(channel, packed);
+                }
             }
             var min = transformed.Aggregate(Vector3.Min);
             var max = transformed.Aggregate(Vector3.Max);
-            geometry.Add(new(path, entityPath, Id(source), collision, Pack(local), Pack(transformed), indices.ToArray(),
-                localNormals, worldNormals, channels, Pack(min), Pack(max)));
+            var result = new ItemSceneGeometry(path, entityPath, Id(source), collision, Pack(local), Pack(transformed), indices.ToArray(),
+                localNormals, worldNormals, channels, Pack(min), Pack(max), WorldTransform: Pack(world.Value));
             if (indices.Length == 0) Issue(path, "empty-indices", ItemSceneState.Absent, "No triangles in the index buffer.");
             else if (Enumerable.Range(0, indices.Length / 3).Any(i => indices[3 * i] == indices[3 * i + 1]
                 || indices[3 * i] == indices[3 * i + 2] || indices[3 * i + 1] == indices[3 * i + 2]))
                 Issue(path, "degenerate-triangle", ItemSceneState.Invalid, "At least one triangle repeats a vertex index.");
+            // Invalid channels can depend on the occurrence transform. Do not pool partial geometry.
+            if (geometryCache is not null && diagnostics.Count == diagnosticStart)
+                result = geometryCache.Add(source, world.Value, result);
+            geometry.Add(result);
         }
 
         private void Surface(CPlugSurface surface, string path, Matrix4x4? world, ItemSceneEntryHandle? entry)

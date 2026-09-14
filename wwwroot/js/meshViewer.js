@@ -3,9 +3,12 @@ let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsG
 let dotNetHelper = null, selectedGizmo = null;
 let isWireframe = false, isPlaying = true, animSpeed = 1;
 let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler = null;
+let resizeObserver = null;
 let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showSockets = true;
 let typedMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
 let legacyMotion = null;
+let geometryEpoch = null, sharedGeometry = new Map();
+const pooledGeometry = new WeakSet();
 let sceneFilter = { materialIndex: null, materialPath: null, lodMask: null };
 
 window.getStudioViewerDebugInfo = function () {
@@ -57,7 +60,7 @@ function phase(value) {
     return value;
 }
 function buffer(values, name, stride) {
-    if (!Array.isArray(values) || values.length % stride || values.some(x => typeof x !== 'number' || !Number.isFinite(x) || !Number.isFinite(Math.fround(x))))
+    if (!(Array.isArray(values) || values instanceof Float32Array) || values.length % stride || values.some(x => typeof x !== 'number' || !Number.isFinite(x) || !Number.isFinite(Math.fround(x))))
         throw new Error(`${name} must be a finite ${stride}-component buffer.`);
     return values;
 }
@@ -70,12 +73,17 @@ function restMatrix(values, name) {
     return matrix;
 }
 function timeline(source) {
-    if (!source || source.isDuration !== false || !Array.isArray(source.keys) || source.keys.length > 4)
-        throw new Error('Unsupported or absent timeline: expected at most four keys and isDuration=false.');
-    const keys = source.keys.map(key => {
+    if (!source || typeof source.isDuration !== 'boolean' || !Array.isArray(source.keys) || source.keys.length > 4)
+        throw new Error('Unsupported or absent timeline: expected a timing mode and at most four keys.');
+    const keys = source.keys.map((key, index) => {
         if (!key || !Number.isInteger(key.ease) || key.ease < 0 || key.ease > 4 || typeof key.reverse !== 'boolean'
-            || !Number.isInteger(key.durationMilliseconds) || key.durationMilliseconds < 0) throw new Error('Unsupported easing or invalid key.');
-        return { ease: key.ease, reverse: key.reverse, durationMilliseconds: key.durationMilliseconds };
+            || !Number.isInteger(key.durationMilliseconds) || key.durationMilliseconds < 0 || key.durationMilliseconds > 2147483647)
+            throw new Error('Unsupported easing or invalid key.');
+        // Loaded native functions use durations; GBX.NET retains raw archived endpoints.
+        // Difference original neighbours, preserving the caller's flag and time words.
+        const durationMilliseconds = source.isDuration || index === 0 ? key.durationMilliseconds
+            : Math.max(0, key.durationMilliseconds - source.keys[index - 1].durationMilliseconds);
+        return { ease: key.ease, reverse: key.reverse, durationMilliseconds };
     });
     const total = keys.reduce((sum, key) => sum + key.durationMilliseconds, 0);
     if (total > 2147483647) throw new Error('Duration exceeds the supported millisecond range.');
@@ -219,11 +227,13 @@ window.init3DViewer = function (containerId, dotNetRef) {
         camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
     };
     window.addEventListener('resize', resizeHandler);
+    resizeObserver = new ResizeObserver(resizeHandler);
+    resizeObserver.observe(container);
 };
 function disposeObjectResources(root) {
     const geometries = new Set(), materials = new Set();
     root.traverse(child => {
-        if (child.geometry) geometries.add(child.geometry);
+        if (child.geometry && !pooledGeometry.has(child.geometry)) geometries.add(child.geometry);
         if (child.material) (Array.isArray(child.material) ? child.material : [child.material]).forEach(m => materials.add(m));
     });
     geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose());
@@ -232,9 +242,11 @@ window.dispose3DViewer = function () {
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
     animationFrameId = null; selectedGizmo = dotNetHelper = null;
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+    resizeObserver?.disconnect(); resizeObserver = null;
     resizeHandler = null;
     if (transformControls) { transformControls.detach(); transformControls.dispose(); scene?.remove(transformControls); }
     controls?.dispose(); if (scene) disposeObjectResources(scene);
+    releaseGeometryPool();
     if (renderer) { renderer.dispose(); renderer.domElement.remove(); }
     renderer = scene = camera = controls = transformControls = null;
     staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = socketsGroup = gridHelper = null;
@@ -257,22 +269,47 @@ function mapping(value) {
     if (value.materialPath != null && (typeof value.materialPath !== 'string' || !value.materialPath)) throw new Error('Invalid material path.');
     return { materialIndex: value.materialIndex ?? null, lodMask: value.lodMask ?? null, materialPath: value.materialPath ?? null };
 }
-function makePart(part, owner) {
-    const positions = buffer(part.positions ?? part.Positions, 'Positions', 3), indices = part.indices ?? part.Indices;
-    if (!Array.isArray(indices) || indices.length % 3 || indices.some(x => !Number.isInteger(x) || x < 0 || x >= positions.length / 3)) throw new Error('Invalid triangle indices.');
-    for (const [key, stride] of [['normals', 3], ['uvs', 2]])
-        if (part[key] != null && buffer(part[key], key, stride).length / stride !== positions.length / 3) throw new Error(`${key} count does not match vertices.`);
-    const mappings = part.mappings == null ? [mapping(part)] : part.mappings.map(mapping);
-    const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geometry.setIndex(indices);
-    if (part.normals != null) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(part.normals, 3)); else geometry.computeVertexNormals();
+function geometryWords(bytes, integer = false) {
+    if (!(bytes instanceof Uint8Array) || bytes.byteLength % 4) throw new Error('Invalid binary geometry buffer.');
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const values = integer ? new Int32Array(bytes.byteLength / 4) : new Float32Array(bytes.byteLength / 4);
+    for (let i = 0; i < values.length; i++) values[i] = integer ? view.getInt32(i * 4, true) : view.getFloat32(i * 4, true);
+    return values;
+}
+function buildGeometry(part) {
+    const positions = buffer(part.positionsBytes == null ? part.positions ?? part.Positions : geometryWords(part.positionsBytes), 'Positions', 3);
+    const indices = part.indicesBytes == null ? part.indices ?? part.Indices : geometryWords(part.indicesBytes, true);
+    const normals = part.normalsBytes == null ? part.normals : geometryWords(part.normalsBytes);
+    if (!(Array.isArray(indices) || indices instanceof Int32Array) || indices.length % 3 || indices.some(x => !Number.isInteger(x) || x < 0 || x >= positions.length / 3)) throw new Error('Invalid triangle indices.');
+    for (const [value, key, stride] of [[normals, 'normals', 3], [part.uvs, 'uvs', 2]])
+        if (value != null && buffer(value, key, stride).length / stride !== positions.length / 3) throw new Error(`${key} count does not match vertices.`);
+    const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices instanceof Int32Array ? new THREE.BufferAttribute(new Uint32Array(indices), 1) : indices);
+    if (normals != null) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); else geometry.computeVertexNormals();
     if (part.uvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(part.uvs, 2));
-    if (owner) geometry.applyMatrix4(owner.inverseChild);
-    if ([...geometry.attributes.position.array, ...geometry.attributes.normal.array].some(x => !Number.isFinite(x))) { geometry.dispose(); throw new Error('Rest transform overflows geometry.'); }
+    if (geometry.attributes.normal.array.some(x => !Number.isFinite(x))) { geometry.dispose(); throw new Error('Normals overflow geometry.'); }
+    geometry.computeBoundingBox();
+    return geometry;
+}
+function makePart(part, owner, bounds, pool) {
+    const mappings = part.mappings == null ? [mapping(part)] : part.mappings.map(mapping);
+    const shared = part.geometryId != null;
+    const world = shared ? restMatrix(part.worldTransform, 'Instance transform') : new THREE.Matrix4();
+    const geometry = shared ? pool.get(part.geometryId) : buildGeometry(part);
+    if (!geometry) throw new Error('Unknown shared geometry.');
+    const instance = owner ? owner.inverseChild.clone().multiply(world) : world;
+    const box = geometry.boundingBox.clone().applyMatrix4(world);
+    if ([...(box.isEmpty() ? [] : [...box.min.toArray(), ...box.max.toArray()]), ...instance.elements].some(x => !Number.isFinite(x) || !Number.isFinite(Math.fround(x)))) {
+        if (!shared) geometry.dispose();
+        throw new Error('Rest transform overflows geometry.');
+    }
+    bounds.union(box);
     // Game textures are not available in this payload. Keep real geometry
     // readable with a neutral, lit material; never substitute fake geometry.
     const material = new THREE.MeshStandardMaterial({ color: part.isCollision ? 0x38d9b3 : 0xb8bdc6,
         metalness: 0, roughness: .75, side: THREE.DoubleSide, wireframe: part.isCollision || isWireframe, transparent: Boolean(part.isCollision), opacity: part.isCollision ? .35 : 1 });
     const mesh = new THREE.Mesh(geometry, material); mesh.name = part.name ?? part.path ?? '';
+    mesh.matrixAutoUpdate = false; mesh.matrix.copy(instance);
     mesh.userData = { path: part.path, entityPath: part.entityPath, isCollision: Boolean(part.isCollision), mappings }; return mesh;
 }
 function makeGizmo(data, index, type) {
@@ -307,35 +344,46 @@ function renderPayload(input, preserveCamera) {
     if (!scene) return;
     const data = structuredClone(typeof input === 'string' ? JSON.parse(input) : input);
     if (!data || typeof data !== 'object') throw new Error('Scene payload required.');
-    isPlaying = data.playing !== false;
-    legacyMotion = (data.motions?.length ?? 0) === 0 && (data.hasTranslationMotion || data.isOscillating)
+    const nextLegacyMotion = (data.motions?.length ?? 0) === 0 && (data.hasTranslationMotion || data.isOscillating)
         ? { period: data.animationPeriodSeconds, phase: data.animationPhaseSeconds, min: data.minAngle, max: data.maxAngle,
             axis: data.animAxis, oscillating: data.isOscillating, distance: data.translationDistance,
             translation: data.hasTranslationMotion ? data.translationAxis : null, harmonic: data.harmonicEasing }
         : null;
     const motions = compileMotions(data.motions ?? []), offset = phase(data.previewPhase01 ?? 0), owners = new Map(motions.map(m => [m.childPath, m]));
     const staged = Array.from({ length: 6 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
+    const epoch = data.geometryEpoch ?? null;
+    if (epoch !== null && (!Number.isSafeInteger(epoch) || epoch < 0)) throw new Error('Invalid geometry epoch.');
+    const pool = epoch === geometryEpoch ? new Map(sharedGeometry) : new Map();
+    const added = [];
     // Stage before replacing: rejected payloads leave the current scene and playback intact.
     try {
+        for (const definition of data.geometryDefinitions ?? []) {
+            if (epoch === null || !Number.isSafeInteger(definition.geometryId) || definition.geometryId < 0 || pool.has(definition.geometryId))
+                throw new Error('Invalid or duplicate shared geometry identity.');
+            const geometry = buildGeometry(definition);
+            pooledGeometry.add(geometry); added.push(geometry); pool.set(definition.geometryId, geometry);
+        }
         for (const motion of motions) {
             const pair = [new THREE.Group(), new THREE.Group()];
             pair.forEach(group => { group.matrixAutoUpdate = false; group.matrix.copy(motion.childRest); });
             staged[1].add(pair[0]); staged[2].add(pair[1]); groups.set(motion.childPath, pair);
         }
         for (const part of data.parts ?? []) {
-            const owner = owners.get(part.entityPath), mesh = makePart(part, owner);
+            const owner = owners.get(part.entityPath), mesh = makePart(part, owner, bounds, pool);
             if (owner) groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
             else staged[part.isCollision ? 2 : (part.isMoving ? 1 : 0)].add(mesh);
-            const authored = part.positions ?? part.Positions;
-            for (let i = 0; i < authored.length; i += 3) bounds.expandByPoint(new THREE.Vector3().fromArray(authored, i));
         }
         for (const [property, type, target] of [['pivots', 'pivot', 3], ['lights', 'light', 4], ['sockets', 'socket', 5]])
             (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type); staged[target].add(group); bounds.expandByPoint(group.position); });
-    } catch (error) { staged.forEach(disposeObjectResources); throw error; }
-    window.clearViewerScene();
+    } catch (error) { staged.forEach(disposeObjectResources); added.forEach(g => g.dispose()); throw error; }
+    window.clearViewerScene(true);
+    if (epoch !== geometryEpoch) releaseGeometryPool();
+    sharedGeometry = pool; geometryEpoch = epoch;
     const destinations = [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsGroup];
     staged.forEach((group, index) => { while (group.children.length) destinations[index].add(group.children[0]); });
-    typedMotions = motions; motionGroups = groups; previewPhase01 = offset; currentPayload = data;
+    isPlaying = data.playing !== false; legacyMotion = nextLegacyMotion;
+    typedMotions = motions; motionGroups = groups; previewPhase01 = offset;
+    currentPayload = { ...data, geometryDefinitions: [] };
     applyTypedMotion(); applySceneFilter(); applyLayerVisibility(); if (!preserveCamera) frameCamera(bounds);
 }
 window.renderStudioScene = payload => renderPayload(payload, false);
@@ -345,7 +393,10 @@ window.setTypedMotionPreview = function (value) {
     compileMotions(motions); phase(value.previewPhase01 ?? previewPhase01);
     if (currentPayload) renderPayload({ ...currentPayload, motions, previewPhase01: value.previewPhase01 ?? previewPhase01 }, true);
 };
-window.clearViewerScene = function () {
+function releaseGeometryPool() {
+    sharedGeometry.forEach(g => g.dispose()); sharedGeometry.clear(); geometryEpoch = null;
+}
+window.clearViewerScene = function (keepGeometry = false) {
     transformControls?.detach(); selectedGizmo = null;
     for (const group of [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsGroup]) {
         if (!group) continue;
@@ -353,6 +404,7 @@ window.clearViewerScene = function () {
         group.position.set(0, 0, 0); group.rotation.set(0, 0, 0); group.scale.set(1, 1, 1);
     }
     typedMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
+    if (!keepGeometry) releaseGeometryPool();
 };
 // Older hosts may call these APIs, but generic/fallback motion is never inferred from them.
 window.setMotionPreview = value => { if (value?.motions) window.setTypedMotionPreview(value); };

@@ -75,6 +75,17 @@ the current checkout automatically; no development server is needed. See
 
 ## Notes
 
+Imported kinematic constraints retain their authored axes, scalar ranges, easing,
+reversed keys and separate translation/rotation timelines. The kinematics panel
+edits those stored fields directly; it does not replace them with a preset.
+Unsupported preview modes (including `IsDuration=true`) are reported and preserved,
+with no generic fallback animation. This is not a native-playback parity claim.
+
+Run `npm --prefix Tests/Browser run test:kinematic-preservation` for the real
+SnowCar upload → variant switching → explicit edit → export → reopen regression.
+See [the test contract](Tests/Browser/MotionArchive/README.md) and the
+[additional approved fixtures](Tests/Browser/Fixtures/Approved/additional-items.md).
+
 The project includes a compatibility-patched `GBX.NET` assembly. Editor++
 multi-variant items can contain valid `0xFFFFFFFF` null node references inside
 surface data. The upstream parser currently treats one of these references as

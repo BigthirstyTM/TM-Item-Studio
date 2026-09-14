@@ -16,45 +16,35 @@
 
 <PageTitle>Trackmania 2020 Item Studio</PageTitle>
 
-<div class="studio-header d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h3 class="mb-0">Trackmania 2020 Item Studio</h3>
-        <small class="text-muted">Interactive 3D editor for Trackmania .Item.Gbx files</small>
-    </div>
-    <div class="studio-upload">
-        <label for="item-upload" class="small fw-bold">Open item files</label>
-        <InputFile id="item-upload" OnChange="LoadFiles" multiple accept=".gbx" class="form-control form-control-sm" />
-    </div>
-    <details class="studio-diagnostics">
-        <summary class="btn btn-sm btn-outline-secondary">Diagnostics (@modelDiagnostics.Count)</summary>
-        <div class="studio-diagnostics-panel">
-        <button class="btn btn-sm btn-outline-secondary mb-2" @onclick="DownloadDebugReport">Download debug report</button>
-        <p class="small text-muted">Reports contain model names, authors and referenced filenames. Review before sharing; nothing is uploaded.</p>
-        <ul class="small">
-            @foreach (var diagnostic in modelDiagnostics)
-            {
-                <li><code>@diagnostic.Code</code>: @diagnostic.Message</li>
-            }
-        </ul>
-        </div>
-    </details>
-</div>
-
-@if (variantSources.Count > 0)
-{
-    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-        <strong>Variants (@variantSources.Count)</strong>
-        @for (int i = 0; i < variantSources.Count; i++)
+<header class="studio-header">
+    <h3>Trackmania 2020 Item Studio</h3>
+    <div class="studio-documents" aria-label="Loaded files">
+        @foreach (var file in LoadedFiles())
         {
-            var variantIndex = i;
-            <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="@(() => SelectVariant(variantIndex))">
-                @(variantIndex + 1). @variantSources[variantIndex].Name
-            </button>
+            <strong class="studio-variant-filename" title="@file.Label">@file.Label</strong>
         }
-        <span class="text-muted small">Select an item or variant to preview. Export preserves every variant in the selected file.</span>
     </div>
-}
+    <div class="studio-header-tools">
+        <details class="studio-diagnostics">
+            <summary class="btn btn-sm btn-outline-secondary">Diagnostics (@modelDiagnostics.Count)</summary>
+            <div class="studio-diagnostics-panel">
+                <button class="btn btn-sm btn-outline-secondary mb-2" @onclick="DownloadDebugReport">Download debug report</button>
+                <p class="small text-muted">Reports contain model names, authors and referenced filenames. Review before sharing; nothing is uploaded.</p>
+                <ul class="small">
+                    @foreach (var diagnostic in modelDiagnostics)
+                    {
+                        <li><code>@diagnostic.Code</code>: @diagnostic.Message</li>
+                    }
+                </ul>
+            </div>
+        </details>
+        <div class="studio-upload">
+            <label for="item-upload" class="btn btn-sm btn-outline-secondary">Open item files</label>
+            <InputFile id="item-upload" OnChange="LoadFiles" multiple accept=".gbx" class="visually-hidden" />
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="studioTheme.toggle()" aria-label="Switch light or dark theme">Light / dark</button>
+    </div>
+</header>
 
 @if (isLoading)
 {
@@ -75,11 +65,11 @@
     <div class="studio-workspace">
         
         <!-- ================= 3D VIEWPORT ================= -->
-        <div>
-            <div style="background: #111; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);">
+        <div class="studio-viewport-column">
+            <div class="studio-viewport">
                 
                 <!-- Viewport Toolbar -->
-                <div style="padding: 8px 12px; background: #1f1f23; border-bottom: 1px solid #2d2d32; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div class="studio-viewport-toolbar">
                     <!-- Layer toggles -->
                     <div class="btn-group btn-group-sm">
                         <button class="btn @(showMeshes ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("meshes"))">
@@ -96,22 +86,47 @@
                         </button>
                     </div>
 
+                    <div class="studio-variants" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
+                        @foreach (var file in LoadedFiles())
+                        {
+                            <div class="studio-variant-file" role="group" aria-label="@file.Label">
+                                @if (CanCombineFiles) { <span class="studio-variant-group-label" title="@file.Label">@file.Label</span> }
+                                <div class="studio-variant-buttons">
+                                    @foreach (var entry in file.Entries)
+                                    {
+                                        var variantIndex = entry.Index;
+                                        <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
+                                                aria-label="@($"{variantIndex + 1}. {entry.Source.Name}")" title="@($"{file.Label} — variant {entry.Source.VariantNumber}")"
+                                                aria-pressed="@((variantIndex == activeVariantIndex).ToString().ToLowerInvariant())"
+                                                aria-disabled="@isSelectingVariant.ToString().ToLowerInvariant()" @onclick="@(() => SelectVariant(variantIndex))">
+                                            @entry.Source.VariantNumber
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <span class="visually-hidden" role="status">@(isSelectingVariant ? "Loading variant…" : "Variant ready. Export preserves every variant in the selected file.")</span>
+                    </div>
+
                     <!-- Animation and general controls -->
-                    <div style="display: flex; gap: 6px; align-items: center;">
+                    <div class="studio-view-controls">
                         @if (isMovingItem)
                         {
                             <button class="btn btn-sm @(isPlaying ? "btn-warning" : "btn-success")" @onclick="ToggleAnimation">
                                 @(isPlaying ? "⏸" : "▶")
                             </button>
-                            <select class="form-select form-select-sm" style="width: auto;" value="@detectedAxis" @onchange="OnAxisChanged">
-                                <option value="y">Y Axis</option>
-                                <option value="x">X Axis</option>
-                                <option value="z">Z Axis</option>
-                            </select>
+                            @if (authoredConstraints.Count == 0)
+                            {
+                                <select class="form-select form-select-sm" style="width: auto;" value="@detectedAxis" @onchange="OnAxisChanged">
+                                    <option value="y">Y Axis</option>
+                                    <option value="x">X Axis</option>
+                                    <option value="z">Z Axis</option>
+                                </select>
+                            }
                         }
                         <button class="btn btn-sm btn-outline-light" @onclick="ToggleWireframe">Wire</button>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset Camera</button>
-                        @if (!string.IsNullOrEmpty(rawObj))
+                        @if (hasMesh)
                         {
                             <button class="btn btn-sm btn-outline-success" @onclick="DownloadObj">.OBJ</button>
                         }
@@ -119,7 +134,7 @@
                 </div>
                 
                 <!-- 3D Canvas container -->
-                <div id="threeContainer" style="width: 100%; height: 550px; position: relative;">
+                <div id="threeContainer">
                 </div>
             </div>
             @if (!hasMesh)
@@ -127,7 +142,7 @@
                 <p class="small mt-2" role="status">No mesh geometry available. See Model diagnostics for external or unsupported references.</p>
             }
             
-            <div class="mt-2 d-flex justify-content-between text-muted small flex-wrap">
+            <div class="studio-viewport-caption text-muted small">
                 <div>
                     <span><span style="color: #b8bdc6;">■</span> Mesh</span>
                     <span class="ms-2"><span style="color: #facc15;">●</span> Pivot</span>
@@ -147,50 +162,50 @@
         <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
         <div class="studio-inspector">
             
-            <div class="d-flex flex-column gap-1 p-2 bg-light border-bottom" style="font-size: 0.85em;">
+            <div class="studio-inspector-tabs p-2 bg-light border-bottom">
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "general" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("general"))">
-                        <span>Item Identification & Collector Metadata</span><span>@(activeTab == "general" ? "−" : "+")</span>
+                    <button aria-label="Item Identification & Collector Metadata" aria-expanded="@((activeTab == "general").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "general" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("general"))">
+                        <span>Identity</span><span>@(activeTab == "general" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "placement" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("placement"))">
-                        <span>Placement Parameters & PivotPositions</span><span>@(activeTab == "placement" ? "−" : "+")</span>
+                    <button aria-label="Placement Parameters & PivotPositions" aria-expanded="@((activeTab == "placement").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "placement" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("placement"))">
+                        <span>Placement & pivots</span><span>@(activeTab == "placement" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "gameplay" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("gameplay"))">
-                        <span>WaypointType, Gameplay & Kinematics</span><span>@(activeTab == "gameplay" ? "−" : "+")</span>
+                    <button aria-label="WaypointType, Gameplay & Kinematics" aria-expanded="@((activeTab == "gameplay").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "gameplay" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("gameplay"))">
+                        <span>Kinematics</span><span>@(activeTab == "gameplay" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "lights" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("lights"))">
-                        <span>Dynamic Real-Time Lights (@detectedLights.Count)</span><span>@(activeTab == "lights" ? "−" : "+")</span>
+                    <button aria-label="@($"Dynamic Real-Time Lights ({detectedLights.Count})")" aria-expanded="@((activeTab == "lights").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "lights" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("lights"))">
+                        <span>Lights (@detectedLights.Count)</span><span>@(activeTab == "lights" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
-                        <span>Socket Positions (@detectedSockets.Count)</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
+                    <button aria-label="@($"Socket Positions ({detectedSockets.Count})")" aria-expanded="@((activeTab == "sockets").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
+                        <span>Sockets (@detectedSockets.Count)</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "physics" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("physics"))">
-                        <span>PhyModel, CPlugSurface & Collision</span><span>@(activeTab == "physics" ? "−" : "+")</span>
+                    <button aria-label="PhyModel, CPlugSurface & Collision" aria-expanded="@((activeTab == "physics").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "physics" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("physics"))">
+                        <span>Collision</span><span>@(activeTab == "physics" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "visual" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("visual"))">
-                        <span>VisModel, Materials & LOD</span><span>@(activeTab == "visual" ? "−" : "+")</span>
+                    <button aria-label="VisModel, Materials & LOD" aria-expanded="@((activeTab == "visual").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "visual" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("visual"))">
+                        <span>Materials & LOD</span><span>@(activeTab == "visual" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "extras" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("extras"))">
-                        <span>Audio, CPlugFx & MediaTracker Triggers</span><span>@(activeTab == "extras" ? "−" : "+")</span>
+                    <button aria-label="Audio, CPlugFx & MediaTracker Triggers" aria-expanded="@((activeTab == "extras").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "extras" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("extras"))">
+                        <span>Audio & effects</span><span>@(activeTab == "extras" ? "−" : "+")</span>
                     </button>
                 </div>
             </div>
 
-            <div class="p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
+            <div class="studio-inspector-content p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
                 
                 @if (activeTab == "general")
                 {
@@ -441,8 +456,7 @@
 
                 @if (activeTab == "gameplay")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">3. WaypointType & Kinematics <span class="text-muted" title="WaypointType and CPlugAnim/CPlugTrajectory settings control gameplay and moving parts.">?</span></h6>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label mb-0 fw-bold">Waypoint Type</label>
                         <select class="form-select form-select-sm" @bind="itemModel.WaypointType">
                             @foreach (var wp in Enum.GetValues<CGameItemModel.EWaypointType>())
@@ -450,13 +464,10 @@
                                 <option value="@wp">@wp</option>
                             }
                         </select>
-                        <small class="text-muted">
-                            Start, Finish, Checkpoint, Turbo, FreeWheeling, Fragile, NoBrakes, SlowMotion, etc.
-                        </small>
                     </div>
 
-                    <h6 class="border-bottom pb-1 mt-4 text-primary">ItemType conversion</h6>
-                    <div class="card p-3 bg-light mb-3">
+                    <h6 class="border-bottom pb-1 text-primary">@(authoredConstraints.Count > 0 ? "Kinematic controls" : "ItemType conversion")</h6>
+                    <div class="@(authoredConstraints.Count > 0 ? "authored-motion-shell" : "card p-3 bg-light mb-3")">
                         @if (!isMovingItem)
                         {
                             <p class="small text-muted mb-2">
@@ -465,6 +476,18 @@
                             <button class="btn btn-sm btn-outline-warning text-dark fw-bold" @onclick="ConvertToKinematic">
                                 ⚙️ Convert to KinematicObject
                             </button>
+                        }
+                        else if (authoredConstraints.Count > 0)
+                        {
+                            <p role="status" class="small text-muted mb-2" title="Only explicit edits change the file. A shared constraint affects all its instances.">Using authored motion settings</p>
+                            @foreach (var diagnostic in motionDiagnostics)
+                            {
+                                <p role="status" class="small text-warning">Preview unavailable: @diagnostic</p>
+                            }
+                            @for (var i = 0; i < authoredConstraints.Count; i++)
+                            {
+                                <AuthoredMotionEditor @key="authoredConstraints[i]" Name="@($"Constraint {i + 1}")" Source="authoredConstraints[i]" Changed="UpdateScenePayload" />
+                            }
                         }
                         else
                         {
@@ -744,6 +767,18 @@
 }
 
 @code {
+    private IEnumerable<(string Label, (ItemVariantSource Source, int Index)[] Entries)> LoadedFiles()
+    {
+        var files = variantSources.Select((source, index) => (Source: source, Index: index)).GroupBy(v => v.Source.GbxFile).ToArray();
+        for (var i = 0; i < files.Length; i++)
+        {
+            var filename = files[i].First().Source.FileName;
+            var label = files.Count(f => string.Equals(f.First().Source.FileName, filename, StringComparison.OrdinalIgnoreCase)) > 1
+                ? $"{filename} (file {i + 1})" : filename;
+            yield return (label, files[i].ToArray());
+        }
+    }
+
     private CGameItemModel? itemModel;
     private Gbx<CGameItemModel>? gbxFile;
     private bool isLoading = false;
@@ -752,7 +787,7 @@
     private bool isMovingItem = false;
     private bool isPlaying = true;
     private int vertexCount = 0;
-    private string? rawObj;
+    private bool isSelectingVariant;
     private bool isViewerInitialized = false;
     private string activeTab = "general";
     private DotNetObjectReference<Home>? dotNetHelper;
@@ -792,6 +827,11 @@
     private float[] translationMin = new float[3];
     private float[] translationMax = new float[3];
     private object? activeKinematicConstraint;
+    private ItemSceneResult? authoredMotionScene;
+    private readonly ItemSceneGeometryCache geometryCache = new();
+    private readonly HashSet<int> uploadedGeometry = new();
+    private readonly List<NPlugDyna_SKinematicConstraint> authoredConstraints = new();
+    private IReadOnlyList<string> motionDiagnostics = Array.Empty<string>();
     private bool showOriginalMotion;
     private string originalConstraintType = "Not found";
     private readonly List<OriginalMotionSetting> originalMotionSettings = new();
@@ -885,7 +925,7 @@
 
         await JS.InvokeVoidAsync("init3DViewer", "threeContainer", dotNetHelper);
         isViewerInitialized = true;
-        await UpdateScenePayload();
+        await UpdateScenePayload(authoredMotionScene);
         if (iconPreviewPending)
         {
             await RenderIconPreview();
@@ -898,11 +938,12 @@
         isLoading = true;
         errorMessage = null;
         variantSources.Clear();
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
         activeVariantIndex = 0;
         itemModel = null;
         hasMesh = false;
         isMovingItem = false;
-        rawObj = null;
         modelParts.Clear();
         detectedPivots.Clear();
         detectedLights.Clear();
@@ -925,6 +966,9 @@
         translationMin = new float[3];
         translationMax = new float[3];
         activeKinematicConstraint = null;
+        authoredMotionScene = null;
+        authoredConstraints.Clear();
+        motionDiagnostics = Array.Empty<string>();
         showOriginalMotion = false;
         originalConstraintType = "Not found";
         originalMotionSettings.Clear();
@@ -970,15 +1014,28 @@
 
     private async Task SelectVariant(int index)
     {
-        if (index < 0 || index >= variantSources.Count) return;
+        if (isSelectingVariant || index < 0 || index >= variantSources.Count) return;
+        isSelectingVariant = true;
+        errorMessage = null;
+        try
+        {
+            StateHasChanged();
+            await Task.Yield();
+            await LoadVariant(index);
+        }
+        catch (Exception ex) { errorMessage = "Error while loading variant: " + ex.Message; }
+        finally { isSelectingVariant = false; }
+    }
 
+    private async Task LoadVariant(int index)
+    {
         activeVariantIndex = index;
         var source = variantSources[index];
+        iconPreviewPending |= !ReferenceEquals(itemModel, source.Model);
         itemModel = source.Model;
         gbxFile = source.GbxFile;
         hasMesh = false;
         isMovingItem = false;
-        rawObj = null;
         modelParts.Clear();
         detectedPivots.Clear();
         detectedLights.Clear();
@@ -1003,23 +1060,27 @@
         originalConstraintType = "Not found";
         originalMotionSettings.Clear();
         originalMotionAvailable = false;
-        iconPreviewPending = true;
 
         identId = itemModel.Ident?.Id ?? "";
         identAuthor = itemModel.Ident?.Author ?? "";
         identCollection = itemModel.Ident?.Collection.ToString() ?? "";
-        ExtractParts(source.PreviewRoot);
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        ExtractParts(source.PreviewRoot, includeGeometry: authoredConstraints.Count == 0);
         ExtractPivotsAndSockets(itemModel);
+        if (authoredConstraints.Count > 0) UseAuthoredModelParts(authoredMotionScene);
+        isMovingItem = isMovingItem || authoredConstraints.Count > 0;
+        motionDiagnostics = AuthoredMotionPreview.Build(authoredMotionScene).Diagnostics;
 
         if (modelParts.Count > 0)
         {
             hasMesh = true;
             vertexCount = modelParts.Sum(p => p.Positions.Length / 3);
-            rawObj = BuildObjExport();
         }
 
         if (isViewerInitialized)
-            await UpdateScenePayload();
+            await UpdateScenePayload(authoredMotionScene);
         else
             StateHasChanged();
         await RefreshDebugDiagnostics();
@@ -1042,11 +1103,74 @@
         return sb.ToString();
     }
 
-    private async Task UpdateScenePayload()
+    private void UseAuthoredModelParts(ItemSceneResult selectedScene)
     {
+        var movingPaths = AuthoredMotionPreview.Build(selectedScene).Tracks.Select(t => t.ChildPath).ToHashSet();
+        modelParts = selectedScene.Preview.Geometry.Where(g => !g.IsCollision).Select(g => new ModelPart
+        {
+            Name = g.Path, IsMoving = g.EntityPath is not null && movingPaths.Contains(g.EntityPath),
+            Positions = g.Positions, Indices = g.Indices
+        }).ToList();
+    }
+
+    private ItemSceneResult ReadSelectedScene()
+    {
+        var source = variantSources[activeVariantIndex];
+        var document = variantSources.Select(s => s.GbxFile).Distinct().ToList().IndexOf(source.GbxFile);
+        int? variant = source.Model.EntityModel is NPlugItem_SVariantList { Variants: { } variants } && source.Variant is { } selected
+            ? Array.IndexOf(variants, selected) : null;
+        return ItemScene.Build(source.PreviewRoot, document, variant, geometryCache);
+    }
+
+    private Task UpdateScenePayload()
+    {
+        // All edit callbacks enter here. Invalidate shared sources across every variant,
+        // including in-place array edits; selection alone keeps the document's geometry.
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        return UpdateScenePayload(null);
+    }
+
+    private async Task UpdateScenePayload(ItemSceneResult? selectedScene)
+    {
+        if (authoredMotionScene is { } authoredScene && authoredConstraints.Count > 0)
+        {
+            // Traversal and motion stay fresh; immutable geometry survives selection.
+            authoredScene = selectedScene ?? ReadSelectedScene();
+            authoredMotionScene = authoredScene;
+            UseAuthoredModelParts(authoredScene);
+            var motion = AuthoredMotionPreview.Build(authoredScene);
+            motionDiagnostics = motion.Diagnostics;
+            var definitions = authoredScene.Preview.Geometry.Where(g => g.GeometryId.HasValue && !uploadedGeometry.Contains(g.GeometryId.Value))
+                .GroupBy(g => g.GeometryId!.Value).Select(group => group.First()).ToArray();
+            var epoch = geometryCache.Epoch;
+            await JS.InvokeVoidAsync("renderStudioScene", new
+            {
+                geometryEpoch = epoch,
+                geometryDefinitions = definitions.Select(g => new { geometryId = g.GeometryId,
+                    positionsBytes = ViewerBuffers.Pack(g.LocalPositions), indicesBytes = ViewerBuffers.Pack(g.Indices),
+                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals) }),
+                parts = authoredScene.Preview.Geometry.Select(g => new
+                {
+                    path = g.Path, entityPath = g.EntityPath, geometryId = g.GeometryId, worldTransform = g.WorldTransform,
+                    positionsBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Positions),
+                    indicesBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Indices),
+                    normalsBytes = g.GeometryId.HasValue || g.Normals is null ? null : ViewerBuffers.Pack(g.Normals),
+                    isCollision = g.IsCollision
+                }),
+                motions = motion.Tracks,
+                pivots = detectedPivots, lights = detectedLights, sockets = detectedSockets,
+                playing = isPlaying
+            });
+            if (geometryCache.Epoch == epoch)
+                foreach (var definition in definitions) uploadedGeometry.Add(definition.GeometryId!.Value);
+            return;
+        }
         var scenePayload = new
         {
-            parts = modelParts,
+            geometryEpoch = geometryCache.Epoch,
+            parts = modelParts.Select(p => new { p.Name, p.IsMoving,
+                positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices) }),
             pivots = detectedPivots,
             lights = detectedLights,
             sockets = detectedSockets,
@@ -1474,7 +1598,7 @@
         }
     }
 
-    private void ExtractParts(CMwNod? previewRoot)
+    private void ExtractParts(CMwNod? previewRoot, bool includeGeometry = true)
     {
         CPlugPrefab? prefab = null;
         FindPrefab(previewRoot, ref prefab, new HashSet<object>(), 0);
@@ -1505,7 +1629,7 @@
                     var indices = new List<int>();
                     var visited = new HashSet<object>();
 
-                    CrawlNode(ent.Model, positions, indices, visited, 0, ent.Position, ent.Rotation);
+                    CrawlNode(ent.Model, positions, indices, visited, 0, ent.Position, ent.Rotation, includeGeometry);
 
                     if (positions.Count > 0)
                     {
@@ -1529,13 +1653,13 @@
             }
         }
 
-        if (modelParts.Count == 0)
+        if (modelParts.Count == 0 && (includeGeometry || prefab is null))
         {
             var positions = new List<float>();
             var indices = new List<int>();
             var visited = new HashSet<object>();
 
-            CrawlNode(previewRoot, positions, indices, visited, 0, null, null);
+            CrawlNode(previewRoot, positions, indices, visited, 0, null, null, includeGeometry);
 
             if (positions.Count > 0)
             {
@@ -1648,6 +1772,7 @@
             originalTranslationMax = (float[])translationMax.Clone();
             originalPivotOffset = new[] { pivotOffsetX, pivotOffsetY, pivotOffsetZ };
             originalMotionAvailable = true;
+            showOriginalMotion = true;
         }
         catch { }
     }
@@ -1698,6 +1823,7 @@
 
     private async Task OnKinematicChanged()
     {
+        if (authoredConstraints.Count > 0) return;
         ApplyKinematicProperty("AngleMinDeg", minAngle);
         ApplyKinematicProperty("AngleMaxDeg", maxAngle);
         ApplyKinematicProperty("TransDist", translationDistance);
@@ -1762,7 +1888,7 @@
         }
     }
 
-    private void CrawlNode(object? obj, List<float> positions, List<int> indices, HashSet<object> visited, int depth, Vec3? offsetPos, Quat? offsetRot)
+    private void CrawlNode(object? obj, List<float> positions, List<int> indices, HashSet<object> visited, int depth, Vec3? offsetPos, Quat? offsetRot, bool includeGeometry = true)
     {
         if (obj == null || depth > 12 || visited.Contains(obj)) return;
         visited.Add(obj);
@@ -1798,7 +1924,7 @@
                 foreach (var ent in prefab.Ents)
                 {
                     if (ent.Model != null)
-                        CrawlNode(ent.Model, positions, indices, visited, depth + 1, ent.Position, ent.Rotation);
+                        CrawlNode(ent.Model, positions, indices, visited, depth + 1, ent.Position, ent.Rotation, includeGeometry);
                 }
             }
             return;
@@ -1806,19 +1932,19 @@
 
         if (obj is CPlugVisualIndexedTriangles mesh)
         {
-            ExtractMeshFromVisual(mesh, positions, indices, offsetPos, offsetRot);
+            if (includeGeometry) ExtractMeshFromVisual(mesh, positions, indices, offsetPos, offsetRot);
             return;
         }
 
         if (obj is CPlugTree tree)
         {
             if (tree.Visual != null)
-                CrawlNode(tree.Visual, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                CrawlNode(tree.Visual, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
 
             if (tree.Children != null)
             {
                 foreach (var child in tree.Children)
-                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
             }
             return;
         }
@@ -1833,7 +1959,7 @@
                 try
                 {
                     var child = prop.GetValue(obj);
-                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
                 }
                 catch { }
             }
@@ -1848,7 +1974,7 @@
                     {
                         foreach (var item in collection)
                             if (item != null && !item.GetType().IsPrimitive && item is not string)
-                                CrawlNode(item, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                                CrawlNode(item, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
                     }
                 }
                 catch { }
@@ -1956,6 +2082,7 @@
 
     private async Task OnAxisChanged(ChangeEventArgs e)
     {
+        if (authoredConstraints.Count > 0) return;
         if (e.Value != null)
         {
             detectedAxis = e.Value.ToString() ?? "y";
@@ -1969,10 +2096,10 @@
     
     private async Task DownloadObj()
     {
-        if (!string.IsNullOrEmpty(rawObj))
+        if (hasMesh)
         {
             string filename = (itemModel?.Ident?.Id ?? "item") + ".obj";
-            await JS.InvokeVoidAsync("downloadObjFile", filename, rawObj);
+            await JS.InvokeVoidAsync("downloadObjFile", filename, BuildObjExport());
         }
     }
 

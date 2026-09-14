@@ -27,8 +27,8 @@ public partial class Home
         ItemScenePreview? preview = null;
         try
         {
-            var source = variantSources[activeVariantIndex];
-            var scene = ItemScene.Build(source.PreviewRoot, 0);
+            // Share the selected scene's geometry cache, but keep diagnostic state fresh.
+            var scene = ReadSelectedScene();
             preview = scene.Preview;
             messages.AddRange(preview.Diagnostics.Take(200).Select(d => new DebugMessage(d.Code, d.Message)));
             // String-based legacy resource references are not GBX reference-table

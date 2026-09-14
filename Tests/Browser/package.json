@@ -5,7 +5,9 @@
     "test": "node viewer-lifecycle.cjs",
     "test:animation-upload": "node run-animation-upload.cjs",
     "test:collection-export": "node run-collection-export.cjs",
-    "test:debug-export": "node run-debug-export.cjs"
+    "test:debug-export": "node run-debug-export.cjs",
+    "test:kinematic-preservation": "node run-kinematic-preservation.cjs",
+    "test:variant-navigation": "node run-kinematic-preservation.cjs --variants"
   },
   "devDependencies": { "playwright": "1.61.1" }
 }

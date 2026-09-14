@@ -11,6 +11,29 @@ using TM_Item_Studio.Models;
 
 var failed = 0;
 var passed = 0;
+Check("document cache preserves shared occurrences, fresh paths and explicit edit invalidation", () =>
+{
+    var visual = Visual();
+    var solid = new CPlugSolid2Model { Visuals = new[] { visual } };
+    var first = new CPlugPrefab { Ents = new[] { Ent(new CPlugStaticObjectModel { Mesh = solid }, new Vec3(10, 0, 0)) } };
+    var second = new CPlugPrefab { Ents = new[] { Ent(new CPlugStaticObjectModel { Mesh = solid }, new Vec3(20, 0, 0)) } };
+    var cache = new ItemSceneGeometryCache();
+    var a = ItemScene.Build(first, 0, 0, cache).Preview.Geometry.Single();
+    var b = ItemScene.Build(second, 0, 1, cache).Preview.Geometry.Single();
+    var again = ItemScene.Build(first, 0, 2, cache).Preview.Geometry.Single();
+    Near(a.Positions.Take(3), 11, 0, 0); Near(b.Positions.Take(3), 21, 0, 0);
+    Require(a.GeometryId.HasValue && a.GeometryId == b.GeometryId, "Shared parsed visual identity lost across variants.");
+    Require(ReferenceEquals(a.LocalPositions, b.LocalPositions) && ReferenceEquals(a.Positions, again.Positions), "Geometry was rebuilt.");
+    Require(again.Path.Contains("variant:2") && again.EntityPath!.Contains("variant:2"), "Cache retained stale occurrence paths.");
+    var unrelated = ItemScene.Build(Visual(), 1, null, cache).Preview.Geometry.Single();
+    Require(unrelated.GeometryId != a.GeometryId, "Snapshot source ID aliased an unrelated visual.");
+    visual.VertexStreams[0].Positions![0] = new Vec3(5, 0, 0);
+    var epoch = cache.Epoch;
+    cache.Clear();
+    var edited = ItemScene.Build(second, 0, 1, cache).Preview.Geometry.Single();
+    Near(edited.Positions.Take(3), 25, 0, 0); Near(a.Positions.Take(3), 11, 0, 0);
+    Require(cache.Epoch != epoch && !ReferenceEquals(edited.LocalPositions, a.LocalPositions), "In-place edit did not invalidate buffers.");
+});
 Check("nested rotations, repeated prefab and original entry ownership", () =>
 {
     var solid = Solid();

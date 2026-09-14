@@ -6,3 +6,4 @@ obj/
 ParseProbe-output.Item.Gbx
 .vscode/
 node_modules/
+!Tests/Browser/Fixtures/Approved/TM2020/*.Item.Gbx

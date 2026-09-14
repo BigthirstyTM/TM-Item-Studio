@@ -48,6 +48,7 @@ var parsed = Reopen(SaveDoc(original));
 var root = parsed.Node.EntityModel;
 var sources = ItemVariantSource.FromFile("two", parsed);
 Check(sources.Count == 2, "Both variants must be available");
+Check(sources[1].FileName == "two" && sources[1].VariantNumber == 2 && sources[1].Name == "two 2", "Compact labels must retain complete file/variant identity");
 Check(sources[1].PreviewRoot is CPlugStaticObjectModel, "Non-prefab preview must use its actual entity");
 Check(ReferenceEquals(parsed.Node.EntityModel, root), "Selecting a preview must not replace the root");
 var saved = Reopen(Save(sources[1].Save));
