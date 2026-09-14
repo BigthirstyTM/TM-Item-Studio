@@ -68,6 +68,15 @@ const path = require('node:path');
         const multiple = await measure();
         assert.equal(multiple.overflow, false, 'Long filenames must not overflow the page');
         assert.ok(multiple.canvas.height >= 400 && multiple.inspector.bottom <= 720, JSON.stringify(multiple));
+        const clipping = await page.evaluate(() => {
+            const viewport = document.querySelector('.studio-viewport').getBoundingClientRect();
+            const canvas = document.querySelector('#threeContainer').getBoundingClientRect();
+            const variants = document.querySelector('.studio-variants').getBoundingClientRect();
+            const last = document.querySelector('.studio-variant-buttons button[aria-pressed="true"]').getBoundingClientRect();
+            return { canvasInside: canvas.y >= viewport.y && canvas.bottom <= viewport.bottom,
+                selectedInside: last.y >= variants.y && last.bottom <= variants.bottom };
+        });
+        assert.deepEqual(clipping, { canvasInside: true, selectedInside: true }, 'Canvas and selected variant must intersect their visible, unclipped regions');
         assert.ok(await page.getByRole('button', { name: 'Export selected file' }).isVisible());
         await capture('multiple-files');
         assert.deepEqual(errors, []);
