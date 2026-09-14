@@ -8,6 +8,25 @@ let typedMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayl
 let legacyMotion = null;
 let sceneFilter = { materialIndex: null, materialPath: null, lodMask: null };
 
+window.getStudioViewerDebugInfo = function () {
+    let meshes = 0;
+    const colors = new Set();
+    for (const group of [staticGroup, movingGroup]) group?.traverse(node => {
+        if (!node.isMesh) return;
+        meshes++;
+        for (const material of (Array.isArray(node.material) ? node.material : [node.material]))
+            if (material?.color) colors.add(material.color.getHexString());
+    });
+    return {
+        initialized: Boolean(renderer?.domElement.isConnected), meshes,
+        materialColors: [...colors].slice(0, 128),
+        cameraPosition: camera?.position.toArray() ?? null,
+        cameraTarget: controls?.target.toArray() ?? null,
+        playing: isPlaying, wireframe: isWireframe,
+        layers: { meshes: showMeshes, collision: showCollision, pivots: showPivots, lights: showLights, sockets: showSockets }
+    };
+};
+
 window.normalizeIcon = async function (bytes, size) {
     const bitmap = await createImageBitmap(new Blob([bytes])), canvas = document.createElement('canvas');
     canvas.width = canvas.height = size;
@@ -249,8 +268,10 @@ function makePart(part, owner) {
     if (part.uvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(part.uvs, 2));
     if (owner) geometry.applyMatrix4(owner.inverseChild);
     if ([...geometry.attributes.position.array, ...geometry.attributes.normal.array].some(x => !Number.isFinite(x))) { geometry.dispose(); throw new Error('Rest transform overflows geometry.'); }
-    const material = new THREE.MeshStandardMaterial({ color: part.isCollision ? 0x38d9b3 : owner ? 0xf59e0b : 0x2563eb,
-        metalness: .15, roughness: .45, side: THREE.DoubleSide, wireframe: part.isCollision || isWireframe, transparent: Boolean(part.isCollision), opacity: part.isCollision ? .35 : 1 });
+    // Game textures are not available in this payload. Keep real geometry
+    // readable with a neutral, lit material; never substitute fake geometry.
+    const material = new THREE.MeshStandardMaterial({ color: part.isCollision ? 0x38d9b3 : 0xb8bdc6,
+        metalness: 0, roughness: .75, side: THREE.DoubleSide, wireframe: part.isCollision || isWireframe, transparent: Boolean(part.isCollision), opacity: part.isCollision ? .35 : 1 });
     const mesh = new THREE.Mesh(geometry, material); mesh.name = part.name ?? part.path ?? '';
     mesh.userData = { path: part.path, entityPath: part.entityPath, isCollision: Boolean(part.isCollision), mappings }; return mesh;
 }
