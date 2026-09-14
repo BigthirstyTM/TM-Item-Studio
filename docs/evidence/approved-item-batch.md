@@ -23,19 +23,12 @@ The two placed items were saved in `StudioApprovedBatch_20260914.Map.Gbx`.
 Reopening the map retained both items (count 2). This verifies map-editor
 placement/rendering, not a full driving/collision/animation simulation.
 
-## Pusher: before, browser after, native after
+## Visual evidence
 
-![PR16 import failure](pusher-before.png)
-
-![Pusher in TMIS with GmSurf support](pusher-tmis.png)
-
-![The downloaded pusher placed in TM2020](pusher-map-editor.png)
-
-## Blimp
-
-![Blimp in TMIS](blimp-tmis.png)
-
-![The downloaded blimp in the reopened map](blimp-map-editor.png)
+Screenshots were captured and visually inspected for the pusher's initial
+import error, successful browser preview, and native placement, and for the
+blimp's browser/native previews. Test captures are retained outside git for
+the PR discussion rather than added to the source tree.
 
 ## Downloaded bytes
 
