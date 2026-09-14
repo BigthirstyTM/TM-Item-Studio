@@ -25,12 +25,10 @@
         <label for="item-upload" class="small fw-bold">Open item files</label>
         <InputFile id="item-upload" OnChange="LoadFiles" multiple accept=".gbx" class="form-control form-control-sm" />
     </div>
-</div>
-
-<div class="studio-diagnostics mb-3">
-    <button class="btn btn-sm btn-outline-secondary" @onclick="DownloadDebugReport">Download debug report</button>
-    <details>
-        <summary>Model diagnostics (@modelDiagnostics.Count)</summary>
+    <details class="studio-diagnostics">
+        <summary class="btn btn-sm btn-outline-secondary">Diagnostics (@modelDiagnostics.Count)</summary>
+        <div class="studio-diagnostics-panel">
+        <button class="btn btn-sm btn-outline-secondary mb-2" @onclick="DownloadDebugReport">Download debug report</button>
         <p class="small text-muted">Reports contain model names, authors and referenced filenames. Review before sharing; nothing is uploaded.</p>
         <ul class="small">
             @foreach (var diagnostic in modelDiagnostics)
@@ -38,6 +36,7 @@
                 <li><code>@diagnostic.Code</code>: @diagnostic.Message</li>
             }
         </ul>
+        </div>
     </details>
 </div>
 

@@ -11,7 +11,8 @@ module.exports = async (url, work) => {
         page.on('pageerror', e => errors.push(e.message));
         page.on('console', m => { if (m.type() === 'warning') warnings.push(m.text()); });
         await page.goto(url, { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Download debug report', exact: true }).waitFor();
+        await page.locator('.studio-diagnostics summary').waitFor();
+        assert.equal(await page.getByRole('button', { name: 'Download debug report', exact: true }).isVisible(), false, 'Debug tools stay collapsed initially');
         const report = () => page.evaluate(() => window.studioDebug.getReport());
         async function exported(name) {
             const event = page.waitForEvent('download');
@@ -40,6 +41,9 @@ module.exports = async (url, work) => {
         await page.getByLabel('Ident.Author', { exact: true }).press('Tab');
         const beforeDebug = await exported('before-debug.Item.Gbx');
         assert.equal((await report()).identity.author, 'DebugReportEditedAuthor', 'Report must describe current edits');
+        const viewportBefore = await page.locator('#threeContainer').boundingBox();
+        await page.locator('.studio-diagnostics summary').click();
+        assert.deepEqual(await page.locator('#threeContainer').boundingBox(), viewportBefore, 'Diagnostics must not shrink or move the viewport');
         const event = page.waitForEvent('download');
         await page.getByRole('button', { name: 'Download debug report', exact: true }).click();
         const download = await event;
@@ -48,6 +52,7 @@ module.exports = async (url, work) => {
         const downloaded = JSON.parse(fs.readFileSync(dest, 'utf8'));
         assert.equal(downloaded.identity.author, 'DebugReportEditedAuthor');
         assert.ok(!JSON.stringify(downloaded).includes('localPositions'), 'No vertex buffers in diagnostic export');
+        await page.locator('.studio-diagnostics summary').click();
         assert.deepEqual(await exported('after-debug.Item.Gbx'), beforeDebug, 'Diagnostics must not mutate the item archive');
         if (process.env.STUDIO_DEBUG_EVIDENCE) {
             fs.mkdirSync(process.env.STUDIO_DEBUG_EVIDENCE, { recursive: true });
