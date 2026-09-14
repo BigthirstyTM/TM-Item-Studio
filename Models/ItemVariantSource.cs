@@ -16,30 +16,37 @@ public sealed class ItemVariantSource
     public CGameItemModel Model => GbxFile.Node;
     public NPlugItem_SVariant? Variant { get; }
     public CMwNod? PreviewRoot => Variant is null ? Model : Variant.EntityModel;
+    public string? SerializationWarning { get; }
 
-    private ItemVariantSource(string name, Gbx<CGameItemModel> file, NPlugItem_SVariant? variant, int? variantNumber = null)
+    private ItemVariantSource(string name, Gbx<CGameItemModel> file, NPlugItem_SVariant? variant, int? variantNumber, string? serializationWarning)
     {
         FileName = name;
         VariantNumber = variantNumber ?? 1;
         Name = variantNumber.HasValue ? $"{name} {variantNumber}" : name;
         GbxFile = file;
         Variant = variant;
+        SerializationWarning = serializationWarning;
     }
 
-    public static IReadOnlyList<ItemVariantSource> FromFile(string name, Gbx<CGameItemModel> file)
+    public static IReadOnlyList<ItemVariantSource> FromFile(string name, Gbx<CGameItemModel> file, byte[]? originalBytes = null)
     {
+        var warning = GetSerializationWarning(file, originalBytes);
         if (file.Node.EntityModel is NPlugItem_SVariantList { Variants.Length: > 0 } list)
         {
             // Keep unresolved and null entity references: they are still authored variants.
             return list.Variants.Select((variant, index) =>
-                new ItemVariantSource(name, file, variant, index + 1)).ToArray();
+                new ItemVariantSource(name, file, variant, index + 1, warning)).ToArray();
         }
 
         // An empty variant list is still an editable/exportable document.
-        return new[] { new ItemVariantSource(name, file, null) };
+        return new[] { new ItemVariantSource(name, file, null, null, warning) };
     }
 
-    public void Save(Stream destination) => GbxFile.Save(destination);
+    public void Save(Stream destination)
+    {
+        EnsureSerializerCanPreserveSource();
+        GbxFile.Save(destination);
+    }
 
     /// <summary>Combines documents using the first file's item-level metadata.</summary>
     public static void SaveCombined(IReadOnlyList<ItemVariantSource> sources, Stream destination)
@@ -48,6 +55,7 @@ public sealed class ItemVariantSource
             throw new InvalidOperationException("Choose at least two item files to combine.");
 
         var documents = sources.Select(source => source.GbxFile).Distinct().ToArray();
+        foreach (var source in sources) source.EnsureSerializerCanPreserveSource();
         if (documents.Any(file => file.RefTable?.Files.Count > 0 || file.RefTable?.Resources.Count > 0))
             throw new InvalidOperationException("Combining files with external references is not supported. Export each file separately to preserve its dependencies.");
 
@@ -75,6 +83,7 @@ public sealed class ItemVariantSource
             {
                 throw new InvalidOperationException($"{source.Name} has no entity model to combine. Export it separately.");
             }
+
         }
 
         var first = sources[0];
@@ -89,5 +98,22 @@ public sealed class ItemVariantSource
         {
             first.Model.EntityModel = originalRoot;
         }
+    }
+
+    private void EnsureSerializerCanPreserveSource()
+    {
+        if (SerializationWarning is not null)
+            throw new InvalidOperationException(SerializationWarning);
+    }
+
+    private static string? GetSerializationWarning(Gbx<CGameItemModel> file, byte[]? originalBytes)
+    {
+        if (originalBytes is null) return null;
+
+        using var output = new MemoryStream();
+        file.Save(output);
+        return output.ToArray().SequenceEqual(originalBytes)
+            ? null
+            : "This item cannot be exported safely: the available GBX serializer changes its bytes even before edits. Use Editor++ to save the edited item, or choose a source item that round-trips byte-for-byte.";
     }
 }

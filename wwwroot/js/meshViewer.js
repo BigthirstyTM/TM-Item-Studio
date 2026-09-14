@@ -467,3 +467,11 @@ window.downloadObjFile = function (filename, content) {
 window.downloadBinaryGbx = function (filename, base64Data) {
     const link = document.createElement('a'); link.download = filename; link.href = 'data:application/octet-stream;base64,' + base64Data; link.click();
 };
+window.downloadTextFile = function (filename, content, contentType) {
+    const url = URL.createObjectURL(new Blob([content], { type: contentType }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+};
