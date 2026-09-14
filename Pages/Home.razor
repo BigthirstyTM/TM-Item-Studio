@@ -9,6 +9,7 @@
 @using GBX.NET.Engines.MetaNotPersistent
 @using System.IO
 @using System.Text
+@using System.Text.Json
 @using System.Globalization
 @using System.Reflection
 @using TM_Item_Studio.Models
@@ -238,8 +239,9 @@
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-8">
-                            <label class="form-label mb-0 fw-bold">Name</label>
+                            <label class="form-label mb-0 fw-bold">Internal item name</label>
                             <input type="text" class="form-control form-control-sm" @bind="itemModel.Name" />
+                            <div class="form-text">Exports with an Ident.Id use that ID as the internal item name to avoid Trackmania catalog collisions.</div>
                         </div>
                         <div class="col-4">
                             <label class="form-label mb-0 fw-bold">CopperPrice</label>
@@ -751,14 +753,45 @@
             
             <div class="p-2 border-top bg-light d-flex justify-content-between align-items-center">
                 <small class="text-muted">Item Studio v1.5</small>
-                <button class="btn btn-sm btn-primary" @onclick="@(() => ExportGbx())">
+                <button class="btn btn-sm btn-primary" disabled="@(!CanExportSelectedFile)" @onclick="@(() => ExportGbx())">
                     💾 Export selected file
                 </button>
+            </div>
+            @if (SelectedSourceRequiresReencodingAcknowledgement)
+            {
+                <div class="p-2 border-top bg-light">
+                    <div class="alert alert-warning small py-2 mb-2">
+                        <strong>Compatibility check required.</strong> This source is re-encoded on export. A verified Blendermania pivot item remained inventory-visible and placeable after this writer, but other sources can still fail Trackmania discovery.
+                    </div>
+                    <div class="form-check">
+                        <input id="acknowledge-reencoded-export" class="form-check-input" type="checkbox" @bind="acknowledgeReencodedExport" />
+                        <label class="form-check-label small" for="acknowledge-reencoded-export">I will verify this source's exported item in a fresh Trackmania map editor session.</label>
+                    </div>
+                </div>
+            }
+            <div class="p-2 border-top bg-light">
+                <strong class="small d-block mb-1">Native Trackmania pivot export</strong>
+                <small class="d-block text-muted mb-2">Use this for a source marked unsafe for GBX.NET export. The downloaded request is executed by the local Openplanet bridge.</small>
+                <div class="row g-2">
+                    <div class="col-12">
+                        <input type="text" class="form-control form-control-sm" placeholder="Source relative to Documents\Trackmania\Items" @bind="nativeSourcePath" />
+                    </div>
+                    <div class="col-12">
+                        <input type="text" class="form-control form-control-sm" placeholder="Destination relative to Documents\Trackmania\Items" @bind="nativeDestinationPath" />
+                    </div>
+                    <div class="col-5">
+                        <input type="number" min="0" class="form-control form-control-sm" @bind="nativePivotIndex" />
+                    </div>
+                    <div class="col-7">
+                        <button class="btn btn-sm btn-success w-100" @onclick="DownloadNativePivotRequest">Download native pivot request</button>
+                    </div>
+                </div>
+                <small class="d-block text-muted mt-2">Save as <code>Documents\Trackmania\Items\TMItemStudioNativeBridge\native-pivot-request.json</code>, then use <em>Load downloaded request</em> in the bridge.</small>
             </div>
             @if (CanCombineFiles)
             {
                 <div class="p-2 border-top bg-light">
-                    <button class="btn btn-sm btn-outline-primary" @onclick="@(() => ExportGbx(combineFiles: true))">Combine loaded files as variants</button>
+                    <button class="btn btn-sm btn-outline-primary" disabled="@(!CanExportCombinedFiles)" @onclick="@(() => ExportGbx(combineFiles: true))">Combine loaded files as variants</button>
                     <small class="d-block text-muted">Uses item metadata, icon and placement from @variantSources[0].Name.</small>
                 </div>
             }
@@ -794,9 +827,17 @@
     private readonly List<ItemVariantSource> variantSources = new();
     private bool CanCombineFiles => variantSources.Select(source => source.GbxFile).Distinct().Take(2).Count() > 1;
     private int activeVariantIndex;
+    private bool acknowledgeReencodedExport;
+    private ItemVariantSource? SelectedSource => activeVariantIndex >= 0 && activeVariantIndex < variantSources.Count ? variantSources[activeVariantIndex] : null;
+    private bool SelectedSourceRequiresReencodingAcknowledgement => SelectedSource?.RequiresReencodingAcknowledgement == true;
+    private bool CanExportSelectedFile => !SelectedSourceRequiresReencodingAcknowledgement || acknowledgeReencodedExport;
+    private bool CanExportCombinedFiles => !variantSources.Any(source => source.RequiresReencodingAcknowledgement) || acknowledgeReencodedExport;
     private string? iconFileName;
     private string? iconStatus;
     private bool iconPreviewPending;
+    private string nativeSourcePath = "";
+    private string nativeDestinationPath = "TMItemStudio/Edited_Pivot.Item.Gbx";
+    private int nativePivotIndex;
 
     // Editable identification fields.
     private string identId = "";
@@ -941,6 +982,7 @@
         geometryCache.Clear();
         uploadedGeometry.Clear();
         activeVariantIndex = 0;
+        acknowledgeReencodedExport = false;
         itemModel = null;
         hasMesh = false;
         isMovingItem = false;
@@ -987,12 +1029,12 @@
             {
                 using var memoryStream = new MemoryStream();
                 await file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-                var parsedGbx = Gbx.Parse<CGameItemModel>(memoryStream);
+                var originalBytes = memoryStream.ToArray();
+                var parsedGbx = Gbx.Parse<CGameItemModel>(new MemoryStream(originalBytes));
                 var parsedModel = parsedGbx.Node;
                 if (parsedModel == null) continue;
 
-                variantSources.AddRange(ItemVariantSource.FromFile(Path.GetFileNameWithoutExtension(file.Name), parsedGbx));
+                variantSources.AddRange(ItemVariantSource.FromFile(Path.GetFileNameWithoutExtension(file.Name), parsedGbx, originalBytes));
             }
 
             if (variantSources.Count > 0)
@@ -1490,26 +1532,19 @@
 
     private void UpdateIdent()
     {
-        if (itemModel != null)
+        if (itemModel is null) return;
+        // ToString resolves numeric collection IDs to display names. Preserve the
+        // original typed value unless the user deliberately changes this field.
+        var collection = itemModel.Ident?.Collection ?? Id.Empty;
+        if (identCollection != collection.ToString())
         {
-            try
-            {
-                // ToString resolves numeric collection IDs to display names.
-                // Keep the typed ID when the text is unchanged (including
-                // when only the item ID or author was edited).
-                var collection = itemModel.Ident?.Collection ?? Id.Empty;
-                if (identCollection != collection.ToString())
-                {
-                    // The upper two bits are reserved for GBX lookback markers.
-                    collection = int.TryParse(identCollection, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
-                        && number < 0x40000000
-                        ? new Id(number)
-                        : new Id(identCollection);
-                }
-                itemModel.Ident = new Ident(identId, collection, identAuthor);
-            }
-            catch { }
+            // The upper two bits are reserved for GBX lookback markers.
+            collection = int.TryParse(identCollection, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
+                && number < 0x40000000
+                ? new Id(number)
+                : new Id(identCollection);
         }
+        itemModel.Ident = new Ident(identId, collection, identAuthor);
     }
 
     private void SyncPivotsToGbx()
@@ -2109,7 +2144,17 @@
         {
             try
             {
+                var requiresAcknowledgement = combineFiles
+                    ? variantSources.Any(source => source.RequiresReencodingAcknowledgement)
+                    : SelectedSourceRequiresReencodingAcknowledgement;
+                if (requiresAcknowledgement && !acknowledgeReencodedExport)
+                {
+                    errorMessage = "Confirm the re-encoding compatibility check before exporting this source.";
+                    return;
+                }
+
                 UpdateIdent();
+                ItemExportValidator.EnsureGameReady(combineFiles ? variantSources[0].Model : itemModel);
                 SyncPivotsToGbx();
                 for (int i = 0; i < detectedLights.Count; i++) SyncLightsToGbx(i);
 
@@ -2134,6 +2179,49 @@
                 errorMessage = "Error while exporting .Item.Gbx: " + ex.Message;
             }
         }
+    }
+
+    private sealed class NativePivotRequest
+    {
+        public int Version { get; init; } = 1;
+        public string SourcePath { get; init; } = "";
+        public string DestinationPath { get; init; } = "";
+        public int PivotIndex { get; init; }
+        public float X { get; init; }
+        public float Y { get; init; }
+        public float Z { get; init; }
+    }
+
+    private async Task DownloadNativePivotRequest()
+    {
+        errorMessage = null;
+        if (string.IsNullOrWhiteSpace(nativeSourcePath) || string.IsNullOrWhiteSpace(nativeDestinationPath))
+        {
+            errorMessage = "Enter source and destination paths relative to Documents\\Trackmania\\Items.";
+            return;
+        }
+        if (nativePivotIndex < 0 || nativePivotIndex >= detectedPivots.Count)
+        {
+            errorMessage = "Choose an existing pivot from the Placement Parameters panel before downloading a native request.";
+            return;
+        }
+
+        var pivot = detectedPivots[nativePivotIndex];
+        var request = new NativePivotRequest
+        {
+            SourcePath = nativeSourcePath,
+            DestinationPath = nativeDestinationPath,
+            PivotIndex = nativePivotIndex,
+            X = pivot.X,
+            Y = pivot.Y,
+            Z = pivot.Z
+        };
+        var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+        await JS.InvokeVoidAsync("downloadTextFile", "native-pivot-request.json", json, "application/json");
     }
 
     public async ValueTask DisposeAsync()

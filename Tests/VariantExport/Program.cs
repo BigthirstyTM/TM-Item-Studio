@@ -9,6 +9,31 @@ using TM_Item_Studio.Models;
 
 // All fixtures are constructed here; no game assets or private files are required.
 Gbx.LZO = new GBX.NET.LZO.MiniLZO();
+
+if (args.Length > 0 && args[0] == "--inspect")
+{
+    foreach (var path in args.Skip(1))
+    {
+        var originalBytes = File.ReadAllBytes(path);
+        var document = Gbx.Parse<CGameItemModel>(new MemoryStream(originalBytes));
+        var item = document.Node;
+        var source = ItemVariantSource.FromFile(Path.GetFileNameWithoutExtension(path), document, originalBytes)[0];
+        Console.WriteLine($"{Path.GetFileName(path)}");
+        Console.WriteLine($"  Ident.Id: {item.Ident?.Id ?? "<empty>"}");
+        Console.WriteLine($"  Ident.Author: {item.Ident?.Author ?? "<empty>"}");
+        Console.WriteLine($"  Ident.Collection: {item.Ident?.Collection.ToString() ?? "<empty>"}");
+        Console.WriteLine($"  ItemType: {item.ItemType}");
+        Console.WriteLine($"  ArchetypeRef: {item.ArchetypeRef ?? "<empty>"}");
+        Console.WriteLine($"  Name: {item.Name ?? "<empty>"}");
+        Console.WriteLine($"  PageName: {item.PageName ?? "<empty>"}");
+        Console.WriteLine($"  CatalogPosition: {item.CatalogPosition}");
+        Console.WriteLine($"  IsInternal: {item.IsInternal}");
+        Console.WriteLine($"  Entity model: {item.EntityModel?.GetType().Name ?? "<empty>"}");
+        Console.WriteLine($"  Byte-exact round-trip: {source.SerializationWarning is null}");
+    }
+    return;
+}
+
 var passed = 0;
 void Check(bool condition, string message)
 {
@@ -23,6 +48,19 @@ Gbx<CGameItemModel> Document(CMwNod? root, string name = "Fixture")
     item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
     item.CreateChunk<CGameCtnCollector.Chunk2E00100C>();
     return new Gbx<CGameItemModel>(item);
+}
+
+foreach (var invalid in new[] { Document(null) })
+{
+    try
+    {
+        ItemExportValidator.EnsureGameReady(invalid.Node);
+        throw new Exception("Expected game-readiness refusal");
+    }
+    catch (InvalidOperationException)
+    {
+        Check(true, "Missing entity model must be refused");
+    }
 }
 
 byte[] Save(Action<Stream> save)
