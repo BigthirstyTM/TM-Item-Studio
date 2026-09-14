@@ -9,7 +9,7 @@ using GBX.NET.Engines.Plug;
 using GBX.NET.Serialization;
 
 Gbx.LZO = new GBX.NET.LZO.MiniLZO();
-if (args.Length is not (1 or 3 or 5)) throw new ArgumentException("Usage: MotionArchive <item> [translation-max <metres>] [translation-duration <ms>]");
+if (args.Length % 2 != 1) throw new ArgumentException("Usage: MotionArchive <item> [translation-max <metres>] [translation-duration <ms>] [translation-count|rotation-count <count>]");
 var item = Gbx.Parse<CGameItemModel>(args[0]).Node;
 var constraints = new List<object>();
 Visit(item, "item");
@@ -42,6 +42,16 @@ void Visit(CMwNod? node, string path)
                     {
                         case "translation-max": constraint.TransMax = float.Parse(args[i + 1], CultureInfo.InvariantCulture); break;
                         case "translation-duration": constraint.TransAnimFunc!.SubFuncs![0].Duration = new TmEssentials.TimeInt32(int.Parse(args[i + 1], CultureInfo.InvariantCulture)); break;
+                        case "translation-count":
+                        case "rotation-count":
+                            var timeline = args[i] == "translation-count" ? constraint.TransAnimFunc! : constraint.RotAnimFunc!;
+                            var count = int.Parse(args[i + 1], CultureInfo.InvariantCulture);
+                            var retained = timeline.SubFuncs!.Take(count).ToList();
+                            while (retained.Count < count)
+                                retained.Add(new() { Ease = NPlugDyna_SKinematicConstraint.AnimEase.Linear, Reverse = false,
+                                    Duration = new TmEssentials.TimeInt32(timeline.IsDuration || retained.Count == 0 ? 1000 : retained[^1].Duration.TotalMilliseconds + 1000) });
+                            timeline.SubFuncs = retained.ToArray();
+                            break;
                         default: throw new ArgumentException("Unknown expected edit");
                     }
             // Independent archive oracle: all serialized fields, including shader

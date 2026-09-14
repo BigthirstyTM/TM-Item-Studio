@@ -45,8 +45,8 @@ function run(command, args, extraEnv = {}) {
             server.once('error', reject);
             server.listen(0, '127.0.0.1', resolve);
         });
-        for (const script of (process.argv.includes('--variants') ? ['variant-navigation.cjs', 'typed-viewer.cjs']
-            : ['kinematic-preservation.cjs', 'viewer-lifecycle.cjs', 'typed-viewer.cjs']))
+        for (const script of (process.argv.includes('--variants') ? ['variant-navigation.cjs', 'compact-layout.cjs', 'typed-viewer.cjs']
+            : ['kinematic-preservation.cjs', 'kinematic-segments.cjs', 'viewer-lifecycle.cjs', 'typed-viewer.cjs']))
             await run(process.execPath, [`Tests/Browser/${script}`],
                 { STUDIO_BASE_URL: `http://127.0.0.1:${server.address().port}` });
     } finally {

@@ -16,46 +16,22 @@
 
 <PageTitle>Trackmania 2020 Item Studio</PageTitle>
 
-<div class="studio-header d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h3 class="mb-0">Trackmania 2020 Item Studio</h3>
-        <small class="text-muted">Interactive 3D editor for Trackmania .Item.Gbx files</small>
-    </div>
-    <div class="studio-upload">
-        <label for="item-upload" class="small fw-bold">Open item files</label>
-        <InputFile id="item-upload" OnChange="LoadFiles" multiple accept=".gbx" class="form-control form-control-sm" />
-    </div>
-</div>
-
-@if (variantSources.Count > 0)
-{
-    var files = variantSources.Select((source, index) => (Source: source, Index: index)).GroupBy(v => v.Source.GbxFile).ToArray();
-    <div class="studio-variants mb-3" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
-        @for (var fileIndex = 0; fileIndex < files.Length; fileIndex++)
+<header class="studio-header">
+    <h3>Trackmania 2020 Item Studio</h3>
+    <div class="studio-documents" aria-label="Loaded files">
+        @foreach (var file in LoadedFiles())
         {
-            var file = files[fileIndex];
-            var filename = file.First().Source.FileName;
-            var label = files.Count(f => string.Equals(f.First().Source.FileName, filename, StringComparison.OrdinalIgnoreCase)) > 1
-                ? $"{filename} (file {fileIndex + 1})" : filename;
-            <div class="studio-variant-file" role="group" aria-label="@label">
-                <strong class="studio-variant-filename" title="@label">@label</strong>
-                <div class="studio-variant-buttons">
-                    @foreach (var entry in file)
-                    {
-                        var variantIndex = entry.Index;
-                        <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
-                                aria-label="@($"{variantIndex + 1}. {entry.Source.Name}")" title="@($"{label} — variant {entry.Source.VariantNumber}")"
-                                aria-pressed="@((variantIndex == activeVariantIndex).ToString().ToLowerInvariant())"
-                                aria-disabled="@isSelectingVariant.ToString().ToLowerInvariant()" @onclick="@(() => SelectVariant(variantIndex))">
-                            @entry.Source.VariantNumber
-                        </button>
-                    }
-                </div>
-            </div>
+            <strong class="studio-variant-filename" title="@file.Label">@file.Label</strong>
         }
-        <span class="text-muted small" role="status">@(isSelectingVariant ? "Loading variant…" : "Select a variant to preview. Export preserves every variant in the selected file.")</span>
     </div>
-}
+    <div class="studio-header-tools">
+        <div class="studio-upload">
+            <label for="item-upload" class="btn btn-sm btn-outline-secondary">Open item files</label>
+            <InputFile id="item-upload" OnChange="LoadFiles" multiple accept=".gbx" class="visually-hidden" />
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="studioTheme.toggle()" aria-label="Switch light or dark theme">Light / dark</button>
+    </div>
+</header>
 
 @if (isLoading)
 {
@@ -76,11 +52,11 @@
     <div class="studio-workspace">
         
         <!-- ================= 3D VIEWPORT ================= -->
-        <div>
-            <div style="background: #111; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);">
+        <div class="studio-viewport-column">
+            <div class="studio-viewport">
                 
                 <!-- Viewport Toolbar -->
-                <div style="padding: 8px 12px; background: #1f1f23; border-bottom: 1px solid #2d2d32; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div class="studio-viewport-toolbar">
                     <!-- Layer toggles -->
                     <div class="btn-group btn-group-sm">
                         <button class="btn @(showMeshes ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("meshes"))">
@@ -97,8 +73,30 @@
                         </button>
                     </div>
 
+                    <div class="studio-variants" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
+                        @foreach (var file in LoadedFiles())
+                        {
+                            <div class="studio-variant-file" role="group" aria-label="@file.Label">
+                                @if (CanCombineFiles) { <span class="studio-variant-group-label" title="@file.Label">@file.Label</span> }
+                                <div class="studio-variant-buttons">
+                                    @foreach (var entry in file.Entries)
+                                    {
+                                        var variantIndex = entry.Index;
+                                        <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
+                                                aria-label="@($"{variantIndex + 1}. {entry.Source.Name}")" title="@($"{file.Label} — variant {entry.Source.VariantNumber}")"
+                                                aria-pressed="@((variantIndex == activeVariantIndex).ToString().ToLowerInvariant())"
+                                                aria-disabled="@isSelectingVariant.ToString().ToLowerInvariant()" @onclick="@(() => SelectVariant(variantIndex))">
+                                            @entry.Source.VariantNumber
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <span class="visually-hidden" role="status">@(isSelectingVariant ? "Loading variant…" : "Variant ready. Export preserves every variant in the selected file.")</span>
+                    </div>
+
                     <!-- Animation and general controls -->
-                    <div style="display: flex; gap: 6px; align-items: center;">
+                    <div class="studio-view-controls">
                         @if (isMovingItem)
                         {
                             <button class="btn btn-sm @(isPlaying ? "btn-warning" : "btn-success")" @onclick="ToggleAnimation">
@@ -123,7 +121,7 @@
                 </div>
                 
                 <!-- 3D Canvas container -->
-                <div id="threeContainer" style="width: 100%; height: 550px; position: relative;">
+                <div id="threeContainer">
                     @if (!hasMesh && detectedPivots.Count == 0 && detectedLights.Count == 0)
                     {
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #888; text-align: center;">
@@ -133,7 +131,7 @@
                 </div>
             </div>
             
-            <div class="mt-2 d-flex justify-content-between text-muted small flex-wrap">
+            <div class="studio-viewport-caption text-muted small">
                 <div>
                     <span><span style="color: #2563eb;">■</span> Static</span>
                     @if (isMovingItem) { <span class="ms-2"><span style="color: #f59e0b;">■</span> Moving</span> }
@@ -150,50 +148,50 @@
         <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
         <div class="studio-inspector">
             
-            <div class="d-flex flex-column gap-1 p-2 bg-light border-bottom" style="font-size: 0.85em;">
+            <div class="studio-inspector-tabs p-2 bg-light border-bottom">
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "general" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("general"))">
-                        <span>Item Identification & Collector Metadata</span><span>@(activeTab == "general" ? "−" : "+")</span>
+                    <button aria-label="Item Identification & Collector Metadata" aria-expanded="@((activeTab == "general").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "general" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("general"))">
+                        <span>Identity</span><span>@(activeTab == "general" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "placement" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("placement"))">
-                        <span>Placement Parameters & PivotPositions</span><span>@(activeTab == "placement" ? "−" : "+")</span>
+                    <button aria-label="Placement Parameters & PivotPositions" aria-expanded="@((activeTab == "placement").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "placement" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("placement"))">
+                        <span>Placement & pivots</span><span>@(activeTab == "placement" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "gameplay" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("gameplay"))">
-                        <span>WaypointType, Gameplay & Kinematics</span><span>@(activeTab == "gameplay" ? "−" : "+")</span>
+                    <button aria-label="WaypointType, Gameplay & Kinematics" aria-expanded="@((activeTab == "gameplay").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "gameplay" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("gameplay"))">
+                        <span>Kinematics</span><span>@(activeTab == "gameplay" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "lights" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("lights"))">
-                        <span>Dynamic Real-Time Lights (@detectedLights.Count)</span><span>@(activeTab == "lights" ? "−" : "+")</span>
+                    <button aria-label="@($"Dynamic Real-Time Lights ({detectedLights.Count})")" aria-expanded="@((activeTab == "lights").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "lights" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("lights"))">
+                        <span>Lights (@detectedLights.Count)</span><span>@(activeTab == "lights" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
-                        <span>Socket Positions (@detectedSockets.Count)</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
+                    <button aria-label="@($"Socket Positions ({detectedSockets.Count})")" aria-expanded="@((activeTab == "sockets").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
+                        <span>Sockets (@detectedSockets.Count)</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "physics" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("physics"))">
-                        <span>PhyModel, CPlugSurface & Collision</span><span>@(activeTab == "physics" ? "−" : "+")</span>
+                    <button aria-label="PhyModel, CPlugSurface & Collision" aria-expanded="@((activeTab == "physics").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "physics" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("physics"))">
+                        <span>Collision</span><span>@(activeTab == "physics" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "visual" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("visual"))">
-                        <span>VisModel, Materials & LOD</span><span>@(activeTab == "visual" ? "−" : "+")</span>
+                    <button aria-label="VisModel, Materials & LOD" aria-expanded="@((activeTab == "visual").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "visual" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("visual"))">
+                        <span>Materials & LOD</span><span>@(activeTab == "visual" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
-                    <button class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "extras" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("extras"))">
-                        <span>Audio, CPlugFx & MediaTracker Triggers</span><span>@(activeTab == "extras" ? "−" : "+")</span>
+                    <button aria-label="Audio, CPlugFx & MediaTracker Triggers" aria-expanded="@((activeTab == "extras").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "extras" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("extras"))">
+                        <span>Audio & effects</span><span>@(activeTab == "extras" ? "−" : "+")</span>
                     </button>
                 </div>
             </div>
 
-            <div class="p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
+            <div class="studio-inspector-content p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
                 
                 @if (activeTab == "general")
                 {
@@ -443,8 +441,7 @@
 
                 @if (activeTab == "gameplay")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">3. WaypointType & Kinematics <span class="text-muted" title="WaypointType and CPlugAnim/CPlugTrajectory settings control gameplay and moving parts.">?</span></h6>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label mb-0 fw-bold">Waypoint Type</label>
                         <select class="form-select form-select-sm" @bind="itemModel.WaypointType">
                             @foreach (var wp in Enum.GetValues<CGameItemModel.EWaypointType>())
@@ -452,13 +449,10 @@
                                 <option value="@wp">@wp</option>
                             }
                         </select>
-                        <small class="text-muted">
-                            Start, Finish, Checkpoint, Turbo, FreeWheeling, Fragile, NoBrakes, SlowMotion, etc.
-                        </small>
                     </div>
 
-                    <h6 class="border-bottom pb-1 mt-4 text-primary">@(authoredConstraints.Count > 0 ? "Authored kinematic controls" : "ItemType conversion")</h6>
-                    <div class="card p-3 bg-light mb-3">
+                    <h6 class="border-bottom pb-1 text-primary">@(authoredConstraints.Count > 0 ? "Kinematic controls" : "ItemType conversion")</h6>
+                    <div class="@(authoredConstraints.Count > 0 ? "authored-motion-shell" : "card p-3 bg-light mb-3")">
                         @if (!isMovingItem)
                         {
                             <p class="small text-muted mb-2">
@@ -470,8 +464,7 @@
                         }
                         else if (authoredConstraints.Count > 0)
                         {
-                            <p role="status" class="small fw-bold text-info">Using authored motion settings</p>
-                            <p class="small text-muted">Authored ranges, axes and independent timelines are retained. Only explicit field edits change the file; shared source constraints affect all their instances.</p>
+                            <p role="status" class="small text-muted mb-2" title="Only explicit edits change the file. A shared constraint affects all its instances.">Using authored motion settings</p>
                             @foreach (var diagnostic in motionDiagnostics)
                             {
                                 <p role="status" class="small text-warning">Preview unavailable: @diagnostic</p>
@@ -759,6 +752,18 @@
 }
 
 @code {
+    private IEnumerable<(string Label, (ItemVariantSource Source, int Index)[] Entries)> LoadedFiles()
+    {
+        var files = variantSources.Select((source, index) => (Source: source, Index: index)).GroupBy(v => v.Source.GbxFile).ToArray();
+        for (var i = 0; i < files.Length; i++)
+        {
+            var filename = files[i].First().Source.FileName;
+            var label = files.Count(f => string.Equals(f.First().Source.FileName, filename, StringComparison.OrdinalIgnoreCase)) > 1
+                ? $"{filename} (file {i + 1})" : filename;
+            yield return (label, files[i].ToArray());
+        }
+    }
+
     private CGameItemModel? itemModel;
     private Gbx<CGameItemModel>? gbxFile;
     private bool isLoading = false;

@@ -3,6 +3,7 @@ let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsG
 let dotNetHelper = null, selectedGizmo = null;
 let isWireframe = false, isPlaying = true, animSpeed = 1;
 let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler = null;
+let resizeObserver = null;
 let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showSockets = true;
 let typedMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
 let legacyMotion = null;
@@ -207,6 +208,8 @@ window.init3DViewer = function (containerId, dotNetRef) {
         camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
     };
     window.addEventListener('resize', resizeHandler);
+    resizeObserver = new ResizeObserver(resizeHandler);
+    resizeObserver.observe(container);
 };
 function disposeObjectResources(root) {
     const geometries = new Set(), materials = new Set();
@@ -220,6 +223,7 @@ window.dispose3DViewer = function () {
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
     animationFrameId = null; selectedGizmo = dotNetHelper = null;
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+    resizeObserver?.disconnect(); resizeObserver = null;
     resizeHandler = null;
     if (transformControls) { transformControls.detach(); transformControls.dispose(); scene?.remove(transformControls); }
     controls?.dispose(); if (scene) disposeObjectResources(scene);

@@ -51,6 +51,33 @@ public static class ItemMotion
             : new(error.Value.Status, value, error.Value.Reason);
     }
 
+    /// <summary>Explicit count edit: retain prefix keys and timing mode, remove only trailing
+    /// keys or append one-second linear segments. Prepare/validate before mutating the array.</summary>
+    public static ItemMotionResult<bool> ResizeTimeline(KC.AnimFunc? source, int count)
+    {
+        if (source?.SubFuncs is not { } keys)
+            return ItemMotionResult<bool>.Fail(ItemMotionStatus.Absent, "Timeline is absent; no default functions were created.");
+        if (count == keys.Length) return ItemMotionResult<bool>.Ok(false);
+        if (count < 1 || count > 4)
+            return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "Choose between one and four segments.");
+        if (keys.Any(k => k is null))
+            return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "Timeline contains an absent segment; stored functions are unchanged.");
+        var resized = new KC.SubAnimFunc[count];
+        Array.Copy(keys, resized, Math.Min(keys.Length, count));
+        for (var i = keys.Length; i < count; i++)
+        {
+            var ms = source.IsDuration || i == 0 ? 1000L : (long)resized[i - 1].Duration.TotalMilliseconds + 1000;
+            if (ms > int.MaxValue)
+                return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "New segment end time exceeds the supported range; stored functions are unchanged.");
+            resized[i] = new KC.SubAnimFunc { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32((int)ms) };
+        }
+        var candidate = new ItemMotionTimeline(source.IsDuration, resized.Select(k => new ItemMotionKey(k.Ease, k.Reverse, k.Duration.TotalMilliseconds)).ToArray());
+        var error = ValidateTimeline(candidate);
+        if (error is not null) return ItemMotionResult<bool>.Fail(error.Value.Status, error.Value.Reason);
+        source.SubFuncs = resized;
+        return ItemMotionResult<bool>.Ok(true);
+    }
+
     /// <summary>Validate and prepare both timelines before changing any field. Unedited shader/unknown data stays untouched.</summary>
     public static ItemMotionResult<bool> Apply(KC source, ItemMotionEdit edit)
     {

@@ -1,18 +1,31 @@
 @using System.Globalization
 @using TmEssentials
+@using TM_Item_Studio.Models
 @using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 
-<fieldset class="mt-2">
-    <legend class="small fw-bold">@Name timeline</legend>
+<div class="motion-timeline">
     @if (Source?.SubFuncs is not { } keys)
     {
-        <p class="small text-muted">Absent timeline; preserved without creating default keys.</p>
+        <p class="small text-muted">Absent timeline; preserved without creating default functions.</p>
     }
     else
     {
-        <p class="small text-muted">IsDuration=@Source.IsDuration.ToString().ToLowerInvariant() (preserved).
-            @(Source.IsDuration ? "Each value is a segment duration." : "Each value is a cumulative segment end time.") Times are in milliseconds.</p>
-        @if (keys.Length == 0) { <p class="small text-muted">Empty key array (preserved).</p> }
+        <div class="motion-timeline-heading">
+            <label class="motion-count small">Segments
+                <select class="form-select form-select-sm" aria-label="@($"{Name} segment count")" @bind:get="keys.Length" @bind:set="SetCount">
+                    @if (keys.Length is < 1 or > 4) { <option value="@keys.Length">@keys.Length (stored)</option> }
+                    @for (var n = 1; n <= 4; n++) { <option value="@n">@n</option> }
+                </select>
+            </label>
+            <span class="small text-muted" title="@($"IsDuration={Source.IsDuration.ToString().ToLowerInvariant()} (preserved). Times are milliseconds.")">
+                @(Source.IsDuration ? "Durations · ms" : "End times · ms")
+            </span>
+            <span class="visually-hidden">IsDuration=@Source.IsDuration.ToString().ToLowerInvariant() (preserved).</span>
+        </div>
+        @if (keys.Length == 0) { <p class="small text-muted">Empty function array (preserved).</p> }
+        <div class="motion-segment-grid motion-segment-labels small text-muted" aria-hidden="true">
+            <span>#</span><span>@(Source.IsDuration ? "Duration" : "End time")</span><span>Easing</span><span>Reverse</span>
+        </div>
         @for (var i = 0; i < keys.Length; i++)
         {
             var key = keys[i];
@@ -20,30 +33,38 @@
             if (key is null) { <p class="small text-muted">@prefix is absent (preserved).</p> }
             else
             {
-                <div class="row g-1 mb-2">
-                    <label class="col-6 small">@prefix @(Source.IsDuration ? "duration" : "end time") (ms)
-                        <input type="number" min="0" max="2147483647" step="1" class="form-control form-control-sm"
-                               value="@key.Duration.TotalMilliseconds" @onchange="e => SetDuration(key, e)" />
-                    </label>
-                    <label class="col-6 small">@prefix easing
-                        <select class="form-select form-select-sm" @bind="key.Ease" @bind:after="NotifyChanged">
-                            @if (!Enum.IsDefined(key.Ease)) { <option value="@key.Ease">Unknown (@key.Ease)</option> }
-                            @foreach (var ease in Enum.GetValues<KC.AnimEase>()) { <option value="@ease">@ease</option> }
-                        </select>
-                    </label>
-                    <label class="small"><input type="checkbox" @bind="key.Reverse" @bind:after="NotifyChanged" /> @prefix reverse</label>
+                <div class="motion-segment-grid" @key="key">
+                    <span class="motion-segment-number small">@(i + 1)</span>
+                    <input aria-label="@($"{prefix} {(Source.IsDuration ? "duration" : "end time")} (ms)")" type="number" min="0" max="2147483647" step="1"
+                           class="form-control form-control-sm" value="@key.Duration.TotalMilliseconds" @onchange="e => SetDuration(key, e)" />
+                    <select aria-label="@($"{prefix} easing")" class="form-select form-select-sm" @bind="key.Ease" @bind:after="NotifyChanged">
+                        @if (!Enum.IsDefined(key.Ease)) { <option value="@key.Ease">Unknown (@key.Ease)</option> }
+                        @foreach (var ease in Enum.GetValues<KC.AnimEase>()) { <option value="@ease">@ease</option> }
+                    </select>
+                    <input aria-label="@($"{prefix} reverse")" type="checkbox" @bind="key.Reverse" @bind:after="NotifyChanged" />
                 </div>
             }
         }
+        <details class="motion-timeline-help small text-muted">
+            <summary>Segment editing</summary>
+            Reducing the count removes trailing functions. New functions are linear, forward, and one second long. Existing functions and the timing mode are preserved.
+        </details>
         @if (validationError is not null) { <p role="alert" class="small text-danger">@validationError</p> }
     }
-</fieldset>
+</div>
 
 @code {
     [Parameter, EditorRequired] public string Name { get; set; } = "Motion";
     [Parameter] public KC.AnimFunc? Source { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
     private string? validationError;
+
+    private async Task SetCount(int count)
+    {
+        var result = ItemMotion.ResizeTimeline(Source, count);
+        validationError = result.Reason;
+        if (result.Success && result.Value) await NotifyChanged();
+    }
 
     private async Task SetDuration(KC.SubAnimFunc key, ChangeEventArgs e)
     {
