@@ -24,6 +24,10 @@ identity-only edits, unknown numeric IDs, literal strings (including numeric-loo
 strings), empty IDs, deliberate edits, and the GBX lookback-marker boundary.
 
 Inputs are temporary identity variations of the existing public bespoke
-`animation-static-first.Item.Gbx`. They are not new native-validated fixture
-contributions. These tests prove browser/archive behavior, not native placement
-or rendering of the supplied reproduction items.
+`animation-static-first.Item.Gbx`, plus both public reproductions already in
+`Test Exported items`. They are not new native-validated fixture contributions.
+These tests prove browser/archive behavior, not native placement or rendering.
+
+Optionally set `STUDIO_COLLECTION_EXPORTS` to a new output directory to retain
+the two repaired public reproductions for native testing. Only those two
+downloads are retained; synthetic test variations are always cleaned up.

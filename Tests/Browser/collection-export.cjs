@@ -2,6 +2,7 @@ const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const path = require('node:path');
+const fs = require('node:fs');
 
 module.exports = async function checkCollection(baseUrl, work) {
     const archive = (...args) => execFileSync('dotnet',
@@ -23,14 +24,17 @@ module.exports = async function checkCollection(baseUrl, work) {
             { name: 'largest numeric ID', kind: 'number', value: '26', editCollection: '1073741823', number: 1073741823, text: null },
             { name: 'change to custom string', kind: 'number', value: '26', editCollection: 'BespokeCollection', number: null, text: 'BespokeCollection' },
             { name: 'clear collection', kind: 'number', value: '26', editCollection: '', number: null, text: null },
+            { name: 'public static reproduction repair', source: 'CustomItem_Static.Item.Gbx', editCollection: '26', number: 26, text: null, id: '', author: '-oTBhm4_S1-UxnlnBizUDA' },
+            { name: 'public kinematic reproduction repair', source: 'CustomItem_Kinematic.Item.Gbx', editCollection: '26', number: 26, text: null, id: '', author: 'BigthirstyTM' },
         ];
         for (const test of cases) {
             const page = await browser.newPage();
             const errors = [];
             page.on('pageerror', error => errors.push(error.message));
             await page.goto(baseUrl, { waitUntil: 'networkidle' });
-            const input = path.join(work, 'input.Item.Gbx');
-            archive('prepare', path.join(__dirname, 'Fixtures/animation-static-first.Item.Gbx'), input, test.kind, test.value);
+            const input = test.source ? path.resolve(__dirname, '../../Test Exported items', test.source) : path.join(work, 'input.Item.Gbx');
+            if (!test.source)
+                archive('prepare', path.join(__dirname, 'Fixtures/animation-static-first.Item.Gbx'), input, test.kind, test.value);
             await page.getByLabel('Open item files').setInputFiles(input);
             const exportButton = page.getByRole('button', { name: 'Export selected file' });
             await exportButton.waitFor();
@@ -58,17 +62,21 @@ module.exports = async function checkCollection(baseUrl, work) {
             // alone cannot distinguish a numeric collection from a string-defined ID.
             assert.deepEqual(JSON.parse(archive('inspect', exported)), {
                 number: test.number, text: test.text,
-                id: test.editIdentity ? 'RenamedBespoke' : 'BespokeAnimation',
-                author: test.editIdentity ? 'EditedAuthor' : 'FixtureGenerator',
+                id: test.editIdentity ? 'RenamedBespoke' : test.id ?? 'BespokeAnimation',
+                author: test.editIdentity ? 'EditedAuthor' : test.author ?? 'FixtureGenerator',
             }, test.name);
             await page.reload({ waitUntil: 'networkidle' });
             await page.getByLabel('Open item files').setInputFiles(exported);
             await exportButton.waitFor();
             await page.waitForFunction(() => typeof renderer !== 'undefined' && renderer?.domElement.isConnected);
-            assert.equal(await field(/^Ident.Id \/ File name$/).inputValue(), test.editIdentity ? 'RenamedBespoke' : 'BespokeAnimation');
-            assert.equal(await field(/^Ident.Author$/).inputValue(), test.editIdentity ? 'EditedAuthor' : 'FixtureGenerator');
+            assert.equal(await field(/^Ident.Id \/ File name$/).inputValue(), test.editIdentity ? 'RenamedBespoke' : test.id ?? 'BespokeAnimation');
+            assert.equal(await field(/^Ident.Author$/).inputValue(), test.editIdentity ? 'EditedAuthor' : test.author ?? 'FixtureGenerator');
             assert.equal(await page.locator('.alert-danger').count(), 0, 'Reopen must succeed');
             assert.deepEqual(errors, [], 'Upload/export/reopen must not raise page errors');
+            if (test.source && process.env.STUDIO_COLLECTION_EXPORTS) {
+                fs.mkdirSync(process.env.STUDIO_COLLECTION_EXPORTS, { recursive: true });
+                fs.copyFileSync(exported, path.join(process.env.STUDIO_COLLECTION_EXPORTS, test.source));
+            }
             await page.close();
             console.log(`PASS: upload/export/reopen: ${test.name}`);
         }
