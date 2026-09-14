@@ -27,6 +27,20 @@
     </div>
 </div>
 
+<div class="studio-diagnostics mb-3">
+    <button class="btn btn-sm btn-outline-secondary" @onclick="DownloadDebugReport">Download debug report</button>
+    <details>
+        <summary>Model diagnostics (@modelDiagnostics.Count)</summary>
+        <p class="small text-muted">Reports contain model names, authors and referenced filenames. Review before sharing; nothing is uploaded.</p>
+        <ul class="small">
+            @foreach (var diagnostic in modelDiagnostics)
+            {
+                <li><code>@diagnostic.Code</code>: @diagnostic.Message</li>
+            }
+        </ul>
+    </details>
+</div>
+
 @if (variantSources.Count > 0)
 {
     <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
@@ -107,19 +121,16 @@
                 
                 <!-- 3D Canvas container -->
                 <div id="threeContainer" style="width: 100%; height: 550px; position: relative;">
-                    @if (!hasMesh && detectedPivots.Count == 0 && detectedLights.Count == 0)
-                    {
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #888; text-align: center;">
-                            <p>No visual elements found in this item.</p>
-                        </div>
-                    }
                 </div>
             </div>
+            @if (!hasMesh)
+            {
+                <p class="small mt-2" role="status">No mesh geometry available. See Model diagnostics for external or unsupported references.</p>
+            }
             
             <div class="mt-2 d-flex justify-content-between text-muted small flex-wrap">
                 <div>
-                    <span><span style="color: #2563eb;">■</span> Static</span>
-                    @if (isMovingItem) { <span class="ms-2"><span style="color: #f59e0b;">■</span> Moving</span> }
+                    <span><span style="color: #b8bdc6;">■</span> Mesh</span>
                     <span class="ms-2"><span style="color: #facc15;">●</span> Pivot</span>
                     <span class="ms-2"><span style="color: #fffbeb;">💡</span> Light</span>
                     <span class="ms-2"><span style="color: #06b6d4;">⭕</span> Socket</span>
@@ -128,6 +139,10 @@
                     <em>Tip: Select a 3D gizmo and move it with the transform arrows.</em>
                 </div>
             </div>
+            @if (hasMesh)
+            {
+                <p class="small text-muted mt-2">Neutral preview — textures are not loaded.</p>
+            }
         </div>
 
         <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
@@ -858,6 +873,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender) await JS.InvokeVoidAsync("registerStudioDebug", dotNetHelper);
         if (itemModel == null || isViewerInitialized)
         {
             if (iconPreviewPending && itemModel != null)
@@ -894,6 +910,7 @@
         detectedSockets.Clear();
         detectedNodeTypes.Clear();
         debugLog.Clear();
+        modelDiagnostics.Clear();
         detectedAxis = "y";
         isOscillating = false;
         minAngle = 0;
@@ -947,6 +964,7 @@
         finally
         {
             isLoading = false;
+            if (itemModel is null) await RefreshDebugDiagnostics();
             StateHasChanged();
         }
     }
@@ -1005,6 +1023,7 @@
             await UpdateScenePayload();
         else
             StateHasChanged();
+        await RefreshDebugDiagnostics();
     }
 
     private string BuildObjExport()
@@ -1995,6 +2014,7 @@
     {
         try
         {
+            await JS.InvokeVoidAsync("unregisterStudioDebug");
             if (isViewerInitialized)
                 await JS.InvokeVoidAsync("dispose3DViewer");
         }
