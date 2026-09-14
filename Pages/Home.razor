@@ -182,16 +182,17 @@
                 {
                     <h6 class="border-bottom pb-1 text-primary">1. Ident (Id, Author, Collection) <span class="text-muted" title="Defines the item's internal ID, author and context collection.">?</span></h6>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Ident.Id / File name</label>
-                        <input type="text" class="form-control form-control-sm" @bind="identId" @bind:after="UpdateIdent" />
+                        <label for="ident-id" class="form-label mb-0 fw-bold">Ident.Id / File name</label>
+                        <input id="ident-id" type="text" class="form-control form-control-sm" @bind="identId" @bind:after="UpdateIdent" />
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Ident.Author</label>
-                        <input type="text" class="form-control form-control-sm" @bind="identAuthor" @bind:after="UpdateIdent" />
+                        <label for="ident-author" class="form-label mb-0 fw-bold">Ident.Author</label>
+                        <input id="ident-author" type="text" class="form-control form-control-sm" @bind="identAuthor" @bind:after="UpdateIdent" />
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Ident.Collection</label>
-                        <input type="text" class="form-control form-control-sm" @bind="identCollection" @bind:after="UpdateIdent" />
+                        <label for="ident-collection" class="form-label mb-0 fw-bold">Ident.Collection</label>
+                        <input id="ident-collection" type="text" class="form-control form-control-sm" aria-describedby="ident-collection-help" @bind="identCollection" @bind:after="UpdateIdent" />
+                        <small id="ident-collection-help" class="text-muted">Unchanged values keep their encoding. Numeric edits use IDs 0–1073741823 (26 for TM2020); other edits stay strings.</small>
                     </div>
                     <div class="mb-2">
                         <label class="form-label mb-0 fw-bold">ItemType (EItemType)</label>
@@ -1351,7 +1352,19 @@
         {
             try
             {
-                itemModel.Ident = new Ident(identId, identCollection, identAuthor);
+                // ToString resolves numeric collection IDs to display names.
+                // Keep the typed ID when the text is unchanged (including
+                // when only the item ID or author was edited).
+                var collection = itemModel.Ident?.Collection ?? Id.Empty;
+                if (identCollection != collection.ToString())
+                {
+                    // The upper two bits are reserved for GBX lookback markers.
+                    collection = int.TryParse(identCollection, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
+                        && number < 0x40000000
+                        ? new Id(number)
+                        : new Id(identCollection);
+                }
+                itemModel.Ident = new Ident(identId, collection, identAuthor);
             }
             catch { }
         }
