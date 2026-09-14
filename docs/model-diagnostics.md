@@ -1,8 +1,10 @@
 # Model diagnostics and neutral preview
 
-**Download debug report** exports a local JSON snapshot of the current selection.
+Open **Diagnostics** in the header, then **Download debug report** to export a
+local JSON snapshot of the current selection.
 It works before upload and after an import failure as well as with a loaded
-model. **Model diagnostics** expands the warnings without opening developer tools.
+model. The disclosure starts collapsed and opens a scrollable overlay containing
+warnings without opening developer tools or reducing the viewport height.
 
 The viewer currently does not load game textures. Available mesh geometry uses
 a neutral, lit matte material, with a visible `textures-not-loaded` notice.
