@@ -21,7 +21,7 @@ module.exports = async (url, work) => {
             return fs.readFileSync(file);
         }
         assert.equal((await report()).status, 'empty');
-        await page.getByLabel('Open item files').setInputFiles(path.join(__dirname, 'Fixtures/animation-static-first.Item.Gbx'));
+        await page.getByLabel('Open item files').setInputFiles(path.join(__dirname, 'Fixtures/Approved/Blimp.Item.gbx'));
         await page.getByRole('button', { name: 'Export selected file' }).waitFor();
         await page.locator('#threeContainer canvas').waitFor();
         const loaded = await report();

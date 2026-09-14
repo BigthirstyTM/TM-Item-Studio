@@ -71,8 +71,5 @@ also run against that same fresh server.
 
 The initial regression failed on the absent download control. The implemented
 path passes without page errors. Cat is the explicitly approved external-mesh
-test item; the neutral-preview triangles are the existing bespoke fixture.
-
-![Neutral fallback preview](evidence/neutral-preview.png)
-
-![External-mesh diagnostics](evidence/external-mesh-diagnostics.png)
+test item; the approved blimp exercises the neutral-material preview. Test
+screenshots are retained outside git for the PR discussion.

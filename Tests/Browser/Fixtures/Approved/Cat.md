@@ -9,3 +9,7 @@ dependency files. The regression verifies that diagnostics distinguish missing
 geometry from an unavailable texture, and list `Meshes\Cat.Mesh.gbx` without
 attempting filesystem/network resolution. No native-validity claim is made for
 this standalone archive or its original non-TM2020 collection.
+
+`Blimp.Item.gbx` is the other explicitly approved test asset. It supplies actual
+inline geometry for neutral-material preview and report/export checks, with
+its original metadata retained. It is not a synthetic animation fixture.
