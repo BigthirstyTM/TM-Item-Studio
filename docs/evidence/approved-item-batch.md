@@ -51,3 +51,26 @@ An absent mesh cannot be fixed by a fallback texture. The separate diagnostics
 change makes the distinction visible and exports dependency names and model
 types. Collection-26 repair cases are recorded separately from these unchanged
 exports; preserving an original non-TM2020 collection is not a parser regression.
+
+### Explicit collection-26 repair checks
+
+The separate Cat and Bretzel cases used the real identity input to set collection
+26, then exported and reopened through the browser. With their matching external
+mesh/shape dependencies installed, both exports preloaded and placed in TM2020.
+Close camera views confirmed textured geometry for both, not merely pivots or
+item-count changes. These edits were explicit compatibility repairs; unchanged
+exports retain the original collections and the results in the table above.
+
+The existing editor map was backed up before testing. The two repaired items were
+placed far from its original item, whose properties remained unchanged; block
+count remained 2306 and item count increased from 1 to 3. No map was replaced to
+perform the placement checks.
+
+**Remaining limitation:** TM reported `Error while saving items into the map file`
+for both repaired legacy items. A separate local test map was saved with the
+visible **Save anyway** action. This does not demonstrate portable embedding:
+the map requires locally installed item dependencies. Reopening this unembedded
+test save failed because existing custom-block resources were also no longer
+embedded. Therefore the repaired Cat/Bretzel cases are **placement/rendering
+passes, not map-round-trip passes**. The backup remained byte-identical.
+Screenshots and the native receipt are retained outside git.
