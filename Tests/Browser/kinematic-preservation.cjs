@@ -106,6 +106,12 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
             'Switching every variant must not rewrite any constraint');
         await page.getByLabel('Translation maximum (m)', { exact: true }).fill('40');
         await page.getByLabel('Translation maximum (m)', { exact: true }).press('Tab');
+        assert.equal(await page.evaluate(() => typedMotions[0].fields.translationMax), 40,
+            'An authored edit must rebuild the live motion alongside invalidated shared geometry');
+        await page.getByRole('button', { name: /^3\./ }).click();
+        await page.getByRole('button', { name: /^2\./ }).click();
+        assert.equal(await page.evaluate(() => typedMotions[0].fields.translationMax), 40,
+            'Returning to an edited variant must not resurrect stale cached motion');
         assert.deepEqual(inspect(await exportTo('range-edit.Item.Gbx')), inspect(fixture, ['translation-max', '40']),
             'Changing the range must preserve all other serialized fields, timelines and constraints');
         await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).fill('1440');

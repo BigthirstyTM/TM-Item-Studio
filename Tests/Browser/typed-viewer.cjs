@@ -64,6 +64,41 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                     reject(() => renderStudioScene({ parts: [{ ...packed, ...patch }] }));
                 require(mesh('packed') === previous, 'Corrupt binary payload replaced live geometry');
             });
+            check('shared local geometry survives variant instances and retires on invalidation', () => {
+                const definition = { ...part(), geometryId: 1 };
+                const instance = (path, x, entityPath = null) => ({ path, entityPath, geometryId: 1,
+                    worldTransform: new THREE.Matrix4().makeTranslation(x, 0, 0).toArray() });
+                const payload = { geometryEpoch: 1, geometryDefinitions: [definition],
+                    parts: [instance('a', 10), instance('b', 20, 'child')],
+                    motions: [motion({ childRest: new THREE.Matrix4().makeTranslation(20, 0, 0).toArray() })] };
+                renderStudioScene(payload);
+                const shared = mesh('a').geometry;
+                require(shared === mesh('b').geometry, 'Occurrences must share the local buffer');
+                near(vertex('a'), [11, 0, 0]); near(vertex('b'), [21, 0, 0]);
+                advance(50); near(vertex('a'), [11, 0, 0]); near(vertex('b'), [26, 0, 0]);
+                near(Array.from(shared.attributes.position.array), definition.positions, 'Motion mutated shared geometry');
+                let disposed = 0; shared.addEventListener('dispose', () => disposed++);
+                renderStudioScene({ geometryEpoch: 1, parts: [instance('c', 30)] });
+                require(mesh('c').geometry === shared && disposed === 0, 'Variant switch rebuilt/disposed shared geometry');
+                near(vertex('c'), [31, 0, 0]);
+                const previousTarget = controls.target.toArray();
+                reject(() => renderStudioScene({ geometryEpoch: 1, parts: [instance('bad', 0)], motions: [motion({ fields: fields({ translationAxis: 9 }) })], playing: false }));
+                require(mesh('c').geometry === shared && isPlaying, 'Rejected shared payload changed playback');
+                near(controls.target.toArray(), previousTarget);
+                reject(() => renderStudioScene({ geometryEpoch: 2, parts: [instance('missing', 0)] }));
+                require(mesh('c').geometry === shared && disposed === 0, 'Rejected epoch destroyed live geometry');
+                renderStudioScene({ geometryEpoch: 2, geometryDefinitions: [{ ...definition, positions: [2, 0, 0, 0, 1, 0, 0, 0, 0] }], parts: [instance('edited', 30)] });
+                near(vertex('edited'), [32, 0, 0]); require(disposed === 1, 'Invalidation must dispose old geometry exactly once');
+                const edited = mesh('edited').geometry;
+                let released = 0; edited.addEventListener('dispose', () => released++);
+                clearViewerScene();
+                require(released === 1, 'Explicit clear must release the geometry pool');
+                renderStudioScene({ geometryEpoch: 3, geometryDefinitions: [definition], parts: [instance('last', 0)] });
+                const last = mesh('last').geometry;
+                let disposedOnReplace = 0; last.addEventListener('dispose', () => disposedOnReplace++);
+                init3DViewer('threeContainer', { invokeMethodAsync: (...args) => { messages.push(args); return Promise.resolve(); } });
+                require(disposedOnReplace === 1, 'Viewer replacement must release shared geometry exactly once');
+            });
             check('duration and endpoint storage produce equivalent motion without mutation', () => {
                 for (const isDuration of [true, false]) {
                     const source = { isDuration, keys: [{ ease: 1, reverse: false, durationMilliseconds: 1000 },

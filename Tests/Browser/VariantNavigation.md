@@ -6,15 +6,17 @@ npm --prefix Tests/Browser run test:variant-navigation
 ```
 
 The runner publishes this checkout and serves it on an isolated local port.
-The test uploads the approved SnowCar through the real UI, switches 2 → 3 → 2,
-and measures until the real scene renderer finishes. It checks nine compact
+The test uploads the approved SnowCar through the real UI, switches 2 → 3 → 2 → 1 → 3,
+and measures until the viewer has rendered and the variant controls are ready again. It checks nine compact
 buttons on one desktop row, no horizontal page overflow at 390 px, distinct
 groups for multiple loaded files, and a real on-demand OBJ download containing
 vertices and faces. It also checks retained keyboard focus and disambiguated
 headings for two documents with the same filename. The default 5000 ms ceiling leaves headroom for loaded CI
 machines; override it with `STUDIO_VARIANT_BUDGET_MS`. Timings are not a promise
 for every device. The original dev build took approximately 15–16 seconds per
-switch; the revised dev build measured approximately 2–3 seconds on the same host.
+switch. The first optimization reduced this to approximately 2–3 seconds; shared
+geometry further reduces repeated selections. Cold geometry/transform visits and
+warm visits are reported separately by the ordered timing samples.
 
 `STUDIO_VARIANT_EVIDENCE=/tmp/studio-variants` optionally captures desktop and
 narrow screenshots after fonts load. Screenshots and downloads stay outside git.
@@ -27,6 +29,15 @@ supported. Bounds, normal validation and index validation use the decoded data.
 
 Run `test:kinematic-preservation` as well: it checks real moving geometry, every
 SnowCar variant, exact authored constraints, explicit edits, export and reopen.
-Selection reuses its freshly built scene snapshot; edit callbacks rebuild it
-instead of trusting a cross-selection cache. Neither optimization changes GBX
+Selection traverses the current source graph but reuses geometry by parsed GBX
+node reference identity, not by name or snapshot-local ID. Shared local vertex,
+normal and index buffers upload once per document/edit epoch; each occurrence
+has its own transform, material and motion ownership. The test verifies that
+SnowCar's later moving variants transfer no new geometry, even after visiting
+its static variant. World-space snapshot arrays are cached per authored transform
+for other consumers, including on-demand OBJ export. Legacy array/binary payloads
+still work. All preview edit callbacks invalidate the cache conservatively;
+replacing documents and disposing the viewer release its GPU geometry pool.
+The typed-viewer suite checks shared instances, independent motion, invalidation,
+rejected-payload rollback and explicit clear. Neither optimization changes GBX
 serialization or the authored source graph.

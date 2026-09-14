@@ -10,7 +10,7 @@ namespace TM_Item_Studio.Models;
 
 public static partial class ItemScene
 {
-    private sealed partial class Builder(int? variantOrdinal)
+    private sealed partial class Builder(int? variantOrdinal, ItemSceneGeometryCache? geometryCache)
     {
         private readonly List<ItemSceneNode> nodes = new();
         private readonly List<ItemSceneGeometry> geometry = new();

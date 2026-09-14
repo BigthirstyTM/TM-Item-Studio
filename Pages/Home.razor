@@ -808,6 +808,8 @@
     private float[] translationMax = new float[3];
     private object? activeKinematicConstraint;
     private ItemSceneResult? authoredMotionScene;
+    private readonly ItemSceneGeometryCache geometryCache = new();
+    private readonly HashSet<int> uploadedGeometry = new();
     private readonly List<NPlugDyna_SKinematicConstraint> authoredConstraints = new();
     private IReadOnlyList<string> motionDiagnostics = Array.Empty<string>();
     private bool showOriginalMotion;
@@ -915,6 +917,8 @@
         isLoading = true;
         errorMessage = null;
         variantSources.Clear();
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
         activeVariantIndex = 0;
         itemModel = null;
         hasMesh = false;
@@ -1004,6 +1008,7 @@
     {
         activeVariantIndex = index;
         var source = variantSources[index];
+        iconPreviewPending |= !ReferenceEquals(itemModel, source.Model);
         itemModel = source.Model;
         gbxFile = source.GbxFile;
         hasMesh = false;
@@ -1032,16 +1037,16 @@
         originalConstraintType = "Not found";
         originalMotionSettings.Clear();
         originalMotionAvailable = false;
-        iconPreviewPending = true;
 
         identId = itemModel.Ident?.Id ?? "";
         identAuthor = itemModel.Ident?.Author ?? "";
         identCollection = itemModel.Ident?.Collection.ToString() ?? "";
-        ExtractParts(source.PreviewRoot);
-        ExtractPivotsAndSockets(itemModel);
         authoredMotionScene = ReadSelectedScene();
         authoredConstraints.Clear();
         authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        ExtractParts(source.PreviewRoot, includeGeometry: authoredConstraints.Count == 0);
+        ExtractPivotsAndSockets(itemModel);
+        if (authoredConstraints.Count > 0) UseAuthoredModelParts(authoredMotionScene);
         isMovingItem = isMovingItem || authoredConstraints.Count > 0;
         motionDiagnostics = AuthoredMotionPreview.Build(authoredMotionScene).Diagnostics;
 
@@ -1074,43 +1079,72 @@
         return sb.ToString();
     }
 
+    private void UseAuthoredModelParts(ItemSceneResult selectedScene)
+    {
+        var movingPaths = AuthoredMotionPreview.Build(selectedScene).Tracks.Select(t => t.ChildPath).ToHashSet();
+        modelParts = selectedScene.Preview.Geometry.Where(g => !g.IsCollision).Select(g => new ModelPart
+        {
+            Name = g.Path, IsMoving = g.EntityPath is not null && movingPaths.Contains(g.EntityPath),
+            Positions = g.Positions, Indices = g.Indices
+        }).ToList();
+    }
+
     private ItemSceneResult ReadSelectedScene()
     {
         var source = variantSources[activeVariantIndex];
         var document = variantSources.Select(s => s.GbxFile).Distinct().ToList().IndexOf(source.GbxFile);
         int? variant = source.Model.EntityModel is NPlugItem_SVariantList { Variants: { } variants } && source.Variant is { } selected
             ? Array.IndexOf(variants, selected) : null;
-        return ItemScene.Build(source.PreviewRoot, document, variant);
+        return ItemScene.Build(source.PreviewRoot, document, variant, geometryCache);
     }
 
-    private Task UpdateScenePayload() => UpdateScenePayload(null);
+    private Task UpdateScenePayload()
+    {
+        // All edit callbacks enter here. Invalidate shared sources across every variant,
+        // including in-place array edits; selection alone keeps the document's geometry.
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        return UpdateScenePayload(null);
+    }
 
     private async Task UpdateScenePayload(ItemSceneResult? selectedScene)
     {
         if (authoredMotionScene is { } authoredScene && authoredConstraints.Count > 0)
         {
-            // Selection already built a fresh snapshot. Other edit callers must
-            // rebuild it; no cross-selection cache can hide edits to shared sources.
+            // Traversal and motion stay fresh; immutable geometry survives selection.
             authoredScene = selectedScene ?? ReadSelectedScene();
             authoredMotionScene = authoredScene;
+            UseAuthoredModelParts(authoredScene);
             var motion = AuthoredMotionPreview.Build(authoredScene);
             motionDiagnostics = motion.Diagnostics;
+            var definitions = authoredScene.Preview.Geometry.Where(g => g.GeometryId.HasValue && !uploadedGeometry.Contains(g.GeometryId.Value))
+                .GroupBy(g => g.GeometryId!.Value).Select(group => group.First()).ToArray();
+            var epoch = geometryCache.Epoch;
             await JS.InvokeVoidAsync("renderStudioScene", new
             {
+                geometryEpoch = epoch,
+                geometryDefinitions = definitions.Select(g => new { geometryId = g.GeometryId,
+                    positionsBytes = ViewerBuffers.Pack(g.LocalPositions), indicesBytes = ViewerBuffers.Pack(g.Indices),
+                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals) }),
                 parts = authoredScene.Preview.Geometry.Select(g => new
                 {
-                    path = g.Path, entityPath = g.EntityPath, positionsBytes = ViewerBuffers.Pack(g.Positions),
-                    indicesBytes = ViewerBuffers.Pack(g.Indices), normalsBytes = g.Normals is null ? null : ViewerBuffers.Pack(g.Normals),
+                    path = g.Path, entityPath = g.EntityPath, geometryId = g.GeometryId, worldTransform = g.WorldTransform,
+                    positionsBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Positions),
+                    indicesBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Indices),
+                    normalsBytes = g.GeometryId.HasValue || g.Normals is null ? null : ViewerBuffers.Pack(g.Normals),
                     isCollision = g.IsCollision
                 }),
                 motions = motion.Tracks,
                 pivots = detectedPivots, lights = detectedLights, sockets = detectedSockets,
                 playing = isPlaying
             });
+            if (geometryCache.Epoch == epoch)
+                foreach (var definition in definitions) uploadedGeometry.Add(definition.GeometryId!.Value);
             return;
         }
         var scenePayload = new
         {
+            geometryEpoch = geometryCache.Epoch,
             parts = modelParts.Select(p => new { p.Name, p.IsMoving,
                 positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices) }),
             pivots = detectedPivots,
@@ -1528,7 +1562,7 @@
         }
     }
 
-    private void ExtractParts(CMwNod? previewRoot)
+    private void ExtractParts(CMwNod? previewRoot, bool includeGeometry = true)
     {
         CPlugPrefab? prefab = null;
         FindPrefab(previewRoot, ref prefab, new HashSet<object>(), 0);
@@ -1559,7 +1593,7 @@
                     var indices = new List<int>();
                     var visited = new HashSet<object>();
 
-                    CrawlNode(ent.Model, positions, indices, visited, 0, ent.Position, ent.Rotation);
+                    CrawlNode(ent.Model, positions, indices, visited, 0, ent.Position, ent.Rotation, includeGeometry);
 
                     if (positions.Count > 0)
                     {
@@ -1583,13 +1617,13 @@
             }
         }
 
-        if (modelParts.Count == 0)
+        if (modelParts.Count == 0 && (includeGeometry || prefab is null))
         {
             var positions = new List<float>();
             var indices = new List<int>();
             var visited = new HashSet<object>();
 
-            CrawlNode(previewRoot, positions, indices, visited, 0, null, null);
+            CrawlNode(previewRoot, positions, indices, visited, 0, null, null, includeGeometry);
 
             if (positions.Count > 0)
             {
@@ -1818,7 +1852,7 @@
         }
     }
 
-    private void CrawlNode(object? obj, List<float> positions, List<int> indices, HashSet<object> visited, int depth, Vec3? offsetPos, Quat? offsetRot)
+    private void CrawlNode(object? obj, List<float> positions, List<int> indices, HashSet<object> visited, int depth, Vec3? offsetPos, Quat? offsetRot, bool includeGeometry = true)
     {
         if (obj == null || depth > 12 || visited.Contains(obj)) return;
         visited.Add(obj);
@@ -1854,7 +1888,7 @@
                 foreach (var ent in prefab.Ents)
                 {
                     if (ent.Model != null)
-                        CrawlNode(ent.Model, positions, indices, visited, depth + 1, ent.Position, ent.Rotation);
+                        CrawlNode(ent.Model, positions, indices, visited, depth + 1, ent.Position, ent.Rotation, includeGeometry);
                 }
             }
             return;
@@ -1862,19 +1896,19 @@
 
         if (obj is CPlugVisualIndexedTriangles mesh)
         {
-            ExtractMeshFromVisual(mesh, positions, indices, offsetPos, offsetRot);
+            if (includeGeometry) ExtractMeshFromVisual(mesh, positions, indices, offsetPos, offsetRot);
             return;
         }
 
         if (obj is CPlugTree tree)
         {
             if (tree.Visual != null)
-                CrawlNode(tree.Visual, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                CrawlNode(tree.Visual, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
 
             if (tree.Children != null)
             {
                 foreach (var child in tree.Children)
-                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
             }
             return;
         }
@@ -1889,7 +1923,7 @@
                 try
                 {
                     var child = prop.GetValue(obj);
-                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                    CrawlNode(child, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
                 }
                 catch { }
             }
@@ -1904,7 +1938,7 @@
                     {
                         foreach (var item in collection)
                             if (item != null && !item.GetType().IsPrimitive && item is not string)
-                                CrawlNode(item, positions, indices, visited, depth + 1, offsetPos, offsetRot);
+                                CrawlNode(item, positions, indices, visited, depth + 1, offsetPos, offsetRot, includeGeometry);
                     }
                 }
                 catch { }

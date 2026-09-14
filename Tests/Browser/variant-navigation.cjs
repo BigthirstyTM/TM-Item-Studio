@@ -16,9 +16,13 @@ const fs = require('node:fs');
         await page.evaluate(() => {
             const render = window.renderStudioScene;
             window.variantRenders = [];
+            window.geometryTransfers = [];
             window.renderStudioScene = payload => {
                 const result = render(payload);
                 variantRenders.push(performance.now());
+                geometryTransfers.push({ definitions: payload.geometryDefinitions?.length ?? 0,
+                    shared: payload.parts.filter(p => p.geometryId != null).length,
+                    parts: payload.parts.length });
                 return result;
             };
         });
@@ -34,20 +38,27 @@ const fs = require('node:fs');
             rows: new Set(buttons.map(b => Math.round(b.getBoundingClientRect().top))).size
         }));
         const durations = [];
-        for (const n of [2, 3, 2]) {
+        for (const n of [2, 3, 2, 1, 3]) {
             const before = await page.evaluate(() => ({ count: variantRenders.length, time: performance.now() }));
             await page.getByRole('button', { name: new RegExp(`^${n}\\. SnowCarTraffic`) }).click();
             await page.waitForFunction(count => variantRenders.length > count, before.count);
-            durations.push(await page.evaluate(start => variantRenders.at(-1) - start, before.time));
+            await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
+            durations.push(await page.evaluate(start => performance.now() - start, before.time));
         }
         console.log(JSON.stringify({ layout, switchMilliseconds: durations }));
+        const transfers = await page.evaluate(() => geometryTransfers.filter(t => t.shared > 0));
+        console.log(JSON.stringify({ geometryTransfers: transfers }));
+        assert.ok(transfers[0].shared > 0, 'Real upload must use GBX reference identities');
+        assert.equal(transfers[1].definitions, 0, 'SnowCar variants must reuse their shared GBX geometry');
+        assert.equal(transfers[2].definitions, 0, 'Revisiting a variant must not upload geometry again');
+        assert.equal(transfers.at(-1).definitions, 0, 'Visiting a legacy/static variant must retain the shared pool');
         assert.equal(layout.rows, 1, 'Desktop variant buttons must fit on one row');
         assert.deepEqual(layout.labels, ['1', '2', '3', '4', '5', '6', '7', '8', '9'], 'Filename/ordinal repeated in each visible button');
         // A generous ceiling for loaded CI machines; the previous dev build takes ~15s.
         const budget = Number(process.env.STUDIO_VARIANT_BUDGET_MS || 5000);
         assert.ok(durations.every(ms => ms < budget), `Variant switch exceeds ${budget}ms: ${durations}`);
         await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
-        const focusRetained = await page.getByRole('button', { name: /^2\. SnowCarTraffic/ }).evaluate(button => button === document.activeElement);
+        const focusRetained = await page.getByRole('button', { name: /^3\. SnowCarTraffic/ }).evaluate(button => button === document.activeElement);
         async function screenshot(name) {
             if (!process.env.STUDIO_VARIANT_EVIDENCE) return;
             fs.mkdirSync(process.env.STUDIO_VARIANT_EVIDENCE, { recursive: true });
