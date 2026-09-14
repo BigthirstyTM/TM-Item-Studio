@@ -1,4 +1,62 @@
-# Bundled GBX.NET compatibility patch
+# Bundled GBX.NET parser
+
+## Current development build: GmSurf support
+
+`lib/GBX.NET.dll` is built from
+[`15dba8bf7dae04e9654953418437e34957f84859`](https://github.com/XertroV/gbx-net/commit/15dba8bf7dae04e9654953418437e34957f84859),
+the locally authored [GBX.NET PR #215](https://github.com/BigBang1112/gbx-net/pull/215),
+plus Studio's existing [null-class-ID patch](../patches/gbx-net-null-class-id.patch).
+This is a pinned development build, **not an official NuGet release**.
+
+- Target: net8.0, Release, .NET SDK 10.0.111.
+- SHA-256: `707d8c727bd8c037f0b67ba27b256d2ff4588b166cbd043b02d3ae97767e73be`.
+- Upstream MIT terms are retained in [GBX.NET.LICENSE](../lib/GBX.NET.LICENSE).
+- Our GmSurf changes and bespoke shape fixtures are public domain and may be relicensed by the maintainer. This does not relicense GBX.NET or game-derived item assets.
+
+The source adds TM2020 GmSurf archive support and corrects the C003 material-ID
+vectors. It does not add texture loading or promise support for legacy surface
+IDs 2–5. The pusher's convex surface (type 10) previously stopped browser import.
+
+Rebuild in a separate checkout (does not overwrite the bundled DLL):
+
+```bash
+studio="$PWD"
+scratch="$(mktemp -d)"
+git clone https://github.com/XertroV/gbx-net.git "$scratch/gbx-net"
+git -C "$scratch/gbx-net" checkout --detach 15dba8bf7dae04e9654953418437e34957f84859
+git -C "$scratch/gbx-net" apply --check "$studio/patches/gbx-net-null-class-id.patch"
+git -C "$scratch/gbx-net" apply "$studio/patches/gbx-net-null-class-id.patch"
+dotnet build "$scratch/gbx-net/Src/GBX.NET/GBX.NET.csproj" \
+  -c Release -f net8.0 --nologo -m:2 -p:GeneratePackageOnBuild=false
+```
+
+Build metadata/environment can change the resulting binary hash. The source
+revision and applied patch, not a matching assembly version string, identify
+this build. Existing upstream generator warnings and the NU1902 advisory for
+the build-only `Microsoft.Build.Tasks.Git` dependency remain.
+
+Verification on 2026-09-14:
+
+```bash
+DOTNET_ROLL_FORWARD=Major dotnet run --project Tests/ParserSentinels
+DOTNET_ROLL_FORWARD=Major dotnet run --project Tests/ParserSurfaces
+npm ci --prefix Tests/Browser
+npm --prefix Tests/Browser run test:collection-export
+npm --prefix Tests/Browser run test:animation-upload
+```
+
+The shape suite processes all 23 exact native-validated contributions with the
+bundled parser, comparing the complete decompressed archive on save/reparse.
+The browser suite covers the pusher's real upload/export/reopen and geometry
+export, and verifies the archive helper is using the exact bundled DLL. Its
+previous transitive LZO dependency could silently select official GBX.NET.
+See [native/browser evidence](evidence/approved-item-batch.md).
+
+## Historical investigation of the previous bundled DLL
+
+The remainder records the pre-GmSurf DLL and is retained as provenance for the
+null-class-ID compatibility patch. Its hashes and replacement cautions refer
+to that earlier artifact, not the current development build above.
 
 The reviewed `lib/GBX.NET.dll` identifies as GBX.NET 2.4.4 (assembly version
 2.4.4.0). It is not identical to the official NuGet net8.0 assembly.
