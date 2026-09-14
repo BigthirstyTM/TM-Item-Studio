@@ -68,6 +68,11 @@ The checks load two distinct synthetic items, exercise a failed load and recover
 check recursive gizmo cleanup, and navigate away to verify renderer/listener teardown.
 No Trackmania installation or third-party item files are required.
 
+For the upload → export → reopen collection regression, run
+`npm --prefix Tests/Browser run test:collection-export`. This publishes and serves
+the current checkout automatically; no development server is needed. See
+[collection regression details](Tests/Browser/CollectionArchive/README.md).
+
 ## Notes
 
 The project includes a compatibility-patched `GBX.NET` assembly. Editor++
