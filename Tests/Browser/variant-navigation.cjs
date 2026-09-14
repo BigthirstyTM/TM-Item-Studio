@@ -46,6 +46,8 @@ const fs = require('node:fs');
         // A generous ceiling for loaded CI machines; the previous dev build takes ~15s.
         const budget = Number(process.env.STUDIO_VARIANT_BUDGET_MS || 5000);
         assert.ok(durations.every(ms => ms < budget), `Variant switch exceeds ${budget}ms: ${durations}`);
+        await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
+        const focusRetained = await page.getByRole('button', { name: /^2\. SnowCarTraffic/ }).evaluate(button => button === document.activeElement);
         async function screenshot(name) {
             if (!process.env.STUDIO_VARIANT_EVIDENCE) return;
             fs.mkdirSync(process.env.STUDIO_VARIANT_EVIDENCE, { recursive: true });
@@ -79,6 +81,16 @@ const fs = require('node:fs');
         assert.equal(await cube.innerText(), '1');
         assert.equal(await page.locator('.studio-variant-file').count(), 2);
         assert.equal(await page.getByRole('button', { name: /^1\. SnowCarTraffic/ }).innerText(), '1');
+        await page.getByLabel('Open item files').setInputFiles([
+            { name: 'same.Item.Gbx', mimeType: 'application/octet-stream', buffer: fs.readFileSync(fixture) },
+            { name: 'same.Item.Gbx', mimeType: 'application/octet-stream', buffer: fs.readFileSync(path.join(__dirname, 'Fixtures/Approved/TM2020/Item.Item.Gbx')) }
+        ]);
+        const otherDocument = page.getByRole('button', { name: /^10\. same/ });
+        await otherDocument.click();
+        const headings = await page.locator('.studio-variant-filename').allTextContents();
+        console.log(JSON.stringify({ focusRetained, duplicateFileHeadings: headings }));
+        assert.ok(focusRetained, 'Variant selection must retain keyboard focus on its initiating button');
+        assert.equal(new Set(headings).size, 2, 'Distinct documents with equal filenames need distinct visible headings');
         assert.deepEqual(errors, []);
         console.log('PASS: compact responsive variants, bounded switching, and on-demand OBJ export.');
     } finally { await browser.close(); }

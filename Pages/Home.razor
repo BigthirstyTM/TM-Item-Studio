@@ -29,19 +29,24 @@
 
 @if (variantSources.Count > 0)
 {
+    var files = variantSources.Select((source, index) => (Source: source, Index: index)).GroupBy(v => v.Source.GbxFile).ToArray();
     <div class="studio-variants mb-3" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
-        @foreach (var file in variantSources.Select((source, index) => (Source: source, Index: index)).GroupBy(v => v.Source.GbxFile))
+        @for (var fileIndex = 0; fileIndex < files.Length; fileIndex++)
         {
-            <div class="studio-variant-file" role="group" aria-label="@file.First().Source.FileName">
-                <strong class="studio-variant-filename" title="@file.First().Source.FileName">@file.First().Source.FileName</strong>
+            var file = files[fileIndex];
+            var filename = file.First().Source.FileName;
+            var label = files.Count(f => string.Equals(f.First().Source.FileName, filename, StringComparison.OrdinalIgnoreCase)) > 1
+                ? $"{filename} (file {fileIndex + 1})" : filename;
+            <div class="studio-variant-file" role="group" aria-label="@label">
+                <strong class="studio-variant-filename" title="@label">@label</strong>
                 <div class="studio-variant-buttons">
                     @foreach (var entry in file)
                     {
                         var variantIndex = entry.Index;
                         <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
-                                aria-label="@($"{variantIndex + 1}. {entry.Source.Name}")" title="@entry.Source.Name"
+                                aria-label="@($"{variantIndex + 1}. {entry.Source.Name}")" title="@($"{label} — variant {entry.Source.VariantNumber}")"
                                 aria-pressed="@((variantIndex == activeVariantIndex).ToString().ToLowerInvariant())"
-                                disabled="@isSelectingVariant" @onclick="@(() => SelectVariant(variantIndex))">
+                                aria-disabled="@isSelectingVariant.ToString().ToLowerInvariant()" @onclick="@(() => SelectVariant(variantIndex))">
                             @entry.Source.VariantNumber
                         </button>
                     }
