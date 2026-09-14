@@ -20,10 +20,10 @@ SnowCar variants and explicit single-range/single-key edits. The expected edited
 archives come from changing only those requested fields directly with GBX.NET;
 every other serialized constraint byte must stay intact, including shared sources.
 
-The fixture has `IsDuration=true`. The current typed evaluator deliberately
-does not claim support for that mode. The browser must display that limitation
-and retain the rest pose, not invent rotation, alter the flag, or rewrite the
-source timeline to make preview work. The animation check controls only the
+The fixture has `IsDuration=true`: each time is a segment duration. Two world-space
+vertices must translate 16 metres along Z at 960 ms without rotation. The browser
+must not alter the flag or rewrite the source timeline to make preview work.
+The animation check controls only the
 clock and observes world-space uploaded mesh vertices; it does not inject scene
 data or substitute the renderer.
 

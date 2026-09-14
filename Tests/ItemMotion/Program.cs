@@ -13,6 +13,56 @@ using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 int passed = 0, failed = 0;
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("duration and endpoint archives sample equally without rewriting authored data", () =>
+{
+    foreach (var isDuration in new[] { true, false })
+    {
+        var model = Model(); model.TransMin = 0; model.TransMax = 10;
+        model.TransAnimFunc = new() { IsDuration = isDuration, SubFuncs = new[] {
+            Key(KC.AnimEase.Linear, 1000), Key(KC.AnimEase.Linear, isDuration ? 1000 : 2000, true) } };
+        var before = Bytes(model);
+        foreach (var (seconds, expected) in new[] { (0d, 0d), (.5, 5d), (1d, 10d), (1.5, 5d), (2d, 0d) })
+            Near(Value(ItemMotion.Evaluate(model, seconds)).TranslationMetres, expected);
+        Require(Bytes(model).SequenceEqual(before), "Evaluation rewrote the archive representation");
+    }
+    var longer = Model(); longer.TransMin = 0; longer.TransMax = 10;
+    longer.TransAnimFunc = new() { IsDuration = true, SubFuncs = new[] {
+        Key(KC.AnimEase.Linear, 1000), Key(KC.AnimEase.Linear, 2000, true) } };
+    Near(Value(ItemMotion.Evaluate(longer, 1.5)).TranslationMetres, 7.5);
+});
+
+Check("endpoint duplicates, decreases and normalized limits retain native segment boundaries", () =>
+{
+    foreach (var middle in new[] { 500, 1000 })
+    {
+        var model = Model(); model.TransMin = 0; model.TransMax = 10;
+        model.TransAnimFunc = new() { IsDuration = false, SubFuncs = new[] {
+            Key(KC.AnimEase.Linear, 1000), Key(KC.AnimEase.Constant, middle),
+            Key(KC.AnimEase.Linear, middle + 1000, true) } };
+        Near(Value(ItemMotion.Evaluate(model, 1)).TranslationMetres, 10);
+        Near(Value(ItemMotion.Evaluate(model, 1.5)).TranslationMetres, 5);
+        Near(Value(ItemMotion.Evaluate(model, 2)).TranslationMetres, 0);
+        var edit = ItemMotion.Read(model).Fields;
+        var before = Bytes(model);
+        Require(ItemMotion.Apply(model, edit).Success, "raw endpoint edit refused");
+        Require(Bytes(model).SequenceEqual(before), "unchanged endpoint edit rewrote storage");
+    }
+    var limit = Model();
+    limit.TransAnimFunc = new() { IsDuration = false, SubFuncs = new[] {
+        Key(KC.AnimEase.Linear, int.MaxValue), Key(KC.AnimEase.Linear, int.MaxValue) } };
+    Require(ItemMotion.Evaluate(limit, .5).Success, "validated raw sum rather than normalized duration");
+    limit.TransAnimFunc.SubFuncs = new[] { Key(KC.AnimEase.Linear, int.MaxValue),
+        Key(KC.AnimEase.Linear, 0), Key(KC.AnimEase.Linear, int.MaxValue) };
+    Require(ItemMotion.Evaluate(limit, .5).Status == ItemMotionStatus.Invalid, "normalized period overflow accepted");
+    foreach (var mode in new[] { false, true })
+    {
+        limit.TransAnimFunc = new() { IsDuration = mode, SubFuncs = Array.Empty<KC.SubAnimFunc>() };
+        Near(Value(ItemMotion.Evaluate(limit, 1)).TranslationMetres, 2);
+        limit.TransAnimFunc.SubFuncs = new[] { Key(KC.AnimEase.Linear, 0) };
+        Near(Value(ItemMotion.Evaluate(limit, 1)).TranslationMetres, 0);
+    }
+});
+
 Check("independent timelines, scalar units and phase", () =>
 {
     var model = Model();
@@ -149,8 +199,6 @@ Check("unsupported modes and missing data stay visible", () =>
         Require(ItemMotion.Read(model).Fields.Translation!.Keys[0].Ease == ease, "raw easing lost");
         Require(ItemMotion.Evaluate(model, 0).Status == ItemMotionStatus.Unsupported, "unsupported easing coerced");
     }
-    model.TransAnimFunc = Timeline(); model.TransAnimFunc.IsDuration = true;
-    Require(ItemMotion.Evaluate(model, 0).Status == ItemMotionStatus.Unsupported, "duration flag guessed");
     model.TransAnimFunc = null;
     Require(ItemMotion.Evaluate(model, 0).Status == ItemMotionStatus.Absent, "absent timeline defaulted");
     model.TransAnimFunc = new();
@@ -164,7 +212,7 @@ Check("invalid edits are atomic across fields and both timelines", () =>
     var fields = ItemMotion.Read(model).Fields;
     foreach (var invalid in new[] { fields with { TranslationMin = float.NaN }, fields with { AngleMaxDegrees = float.PositiveInfinity },
         fields with { RotationAxis = (KC.EAxis)255 }, fields with { Translation = new(false, [new(KC.AnimEase.Linear, false, -1)]) },
-        fields with { Rotation = new(false, [new(KC.AnimEase.Linear, false, int.MaxValue), new(KC.AnimEase.Linear, false, 1)]) },
+        fields with { Rotation = new(true, [new(KC.AnimEase.Linear, false, int.MaxValue), new(KC.AnimEase.Linear, false, 1)]) },
         fields with { TranslationMin = 9, Rotation = new(false, [new(KC.AnimEase.CubicIn, false, 500)]) },
         fields with { Translation = new(false, Enumerable.Repeat(new ItemMotionKey(KC.AnimEase.Linear, false, 1), 5).ToArray()) } })
     {
@@ -356,7 +404,7 @@ static T Value<T>(ItemMotionResult<T> result) { Require(result.Success, result.R
 static void Near(double actual, double expected) => Require(Math.Abs(actual - expected) < .0001, $"Expected {expected}, got {actual}");
 static void Vector(Vector3 actual, Vector3 expected) { Near(actual.X, expected.X); Near(actual.Y, expected.Y); Near(actual.Z, expected.Z); }
 static KC.SubAnimFunc Key(KC.AnimEase ease, int duration, bool reverse = false) => new() { Ease = ease, Duration = new TimeInt32(duration), Reverse = reverse };
-static KC.AnimFunc Timeline(params KC.SubAnimFunc[] keys) => new() { SubFuncs = keys };
+static KC.AnimFunc Timeline(params KC.SubAnimFunc[] keys) => new() { IsDuration = true, SubFuncs = keys };
 static KC Model() => new() { TransAxis = KC.EAxis.X, TransMin = 2, TransMax = 10, RotAxis = KC.EAxis.Z, AngleMinDeg = 0, AngleMaxDeg = 180,
     TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 2000)), RotAnimFunc = Timeline(Key(KC.AnimEase.Linear, 1000)) };
 static (CPlugPrefab Prefab, KC Model, NPlugDyna_SPrefabConstraintParams Parameters) Prefab()

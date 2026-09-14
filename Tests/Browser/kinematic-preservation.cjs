@@ -58,18 +58,18 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
             for (let t = 40; t <= 960; t += 40) motionTestTick(t);
             return points().map((point, i) => point.sub(before[i]).toArray());
         });
-        // SnowCar uses IsDuration=true, explicitly unsupported by the evaluator.
-        // Preserve that mode, report it, and show the rest pose instead of inventing motion.
+        // Native duration mode: 0 -> 32m along Z in 1920ms, no rotation.
+        // Two independently observed vertices must both translate 16m at 960ms.
         assert.equal(expected[0].translationIsDuration, true);
-        assert.ok(displacement.flat().every(value => Math.abs(value) < 0.001),
-            `Unsupported authored motion must not acquire a fallback preset: ${JSON.stringify(displacement)}`);
+        assert.ok(displacement.every(([x, y, z]) => Math.abs(x) < .001 && Math.abs(y) < .001 && Math.abs(z - 16) < .001),
+            `Authored duration-mode motion must translate without invented rotation: ${JSON.stringify(displacement)}`);
         assert.match(await page.locator('body').innerText(), /IsDuration=true.*preserved/);
         assert.equal(await page.getByLabel('Translation minimum (m)', { exact: true }).inputValue(), '0');
         assert.equal(await page.getByLabel('Translation maximum (m)', { exact: true }).inputValue(), '32');
         assert.equal(await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).inputValue(), '1920');
         assert.equal(await page.getByText('Using authored motion settings', { exact: true }).count(), 1,
             'Import must select original motion, not a replacement preset');
-        console.log('PASS: unsupported preview and exact imported controls. Reopening export.');
+        console.log('PASS: authored duration-mode preview and exact imported controls. Reopening export.');
         await page.reload({ waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(exported);
         await page.getByRole('button', { name: /^2\./ }).click();
@@ -120,7 +120,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         assert.equal(await page.getByLabel('Translation maximum (m)', { exact: true }).inputValue(), '40');
         assert.equal(await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).inputValue(), '1440');
         assert.deepEqual(errors, []);
-        console.log('PASS: authored controls, all SnowCar variants, exact range/key edits and reopen; unsupported preview never substitutes a preset.');
+        console.log('PASS: authored controls and motion, all SnowCar variants, exact range/key edits and reopen.');
     } finally {
         await browser.close();
         fs.rmSync(work, { recursive: true, force: true });

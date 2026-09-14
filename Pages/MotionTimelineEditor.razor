@@ -10,7 +10,8 @@
     }
     else
     {
-        <p class="small text-muted">IsDuration=@Source.IsDuration.ToString().ToLowerInvariant() (preserved). Durations are stored in milliseconds.</p>
+        <p class="small text-muted">IsDuration=@Source.IsDuration.ToString().ToLowerInvariant() (preserved).
+            @(Source.IsDuration ? "Each value is a segment duration." : "Each value is a cumulative segment end time.") Times are in milliseconds.</p>
         @if (keys.Length == 0) { <p class="small text-muted">Empty key array (preserved).</p> }
         @for (var i = 0; i < keys.Length; i++)
         {
@@ -20,7 +21,7 @@
             else
             {
                 <div class="row g-1 mb-2">
-                    <label class="col-6 small">@prefix duration (ms)
+                    <label class="col-6 small">@prefix @(Source.IsDuration ? "duration" : "end time") (ms)
                         <input type="number" min="0" max="2147483647" step="1" class="form-control form-control-sm"
                                value="@key.Duration.TotalMilliseconds" @onchange="e => SetDuration(key, e)" />
                     </label>
@@ -48,7 +49,7 @@
     {
         if (!int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var ms) || ms < 0)
         {
-            validationError = "Duration must be a nonnegative whole number of milliseconds. Stored value unchanged.";
+            validationError = "Time must be a nonnegative whole number of milliseconds. Stored value unchanged.";
             return;
         }
         validationError = null;

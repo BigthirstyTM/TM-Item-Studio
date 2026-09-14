@@ -29,8 +29,8 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                 && actual.every((value, i) => Math.abs(value - expected[i]) < 1e-5), `${message}: ${actual} != ${expected}`);
             const check = (name, action) => { action(); results.push(name); };
             const identity = new THREE.Matrix4().toArray();
-            const track = (duration = 100, ease = 1, reverse = false) => ({ isDuration: false, keys: [{ ease, reverse, durationMilliseconds: duration }] });
-            const empty = () => ({ isDuration: false, keys: [] });
+            const track = (duration = 100, ease = 1, reverse = false) => ({ isDuration: true, keys: [{ ease, reverse, durationMilliseconds: duration }] });
+            const empty = () => ({ isDuration: true, keys: [] });
             const fields = (overrides = {}) => ({ translationAxis: 0, translationMin: 0, translationMax: 10,
                 rotationAxis: 2, angleMinDegrees: 0, angleMaxDegrees: 0, translation: track(), rotation: empty(), ...overrides });
             const motion = (overrides = {}) => ({ path: 'constraint', childPath: 'child', parentPath: null,
@@ -42,6 +42,42 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             const vertex = path => { scene.updateMatrixWorld(true); const obj = mesh(path); return new THREE.Vector3().fromBufferAttribute(obj.geometry.attributes.position, 0).applyMatrix4(obj.matrixWorld).toArray(); };
             const reject = action => { let rejected = false; try { action(); } catch { rejected = true; } require(rejected, 'Expected unsupported/invalid payload rejection'); };
 
+            check('duration and endpoint storage produce equivalent motion without mutation', () => {
+                for (const isDuration of [true, false]) {
+                    const source = { isDuration, keys: [{ ease: 1, reverse: false, durationMilliseconds: 1000 },
+                        { ease: 1, reverse: true, durationMilliseconds: isDuration ? 1000 : 2000 }] };
+                    const before = JSON.stringify(source);
+                    renderStudioScene({ parts: [part()], motions: [motion({ fields: fields({ translation: source }) })] });
+                    advance(1500); near(vertex('mesh'), [6, 0, 0]);
+                    const compiled = timeline(source);
+                    for (const [seconds, expected] of [[0, 0], [.5, 5], [1, 10], [1.5, 5], [2, 0]])
+                        near([sampleTimeline(compiled, seconds, 0, 0, 10)], [expected]);
+                    require(JSON.stringify(source) === before, 'Sampling rewrote stored flag or times');
+                }
+            });
+
+            check('endpoint duplicates, decreases, and normalized limits match native loading', () => {
+                for (const middle of [500, 1000]) {
+                    const source = { isDuration: false, keys: [
+                        { ease: 1, reverse: false, durationMilliseconds: 1000 },
+                        { ease: 0, reverse: false, durationMilliseconds: middle },
+                        { ease: 1, reverse: true, durationMilliseconds: middle + 1000 }] };
+                    const compiled = timeline(source);
+                    for (const [seconds, expected] of [[1, 10], [1.5, 5], [2, 0]])
+                        near([sampleTimeline(compiled, seconds, 0, 0, 10)], [expected]);
+                }
+                const endpoints = times => ({ isDuration: false, keys: times.map(durationMilliseconds => ({ ease: 1, reverse: false, durationMilliseconds })) });
+                require(timeline(endpoints([2147483647, 2147483647])).total === 2147483647, 'Raw sum used for duration validation');
+                reject(() => timeline(endpoints([2147483647, 0, 2147483647])));
+                reject(() => timeline(endpoints([2147483648])));
+                near([sampleTimeline(timeline({ isDuration: true, keys: [
+                    { ease: 1, reverse: false, durationMilliseconds: 1000 },
+                    { ease: 1, reverse: true, durationMilliseconds: 2000 }] }), 1.5, 0, 0, 10)], [7.5]);
+                for (const isDuration of [false, true]) {
+                    near([sampleTimeline(timeline({ isDuration, keys: [] }), 1, 0, 2, 10)], [2]);
+                    near([sampleTimeline(timeline({ isDuration, keys: track(0).keys }), 1, 0, 2, 10)], [0]);
+                }
+            });
             check('static geometry and source buffers survive time and camera-only framing', () => {
                 const positions = [10, 20, 30, 12, 20, 30, 10, 22, 30];
                 renderStudioScene({ parts: [part('static', 'static', { positions, isMoving: true })] });
@@ -102,7 +138,7 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                 require(sampleTimeline(linear, .3 - .000001, 0, 0, 1) > .9999, 'One microsecond before wraps early');
                 near([sampleTimeline(linear, .3 + .000001, 0, 0, 1)], [.00001]);
                 require(sampleTimeline(timeline(track(3)), .0988, .4, 0, 1) === 1 / 3, 'Phased 100ms sample expected one millisecond into 3ms cycle');
-                const step = timeline({ isDuration: false, keys: [...track(100, 0).keys, ...track(100, 0, true).keys] });
+                const step = timeline({ isDuration: true, keys: [...track(100, 0).keys, ...track(100, 0, true).keys] });
                 require(sampleTimeline(step, .0988, .006, 0, 1) === 1, 'Fractional phase must land exactly at 100ms key boundary');
                 require(sampleTimeline(step, .55, .25, 0, 1) === 0 && sampleTimeline(step, .65, .25, 0, 1) === 1, 'Phased half-open keys');
                 require(Number.isFinite(sampleTimeline(linear, Number.MAX_VALUE, .4, 0, 1)), 'Huge finite time overflow');
@@ -132,7 +168,7 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             check('invalid modes, keys, matrices, duplicate writers and cycles reject atomically', () => {
                 renderStudioScene({ parts: [part()], motions: [motion()] }); const previous = mesh('mesh');
                 const bad = [motion({ fields: fields({ translation: null }) }), motion({ fields: fields({ translationAxis: 4 }) }),
-                    motion({ fields: fields({ translation: { isDuration: true, keys: [] } }) }), motion({ fields: fields({ rotation: track(100, 5) }) }),
+                    motion({ fields: fields({ translation: { isDuration: null, keys: [] } }) }), motion({ fields: fields({ rotation: track(100, 5) }) }),
                     motion({ childRest: new Array(16).fill(0) }), motion({ fields: fields({ translation: track(-1) }) })];
                 for (const item of bad) reject(() => setTypedMotionPreview({ motions: [item] }));
                 reject(() => setTypedMotionPreview({ motions: [motion(), motion({ path: 'second' })] }));

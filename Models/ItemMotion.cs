@@ -14,7 +14,7 @@ public sealed record ItemMotionResult<T>(ItemMotionStatus Status, T? Value, stri
     public static ItemMotionResult<T> Fail(ItemMotionStatus status, string reason) => new(status, default, reason);
 }
 
-/// <summary>Storage uses integral milliseconds; UI adapters may display DurationMilliseconds / 1000d.</summary>
+/// <summary>Raw integral milliseconds: duration when IsDuration is true, cumulative endpoint otherwise.</summary>
 public sealed record ItemMotionKey(KC.AnimEase Ease, bool Reverse, int DurationMilliseconds);
 public sealed record ItemMotionTimeline(bool IsDuration, IReadOnlyList<ItemMotionKey> Keys);
 /// <summary>Translation in metres; angles in degrees. Null timeline edits preserve the original timeline.</summary>
@@ -118,9 +118,8 @@ public static class ItemMotion
     {
         if (timeline.Keys is null || timeline.Keys.Any(k => k is null)) return (ItemMotionStatus.Invalid, "Missing timeline keys.");
         if (timeline.Keys.Count > 4) return (ItemMotionStatus.Unsupported, "The supported native layout has at most four keys.");
-        if (timeline.IsDuration) return (ItemMotionStatus.Unsupported, "IsDuration=true semantics have not been verified; data is preserved.");
-        if (timeline.Keys.Any(k => k.DurationMilliseconds < 0)) return (ItemMotionStatus.Invalid, "Durations must be nonnegative milliseconds.");
-        if (timeline.Keys.Sum(k => (long)k.DurationMilliseconds) > int.MaxValue) return (ItemMotionStatus.Invalid, "Total duration exceeds the supported millisecond range.");
+        if (timeline.Keys.Any(k => k.DurationMilliseconds < 0)) return (ItemMotionStatus.Invalid, "Times must be nonnegative milliseconds.");
+        if (TotalDuration(timeline) > int.MaxValue) return (ItemMotionStatus.Invalid, "Total duration exceeds the supported millisecond range.");
         if (timeline.Keys.Any(k => k.Ease < KC.AnimEase.Constant || k.Ease > KC.AnimEase.QuadInOut))
             return (ItemMotionStatus.Unsupported, "Preview/edit supports Constant, Linear, QuadIn, QuadOut and QuadInOut only; other keys are preserved.");
         return null;
@@ -133,10 +132,19 @@ public static class ItemMotion
             Duration = new TimeInt32(k.DurationMilliseconds) }).ToArray()
     };
 
+    // Native archive loading converts false-mode endpoints to durations. Difference
+    // original neighbours (including decreasing/duplicate endpoints), never mutate storage.
+    private static int SegmentDuration(ItemMotionTimeline timeline, int index) =>
+        timeline.IsDuration || index == 0 ? timeline.Keys[index].DurationMilliseconds
+        : Math.Max(0, timeline.Keys[index].DurationMilliseconds - timeline.Keys[index - 1].DurationMilliseconds);
+
+    private static long TotalDuration(ItemMotionTimeline timeline) =>
+        Enumerable.Range(0, timeline.Keys.Count).Sum(i => (long)SegmentDuration(timeline, i));
+
     private static float Scalar(ItemMotionTimeline timeline, double seconds, double phase, float min, float max)
     {
         if (timeline.Keys.Count == 0) return min;
-        var total = timeline.Keys.Sum(k => (long)k.DurationMilliseconds);
+        var total = TotalDuration(timeline);
         if (total == 0) return 0; // Distinct from an empty key array: native signal early-out ignores min/max.
         var totalMicroseconds = total * 1000;
         var scaledTime = seconds * 1_000_000;
@@ -149,10 +157,12 @@ public static class ItemMotion
         // Integer reduction/addition keeps the time-plus-phase boundary exact. The modulo inputs
         // remain safe integers in the JS analogue too; phase 1 naturally wraps to phase 0.
         var position = ((timeMicroseconds % totalMicroseconds) + phaseMicroseconds) % totalMicroseconds;
-        foreach (var key in timeline.Keys)
+        for (var i = 0; i < timeline.Keys.Count; i++)
         {
-            if (key.DurationMilliseconds == 0) continue;
-            var keyMicroseconds = (long)key.DurationMilliseconds * 1000;
+            var key = timeline.Keys[i];
+            var duration = SegmentDuration(timeline, i);
+            if (duration == 0) continue;
+            var keyMicroseconds = (long)duration * 1000;
             if (position >= keyMicroseconds) { position -= keyMicroseconds; continue; }
             var x = (double)position / keyMicroseconds;
             var u = key.Ease switch

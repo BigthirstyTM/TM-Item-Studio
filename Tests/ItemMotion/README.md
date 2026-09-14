@@ -52,6 +52,10 @@ unsupported. `Evaluate`'s phase argument is a separate preview-only control.
 The deterministic preview supports Constant, Linear, QuadIn, QuadOut and QuadInOut,
 up to four keys per timeline. It distinguishes empty timelines (minimum) from
 nonempty zero-total-duration timelines (zero translation/identity rotation).
-Unknown easing, `IsDuration=true`, nonzero anchors, unresolved targets and unsupported
+Both timing representations are supported: `IsDuration=true` stores segment durations;
+`false` stores cumulative end times. Preview derives each later duration as
+`max(0, end[i] - end[i-1])` using original adjacent values, without rewriting stored
+flags or times. Validation limits the normalized period, not the sum of endpoints.
+Unknown easing, nonzero anchors, unresolved targets and unsupported
 instance versions are reported rather than coerced. Synthetic checks do not establish
 game motion or collision parity.

@@ -51,12 +51,17 @@ function restMatrix(values, name) {
     return matrix;
 }
 function timeline(source) {
-    if (!source || source.isDuration !== false || !Array.isArray(source.keys) || source.keys.length > 4)
-        throw new Error('Unsupported or absent timeline: expected at most four keys and isDuration=false.');
-    const keys = source.keys.map(key => {
+    if (!source || typeof source.isDuration !== 'boolean' || !Array.isArray(source.keys) || source.keys.length > 4)
+        throw new Error('Unsupported or absent timeline: expected a timing mode and at most four keys.');
+    const keys = source.keys.map((key, index) => {
         if (!key || !Number.isInteger(key.ease) || key.ease < 0 || key.ease > 4 || typeof key.reverse !== 'boolean'
-            || !Number.isInteger(key.durationMilliseconds) || key.durationMilliseconds < 0) throw new Error('Unsupported easing or invalid key.');
-        return { ease: key.ease, reverse: key.reverse, durationMilliseconds: key.durationMilliseconds };
+            || !Number.isInteger(key.durationMilliseconds) || key.durationMilliseconds < 0 || key.durationMilliseconds > 2147483647)
+            throw new Error('Unsupported easing or invalid key.');
+        // Loaded native functions use durations; GBX.NET retains raw archived endpoints.
+        // Difference original neighbours, preserving the caller's flag and time words.
+        const durationMilliseconds = source.isDuration || index === 0 ? key.durationMilliseconds
+            : Math.max(0, key.durationMilliseconds - source.keys[index - 1].durationMilliseconds);
+        return { ease: key.ease, reverse: key.reverse, durationMilliseconds };
     });
     const total = keys.reduce((sum, key) => sum + key.durationMilliseconds, 0);
     if (total > 2147483647) throw new Error('Duration exceeds the supported millisecond range.');
