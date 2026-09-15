@@ -2,6 +2,22 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Local, lazy vanilla texture preview through a user-selected extracted
+  texture folder.
+- Native game-material names, links, slots, and visual-to-material mappings in
+  the Materials & LOD inspector.
+- Read-only capability-fixture scene inspection for material, collision,
+  light, and mapping discovery.
+
+### Changed
+
+- Removed the Native Trackmania pivot export section from the product UI. The
+  Openplanet bridge remains an internal regression utility under `Tests`.
+
 ## [0.3.0] - 2026-09-15
 
 ### Added

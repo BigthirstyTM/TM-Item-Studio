@@ -12,7 +12,8 @@ public enum ItemSceneKind { Item, Variant, Prefab, Entity, StaticObject, Dynamic
 public sealed record ItemSceneDiagnostic(string Path, string Code, ItemSceneState State, string Message);
 public sealed record ItemSceneNode(string Path, string? ParentPath, int? SourceId, ItemSceneKind Kind,
     ItemSceneState State, string Type, float[]? LocalTransform, float[]? WorldTransform);
-public sealed record ItemSceneMaterial(string Path, int Index, int? SourceId, string? Name, ItemSceneState State, string Representation);
+public sealed record ItemSceneMaterial(string Path, int Index, int? SourceId, string? Name, ItemSceneState State, string Representation,
+    string? GameMaterialName = null, string? GameMaterialLink = null);
 public sealed record ItemSceneMapping(string Path, string SolidPath, int VisualIndex, int MaterialIndex,
     int LodMask, ItemSceneState State);
 public sealed record ItemSceneSolid(string Path, int SourceId, float[]? LodDistances, int VisualCount,

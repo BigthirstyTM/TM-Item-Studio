@@ -34,6 +34,49 @@ if (args.Length > 0 && args[0] == "--inspect")
     return;
 }
 
+if (args.Length > 0 && args[0] == "--inspect-scene")
+{
+    foreach (var path in args.Skip(1))
+    {
+        var document = Gbx.Parse<CGameItemModel>(path);
+        var sceneResult = ItemScene.Build(document.Node, 0);
+        var scene = sceneResult.Preview;
+        Console.WriteLine(Path.GetFileName(path));
+        Console.WriteLine($"  Nodes: {scene.Nodes.Count}; geometry: {scene.Geometry.Count}; materials: {scene.Materials.Count}; mappings: {scene.Mappings.Count}; lights: {scene.Lights.Count}; collisions: {scene.Collisions.Count}");
+        foreach (var node in scene.Nodes)
+            Console.WriteLine($"  NODE [{node.State}] {node.Kind}: {node.Type} ({node.Path})");
+        foreach (var material in scene.Materials)
+            Console.WriteLine($"  MATERIAL [{material.State}] {material.Representation}: {material.Name ?? "<unnamed>"} ({material.Path})");
+        foreach (var solid in sceneResult.Handles.Sources.Values.OfType<CPlugSolid2Model>())
+        {
+            foreach (var material in solid.CustomMaterials ?? [])
+            {
+                if (material is null) continue;
+                var fields = material.GetType().GetProperties()
+                    .Where(property => property.CanRead && property.GetIndexParameters().Length == 0)
+                    .Select(property => $"{property.Name}={FormatValue(property.GetValue(material))}");
+                Console.WriteLine($"  CUSTOM MATERIAL: {string.Join("; ", fields)}");
+                if (material.MaterialUserInst is { } instance)
+                {
+                    var instanceFields = instance.GetType().GetProperties()
+                        .Where(property => property.CanRead && property.GetIndexParameters().Length == 0)
+                        .Select(property => $"{property.Name}={FormatValue(property.GetValue(instance))}");
+                    Console.WriteLine($"  MATERIAL INSTANCE: {string.Join("; ", instanceFields)}");
+                }
+            }
+        }
+        foreach (var mapping in scene.Mappings)
+            Console.WriteLine($"  MAPPING [{mapping.State}] visual {mapping.VisualIndex} -> material {mapping.MaterialIndex}, LOD {mapping.LodMask} ({mapping.Path})");
+        foreach (var light in scene.Lights)
+            Console.WriteLine($"  LIGHT [{light.State}] model {light.ModelIndex?.ToString() ?? "<direct>"}, socket {light.SocketIndex?.ToString() ?? "<none>"}, position {Format(light.Position)} ({light.Path})");
+        foreach (var collision in scene.Collisions)
+            Console.WriteLine($"  COLLISION [{collision.State}] {collision.Representation} ({collision.Path})");
+        foreach (var diagnostic in scene.Diagnostics)
+            Console.WriteLine($"  DIAGNOSTIC [{diagnostic.State}] {diagnostic.Code}: {diagnostic.Message} ({diagnostic.Path})");
+    }
+    return;
+}
+
 var passed = 0;
 void Check(bool condition, string message)
 {
@@ -71,6 +114,14 @@ byte[] Save(Action<Stream> save)
 }
 
 Gbx<CGameItemModel> Reopen(byte[] bytes) => Gbx.Parse<CGameItemModel>(new MemoryStream(bytes));
+string Format(float[]? values) => values is null ? "<unresolved>" : string.Join(",", values.Select(value => value.ToString("G9", System.Globalization.CultureInfo.InvariantCulture)));
+string FormatValue(object? value) => value switch
+{
+    null => "<null>",
+    string text => string.IsNullOrEmpty(text) ? "<empty>" : text,
+    Array array => $"{array.GetType().GetElementType()?.Name ?? "value"}[{array.Length}]",
+    _ => value.ToString() ?? value.GetType().Name
+};
 byte[] SaveDoc(Gbx<CGameItemModel> file) => Save(output => file.Save(output));
 NPlugItem_SVariantList ListOf(params NPlugItem_SVariant[] variants) => new() { Version = 1, Variants = variants };
 NPlugItem_SVariant Tagged(CMwNod? model) => new()
