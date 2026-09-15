@@ -10,6 +10,86 @@ let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
 const pooledGeometry = new WeakSet();
 let sceneFilter = { materialIndex: null, materialPath: null, lodMask: null };
+let textureDirectory = null, textureFiles = new Map(), textureRenderVersion = 0;
+
+function normalizedPath(value) {
+    return value.replaceAll('\\', '/').toLowerCase();
+}
+function isPreviewTexture(name) {
+    return /\.(dds|png|jpe?g|webp)$/i.test(name);
+}
+async function indexTextureDirectory(directory, prefix = '') {
+    for await (const [name, handle] of directory.entries()) {
+        const path = prefix ? `${prefix}/${name}` : name;
+        if (handle.kind === 'directory') await indexTextureDirectory(handle, path);
+        else textureFiles.set(normalizedPath(path), handle);
+    }
+}
+window.selectStudioTextureDirectory = async function () {
+    if (!window.showDirectoryPicker) throw new Error('This browser does not support selecting a local folder. Use a current Chromium-based browser.');
+    const directory = await window.showDirectoryPicker({ mode: 'read' });
+    const previousFiles = textureFiles;
+    textureFiles = new Map();
+    try {
+        await indexTextureDirectory(directory);
+        textureDirectory = directory;
+        return { name: directory.name, fileCount: textureFiles.size };
+    } catch (error) {
+        textureFiles = previousFiles;
+        throw error;
+    }
+};
+function materialToken(material) {
+    const source = material.gameMaterialLink || material.gameMaterialName || '';
+    const last = source.replaceAll('\\', '/').split('/').pop() || '';
+    return last.replace(/_asset(?:\.\d+)?$/i, '').toLowerCase();
+}
+function textureCandidate(material) {
+    const token = materialToken(material);
+    if (!token) return null;
+    const candidates = [...textureFiles.entries()].filter(([path]) => {
+        const filename = path.split('/').pop();
+        return isPreviewTexture(filename) && (filename === `${token}.dds` || filename.startsWith(`${token}_`) || filename.startsWith(`${token}.`));
+    });
+    candidates.sort(([first], [second]) => {
+        const rank = path => /(?:_d|_diffuse|_albedo|_color)\.(?:dds|png|jpe?g|webp)$/i.test(path) ? 0 : 1;
+        return rank(first) - rank(second) || first.localeCompare(second);
+    });
+    return candidates[0] ?? null;
+}
+function loadTexture(handle, path) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const file = await handle.getFile(), url = URL.createObjectURL(file);
+            const loader = /\.dds$/i.test(path) ? new THREE.DDSLoader() : new THREE.TextureLoader();
+            loader.load(url, texture => { URL.revokeObjectURL(url); resolve(texture); }, undefined, error => { URL.revokeObjectURL(url); reject(error); });
+        } catch (error) { reject(error); }
+    });
+}
+async function applyLocalTextures(data, renderVersion) {
+    if (!textureDirectory || !Array.isArray(data.materials)) return;
+    const materials = new Map(data.materials.filter(material => material?.path).map(material => [material.path, material]));
+    const requested = new Map();
+    for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
+        if (!mesh.isMesh || !Array.isArray(mesh.userData.mappings)) return;
+        const mapping = mesh.userData.mappings.find(candidate => materials.has(candidate.materialPath));
+        if (!mapping || requested.has(mapping.materialPath)) return;
+        const candidate = textureCandidate(materials.get(mapping.materialPath));
+        if (candidate) requested.set(mapping.materialPath, loadTexture(candidate[1], candidate[0]));
+    });
+    for (const [materialPath, texturePromise] of requested) {
+        try {
+            const texture = await texturePromise;
+            if (renderVersion !== textureRenderVersion) { texture.dispose(); continue; }
+            for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
+                if (!mesh.isMesh || !mesh.userData.mappings?.some(mapping => mapping.materialPath === materialPath)) return;
+                mesh.material.map = texture; mesh.material.needsUpdate = true;
+            });
+        } catch (error) {
+            console.warn(`Could not load local texture for ${materialPath}.`, error);
+        }
+    }
+}
 
 window.getStudioViewerDebugInfo = function () {
     let meshes = 0;
@@ -231,12 +311,12 @@ window.init3DViewer = function (containerId, dotNetRef) {
     resizeObserver.observe(container);
 };
 function disposeObjectResources(root) {
-    const geometries = new Set(), materials = new Set();
+    const geometries = new Set(), materials = new Set(), textures = new Set();
     root.traverse(child => {
         if (child.geometry && !pooledGeometry.has(child.geometry)) geometries.add(child.geometry);
         if (child.material) (Array.isArray(child.material) ? child.material : [child.material]).forEach(m => materials.add(m));
     });
-    geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose());
+    geometries.forEach(g => g.dispose()); materials.forEach(m => { if (m.map) textures.add(m.map); m.dispose(); }); textures.forEach(texture => texture.dispose());
 }
 window.dispose3DViewer = function () {
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
@@ -385,6 +465,8 @@ function renderPayload(input, preserveCamera) {
     typedMotions = motions; motionGroups = groups; previewPhase01 = offset;
     currentPayload = { ...data, geometryDefinitions: [] };
     applyTypedMotion(); applySceneFilter(); applyLayerVisibility(); if (!preserveCamera) frameCamera(bounds);
+    const renderVersion = ++textureRenderVersion;
+    void applyLocalTextures(data, renderVersion);
 }
 window.renderStudioScene = payload => renderPayload(payload, false);
 window.setTypedMotionPreview = function (value) {
@@ -466,12 +548,4 @@ window.downloadObjFile = function (filename, content) {
 };
 window.downloadBinaryGbx = function (filename, base64Data) {
     const link = document.createElement('a'); link.download = filename; link.href = 'data:application/octet-stream;base64,' + base64Data; link.click();
-};
-window.downloadTextFile = function (filename, content, contentType) {
-    const url = URL.createObjectURL(new Blob([content], { type: contentType }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
 };

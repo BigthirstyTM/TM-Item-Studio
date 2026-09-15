@@ -9,7 +9,6 @@
 @using GBX.NET.Engines.MetaNotPersistent
 @using System.IO
 @using System.Text
-@using System.Text.Json
 @using System.Globalization
 @using System.Reflection
 @using TM_Item_Studio.Models
@@ -734,7 +733,31 @@
                         <div class="col-6"><div class="card bg-light p-2 small"><strong>Visual geometry</strong><br />@vertexCount vertices</div></div>
                         <div class="col-6"><div class="card bg-light p-2 small"><strong>LOD</strong><br />@(HasNode("LOD", "Lod") ? "Present" : "Not found")</div></div>
                     </div>
-                    <p class="small text-muted">Materials, UV sets and LOD levels remain part of the original GBX model. Only supported public GBX.NET properties are edited.</p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="small">Authored materials (@detectedMaterials.Count)</strong>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="SelectTextureDirectory">Choose local texture folder</button>
+                    </div>
+                    @if (!string.IsNullOrEmpty(textureDirectoryStatus))
+                    {
+                        <p class="small text-muted">@textureDirectoryStatus</p>
+                    }
+                    @if (detectedMaterials.Count > 0)
+                    {
+                        <div class="list-group small mb-2">
+                            @foreach (var material in detectedMaterials)
+                            {
+                                <div class="list-group-item">
+                                    <strong>Slot @material.Index:</strong> @(material.GameMaterialName ?? material.Name ?? "Unnamed material")
+                                    <div class="text-muted text-break">@((material.GameMaterialLink ?? material.Path).Replace('\\', '/'))</div>
+                                </div>
+                            }
+                        </div>
+                        <p class="small text-muted">Texture preview is local and best-effort. Studio matches texture filenames to native game-material links; it does not modify material, UV, collision, or export data.</p>
+                    }
+                    else
+                    {
+                        <p class="small text-muted">No authored material slots were found.</p>
+                    }
                 }
 
                 @if (activeTab == "extras")
@@ -769,25 +792,6 @@
                     </div>
                 </div>
             }
-            <div class="p-2 border-top bg-light">
-                <strong class="small d-block mb-1">Native Trackmania pivot export</strong>
-                <small class="d-block text-muted mb-2">Use this for a source marked unsafe for GBX.NET export. The downloaded request is executed by the local Openplanet bridge.</small>
-                <div class="row g-2">
-                    <div class="col-12">
-                        <input type="text" class="form-control form-control-sm" placeholder="Source relative to Documents\Trackmania\Items" @bind="nativeSourcePath" />
-                    </div>
-                    <div class="col-12">
-                        <input type="text" class="form-control form-control-sm" placeholder="Destination relative to Documents\Trackmania\Items" @bind="nativeDestinationPath" />
-                    </div>
-                    <div class="col-5">
-                        <input type="number" min="0" class="form-control form-control-sm" @bind="nativePivotIndex" />
-                    </div>
-                    <div class="col-7">
-                        <button class="btn btn-sm btn-success w-100" @onclick="DownloadNativePivotRequest">Download native pivot request</button>
-                    </div>
-                </div>
-                <small class="d-block text-muted mt-2">Save as <code>Documents\Trackmania\Items\TMItemStudioNativeBridge\native-pivot-request.json</code>, then use <em>Load downloaded request</em> in the bridge.</small>
-            </div>
             @if (CanCombineFiles)
             {
                 <div class="p-2 border-top bg-light">
@@ -835,10 +839,8 @@
     private string? iconFileName;
     private string? iconStatus;
     private bool iconPreviewPending;
-    private string nativeSourcePath = "";
-    private string nativeDestinationPath = "TMItemStudio/Edited_Pivot.Item.Gbx";
-    private int nativePivotIndex;
-
+    private IReadOnlyList<ItemSceneMaterial> detectedMaterials = Array.Empty<ItemSceneMaterial>();
+    private string? textureDirectoryStatus;
     // Editable identification fields.
     private string identId = "";
     private string identAuthor = "";
@@ -987,6 +989,7 @@
         hasMesh = false;
         isMovingItem = false;
         modelParts.Clear();
+        detectedMaterials = Array.Empty<ItemSceneMaterial>();
         detectedPivots.Clear();
         detectedLights.Clear();
         detectedSockets.Clear();
@@ -1107,6 +1110,7 @@
         identAuthor = itemModel.Ident?.Author ?? "";
         identCollection = itemModel.Ident?.Collection.ToString() ?? "";
         authoredMotionScene = ReadSelectedScene();
+        detectedMaterials = authoredMotionScene.Preview.Materials;
         authoredConstraints.Clear();
         authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
         ExtractParts(source.PreviewRoot, includeGeometry: authoredConstraints.Count == 0);
@@ -1175,7 +1179,7 @@
 
     private async Task UpdateScenePayload(ItemSceneResult? selectedScene)
     {
-        if (authoredMotionScene is { } authoredScene && authoredConstraints.Count > 0)
+        if (authoredMotionScene is { } authoredScene)
         {
             // Traversal and motion stay fresh; immutable geometry survives selection.
             authoredScene = selectedScene ?? ReadSelectedScene();
@@ -1198,7 +1202,12 @@
                     positionsBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Positions),
                     indicesBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Indices),
                     normalsBytes = g.GeometryId.HasValue || g.Normals is null ? null : ViewerBuffers.Pack(g.Normals),
-                    isCollision = g.IsCollision
+                    isCollision = g.IsCollision,
+                    mappings = MappingsForVisual(authoredScene.Preview, g.Path)
+                }),
+                materials = authoredScene.Preview.Materials.Select(material => new
+                {
+                    material.Path, material.GameMaterialName, material.GameMaterialLink
                 }),
                 motions = motion.Tracks,
                 pivots = detectedPivots, lights = detectedLights, sockets = detectedSockets,
@@ -1212,7 +1221,12 @@
         {
             geometryEpoch = geometryCache.Epoch,
             parts = modelParts.Select(p => new { p.Name, p.IsMoving,
-                positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices) }),
+                positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices),
+                mappings = authoredMotionScene is null ? [] : MappingsForVisual(authoredMotionScene.Preview, p.Name) }),
+            materials = authoredMotionScene?.Preview.Materials.Select(material => new
+            {
+                material.Path, material.GameMaterialName, material.GameMaterialLink
+            }),
             pivots = detectedPivots,
             lights = detectedLights,
             sockets = detectedSockets,
@@ -1234,6 +1248,40 @@
         };
 
         await JS.InvokeVoidAsync("renderStudioScene", scenePayload);
+    }
+
+    private static object[] MappingsForVisual(ItemScenePreview scene, string visualPath)
+    {
+        const string visualMarker = "/visual:";
+        var marker = visualPath.LastIndexOf(visualMarker, StringComparison.Ordinal);
+        if (marker < 0) return [];
+        var solidPath = visualPath[..marker];
+        return scene.Mappings.Where(mapping => mapping.SolidPath == solidPath).Select(mapping => (object)new
+        {
+            materialIndex = mapping.MaterialIndex,
+            materialPath = $"{mapping.SolidPath}/material:{mapping.MaterialIndex}",
+            lodMask = mapping.LodMask
+        }).ToArray();
+    }
+
+    private sealed class TextureDirectorySelection
+    {
+        public string Name { get; init; } = "";
+        public int FileCount { get; init; }
+    }
+
+    private async Task SelectTextureDirectory()
+    {
+        try
+        {
+            var selection = await JS.InvokeAsync<TextureDirectorySelection>("selectStudioTextureDirectory");
+            textureDirectoryStatus = $"Using local folder {selection.Name} ({selection.FileCount:N0} files indexed).";
+            await UpdateScenePayload(authoredMotionScene);
+        }
+        catch (JSException ex)
+        {
+            textureDirectoryStatus = "Texture folder was not selected: " + ex.Message;
+        }
     }
 
     private void ToggleTab(string tab)
@@ -2179,49 +2227,6 @@
                 errorMessage = "Error while exporting .Item.Gbx: " + ex.Message;
             }
         }
-    }
-
-    private sealed class NativePivotRequest
-    {
-        public int Version { get; init; } = 1;
-        public string SourcePath { get; init; } = "";
-        public string DestinationPath { get; init; } = "";
-        public int PivotIndex { get; init; }
-        public float X { get; init; }
-        public float Y { get; init; }
-        public float Z { get; init; }
-    }
-
-    private async Task DownloadNativePivotRequest()
-    {
-        errorMessage = null;
-        if (string.IsNullOrWhiteSpace(nativeSourcePath) || string.IsNullOrWhiteSpace(nativeDestinationPath))
-        {
-            errorMessage = "Enter source and destination paths relative to Documents\\Trackmania\\Items.";
-            return;
-        }
-        if (nativePivotIndex < 0 || nativePivotIndex >= detectedPivots.Count)
-        {
-            errorMessage = "Choose an existing pivot from the Placement Parameters panel before downloading a native request.";
-            return;
-        }
-
-        var pivot = detectedPivots[nativePivotIndex];
-        var request = new NativePivotRequest
-        {
-            SourcePath = nativeSourcePath,
-            DestinationPath = nativeDestinationPath,
-            PivotIndex = nativePivotIndex,
-            X = pivot.X,
-            Y = pivot.Y,
-            Z = pivot.Z
-        };
-        var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-        await JS.InvokeVoidAsync("downloadTextFile", "native-pivot-request.json", json, "application/json");
     }
 
     public async ValueTask DisposeAsync()

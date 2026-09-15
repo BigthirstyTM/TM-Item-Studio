@@ -260,8 +260,11 @@ public static partial class ItemScene
                 if (custom is { Length: > 0 })
                 {
                     var material = custom[i];
-                    materials.Add(new(matPath, i, material is null ? null : Id(material), material?.MaterialName,
-                        material is null ? ItemSceneState.Absent : ItemSceneState.Present, "CustomMaterial"));
+                    var instance = material?.MaterialUserInst;
+                    var name = instance?.MaterialName ?? material?.MaterialName;
+                    materials.Add(new(matPath, i, material is null ? null : Id(material), name,
+                        material is null ? ItemSceneState.Absent : ItemSceneState.Present, "CustomMaterial",
+                        instance?.MaterialName, instance?.Link));
                 }
                 else
                 {

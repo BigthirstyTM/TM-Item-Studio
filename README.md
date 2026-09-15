@@ -13,6 +13,22 @@ kinematics, lights, sockets, physics and visual information.
 - Export edited items, including multi-variant items.
 - Export visible geometry as OBJ.
 
+## Local material preview
+
+The **Materials & LOD** panel lists each authored material slot with its native
+game-material name and link. To preview vanilla textures, download Zai's
+current `DefaultTextures.zip`, extract it locally, then choose the extracted
+folder in that panel. The folder is selected through the browser and remains
+local: Studio indexes filenames only and reads a texture file only when it is
+needed for the currently loaded item.
+
+The current package is about 918 MB, so Studio intentionally does not import
+the zip into browser memory. A Chromium-based browser is required for the
+local folder picker. Texture matching is best-effort and based on the native
+material link (for example `Stadium\Media\Material\RoadTech`); a missing or
+ambiguous filename leaves the neutral preview in place. This preview never
+changes GBX material data, UVs, collision, or the exported item.
+
 ## Exporting files and variants
 
 Selecting a variant changes the preview. **Export selected file** saves the complete
@@ -49,11 +65,8 @@ still preload yet be omitted from the normal map editor inventory.
 
 For a re-encoded source, Studio requires an explicit confirmation before it
 downloads a standalone export. Confirm only when the source's output will be
-tested in a fresh Trackmania map editor session. For pivot changes on an
-unverified source, use the **Native Trackmania pivot export** request with the
-included Openplanet bridge; it delegates the write and inventory registration
-to Editor++ and Trackmania. See
-`Tests/Openplanet/TMItemStudioNativeBridge/README.md`.
+tested in a fresh Trackmania map editor session. The Openplanet bridge remains
+under `Tests` as a regression utility; it is not part of the Studio workflow.
 
 These checks protect the metadata that the studio can verify. They do not turn
 an arbitrary legacy or synthetic GBX archive into a native-placeable item.
@@ -89,7 +102,8 @@ coverage.
 ## Requirements
 
 - .NET 8 SDK with the Blazor WebAssembly workload.
-- A modern browser with WebAssembly support.
+- A Chromium-based browser with WebAssembly support for local texture-folder
+  selection (other modern browsers can still use the neutral material preview).
 
 ## Run locally
 
