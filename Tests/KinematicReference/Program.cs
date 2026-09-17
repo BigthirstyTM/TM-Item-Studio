@@ -119,6 +119,103 @@ Check("exported kinematic template carries explicit collision surface meshes", (
     }
 });
 
+Check("synthetic two-object/two-constraint item builds from scratch and reparses", () =>
+{
+    foreach (var interleaved in new[] { false, true })
+    {
+        var item = ExperimentItem(interleaved);
+        using var bytes = new MemoryStream();
+        new Gbx<CGameItemModel>(item) { BodyCompression = GbxCompression.Uncompressed }.Save(bytes);
+        bytes.Position = 0;
+        var reopened = Gbx.Parse<CGameItemModel>(bytes, new GbxReadSettings { SafeSkippableChunks = true }).Node;
+        VerifyExperiment(reopened, interleaved);
+    }
+});
+
+Check("binding resolver classifies world->A and A->B constraints as supported flat bindings", () =>
+{
+    foreach (var interleaved in new[] { false, true })
+    {
+        var prefab = (CPlugPrefab)ExperimentItem(interleaved).EntityModel!;
+        var (aIx, bIx) = interleaved ? (0, 2) : (0, 1);
+        var world = (KC)prefab.Ents[interleaved ? 1 : 2].Model!;
+        var chained = (KC)prefab.Ents[3].Model!;
+        var worldParams = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[interleaved ? 1 : 2].Params!;
+        var chainedParams = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[3].Params!;
+        var root = ItemMotionBindings.RootPath(0, null);
+        var worldBinding = ItemMotionBindings.Resolve(world, prefab, worldParams, root);
+        Require(worldBinding.Status == ItemMotionStatus.Supported, worldBinding.Reason ?? "world constraint failed");
+        Require(worldBinding.Parent.IsWorld && worldBinding.Parent.RawSlot == -1 && worldBinding.Child.RawSlot == 0
+            && worldBinding.Child.OriginalArrayIndex == aIx, "world constraint targets wrong slot");
+        var chainedBinding = ItemMotionBindings.Resolve(chained, prefab, chainedParams, root);
+        Require(chainedBinding.Status == ItemMotionStatus.Supported, chainedBinding.Reason ?? "chained constraint failed");
+        Require(!chainedBinding.Parent.IsWorld && chainedBinding.Parent.RawSlot == 0
+            && chainedBinding.Parent.OriginalArrayIndex == aIx && chainedBinding.Parent.Path == $"{root}/ent:{aIx}",
+            "chained parent is not object A");
+        Require(chainedBinding.Child.RawSlot == 1 && chainedBinding.Child.OriginalArrayIndex == bIx
+            && chainedBinding.Child.Path == $"{root}/ent:{bIx}", "chained child is not object B");
+        Require(chainedBinding.Slots.Count == 2 && chainedBinding.Slots[0].OriginalArrayIndex == aIx
+            && chainedBinding.Slots[1].OriginalArrayIndex == bIx, "filtered slot table order changed with layout");
+    }
+});
+
+Check("experiment graph keeps every binding-resolver guard active", () =>
+{
+    var prefab = (CPlugPrefab)ExperimentItem(false).EntityModel!;
+    var chained = (KC)prefab.Ents[3].Model!;
+    var parameters = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[3].Params!;
+    var root = ItemMotionBindings.RootPath(0, null);
+    Require(ItemMotionBindings.Resolve(chained, prefab, parameters, $"{root}/ent:0").Status == ItemMotionStatus.Unsupported,
+        "nested occurrence guard inactive");
+    Require(ItemMotionBindings.Resolve(chained, prefab, parameters, "owned-edge", isNestedPrefabOccurrence: true).Status == ItemMotionStatus.Unsupported,
+        "explicit nested guard inactive");
+    parameters.Version = 1;
+    Require(ItemMotionBindings.Resolve(chained, prefab, parameters, root).Status == ItemMotionStatus.Unsupported, "params version guard inactive");
+    parameters.Version = 0; parameters.Pos1 = new(1, 0, 0);
+    Require(ItemMotionBindings.Resolve(chained, prefab, parameters, root).Status == ItemMotionStatus.Unsupported, "anchor guard inactive");
+    parameters.Pos1 = default; parameters.Ent1 = 1;
+    Require(ItemMotionBindings.Resolve(chained, prefab, parameters, root).Status == ItemMotionStatus.Unsupported, "self-parent guard inactive");
+    parameters.Ent1 = 0;
+});
+
+Check("chained constraint edits rebind and round-trip through save and reparse", () =>
+{
+    var item = ExperimentItem(false);
+    var prefab = (CPlugPrefab)item.EntityModel!;
+    var chained = (KC)prefab.Ents[3].Model!;
+    var parameters = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[3].Params!;
+    Require(!ItemMotionBindings.ApplyTargets(chained, prefab, parameters, "root", 0, 9).Success
+        && parameters.Ent1 == 0 && parameters.Ent2 == 1, "invalid rebind mutated targets");
+    var fields = ItemMotion.Read(chained).Fields;
+    Require(ItemMotion.Apply(chained, fields with { TranslationMax = 3,
+        Translation = new(true, [new(KC.AnimEase.QuadInOut, false, 3000)]) }).Success, "chained edit refused");
+    Require(ItemMotionBindings.ApplyTargets(chained, prefab, parameters, "root", -1, 1).Success, "decoupling rebind refused");
+    using var bytes = new MemoryStream();
+    new Gbx<CGameItemModel>(item) { BodyCompression = GbxCompression.Uncompressed }.Save(bytes);
+    bytes.Position = 0;
+    VerifyExperiment(Gbx.Parse<CGameItemModel>(bytes, new GbxReadSettings { SafeSkippableChunks = true }).Node, false,
+        chainedTranslationMax: 3, chainedTranslationKeys: [(KC.AnimEase.QuadInOut, false, 3000)], chainedEnt1: -1);
+});
+
+Check("composed preview evaluates both constraints of the chain independently", () =>
+{
+    var prefab = (CPlugPrefab)ExperimentItem(false).EntityModel!;
+    var world = (KC)prefab.Ents[2].Model!;
+    var chained = (KC)prefab.Ents[3].Model!;
+    // Both timelines total 3000 ms; at 0.75 s A is three quarters through its first
+    // sweep and B is mid-key of its first: A at +3 m on X, B at +1 m on Z, B at -45 deg.
+    var aLive = Value(ItemMotion.Evaluate(world, 0.75));
+    var bSignal = Value(ItemMotion.Evaluate(chained, 0.75));
+    Vector(aLive.Translation, new(3, 0, 0));
+    Vector(bSignal.Translation, new(0, 0, 1));
+    NearV(bSignal.AngleDegrees, -45); // -90 -> 90, a quarter through
+    var childRest = Matrix4x4.CreateTranslation(2, 0, 0);   // B rests 2 m from A
+    var parentRest = Matrix4x4.Identity;                     // A rests at the prefab origin
+    var parentLive = Matrix4x4.CreateTranslation(aLive.Translation);
+    var composed = Value(ItemMotionTransforms.ComposeVisual(childRest, parentRest, parentLive, bSignal.Signal));
+    Vector(Vector3.Transform(Vector3.Zero, composed), new(5, 0, 1));
+});
+
 Console.WriteLine($"{passed} passed, {failed} failed.");
 return failed == 0 ? 0 : 1;
 
@@ -142,11 +239,144 @@ static byte[] Save(CGameItemModel node)
 static CGameItemModel Reparse(byte[] bytes) => Gbx.Parse<CGameItemModel>(
     new MemoryStream(bytes), new GbxReadSettings { SafeSkippableChunks = true }).Node;
 static KC KinematicConstraint(CGameItemModel item) => (KC)((CPlugPrefab)item.EntityModel!).Ents[1].Model!;
+static void Vector(Vector3 actual, Vector3 expected) { NearV(actual.X, expected.X); NearV(actual.Y, expected.Y); NearV(actual.Z, expected.Z); }
+static void NearV(double actual, double expected) => Require(Math.Abs(actual - expected) < .0001, $"Expected {expected}, got {actual}");
+static T Value<T>(ItemMotionResult<T> result) { Require(result.Success, result.Reason ?? "operation failed"); return result.Value!; }
+
+// Issue #22 minimal experiment pair: object A constrained world->A, object B constrained A->B,
+// distinct axes/ranges, synchronized 3000 ms timelines. interleaved reproduces the documented
+// DTC_Firework200 alternating dyna-object/constraint entity layout.
+static CGameItemModel ExperimentItem(bool interleaved)
+{
+    CPlugPrefab.EntRef Body(int offset) => new()
+    {
+        Position = new Vec3(offset, 0, 0),
+        Rotation = new Quat(0, 0, 0, 1),
+        Params = new NPlugDynaObjectModel_SInstanceParams { Version = 2, PeriodSc = 1, PeriodScMax = -1, Phase01 = -1, Phase01Max = -1, IsKinematic = true },
+        Model = new CPlugDynaObjectModel { Version = 13, IsStatic = false, Mass = 10, BreakSpeedKmh = 100, Mesh = Solid(),
+            StaticShape = new CPlugSurface(), DynaShape = new CPlugSurface() }
+    };
+    var a = Body(0);
+    var b = Body(2);
+    var world = ConstraintEntry(-1, 0, KC.EAxis.X, 0, 4, 0, 0,
+        [(KC.AnimEase.Linear, false, 1000), (KC.AnimEase.Linear, false, 1000), (KC.AnimEase.Linear, false, 1000)],
+        (KC.AnimEase.Linear, false, 3000));
+    var chained = ConstraintEntry(0, 1, KC.EAxis.Z, 0, 2, -90, 90,
+        [(KC.AnimEase.Linear, false, 1500), (KC.AnimEase.Linear, false, 1500)],
+        (KC.AnimEase.Linear, false, 3000));
+    var prefab = new CPlugPrefab { Version = 11, Ents = interleaved
+        ? [a, world, b, chained]
+        : [a, b, world, chained] };
+    var item = new CGameItemModel
+    {
+        Ident = new Ident("KinematicExperiment", 26, "KinematicReference"),
+        ItemType = CGameItemModel.EItemType.PickUp,
+        EntityModel = prefab
+    };
+    item.CreateChunk<CGameCtnCollector.HeaderChunk2E001003>().Version = 8;
+    item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+    item.CreateChunk<CGameItemModel.Chunk2E002015>();
+    item.ItemTypeE = CGameItemModel.EItemType.PickUp;
+    item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
+    return item;
+}
+
+static CPlugPrefab.EntRef ConstraintEntry(int ent1, int ent2, KC.EAxis axis, float min, float max,
+    float rotMin, float rotMax, (KC.AnimEase Ease, bool Reverse, int Milliseconds)[] keys,
+    (KC.AnimEase Ease, bool Reverse, int Milliseconds) rotKey) => new()
+{
+    Rotation = new Quat(0, 0, 0, 1),
+    Params = new NPlugDyna_SPrefabConstraintParams { Ent1 = ent1, Ent2 = ent2 },
+    Model = new KC
+    {
+        SubVersion = 3,
+        TransAxis = axis, TransMin = min, TransMax = max,
+        TransAnimFunc = new() { IsDuration = true, SubFuncs = keys.Select(k => new KC.SubAnimFunc { Ease = k.Ease, Reverse = k.Reverse, Duration = new TimeInt32(k.Milliseconds) }).ToArray() },
+        RotAxis = KC.EAxis.Y, AngleMinDeg = rotMin, AngleMaxDeg = rotMax,
+        RotAnimFunc = new() { IsDuration = true, SubFuncs = [new KC.SubAnimFunc { Ease = rotKey.Ease, Reverse = rotKey.Reverse, Duration = new TimeInt32(rotKey.Milliseconds) }] }
+    }
+};
+
+static void VerifyExperiment(CGameItemModel item, bool interleaved, float chainedTranslationMax = 2,
+    (KC.AnimEase Ease, bool Reverse, int Milliseconds)[]? chainedTranslationKeys = null, int chainedEnt1 = 0)
+{
+    var (aIx, bIx, worldIx, chainedIx) = interleaved ? (0, 2, 1, 3) : (0, 1, 2, 3);
+    var prefab = (CPlugPrefab)item.EntityModel!;
+    Require(prefab.Version == 11 && prefab.Ents!.Length == 4, "experiment envelope changed");
+    foreach (var (ix, offset) in new[] { (aIx, 0), (bIx, 2) })
+    {
+        var entry = prefab.Ents[ix];
+        var instance = (NPlugDynaObjectModel_SInstanceParams)entry.Params!;
+        Require(instance.Version == 2 && instance.IsKinematic && instance.PeriodSc == 1 && instance.PeriodScMax == -1,
+            "experiment body lost its kinematic classification");
+        var dyna = (CPlugDynaObjectModel)entry.Model!;
+        Require(dyna.Version == 13 && !dyna.IsStatic, "experiment body class changed");
+        Require(dyna.StaticShape is CPlugSurface && dyna.DynaShape is CPlugSurface, "experiment shape fields lost");
+        var solid = (CPlugSolid2Model)dyna.Mesh!;
+        var visual = (CPlugVisualIndexedTriangles)solid.Visuals![0];
+        var positions = visual.VertexStreams![0].Positions;
+        Require(positions is [var p0, var p1, var p2] && p0 == new Vec3() && p1 == new Vec3(1, 0, 0) && p2 == new Vec3(0, 1, 0),
+            "experiment body lost its authored triangle");
+        Require(entry.Position.X == offset, "experiment rest transform lost");
+    }
+    var world = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[worldIx].Params!;
+    Require(world.Ent1 == -1 && world.Ent2 == 0 && world.Version == 0, "world constraint binding changed");
+    var worldModel = (KC)prefab.Ents[worldIx].Model!;
+    Require(worldModel.TransAxis == KC.EAxis.X && worldModel.TransMin == 0 && worldModel.TransMax == 4
+        && worldModel.TransAnimFunc!.IsDuration && worldModel.TransAnimFunc.SubFuncs!.Length == 3
+        && worldModel.TransAnimFunc.SubFuncs.All(k => k.Ease == KC.AnimEase.Linear && !k.Reverse && k.Duration.TotalMilliseconds == 1000),
+        "world constraint channel changed");
+    var chained = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[chainedIx].Params!;
+    Require(chained.Ent1 == chainedEnt1 && chained.Ent2 == 1 && chained.Version == 0
+        && chained.Pos1 == default && chained.Pos2 == default, "chained constraint binding changed");
+    var chainedModel = (KC)prefab.Ents[chainedIx].Model!;
+    Require(chainedModel.TransAxis == KC.EAxis.Z && chainedModel.TransMin == 0 && Math.Abs(chainedModel.TransMax - chainedTranslationMax) < .0001,
+        "chained translation channel changed");
+    var expectedKeys = chainedTranslationKeys ?? [(KC.AnimEase.Linear, false, 1500), (KC.AnimEase.Linear, false, 1500)];
+    var timeline = chainedModel.TransAnimFunc!;
+    var subFuncs = timeline.SubFuncs!;
+    Require(timeline.IsDuration && subFuncs.Length == expectedKeys.Length, "chained timeline count changed");
+    for (int i = 0; i < expectedKeys.Length; i++)
+        Require(subFuncs[i].Ease == expectedKeys[i].Item1 && subFuncs[i].Reverse == expectedKeys[i].Item2
+            && subFuncs[i].Duration.TotalMilliseconds == expectedKeys[i].Item3, $"chained key {i} changed");
+    Require(chainedModel.RotAxis == KC.EAxis.Y && chainedModel.AngleMinDeg == -90 && chainedModel.AngleMaxDeg == 90, "chained rotation channel changed");
+    // Both constraints keep synchronized 3000 ms total timelines in every variant.
+    Require(worldModel.TransAnimFunc!.SubFuncs!.Sum(k => k.Duration.TotalMilliseconds) == 3000
+        && subFuncs.Sum(k => k.Duration.TotalMilliseconds) == 3000, "synchronized durations drifted");
+}
+
+// Mirrors Tests/Browser/FixtureGenerator: the bundled serializer exposes decoded arrays, but
+// not its declarations or count setters. Reflection is restricted to this synthetic generator.
+static CPlugSolid2Model Solid()
+{
+    const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+    var stream = new CPlugVertexStream { Positions = [new(), new(1, 0, 0), new(0, 1, 0)] };
+    var declaration = new CPlugVertexStream.DataDecl();
+    typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
+        (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
+    typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
+    typeof(CPlugVertexStream).GetField("count", flags)!.SetValue(stream, 3);
+    stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
+    var indexBuffer = new CPlugIndexBuffer { Indices = [0, 1, 2] };
+    indexBuffer.CreateChunk<CPlugIndexBuffer.Chunk09057000>();
+    var visual = new CPlugVisualIndexedTriangles
+    {
+        VertexStreams = [stream], IndexBuffer = indexBuffer,
+        IsGeometryStatic = true, IsIndexationStatic = true,
+        BoundingBox = new BoxAligned(0, 0, 0, 1, 1, 0)
+    };
+    typeof(CPlugVisual).GetProperty("Count", flags)!.SetValue(visual, 3);
+    visual.CreateChunk<CPlugVisual.Chunk0900600F>().Version = 6;
+    visual.CreateChunk<CPlugVisualIndexed.Chunk0906A001>();
+    var solid = new CPlugSolid2Model { Visuals = [visual], CustomMaterials = [], ShadedGeoms = [] };
+    solid.CreateChunk<CPlugSolid2Model.Chunk090BB000>().Version = 34;
+    return solid;
+}
 
 static void VerifyKinematic(CGameItemModel item, float translationMax = 1,
     (KC.AnimEase Ease, bool Reverse, int Milliseconds)[]? translationKeys = null)
 {
-    Require(item is not null && item.ItemType == CGameItemModel.EItemType.Ornament && item.ItemTypeE == CGameItemModel.EItemType.Ornament,
+    Require(item.ItemType == CGameItemModel.EItemType.Ornament && item.ItemTypeE == CGameItemModel.EItemType.Ornament,
         "item type changed");
     Require(item.DefaultPlacement is not null, "default placement lost");
     var prefab = (CPlugPrefab)(item.EntityModel ?? throw new Exception("kinematic archive lost its prefab entity model"));
