@@ -10,7 +10,7 @@ let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
 const pooledGeometry = new WeakSet();
 let sceneFilter = { materialIndex: null, materialPath: null, lodMask: null };
-let textureDirectory = null, textureFiles = new Map(), textureRenderVersion = 0;
+let textureDirectory = null, textureFiles = new Map(), textureRenderVersion = 0, lastTextureMatches = null;
 
 function normalizedPath(value) {
     return value.replaceAll('\\', '/').toLowerCase();
@@ -44,38 +44,108 @@ function materialToken(material) {
     const last = source.replaceAll('\\', '/').split('/').pop() || '';
     return last.replace(/_asset(?:\.\d+)?$/i, '').toLowerCase();
 }
-function textureCandidate(material) {
-    const token = materialToken(material);
-    if (!token) return null;
+function comparePaths(first, second) {
+    // Codepoint ordering (not localeCompare) keeps matching identical across
+    // browsers, locales and reloads.
+    return first < second ? -1 : first > second ? 1 : 0;
+}
+function textureCandidates(token) {
+    if (!token) return [];
     const candidates = [...textureFiles.entries()].filter(([path]) => {
         const filename = path.split('/').pop();
         return isPreviewTexture(filename) && (filename === `${token}.dds` || filename.startsWith(`${token}_`) || filename.startsWith(`${token}.`));
     });
     candidates.sort(([first], [second]) => {
         const rank = path => /(?:_d|_diffuse|_albedo|_color)\.(?:dds|png|jpe?g|webp)$/i.test(path) ? 0 : 1;
-        return rank(first) - rank(second) || first.localeCompare(second);
+        return rank(first) - rank(second) || comparePaths(first, second);
     });
-    return candidates[0] ?? null;
+    return candidates;
+}
+// Deterministic material-to-file matching: a pure function of the payload's
+// material identities and the indexed filenames. Equal identities (one game
+// material used by several solids) legitimately share one texture, but
+// distinct identities collapsing onto the same candidate files stay neutral
+// instead of guessing which material the files belong to.
+function matchTextureFiles(materials) {
+    const identities = new Map();
+    for (const material of materials) {
+        if (!material?.path) continue;
+        const identity = material.gameMaterialLink || material.gameMaterialName || '';
+        if (!identities.has(identity))
+            identities.set(identity, { token: materialToken(material), key: null, file: null, handle: null, status: 'absent' });
+    }
+    const shared = new Map();
+    for (const [identity, match] of identities) {
+        const candidates = textureCandidates(match.token);
+        if (!candidates.length) continue;
+        match.key = candidates.map(([path]) => path).join('\n');
+        match.file = candidates[0][0]; match.handle = candidates[0][1]; match.status = 'matched';
+        shared.set(match.key, (shared.get(match.key) ?? new Set()).add(identity));
+    }
+    for (const match of identities.values())
+        if (match.key != null && shared.get(match.key).size > 1) { match.status = 'ambiguous'; match.file = match.handle = null; }
+    const matches = new Map();
+    for (const material of materials) {
+        if (!material?.path) continue;
+        const match = identities.get(material.gameMaterialLink || material.gameMaterialName || '');
+        matches.set(material.path, { token: match.token, status: match.status, file: match.file, handle: match.handle });
+    }
+    return matches;
+}
+let ddsLoaderPromise = null;
+function ensureDdsLoader() {
+    if (typeof THREE.DDSLoader === 'function') return Promise.resolve();
+    // three r128 ships DDSLoader as a separate examples module; fetch it once,
+    // on demand, pinned to the same revision as the page's three.js build.
+    ddsLoaderPromise ??= new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DDSLoader.js';
+        script.onload = () => resolve();
+        script.onerror = () => { ddsLoaderPromise = null; script.remove(); reject(new Error('The DDS preview loader could not be downloaded.')); };
+        document.head.appendChild(script);
+    });
+    return ddsLoaderPromise;
+}
+async function loadDdsTexture(file, path) {
+    await ensureDdsLoader();
+    const buffer = await file.arrayBuffer();
+    if (buffer.byteLength < 20 || String.fromCharCode(...new Uint8Array(buffer, 0, 4)) !== 'DDS ')
+        throw new Error(`${path} is not a readable DDS file.`);
+    // CompressedTextureLoader.load() runs parse() uncaught inside the fetch
+    // callback (three r128), so parse here where malformed files reject
+    // cleanly and the viewer keeps its neutral material.
+    const dds = new THREE.DDSLoader().parse(buffer, true);
+    if (dds.isCubemap || !dds.format || !dds.mipmaps.length) throw new Error(`${path} uses an unsupported DDS layout.`);
+    const texture = new THREE.CompressedTexture();
+    texture.image = { width: dds.width, height: dds.height };
+    texture.mipmaps = dds.mipmaps; texture.format = dds.format;
+    if (dds.mipmapCount === 1) texture.minFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+    return texture;
+}
+function loadImageTexture(file) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        new THREE.TextureLoader().load(url, texture => { URL.revokeObjectURL(url); resolve(texture); },
+            undefined, error => { URL.revokeObjectURL(url); reject(error); });
+    });
 }
 function loadTexture(handle, path) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const file = await handle.getFile(), url = URL.createObjectURL(file);
-            const loader = /\.dds$/i.test(path) ? new THREE.DDSLoader() : new THREE.TextureLoader();
-            loader.load(url, texture => { URL.revokeObjectURL(url); resolve(texture); }, undefined, error => { URL.revokeObjectURL(url); reject(error); });
-        } catch (error) { reject(error); }
-    });
+    return handle.getFile().then(file => /\.dds$/i.test(path) ? loadDdsTexture(file, path) : loadImageTexture(file));
 }
 async function applyLocalTextures(data, renderVersion) {
     if (!textureDirectory || !Array.isArray(data.materials)) return;
-    const materials = new Map(data.materials.filter(material => material?.path).map(material => [material.path, material]));
+    const matches = matchTextureFiles(data.materials);
+    lastTextureMatches = [...matches.entries()]
+        .map(([materialPath, match]) => ({ materialPath, token: match.token, status: match.status, file: match.file }))
+        .sort((first, second) => comparePaths(first.materialPath, second.materialPath));
     const requested = new Map();
     for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
         if (!mesh.isMesh || !Array.isArray(mesh.userData.mappings)) return;
-        const mapping = mesh.userData.mappings.find(candidate => materials.has(candidate.materialPath));
+        const mapping = mesh.userData.mappings.find(candidate => matches.has(candidate.materialPath));
         if (!mapping || requested.has(mapping.materialPath)) return;
-        const candidate = textureCandidate(materials.get(mapping.materialPath));
-        if (candidate) requested.set(mapping.materialPath, loadTexture(candidate[1], candidate[0]));
+        const match = matches.get(mapping.materialPath);
+        if (match.status === 'matched') requested.set(mapping.materialPath, loadTexture(match.handle, match.file));
     });
     for (const [materialPath, texturePromise] of requested) {
         try {
@@ -89,6 +159,10 @@ async function applyLocalTextures(data, renderVersion) {
             console.warn(`Could not load local texture for ${materialPath}.`, error);
         }
     }
+}
+window.getStudioTexturePreviewInfo = function () {
+    return { directory: textureDirectory?.name ?? null, fileCount: textureFiles.size,
+        renderVersion: textureRenderVersion, matches: lastTextureMatches ?? [] };
 }
 
 window.getStudioViewerDebugInfo = function () {
