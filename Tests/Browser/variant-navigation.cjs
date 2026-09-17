@@ -53,9 +53,11 @@ const fs = require('node:fs');
         // static reference variant — a single CPlugStaticObjectModel with seven authored
         // visuals and no dyna graph. Variants 2-9 are CPlugDynaObjectModel entities with a
         // kinematic constraint; their dynaShape collision surface is one additional shared
-        // geometry (the same authored CPlugSurface node across variants). So the first
-        // switch to a dyna variant legitimately transfers exactly that one new definition,
-        // and every later switch must transfer nothing.
+        // geometry, the same authored CPlugSurface node in every variant this navigation
+        // visits. (The file also authors a second car from distinct nodes — first
+        // referenced by variant 6 — so extending navigation there legitimately transfers
+        // again.) So the first switch to a dyna variant transfers exactly that one new
+        // definition, and every later switch in this navigation must transfer nothing.
         assert.ok(transfers[0].shared > 0, 'Real upload must use GBX reference identities');
         assert.equal(transfers[0].definitions, 7, 'The static reference variant authors seven shared visuals');
         assert.equal(transfers[1].definitions, 1, 'The first dyna variant introduces its dynaShape collision geometry once');
