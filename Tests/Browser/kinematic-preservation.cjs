@@ -36,6 +36,13 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         await page.getByRole('button', { name: 'Export selected file' }).waitFor();
         await page.getByRole('button', { name: /^2\. SnowCarTraffic/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
+        // SnowCar re-encodes on save in this WASM writer, so the export gate added with
+        // standalone exports requires the compatibility acknowledgement before exporting.
+        const acknowledgeReencoding = async () => {
+            const gate = page.locator('#acknowledge-reencoded-export');
+            if (await gate.count()) await gate.check();
+        };
+        await acknowledgeReencoding();
         const downloaded = page.waitForEvent('download');
         await page.getByRole('button', { name: 'Export selected file' }).click();
         const exported = path.join(work, 'snowcar.Item.Gbx');
@@ -74,6 +81,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         await page.getByLabel('Open item files').setInputFiles(exported);
         await page.getByRole('button', { name: /^2\./ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
+        await acknowledgeReencoding();
         assert.equal(await page.getByText('Using authored motion settings', { exact: true }).count(), 1,
             'Reopened item must still use its authored motion');
         if (process.env.STUDIO_MOTION_EVIDENCE) {
@@ -96,6 +104,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         await page.getByRole('button', { name: /^2\./ }).click();
         console.log('Checking no-op after variant switches and explicit edits.');
         const exportTo = async filename => {
+            await acknowledgeReencoding();
             const event = page.waitForEvent('download');
             await page.getByRole('button', { name: 'Export selected file' }).click();
             const file = path.join(work, filename);

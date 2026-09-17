@@ -15,6 +15,10 @@ module.exports = async (url, work) => {
         assert.equal(await page.getByRole('button', { name: 'Download debug report', exact: true }).isVisible(), false, 'Debug tools stay collapsed initially');
         const report = () => page.evaluate(() => window.studioDebug.getReport());
         async function exported(name) {
+            // Blimp re-encodes on save in this WASM writer; the export gate added with
+            // standalone exports requires the acknowledgement checkbox before exporting.
+            const gate = page.locator('#acknowledge-reencoded-export');
+            if (await gate.count()) await gate.check();
             const event = page.waitForEvent('download');
             await page.getByRole('button', { name: 'Export selected file' }).click();
             const file = path.join(work, name);

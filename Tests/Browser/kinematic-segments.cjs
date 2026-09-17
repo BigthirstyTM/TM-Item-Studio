@@ -25,6 +25,10 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync('dotnet',
         for (const name of ['Translation', 'Rotation'])
             assert.equal(Number(await page.getByLabel(`${name} segment count`, { exact: true }).inputValue()), original[0][name.toLowerCase()].length);
         async function download() {
+            // SnowCar re-encodes on save in this WASM writer; the export gate added with
+            // standalone exports requires the acknowledgement checkbox before exporting.
+            const gate = page.locator('#acknowledge-reencoded-export');
+            if (await gate.count()) await gate.check();
             const event = page.waitForEvent('download');
             await page.getByRole('button', { name: 'Export selected file' }).click();
             const file = path.join(work, 'segments.Item.Gbx');
