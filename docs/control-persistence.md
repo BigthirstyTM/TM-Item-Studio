@@ -2,6 +2,8 @@
 
 Audit baseline: `ef0e070`, `Pages/Home.razor` and `wwwroot/js/meshViewer.js`. The table inventories every editable control and action in those files, including duplicate axis selectors and mouse interactions. It describes the baseline; `Models/ItemEdits.cs` adds the supported operations below but does not itself change the UI. Serializer evidence is from the original bundled GBX.NET DLL (SHA256 `09f87f2c447e4cadd7539f749acc79b73b3f3575cbadc91fcf967e93e5e8d30c`). Synthetic regression fixtures use that DLL directly.
 
+Capability-gating update (`fix/capability-gate-preview-controls`): the preview-only controls this audit flagged are now disabled, read-only, or removed in the UI, as recorded in the **Current UI** column/notes below. Light color/intensity/radius editing, pivot editing, and authored-constraint editing are unchanged and remain the only persisted light/motion writes.
+
 “Persistent field” means an actual serializer field exists, **conditional on its chunk/version being present**. The old setters do not ensure that chunk exists or validate the document's representation. A setter succeeding in memory is not proof that export will retain it. Game behavior is not verified here.
 
 ## Item metadata and placement
@@ -45,26 +47,26 @@ Archetype is explicitly readonly. Visual/LOD, extras, original-motion property l
 
 ## Motion, lights, sockets, physics
 
-| Control | Baseline write path | Required behavior |
-|---|---|---|
-| Convert To Kinematic / Convert To Static | Tries nonexistent enum names; toggles moving DTO flags and arbitrary last part | Unsupported conversion. Disable/label; never report a saved conversion. |
-| Rotation axis (toolbar and gameplay selectors) | `OnAxisChanged` -> reflected `RotAxis`, then JS axis | Actual `NPlugDyna_SKinematicConstraint.RotAxis` exists; typed motion integration must verify target, axis enum and supported mode. |
-| Animation Type (spin/oscillation) | Preview bool; may write default -45/+45 via shared callback | No direct persisted spin/oscillation bool. Replace with supported typed timeline mode, not preview-only conversion. |
-| Min Angle / Max Angle | Reflected `AngleMinDeg`, `AngleMaxDeg` | Real scalar fields in degrees; no validated bounds/target contract in old UI. T02 owns typed edits. |
-| Period / Phase | Attempts constraint `Period`, `Duration`, `Phase`, `PhaseOffset` | These properties do not exist on that constraint. Preview-only old controls. Instance timing belongs to typed params; key durations to animation subfunctions. |
-| Translation Axis | Reflected `TransAxis` | Real enum field; use T02 validation. |
-| Translation Distance | Attempts `TransDist`, `TranslationDistance` | Neither exists on actual constraint. Real values are scalar `TransMin` / `TransMax`; old UI only previews distance. |
-| Harmonic Easing / Invert Motion | DTO/JS booleans, no source write | Replace with supported independent timeline easing/reversal; no global persistence claim. |
-| Pivot Offset X/Y/Z (motion) | DTO/JS only | Separate from placement pivots; owner constraint entry transform must be edited explicitly by typed motion adapter. |
-| Light color | `SyncLightsToGbx`: RGB HTML bytes /255 -> `CPlugLightUserModel.Color`, 090F9000 | Supported existing model only. Old extraction quantizes/clamps HDR; retain source floats unless deliberately edited. |
-| Light intensity | `CPlugLightUserModel.Intensity`, 090F9000 | Supported existing model; zero valid. Old extraction replaces zero with 2. |
-| Light radius | `CPlugLightUserModel.Distance`, 090F9000 | Supported existing model distance; zero valid. Old extraction replaces zero with 15. Preview radius is not a physics hull. |
-| Light X/Y/Z and light drag | DTO only; same callback rewrites unrelated light color/intensity/distance | No `Position` on `CPlugLightUserModel`. Require explicit owning entry or certified transform mapping; otherwise disable movement. |
-| Add Light / Remove Light | Adds/removes only DTOs | Unsupported authored graph mutation. Disable/label; removing a preview light does not remove source. |
-| Socket tag | DTO text only | No persisted field or write path. Unsupported. |
-| Socket X/Y/Z / drag | DTO/JS only | `DefaultPlacement.Sockets` property does not exist in bundled API. Unsupported. |
-| Add Socket / Remove Socket | DTO list only | Unsupported authored socket topology. Disable/label. |
-| CollisionEnabled checkbox | No bind/event handler at all | Unsupported toggle; replace with readonly diagnostic. Node substring detection does not establish collision capability. |
+| Control | Baseline write path | Required behavior | Current UI (capability gating) |
+|---|---|---|---|
+| Convert To Kinematic / Convert To Static | Tries nonexistent enum names; toggles moving DTO flags and arbitrary last part | Unsupported conversion. Disable/label; never report a saved conversion. | Buttons disabled with explanation; handlers removed; "trajectory nodes" promise removed. |
+| Rotation axis (toolbar and gameplay selectors) | `OnAxisChanged` -> reflected `RotAxis`, then JS axis | Actual `NPlugDyna_SKinematicConstraint.RotAxis` exists; typed motion integration must verify target, axis enum and supported mode. | Unchanged; authored constraints edit real `RotAxis`/`TransAxis`. |
+| Animation Type (spin/oscillation) | Preview bool; may write default -45/+45 via shared callback | No direct persisted spin/oscillation bool. Replace with supported typed timeline mode, not preview-only conversion. | Unchanged legacy preview for items without authored constraints; labeled as viewport-only. |
+| Min Angle / Max Angle | Reflected `AngleMinDeg`, `AngleMaxDeg` | Real scalar fields in degrees; no validated bounds/target contract in old UI. T02 owns typed edits. | Unchanged; authored-constraint editor binds `AngleMinDeg`/`AngleMaxDeg`. |
+| Period / Phase | Attempts constraint `Period`, `Duration`, `Phase`, `PhaseOffset` | These properties do not exist on that constraint. Preview-only old controls. Instance timing belongs to typed params; key durations to animation subfunctions. | Unchanged legacy preview; segment durations write real `SubAnimFunc.Duration`. |
+| Translation Axis | Reflected `TransAxis` | Real enum field; use T02 validation. | Unchanged. |
+| Translation Distance | Attempts `TransDist`, `TranslationDistance` | Neither exists on actual constraint. Real values are scalar `TransMin` / `TransMax`; old UI only previews distance. | Unchanged legacy preview; authored editor binds `TransMin`/`TransMax`. |
+| Harmonic Easing / Invert Motion | DTO/JS booleans, no source write | Replace with supported independent timeline easing/reversal; no global persistence claim. | Unchanged legacy preview; segment editor writes real per-function `Ease`/`Reverse`. |
+| Pivot Offset X/Y/Z (motion) | DTO/JS only | Separate from placement pivots; owner constraint entry transform must be edited explicitly by typed motion adapter. | Unchanged legacy preview. |
+| Light color | `SyncLightsToGbx`: RGB HTML bytes /255 -> `CPlugLightUserModel.Color`, 090F9000 | Supported existing model only. Old extraction quantizes/clamps HDR; retain source floats unless deliberately edited. | Unchanged and editable. |
+| Light intensity | `CPlugLightUserModel.Intensity`, 090F9000 | Supported existing model; zero valid. Old extraction replaces zero with 2. | Unchanged and editable. |
+| Light radius | `CPlugLightUserModel.Distance`, 090F9000 | Supported existing model distance; zero valid. Old extraction replaces zero with 15. Preview radius is not a physics hull. | Unchanged and editable. |
+| Light X/Y/Z and light drag | DTO only; same callback rewrites unrelated light color/intensity/distance | No `Position` on `CPlugLightUserModel`. Require explicit owning entry or certified transform mapping; otherwise disable movement. | Read-only display inputs; gizmo remains selectable but never draggable (`editable:false` payload flag); `OnGizmoMoved` light branch and `updateLightRealtime` position args removed. |
+| Add Light / Remove Light | Adds/removes only DTOs | Unsupported authored graph mutation. Disable/label; removing a preview light does not remove source. | Buttons and handlers removed; panel labels "existing serialized lights only". |
+| Socket tag | DTO text only | No persisted field or write path. Unsupported. | Removed; sockets tab is a read-only capability note. |
+| Socket X/Y/Z / drag | DTO/JS only | `DefaultPlacement.Sockets` property does not exist in bundled API. Unsupported. | Removed; socket gizmos, drag branch, `updateSocketRealtime`, and socket layer removed. |
+| Add Socket / Remove Socket | DTO list only | Unsupported authored socket topology. Disable/label. | Removed; `SocketDto` and extraction reflection deleted. |
+| CollisionEnabled checkbox | No bind/event handler at all | Unsupported toggle; replace with readonly diagnostic. Node substring detection does not establish collision capability. | Replaced with read-only `ItemScene` collision inventory (representation/state/path); no user toggle. |
 
 ## Viewer and document actions
 
@@ -74,12 +76,12 @@ Archetype is explicitly readonly. Visual/LOD, extras, original-motion property l
 | Variant selection | Baseline wrongly replaces `Item.EntityModel` with selected root. Integrate the document-preserving selection module before export. |
 | GBX Export | Baseline re-syncs pivots/lights, then reconstructs multi-file variants with empty tags/version 0 and filters non-prefabs. Replace with original-document save; never flush lossy preview DTOs. Combine must be explicit with metadata source/dependency checks. |
 | OBJ Export | Downloads extracted geometry text, no GBX mutation. Baseline lacks normals/UVs and current pose; material/geometry integration owns extensions. |
-| Mesh / Pivot / Light / Socket visibility | Preview only, `toggleLayer`; source remains unchanged. |
+| Mesh / Pivot / Light visibility | Preview only, `toggleLayer`; source remains unchanged. Socket layer removed (no socket gizmos exist). |
 | Play/Pause; original-motion toggle | Preview only (`setAnimationPlaying`, `setMotionPreview`); never revert/rewrite saved model. |
 | Wireframe; Reset Camera; orbit/pan/zoom | Preview only; not authored transforms. |
-| Gizmo focus buttons, pointer selection | Select preview object / open tab only. Drag invokes `OnGizmoMoved`; persistence follows pivot/light/socket rows above. |
+| Gizmo focus buttons, pointer selection | Select preview object / open tab only. Drag invokes `OnGizmoMoved` for pivots; light gizmos are selectable but never draggable. |
 | JS `setAnimationSpeed` | Preview-only API, no rendered speed control in baseline. |
-| JS `updateLightRealtime`, `updatePivotRealtime`, `updateSocketRealtime`, `renderStudioScene` | Rendering helpers, not independent persistence mechanisms. Light default/radius geometry bugs require viewer integration tests. |
+| JS `updateLightRealtime` (color/intensity/radius only), `updatePivotRealtime`, `renderStudioScene` | Rendering helpers, not independent persistence mechanisms. `updateSocketRealtime` and the light-position realtime path were removed. |
 | Sidebar tabs | UI state only. |
 
 ## Supported module and exact integration contract
