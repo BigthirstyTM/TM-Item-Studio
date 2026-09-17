@@ -240,30 +240,39 @@ public static partial class ItemScene
 
         /// <summary>
         /// Inventory the hit/move/trigger shape references of a game-object phy model. The fid getters resolve
-        /// external files, so the node is only read through the inline path when no file reference is set.
+        /// external files, so the node is only read through the inline path when no file reference is set; a
+        /// non-empty shape name (the chunk 2E006001 v11+ layout serializes a name instead of a node ref) is an
+        /// unresolvable reference, not an absent shape.
         /// </summary>
         private void PhyShapes(CGameObjectPhyModel phy, string path, Matrix4x4? world, ItemSceneEntryHandle? entry)
         {
-            PhyShape(phy.HitShapeFidFile, () => phy.HitShapeFid, path + "/hitShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectHitShape);
-            PhyShape(phy.MoveShapeFidFile, () => phy.MoveShapeFid, path + "/moveShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectMoveShape);
-            PhyShape(phy.TriggerShapeFidFile, () => phy.TriggerShapeFid, path + "/triggerShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectTriggerShape);
+            PhyShape(phy.HitShapeFidFile, () => phy.HitShapeFid, path + "/hitShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectHitShape, phy.HitShape);
+            PhyShape(phy.MoveShapeFidFile, () => phy.MoveShapeFid, path + "/moveShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectMoveShape, phy.MoveShape);
+            PhyShape(phy.TriggerShapeFidFile, () => phy.TriggerShapeFid, path + "/triggerShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectTriggerShape, phy.TriggerShape);
             if (phy.Triggers is { Length: > 0 })
                 Issue(path + "/triggers", "phy-trigger-actions", ItemSceneState.Unsupported,
                     $"{phy.Triggers.Length} trigger action records retained; their semantics are not interpreted.");
         }
 
         private void PhyShape(GbxRefTableFile? file, Func<CPlugSurface?> inline, string path, string parent,
-            Matrix4x4? world, ItemSceneEntryHandle? entry, ItemSceneCollisionSource source)
+            Matrix4x4? world, ItemSceneEntryHandle? entry, ItemSceneCollisionSource source, string? namedReference)
         {
             if (file is not null)
             {
                 Node(path, parent, file, ItemSceneKind.Collision, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
                 collisions.Add(new(path, entry?.Path, "External shape reference", ItemSceneState.Unresolved, source));
+                Issue(path, "external-reference", ItemSceneState.Unresolved, $"External shape reference: {file.FilePath}");
                 return;
             }
             var surface = inline();
             if (surface is null)
             {
+                if (!string.IsNullOrEmpty(namedReference))
+                {
+                    Node(path, parent, null, ItemSceneKind.Collision, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
+                    collisions.Add(new(path, entry?.Path, $"Named shape reference '{namedReference}'", ItemSceneState.Unresolved, source));
+                    return;
+                }
                 Node(path, parent, null, ItemSceneKind.Collision, ItemSceneState.Absent, Matrix4x4.Identity, world);
                 collisions.Add(new(path, entry?.Path, "No shape", ItemSceneState.Absent, source));
                 return;

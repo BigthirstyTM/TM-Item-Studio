@@ -25,7 +25,7 @@ classified from) plus a `State` (`Present`, `Absent`, `Unresolved` for external,
 | `DynamicObjectStaticShape` | `CPlugDynaObjectModel.StaticShape` (pre-destruction hull) | present / absent / external |
 | `CommonItemTrigger` | `CGameCommonItemEntityModel.TriggerShape` | present (typed `CPlugSurface`) / absent / unsupported (other node) |
 | `ItemPhyModel` | `CGameItemModel.PhyModelCustom` reference (external file) | unresolved |
-| `GameObjectHitShape` / `GameObjectMoveShape` / `GameObjectTriggerShape` | `CGameObjectPhyModel.HitShapeFid` / `.MoveShapeFid` / `.TriggerShapeFid` | present / absent / external |
+| `GameObjectHitShape` / `GameObjectMoveShape` / `GameObjectTriggerShape` | `CGameObjectPhyModel.HitShapeFid` / `.MoveShapeFid` / `.TriggerShapeFid` | present / absent / external / named (unresolved) |
 | `SurfaceSlot` | a plain `CPlugSurface` reference such as a tree surface or a direct visit | mesh states |
 
 How mesh collision connects to the static object: `CPlugStaticObjectModel` (body
@@ -43,8 +43,12 @@ version exactly 0 (the chunk DSL's `v0=` is an equality test), so they never coe
 with the version-4+ `StaticObject`/`TriggerShape` fields — modern items reach a phy
 model only through `PhyModelCustom`. The traversal inventories all three fid slots
 without invoking the resolving getters (the `*Fid` properties resolve external files;
-the node is only read when no file reference is set) and counts `Triggers`
-(`CPlugTriggerAction[]`) without interpreting them.
+the node is only read when no file reference is set, and external fids are inventoried
+with an `external-reference` diagnostic like every other external slot) and counts
+`Triggers` (`CPlugTriggerAction[]`) without interpreting them. From chunk `2E006001`
+version 11 the serializer writes a shape *name* string instead of a node ref whenever
+that name is non-empty; such a slot is a reference the traversal cannot resolve, so it
+is classified `Unresolved` (with the name reported) rather than absent.
 
 ## Do NadeoImporter conventions persist as independent native fields?
 
@@ -108,9 +112,10 @@ none is proposed.
 `DOTNET_ROLL_FORWARD=Major dotnet run --project Tests/ItemScene -m:2` covers every
 classification above with synthetic fixtures: present/absent/external static shapes,
 generated mesh collision, present/absent/non-surface triggers, dynamic shape slots,
-phy-model fid slots with a resolution trap, plain surface visits, and a
-save/reparse check proving the inventory is read-only (serialized bytes unchanged by
-traversal; identical classification after reparse).
+phy-model fid slots with a resolution trap (including a name-referenced shape and the
+counted trigger actions), plain surface visits, and a save/reparse check proving the
+inventory is read-only (serialized bytes unchanged by traversal; identical
+classification after reparse).
 
 ## Evidence index
 

@@ -43,7 +43,9 @@ inventory and the NadeoImporter persistence findings. Trigger slots are classifi
 shallowly: presence is reported, but the transform companion is not exposed by the
 bundled public API (`trigger-transform`). Game-object phy model fid getters resolve
 external files, so the traversal reads their nodes only when no file reference is set
-and external slots stay unresolved; trigger action records are counted, not interpreted.
+and external slots stay unresolved (with an `external-reference` diagnostic); a shape
+referenced only by name (the chunk `2E006001` v11+ string layout) is unresolved, not
+absent; trigger action records are counted, not interpreted.
 
 The bundled public API does not expose vertex-stream counts/declarations/shared-model slots or skeleton socket arrays. Decoded stream geometry carries a `stream-layout-opaque` diagnostic; an empty/opaque stream is unsupported rather than absent. Duplicate attributes and mixed CPU/stream layouts are rejected. No private-field reflection is used. `CPlugVisualTriangles` is not a public type in this DLL and is not inferred from its CPU base class. Legacy/unknown visuals, analytic collision tessellation, skinning/morph/subvisual animation and trigger transforms remain unsupported.
 

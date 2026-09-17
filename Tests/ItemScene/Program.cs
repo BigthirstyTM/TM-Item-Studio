@@ -410,7 +410,18 @@ Check("collision sources classify slots without resolving externals", () =>
     var phyScene = ItemScene.Build(phy, 0).Preview;
     Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectHitShape).State == ItemSceneState.Present, "Phy hit shape misclassified.");
     Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectMoveShape).State == ItemSceneState.Unresolved && calls == 0, "Phy move shape resolved or misclassified.");
+    Require(phyScene.Diagnostics.Any(x => x.Code == "external-reference" && x.Path.EndsWith("/moveShapeFid")), "Phy external shape diagnostic missing.");
     Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectTriggerShape).State == ItemSceneState.Absent, "Phy trigger shape misclassified.");
+
+    // Chunk 2E006001 v11+ serializes a shape name instead of a node ref; that slot is referenced, not absent.
+    var namedPhy = new CGameObjectPhyModel { TriggerShape = "BakedTriggerShape" };
+    var named = ItemScene.Build(namedPhy, 0).Preview;
+    var namedRecord = named.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectTriggerShape);
+    Require(namedRecord.State == ItemSceneState.Unresolved && namedRecord.Representation.Contains("BakedTriggerShape")
+        && named.Nodes.Single(x => x.Path.EndsWith("/triggerShapeFid")).State == ItemSceneState.Unresolved, "Named shape reference reported absent.");
+    namedPhy.Triggers = new[] { new CPlugTriggerAction(), new CPlugTriggerAction() };
+    var counted = ItemScene.Build(namedPhy, 0).Preview;
+    Require(counted.Diagnostics.Any(x => x.Code == "phy-trigger-actions" && x.Message.Contains("2") && x.Path.EndsWith("/triggers")), "Trigger actions not counted.");
 
     var item = ItemScene.Build(new CGameItemModel { PhyModelCustomFile = external }, 0).Preview;
     Require(item.Collisions.Single(x => x.Source == ItemSceneCollisionSource.ItemPhyModel).State == ItemSceneState.Unresolved && calls == 0, "Item phy model resolved or misclassified.");
@@ -431,12 +442,13 @@ Check("collision inventory is read-only over serialized item bytes", () =>
     item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
     var file = new Gbx<CGameItemModel>(item) { BodyCompression = GbxCompression.Uncompressed };
     using var before = new MemoryStream(); file.Save(before);
-    ItemScene.Build(item, 0);
+    var beforeInventory = ItemScene.Build(item, 0).Preview;
     using var after = new MemoryStream(); file.Save(after);
     Require(before.ToArray().SequenceEqual(after.ToArray()), "Traversal changed serialized source bytes.");
     after.Position = 0;
     var reopened = Gbx.Parse<CGameItemModel>(after).Node;
     var result = ItemScene.Build(reopened, 0).Preview;
+    Require(beforeInventory.Collisions.SequenceEqual(result.Collisions), "Collision classification changed after reparse.");
     var sources = result.Collisions.Select(c => (c.Source, c.State)).ToArray();
     Require(sources.Contains((ItemSceneCollisionSource.StaticObjectShape, ItemSceneState.Present)), "Static shape lost after reparse.");
     Require(sources.Contains((ItemSceneCollisionSource.CommonItemTrigger, ItemSceneState.Present)) && Has(result, "trigger-transform"), "Trigger lost after reparse.");
@@ -445,21 +457,37 @@ Check("collision inventory is read-only over serialized item bytes", () =>
     // The common entity model serializes PhyModel/VisModel only at body version 0, so the
     // phy-model layout is exercised on its own ancient-layout node and as a standalone file.
     var phy = new CGameObjectPhyModel { HitShapeFid = ReopenSurface(new CPlugSurface.Mesh { Version = 6,
-        Vertices = [new(3, 0, 0), new(0, 3, 0), Vec3.Zero], Triangles = [new(new(0, 1, 2), 0, 0, 0)] }) };
+        Vertices = [new(3, 0, 0), new(0, 3, 0), Vec3.Zero], Triangles = [new(new(0, 1, 2), 0, 0, 0)] }),
+        Triggers = new[] { new CPlugTriggerAction(), new CPlugTriggerAction() } };
     phy.CreateChunk<CGameObjectPhyModel.Chunk2E006001>().Version = 0;
     var ancient = new CGameCommonItemEntityModel { PhyModel = phy };
     ancient.CreateChunk<CGameCommonItemEntityModel.Chunk2E027000>().Version = 0;
     var phyFile = new Gbx<CGameCommonItemEntityModel>(ancient) { BodyCompression = GbxCompression.Uncompressed };
     using var phyBefore = new MemoryStream(); phyFile.Save(phyBefore);
-    ItemScene.Build(ancient, 0);
+    var phyInventory = ItemScene.Build(ancient, 0).Preview;
     using var phyAfter = new MemoryStream(); phyFile.Save(phyAfter);
     Require(phyBefore.ToArray().SequenceEqual(phyAfter.ToArray()), "Traversal changed serialized phy bytes.");
     phyAfter.Position = 0;
     var phyResult = ItemScene.Build(Gbx.Parse<CGameCommonItemEntityModel>(phyAfter).Node, 0).Preview;
+    Require(phyInventory.Collisions.SequenceEqual(phyResult.Collisions), "Phy collision classification changed after reparse.");
     Require(phyResult.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectHitShape).State == ItemSceneState.Present, "Phy hit shape lost after reparse.");
     Require(phyResult.Collisions.Where(x => x.Source is ItemSceneCollisionSource.GameObjectMoveShape or ItemSceneCollisionSource.GameObjectTriggerShape)
         .All(x => x.State == ItemSceneState.Absent), "Absent phy shape slots changed after reparse.");
     Require(phyResult.Geometry.Count(x => x.IsCollision) == 1, "Phy collision geometry lost after reparse.");
+    Require(phyResult.Diagnostics.Any(x => x.Code == "phy-trigger-actions" && x.Message.Contains("2")), "Phy trigger action count lost after reparse.");
+
+    // Chunk 2E006001 v11+ serializes a shape name instead of a node ref; the reference must stay unresolved.
+    var namedPhy = new CGameObjectPhyModel { TriggerShape = "BakedTriggerShape" };
+    namedPhy.CreateChunk<CGameObjectPhyModel.Chunk2E006001>().Version = 12;
+    var namedFile = new Gbx<CGameObjectPhyModel>(namedPhy) { BodyCompression = GbxCompression.Uncompressed };
+    using var namedBefore = new MemoryStream(); namedFile.Save(namedBefore);
+    ItemScene.Build(namedPhy, 0);
+    using var namedAfter = new MemoryStream(); namedFile.Save(namedAfter);
+    Require(namedBefore.ToArray().SequenceEqual(namedAfter.ToArray()), "Traversal changed serialized named-shape bytes.");
+    namedAfter.Position = 0;
+    var namedResult = ItemScene.Build(Gbx.Parse<CGameObjectPhyModel>(namedAfter).Node, 0).Preview;
+    var namedTrigger = namedResult.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectTriggerShape);
+    Require(namedTrigger.State == ItemSceneState.Unresolved && namedTrigger.Representation.Contains("BakedTriggerShape"), "Named trigger reference lost after reparse.");
 });
 
 Check("tree roots, solid wrappers and nested affine locations", () =>
