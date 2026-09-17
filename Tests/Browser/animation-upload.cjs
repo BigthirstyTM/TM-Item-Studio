@@ -3,7 +3,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 // Bespoke fixture contract: two XY triangles, one static at x=0 and one
-// moving at x=2. Upload the archive normally; never inject scene/motion data.
+// moving at x=2. Both meshes author identical LOCAL vertices (0..1); the +2 m
+// placement travels in the moving entity's world transform. Since the shared-
+// geometry payload change, authored buffers are local vertices and placement
+// is enforced below through matrixWorld. Upload the archive normally; never
+// inject scene/motion data.
 const fixture = process.argv[2];
 assert.ok(fixture, 'Usage: node animation-upload.cjs <bespoke-animation.Item.Gbx>');
 const buffer = fs.readFileSync(fixture);
@@ -55,8 +59,11 @@ const buffer = fs.readFileSync(fixture);
             const after = snapshot();
             return { authored, before, after };
         });
-        assert.deepEqual(observed.authored, [[0, 0, 0, 1, 0, 0, 0, 1, 0], [2, 0, 0, 3, 0, 0, 2, 1, 0]], 'Fixture geometry changed');
-        assert.deepEqual(observed.before[0], observed.authored[0], 'Static base moved before the first frame');
+        assert.deepEqual(observed.authored, [[0, 0, 0, 1, 0, 0, 0, 1, 0], [0, 0, 0, 1, 0, 0, 0, 1, 0]],
+            'Fixture geometry changed (authored buffers are shared-geometry LOCAL vertices)');
+        assert.deepEqual(observed.before[0], [0, 0, 0, 1, 0, 0, 0, 1, 0], 'Static base moved before the first frame');
+        assert.deepEqual(observed.before[1], [2, 0, 0, 3, 0, 0, 2, 1, 0],
+            'Moving geometry must be placed at x=2..3 by its entity world transform');
         assert.deepEqual(observed.after[0], observed.authored[0], 'Static base must remain fixed during playback');
         assert.ok(observed.after[1].some((value, i) => Math.abs(value - observed.before[1][i]) > 0.01), 'Moving geometry must change during playback');
         assert.deepEqual(errors, [], 'Upload/playback must not raise page errors');

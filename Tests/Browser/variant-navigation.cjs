@@ -21,6 +21,7 @@ const fs = require('node:fs');
                 const result = render(payload);
                 variantRenders.push(performance.now());
                 geometryTransfers.push({ definitions: payload.geometryDefinitions?.length ?? 0,
+                    definitionIds: (payload.geometryDefinitions ?? []).map(definition => definition.geometryId),
                     shared: payload.parts.filter(p => p.geometryId != null).length,
                     parts: payload.parts.length });
                 return result;
@@ -48,10 +49,22 @@ const fs = require('node:fs');
         console.log(JSON.stringify({ layout, switchMilliseconds: durations }));
         const transfers = await page.evaluate(() => geometryTransfers.filter(t => t.shared > 0));
         console.log(JSON.stringify({ geometryTransfers: transfers }));
+        // Native SnowCar structure (verified against the pinned parser): variant 1 is the
+        // static reference variant — a single CPlugStaticObjectModel with seven authored
+        // visuals and no dyna graph. Variants 2-9 are CPlugDynaObjectModel entities with a
+        // kinematic constraint; their dynaShape collision surface is one additional shared
+        // geometry (the same authored CPlugSurface node across variants). So the first
+        // switch to a dyna variant legitimately transfers exactly that one new definition,
+        // and every later switch must transfer nothing.
         assert.ok(transfers[0].shared > 0, 'Real upload must use GBX reference identities');
-        assert.equal(transfers[1].definitions, 0, 'SnowCar variants must reuse their shared GBX geometry');
-        assert.equal(transfers[2].definitions, 0, 'Revisiting a variant must not upload geometry again');
-        assert.equal(transfers.at(-1).definitions, 0, 'Visiting a legacy/static variant must retain the shared pool');
+        assert.equal(transfers[0].definitions, 7, 'The static reference variant authors seven shared visuals');
+        assert.equal(transfers[1].definitions, 1, 'The first dyna variant introduces its dynaShape collision geometry once');
+        assert.equal(transfers[2].definitions, 0, 'Further SnowCar variants must reuse their shared GBX geometry');
+        assert.equal(transfers[3].definitions, 0, 'Revisiting a variant must not upload geometry again');
+        assert.equal(transfers[4].definitions, 0, 'Visiting the static variant must retain the shared pool');
+        assert.equal(transfers.at(-1).definitions, 0, 'Returning to a dyna variant must still reuse the shared pool');
+        const sentIds = transfers.flatMap(transfer => transfer.definitionIds);
+        assert.equal(new Set(sentIds).size, sentIds.length, 'No shared geometry definition may be uploaded twice');
         assert.equal(layout.rows, 1, 'Desktop variant buttons must fit on one row');
         assert.deepEqual(layout.labels, ['1', '2', '3', '4', '5', '6', '7', '8', '9'], 'Filename/ordinal repeated in each visible button');
         // A generous ceiling for loaded CI machines; the previous dev build takes ~15s.
