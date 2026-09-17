@@ -8,6 +8,7 @@
     "test:debug-export": "node run-debug-export.cjs",
     "test:capability-gating": "node run-capability-gating.cjs",
     "test:kinematic-preservation": "node run-kinematic-preservation.cjs",
+    "test:material-preview": "node run-material-preview.cjs",
     "test:variant-navigation": "node run-kinematic-preservation.cjs --variants"
   },
   "devDependencies": { "playwright": "1.61.1" }
