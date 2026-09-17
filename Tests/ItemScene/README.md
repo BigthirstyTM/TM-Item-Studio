@@ -23,7 +23,7 @@ returns independent mutable snapshots. Partial/invalid geometry is not pooled.
 The cache regression covers distinct transforms, revisits, unrelated documents,
 fresh paths and invalidation after editing a shared source in place.
 
-The suite checks nested rotations, repeated prefabs, original entry slots, path-local cycles, save/reparse topology and unchanged serialized bytes, independent attribute streams, CPU indexed attributes, normals/UV0/UV1, material/LOD mappings, invalid indices/values/transforms, collision ownership and generated status, external-resolution traps, selected variants, zero-valued lights and socket ownership.
+The suite checks nested rotations, repeated prefabs, original entry slots, path-local cycles, save/reparse topology and unchanged serialized bytes, independent attribute streams, CPU indexed attributes, normals/UV0/UV1, material/LOD mappings, invalid indices/values/transforms, collision ownership and generated status, external-resolution traps, selected variants, zero-valued lights, socket ownership, light ownership classes and value persistence capability.
 
 Supported geometry is the bundled `CPlugVisualIndexedTriangles` with one unambiguous decoded position channel, optional normal/UV channels, and an index buffer. Both inherited CPU arrays and decoded vertex streams are supported separately. Separate streams supply attributes for the same vertices; they are not concatenated. Collision triangle meshes and compound transforms are exposed separately from visual geometry. Normals use inverse transpose, and invalid geometry or attribute channels produce diagnostics. Preview arrays are copies; source handles retain authored arrays for a separate validated editor.
 
@@ -34,5 +34,28 @@ Collision mesh versions 1/2/3/5 select CookedTriangles; versions 6/7 select Tria
 The bundled public API does not expose vertex-stream counts/declarations/shared-model slots or skeleton socket arrays. Decoded stream geometry carries a `stream-layout-opaque` diagnostic; an empty/opaque stream is unsupported rather than absent. Duplicate attributes and mixed CPU/stream layouts are rejected. No private-field reflection is used. `CPlugVisualTriangles` is not a public type in this DLL and is not inferred from its CPU base class. Legacy/unknown visuals, analytic collision tessellation, skinning/morph/subvisual animation and trigger transforms remain unsupported.
 
 `Solid.LightInsts[i].ModelIndex` selects `Solid.LightUserModels`; `SocketIndex` is retained but does not become a guessed light position. Those light instances are unsupported for positional preview and retain typed model/instance ownership for editing. A direct prefab light model has an explicit prefab-entry transform. Existing zero color, intensity and distance values remain zero.
+
+Every light in the preview carries an `Ownership` classification plus a `ValuesPersist` capability:
+
+- `PrefabEntry` — the light is a direct prefab entry model; the entry transform owns its
+  position and the owning entry path is reported in `EntityPath` and in a
+  `light-owner-entry` (Present) diagnostic.
+- `SolidInstance` — the light is `LightUserModels[LightInst.ModelIndex]`. Position is
+  explicitly uninferrable: the socket transform needs `CPlugSkel` socket records, which are
+  serialized by chunk `090BA000` but kept private in the bundled GBX.NET 2.4.4 public API.
+  `light-socket-transform` (Unsupported) states that exact blocker. `SocketIndex` is typed
+  data, not an array index into positions.
+- `SceneTransform` — no prefab entry owns the light; its position is the composed scene
+  transform chain (`light-owner-scene`, Present).
+
+Lights without any instance (`uninstanced-light`) and legacy `Solid.Lights` arrays
+(`legacy-light`) stay diagnostic-only and never enter the editable light inventory.
+`ValuesPersist` is true only when the node carries `CPlugLightUserModel` chunk `090F9000`,
+the sole serializer of color/intensity/distance; a missing chunk emits
+`light-values-not-persisted` (Unsupported) because in-memory value edits would not survive
+a save. The save/reparse test proves both directions: values with the chunk round-trip
+identically, and values without it fall back to defaults after reparse. Traversal leaves
+serialized source bytes unchanged in both cases.
+
 
 Motion target resolution belongs to the motion module, using `Handles.Prefabs` and `Handles.Entries`. Scene traversal never interprets constraint entity indices. Editing, collision generation, OBJ export and viewport behavior are outside this module. These tests establish bundled-parser and scene-model behavior, not game compatibility.
