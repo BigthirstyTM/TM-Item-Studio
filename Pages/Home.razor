@@ -81,9 +81,6 @@
                         <button class="btn @(showLights ? "btn-info text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("lights"))">
                             Lights (@detectedLights.Count)
                         </button>
-                        <button class="btn @(showSockets ? "btn-success" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("sockets"))">
-                            Sockets (@detectedSockets.Count)
-                        </button>
                     </div>
 
                     <div class="studio-variants" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
@@ -147,10 +144,9 @@
                     <span><span style="color: #b8bdc6;">■</span> Mesh</span>
                     <span class="ms-2"><span style="color: #facc15;">●</span> Pivot</span>
                     <span class="ms-2"><span style="color: #fffbeb;">💡</span> Light</span>
-                    <span class="ms-2"><span style="color: #06b6d4;">⭕</span> Socket</span>
                 </div>
                 <div>
-                    <em>Tip: Select a 3D gizmo and move it with the transform arrows.</em>
+                    <em>Tip: Select a pivot gizmo and move it with the transform arrows. Lights can be selected but not moved.</em>
                 </div>
             </div>
             @if (hasMesh)
@@ -184,8 +180,8 @@
                     </button>
                 </div>
                 <div>
-                    <button aria-label="@($"Socket Positions ({detectedSockets.Count})")" aria-expanded="@((activeTab == "sockets").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
-                        <span>Sockets (@detectedSockets.Count)</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
+                    <button aria-label="Socket authoring capability (read-only)" aria-expanded="@((activeTab == "sockets").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
+                        <span>Sockets</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
                     </button>
                 </div>
                 <div>
@@ -467,16 +463,21 @@
                         </select>
                     </div>
 
-                    <h6 class="border-bottom pb-1 text-primary">@(authoredConstraints.Count > 0 ? "Kinematic controls" : "ItemType conversion")</h6>
+                    <h6 class="border-bottom pb-1 text-primary">@(authoredConstraints.Count > 0 ? "Kinematic controls" : "Motion capability")</h6>
                     <div class="@(authoredConstraints.Count > 0 ? "authored-motion-shell" : "card p-3 bg-light mb-3")">
                         @if (!isMovingItem)
                         {
                             <p class="small text-muted mb-2">
-                                This item is currently <strong>StaticObject</strong>. Convert it to a <strong>KinematicObject</strong> to use animation and trajectory nodes.
+                                This item is a <strong>static object</strong>. Changing <code>ItemType</code> alone does not author the
+                                <code>NPlugDyna*</code> objects and constraints a moving item needs, so this editor cannot convert it.
                             </p>
-                            <button class="btn btn-sm btn-outline-warning text-dark fw-bold" @onclick="ConvertToKinematic">
-                                ⚙️ Convert to KinematicObject
+                            <button class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true"
+                                    title="Conversion is unsupported: the dynamic object/constraint graph must be authored by an external tool.">
+                                ⚙️ Convert to KinematicObject (unsupported)
                             </button>
+                            <p class="small text-muted mt-2 mb-0">
+                                Author moving items with an external tool; the kinematic graph must already exist in the file.
+                            </p>
                         }
                         else if (authoredConstraints.Count > 0)
                         {
@@ -597,9 +598,13 @@
                                     <input type="number" step="0.05" class="form-control form-control-sm" @bind="pivotOffsetZ" @bind:after="OnKinematicChanged" />
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-outline-secondary mt-2" @onclick="ConvertToStatic">
-                                ⏹ Convert to StaticObject
+                            <button class="btn btn-sm btn-outline-secondary mt-2" disabled aria-disabled="true"
+                                    title="Conversion is unsupported: removing the dynamic object/constraint graph is not implemented.">
+                                ⏹ Convert to StaticObject (unsupported)
                             </button>
+                            <p class="small text-muted mt-2 mb-0">
+                                Removing the dynamic graph is not supported; export keeps the item's kinematic data unchanged.
+                            </p>
                         }
                     </div>
                 }
@@ -607,11 +612,14 @@
                 @if (activeTab == "lights")
                 {
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
-                            <h6 class="mb-0 text-primary">Dynamic lights (@detectedLights.Count) <span class="text-muted" title="CPlugLightPoint and CPlugLightSpot values are updated in the viewport and stored in the GBX model.">?</span></h6>
-                        <button class="btn btn-xs btn-primary" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddLight">
-                            + Add Light
-                        </button>
+                            <h6 class="mb-0 text-primary">Lights (@detectedLights.Count) <span class="text-muted" title="Color, intensity and radius are written to each existing CPlugLightUserModel on export. Light position is not serialized by this editor.">?</span></h6>
+                        <span class="small text-muted">Existing serialized lights only</span>
                     </div>
+                    <p class="small text-muted">
+                        Color, intensity and radius are saved to the light's own GBX data on export.
+                        Position is owned by skeleton socket data the bundled GBX.NET parser does not expose, so it is read-only here.
+                        This editor cannot add or remove lights.
+                    </p>
 
                     @if (detectedLights.Count > 0)
                     {
@@ -622,41 +630,38 @@
                             <div class="card p-2 mb-2 bg-light small">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <strong>Light @(lIdx + 1) (@light.Type)</strong>
-                                    <div>
-                                        <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("light", lIdx))">
-                                            Select in 3D
-                                        </button>
-                                        <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemoveLight(lIdx))">✕</button>
-                                    </div>
+                                    <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("light", lIdx))">
+                                        Select in 3D
+                                    </button>
                                 </div>
 
                                 <div class="row g-1 mb-1">
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">X</label>
-                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="light.X" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">X (read-only)</label>
+                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.X" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} X (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Y</label>
-                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="light.Y" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Y (read-only)</label>
+                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Y" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Y (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Z</label>
-                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="light.Z" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                        <label class="form-label mb-0" style="font-size: 0.75em;">Z (read-only)</label>
+                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Z" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Z (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                 </div>
 
                                 <div class="row g-1 align-items-center">
                                     <div class="col-4">
                                         <label class="form-label mb-0" style="font-size: 0.75em;">Color</label>
-                                        <input type="color" class="form-control form-control-color w-100 p-0" style="height: 28px;" @bind="light.ColorHtml" @bind:after="@(() => OnLightColorChanged(lIdx))" />
+                                        <input type="color" class="form-control form-control-color w-100 p-0" style="height: 28px;" aria-label="@($"Light {lIdx + 1} color")" @bind="light.ColorHtml" @bind:after="@(() => OnLightColorChanged(lIdx))" />
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label mb-0" style="font-size: 0.75em;">Intensity</label>
-                                        <input type="number" step="0.5" class="form-control form-control-sm" @bind="light.Intensity" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                        <input type="number" step="0.5" class="form-control form-control-sm" aria-label="@($"Light {lIdx + 1} intensity")" @bind="light.Intensity" @bind:after="@(() => OnLightChanged(lIdx))" />
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label mb-0" style="font-size: 0.75em;">Radius (m)</label>
-                                        <input type="number" step="1.0" class="form-control form-control-sm" @bind="light.Radius" @bind:after="@(() => OnLightChanged(lIdx))" />
+                                        <input type="number" step="1.0" class="form-control form-control-sm" aria-label="@($"Light {lIdx + 1} radius")" @bind="light.Radius" @bind:after="@(() => OnLightChanged(lIdx))" />
                                     </div>
                                 </div>
                             </div>
@@ -664,66 +669,51 @@
                     }
                     else
                     {
-                        <p class="text-muted small">No light emitters found. Click <strong>+ Add Light</strong> to add one.</p>
+                        <p class="text-muted small">No light emitters found. Adding lights is not supported by this editor.</p>
                     }
                 }
 
                 @if (activeTab == "sockets")
                 {
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
-                        <h6 class="mb-0 text-primary">Socket Positions (@detectedSockets.Count) <span class="text-muted" title="Socket positions and tags define magnetic connections between objects.">?</span></h6>
-                        <button class="btn btn-xs btn-success" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddSocket">
-                            + Add Socket
-                        </button>
+                    <h6 class="border-bottom pb-1 text-primary">Sockets</h6>
+                    <div class="alert alert-secondary small">
+                        <strong>Socket authoring is not supported.</strong>
+                        Item sockets are owned by skeleton data inside the model; the bundled GBX.NET parser does not
+                        expose them (<code>DefaultPlacement.Sockets</code> does not exist in this build), so socket
+                        positions and tags cannot be listed, added, removed or moved here.
                     </div>
-
-                    @if (detectedSockets.Count > 0)
-                    {
-                        @for (int i = 0; i < detectedSockets.Count; i++)
-                        {
-                            var socket = detectedSockets[i];
-                            int sIdx = i;
-                            <div class="card p-2 mb-2 bg-light small">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <input type="text" class="form-control form-control-sm fw-bold me-2" style="width: 140px;" @bind="socket.Tag" placeholder="SocketTag (e.g. Road)" />
-                                    <div>
-                                        <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" @onclick="@(() => SelectGizmoIn3D("socket", sIdx))">
-                                            Select in 3D
-                                        </button>
-                                        <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemoveSocket(sIdx))">✕</button>
-                                    </div>
-                                </div>
-                                <div class="row g-1">
-                                    <div class="col-4">
-                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="socket.X" @bind:after="@(() => OnSocketChanged(sIdx))" />
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="socket.Y" @bind:after="@(() => OnSocketChanged(sIdx))" />
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="number" step="0.2" class="form-control form-control-sm" @bind="socket.Z" @bind:after="@(() => OnSocketChanged(sIdx))" />
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p class="text-muted small">No Socket Positions found. Click <strong>+ Add Socket</strong> to add one.</p>
-                    }
+                    <p class="small text-muted mb-0">
+                        This panel is a read-only capability note. Author sockets with an external item-authoring tool.
+                        Nothing in this editor claims to change socket behavior in the game.
+                    </p>
                 }
 
                 @if (activeTab == "physics")
                 {
                     <h6 class="border-bottom pb-1 text-primary">PhyModel, CPlugSurface & Collision <span class="text-muted" title="These nodes define collision, physics surfaces and vehicle interaction.">?</span></h6>
-                    <div class="alert @(HasNode("CPlugSurface", "PhyModel", "CPlugSolid") ? "alert-success" : "alert-secondary") small">
-                        @(HasNode("CPlugSurface", "PhyModel", "CPlugSolid") ? "A physical model was found in this item." : "No recognised physical model was found in this item.")
+                    <div class="alert @(CollisionInventory.Count > 0 ? "alert-success" : "alert-secondary") small">
+                        @(CollisionInventory.Count > 0
+                            ? $"Collision inventory: {CollisionInventory.Count} entr{(CollisionInventory.Count == 1 ? "y" : "ies")} found in this item."
+                            : "No collision entries were found in this item.")
                     </div>
-                    <p class="small text-muted">Material, collision and a separate collision hull are shown only when the corresponding GBX node exists.</p>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="collisionInfo" disabled="@(!HasNode("CPlugSurface", "PhyModel"))" />
-                        <label class="form-check-label small" for="collisionInfo">CollisionEnabled</label>
-                    </div>
+                    @if (CollisionInventory.Count > 0)
+                    {
+                        <div class="list-group small mb-2">
+                            @foreach (var collision in CollisionInventory)
+                            {
+                                <div class="list-group-item">
+                                    <strong>@collision.Representation</strong>
+                                    <span class="badge bg-secondary ms-1">@collision.State</span>
+                                    <div class="text-muted text-break">@collision.Path</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    <p class="small text-muted mb-0">
+                        Read-only diagnostic. Enabling or disabling collision is not supported: that would require
+                        authoring or removing native collision shapes, which this editor does not do. No claim is made
+                        about how the game treats these entries.
+                    </p>
                 }
 
                 @if (activeTab == "visual")
@@ -850,7 +840,6 @@
     private bool showMeshes = true;
     private bool showPivots = true;
     private bool showLights = true;
-    private bool showSockets = true;
 
     // Animation.
     private string detectedAxis = "y";
@@ -919,14 +908,9 @@
         public float Intensity { get; set; } = 2.0f;
         public float Radius { get; set; } = 15.0f;
         public object? SourceNode { get; set; }
-    }
-
-    public class SocketDto
-    {
-        public string Tag { get; set; } = "";
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        // Position is display-only: the owner transform is not serialized by this editor,
+        // so light gizmos never attach drag handles in the viewer.
+        public bool Editable => false;
     }
 
     private sealed class OriginalMotionSetting
@@ -944,9 +928,11 @@
     private List<ModelPart> modelParts = new();
     private List<PivotDto> detectedPivots = new();
     private List<LightDto> detectedLights = new();
-    private List<SocketDto> detectedSockets = new();
     private List<string> debugLog = new();
     private readonly HashSet<string> detectedNodeTypes = new(StringComparer.OrdinalIgnoreCase);
+    // Collision capability is a read-only scene inventory; there is no toggle to persist.
+    private IReadOnlyList<ItemSceneCollision> CollisionInventory =>
+        authoredMotionScene?.Preview.Collisions ?? Array.Empty<ItemSceneCollision>();
 
     protected override void OnInitialized()
     {
@@ -992,7 +978,6 @@
         detectedMaterials = Array.Empty<ItemSceneMaterial>();
         detectedPivots.Clear();
         detectedLights.Clear();
-        detectedSockets.Clear();
         detectedNodeTypes.Clear();
         debugLog.Clear();
         modelDiagnostics.Clear();
@@ -1084,7 +1069,6 @@
         modelParts.Clear();
         detectedPivots.Clear();
         detectedLights.Clear();
-        detectedSockets.Clear();
         detectedNodeTypes.Clear();
         detectedAxis = "y";
         isOscillating = false;
@@ -1114,7 +1098,7 @@
         authoredConstraints.Clear();
         authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
         ExtractParts(source.PreviewRoot, includeGeometry: authoredConstraints.Count == 0);
-        ExtractPivotsAndSockets(itemModel);
+        ExtractPivots(itemModel);
         if (authoredConstraints.Count > 0) UseAuthoredModelParts(authoredMotionScene);
         isMovingItem = isMovingItem || authoredConstraints.Count > 0;
         motionDiagnostics = AuthoredMotionPreview.Build(authoredMotionScene).Diagnostics;
@@ -1210,7 +1194,7 @@
                     material.Path, material.GameMaterialName, material.GameMaterialLink
                 }),
                 motions = motion.Tracks,
-                pivots = detectedPivots, lights = detectedLights, sockets = detectedSockets,
+                pivots = detectedPivots, lights = detectedLights,
                 playing = isPlaying
             });
             if (geometryCache.Epoch == epoch)
@@ -1229,7 +1213,6 @@
             }),
             pivots = detectedPivots,
             lights = detectedLights,
-            sockets = detectedSockets,
             animAxis = detectedAxis,
             isOscillating = isOscillating,
             minAngle = minAngle,
@@ -1386,25 +1369,14 @@
     [JSInvokable]
     public void OnGizmoMoved(string type, int index, float x, float y, float z)
     {
+        // Only pivots are editable: light position is display-only and socket
+        // authoring is unsupported, so the viewer never invokes those types.
         if (type == "pivot" && index >= 0 && index < detectedPivots.Count)
         {
             detectedPivots[index].X = (float)Math.Round(x, 2);
             detectedPivots[index].Y = (float)Math.Round(y, 2);
             detectedPivots[index].Z = (float)Math.Round(z, 2);
             SyncPivotsToGbx();
-        }
-        else if (type == "light" && index >= 0 && index < detectedLights.Count)
-        {
-            detectedLights[index].X = (float)Math.Round(x, 2);
-            detectedLights[index].Y = (float)Math.Round(y, 2);
-            detectedLights[index].Z = (float)Math.Round(z, 2);
-            SyncLightsToGbx(index);
-        }
-        else if (type == "socket" && index >= 0 && index < detectedSockets.Count)
-        {
-            detectedSockets[index].X = (float)Math.Round(x, 2);
-            detectedSockets[index].Y = (float)Math.Round(y, 2);
-            detectedSockets[index].Z = (float)Math.Round(z, 2);
         }
         StateHasChanged();
     }
@@ -1414,7 +1386,6 @@
     {
         if (type == "pivot") activeTab = "placement";
         else if (type == "light") activeTab = "lights";
-        else if (type == "socket") activeTab = "sockets";
         StateHasChanged();
     }
 
@@ -1429,7 +1400,7 @@
         {
             var l = detectedLights[idx];
             SyncLightsToGbx(idx);
-            await JS.InvokeVoidAsync("updateLightRealtime", idx, l.ColorHex, l.Intensity, l.Radius, l.X, l.Y, l.Z);
+            await JS.InvokeVoidAsync("updateLightRealtime", idx, l.ColorHex, l.Intensity, l.Radius);
         }
     }
 
@@ -1457,40 +1428,6 @@
         }
     }
 
-    private async Task OnSocketChanged(int idx)
-    {
-        if (idx >= 0 && idx < detectedSockets.Count)
-        {
-            var s = detectedSockets[idx];
-            await JS.InvokeVoidAsync("updateSocketRealtime", idx, s.X, s.Y, s.Z);
-        }
-    }
-
-    private void AddLight()
-    {
-        detectedLights.Add(new LightDto
-        {
-            Type = "PointLight",
-            X = 0,
-            Y = 2.0f,
-            Z = 0,
-            ColorHtml = "#f59e0b",
-            ColorHex = 0xf59e0b,
-            Intensity = 3.0f,
-            Radius = 16.0f
-        });
-        _ = UpdateScenePayload();
-    }
-
-    private void RemoveLight(int idx)
-    {
-        if (idx >= 0 && idx < detectedLights.Count)
-        {
-            detectedLights.RemoveAt(idx);
-            _ = UpdateScenePayload();
-        }
-    }
-
     private void AddPivot()
     {
         detectedPivots.Add(new PivotDto
@@ -1511,59 +1448,6 @@
             detectedPivots.RemoveAt(idx);
             SyncPivotsToGbx();
             _ = UpdateScenePayload();
-        }
-    }
-
-    private void AddSocket()
-    {
-        detectedSockets.Add(new SocketDto
-        {
-            Tag = "Road",
-            X = 0,
-            Y = 1.0f,
-            Z = 0
-        });
-        _ = UpdateScenePayload();
-    }
-
-    private void RemoveSocket(int idx)
-    {
-        if (idx >= 0 && idx < detectedSockets.Count)
-        {
-            detectedSockets.RemoveAt(idx);
-            _ = UpdateScenePayload();
-        }
-    }
-
-    private async Task ConvertToKinematic()
-    {
-        if (itemModel != null)
-        {
-            // GBX.NET names the dynamic/static item kinds PickUp and Ornament;
-            // there are no Kinematic/Static enum values.
-            itemModel.ItemType = CGameItemModel.EItemType.PickUp;
-
-            isMovingItem = true;
-            isPlaying = true;
-
-            if (modelParts.Count > 0)
-            {
-                modelParts.Last().IsMoving = true;
-            }
-
-            await UpdateScenePayload();
-        }
-    }
-
-    private async Task ConvertToStatic()
-    {
-        if (itemModel != null)
-        {
-            itemModel.ItemType = CGameItemModel.EItemType.Ornament;
-
-            isMovingItem = false;
-            foreach (var part in modelParts) part.IsMoving = false;
-            await UpdateScenePayload();
         }
     }
 
@@ -1635,7 +1519,9 @@
         }
     }
 
-    private void ExtractPivotsAndSockets(CGameItemModel item)
+    // Sockets are intentionally not extracted: DefaultPlacement.Sockets does not exist in
+    // the bundled GBX.NET build, so any socket list would be DTO-only fiction.
+    private void ExtractPivots(CGameItemModel item)
     {
         if (item.DefaultPlacement == null) return;
 
@@ -1650,34 +1536,6 @@
         else
         {
             detectedPivots.Add(new PivotDto { Index = 0, X = 0, Y = 0, Z = 0 });
-        }
-
-        var socketsProp = item.DefaultPlacement.GetType().GetProperty("Sockets");
-        if (socketsProp != null)
-        {
-            var socketsVal = socketsProp.GetValue(item.DefaultPlacement) as System.Collections.IEnumerable;
-            if (socketsVal != null)
-            {
-                foreach (var s in socketsVal)
-                {
-                    try
-                    {
-                        var posProp = s.GetType().GetProperty("Position");
-                        var tagProp = s.GetType().GetProperty("Tag") ?? s.GetType().GetProperty("SocketId");
-                        if (posProp != null && posProp.GetValue(s) is Vec3 pos)
-                        {
-                            detectedSockets.Add(new SocketDto
-                            {
-                                Tag = tagProp?.GetValue(s)?.ToString() ?? "",
-                                X = pos.X,
-                                Y = pos.Y,
-                                Z = pos.Z
-                            });
-                        }
-                    }
-                    catch { }
-                }
-            }
         }
     }
 
@@ -2148,7 +2006,6 @@
         if (layerName == "meshes") showMeshes = visible;
         else if (layerName == "pivots") showPivots = visible;
         else if (layerName == "lights") showLights = visible;
-        else if (layerName == "sockets") showSockets = visible;
     }
 
     private async Task ToggleAnimation()
