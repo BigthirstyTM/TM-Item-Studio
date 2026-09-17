@@ -37,22 +37,22 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
 
         // Re-rendering a scene must preserve the UI playback state.
         const playbackState = await page.evaluate(() => {
-            renderStudioScene({ playing: false, parts: [], pivots: [], lights: [], sockets: [] });
+            renderStudioScene({ playing: false, parts: [], pivots: [], lights: [] });
             const paused = isPlaying;
-            renderStudioScene({ playing: true, parts: [], pivots: [], lights: [], sockets: [] });
+            renderStudioScene({ playing: true, parts: [], pivots: [], lights: [] });
             return { paused, resumed: isPlaying };
         });
         assert.deepEqual(playbackState, { paused: false, resumed: true });
 
         const resources = await page.evaluate(() => {
-            renderStudioScene({ parts: [], pivots: [{ x: 0, y: 0, z: 0 }], lights: [{ x: 0, y: 1, z: 0 }], sockets: [{ x: 0, y: 0, z: 0 }] });
+            renderStudioScene({ parts: [], pivots: [{ x: 0, y: 0, z: 0 }], lights: [{ x: 0, y: 1, z: 0 }] });
             let expected = 0, disposed = 0;
-            for (const group of [pivotsGroup, lightsGroup, socketsGroup]) {
+            for (const group of [pivotsGroup, lightsGroup]) {
                 group.traverse(child => {
                     if (child.geometry) { expected++; child.geometry.addEventListener('dispose', () => disposed++); }
                 });
             }
-            renderStudioScene({ parts: [], pivots: [], lights: [], sockets: [] });
+            renderStudioScene({ parts: [], pivots: [], lights: [] });
             return { expected, disposed };
         });
         assert.ok(resources.expected > 0);
