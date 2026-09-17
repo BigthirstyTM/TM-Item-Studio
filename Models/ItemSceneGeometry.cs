@@ -155,27 +155,28 @@ public static partial class ItemScene
             geometry.Add(result);
         }
 
-        private void Surface(CPlugSurface surface, string path, Matrix4x4? world, ItemSceneEntryHandle? entry)
+        private void Surface(CPlugSurface surface, string path, Matrix4x4? world, ItemSceneEntryHandle? entry,
+            ItemSceneCollisionSource source)
         {
             if (surface.Geom is not null)
             {
                 Issue(path + "/geom", "legacy-collision-geometry", ItemSceneState.Unsupported, "Legacy surface geometry is retained without interpreting its layout.");
                 if (surface.Surf is null)
-                    collisions.Add(new(path, entry?.Path, "Legacy surface geometry", ItemSceneState.Unsupported));
+                    collisions.Add(new(path, entry?.Path, "Legacy surface geometry", ItemSceneState.Unsupported, source));
             }
             for (var i = 0; i < surface.Materials.Length; i++)
                 if (surface.Materials[i]?.MaterialFile is { } file)
                     Issue(path + $"/material:{i}", "external-reference", ItemSceneState.Unresolved, $"External collision material: {file.FilePath}");
-            if (surface.Surf is not null || surface.Geom is null) Surf(surface.Surf, path, world, entry, 0);
+            if (surface.Surf is not null || surface.Geom is null) Surf(surface.Surf, path, world, entry, source, 0);
         }
 
-        private void Surf(CPlugSurface.ISurf? surf, string path, Matrix4x4? world, ItemSceneEntryHandle? entry, int depth)
+        private void Surf(CPlugSurface.ISurf? surf, string path, Matrix4x4? world, ItemSceneEntryHandle? entry, ItemSceneCollisionSource source, int depth)
         {
             if (surf is null)
-            { collisions.Add(new(path, entry?.Path, "No decoded surface", ItemSceneState.Absent)); return; }
+            { collisions.Add(new(path, entry?.Path, "No decoded surface", ItemSceneState.Absent, source)); return; }
             if (depth > 128 || !ancestors.Add(surf))
             {
-                collisions.Add(new(path, entry?.Path, surf.GetType().Name, depth > 128 ? ItemSceneState.Unsupported : ItemSceneState.Cycle));
+                collisions.Add(new(path, entry?.Path, surf.GetType().Name, depth > 128 ? ItemSceneState.Unsupported : ItemSceneState.Cycle, source));
                 Issue(path, "collision-cycle-or-limit", ItemSceneState.Unsupported, "Collision traversal stopped at a cycle or depth limit.");
                 return;
             }
@@ -184,10 +185,10 @@ public static partial class ItemScene
                 switch (surf)
                 {
                     case CPlugSurface.Mesh mesh:
-                        CollisionMesh(mesh, path, world, entry);
+                        CollisionMesh(mesh, path, world, entry, source);
                         break;
                     case CPlugSurface.Compound compound:
-                        collisions.Add(new(path, entry?.Path, "Compound", ItemSceneState.Present));
+                        collisions.Add(new(path, entry?.Path, "Compound", ItemSceneState.Present, source));
                         if (compound.Surfs.Length != compound.SurfLocs.Length)
                             Issue(path, "collision-transform-count", ItemSceneState.Invalid, "Compound child and transform counts differ.");
                         for (var i = 0; i < compound.Surfs.Length; i++)
@@ -195,11 +196,11 @@ public static partial class ItemScene
                             Matrix4x4? composed = i < compound.SurfLocs.Length && world.HasValue
                                 ? FromIso4(compound.SurfLocs[i]) * world.Value : null;
                             if (composed.HasValue && !ValidTransform(composed.Value)) composed = null;
-                            Surf(compound.Surfs[i], path + $"/surf:{i}", composed, entry, depth + 1);
+                            Surf(compound.Surfs[i], path + $"/surf:{i}", composed, entry, source, depth + 1);
                         }
                         break;
                     default:
-                        collisions.Add(new(path, entry?.Path, surf.GetType().Name, ItemSceneState.Unsupported));
+                        collisions.Add(new(path, entry?.Path, surf.GetType().Name, ItemSceneState.Unsupported, source));
                         Issue(path, "collision-primitive", ItemSceneState.Unsupported, "Analytic collision primitive retained; no triangle tessellation implemented.");
                         break;
                 }
@@ -207,11 +208,12 @@ public static partial class ItemScene
             finally { ancestors.Remove(surf); }
         }
 
-        private void CollisionMesh(CPlugSurface.Mesh mesh, string path, Matrix4x4? world, ItemSceneEntryHandle? entry)
+        private void CollisionMesh(CPlugSurface.Mesh mesh, string path, Matrix4x4? world, ItemSceneEntryHandle? entry,
+            ItemSceneCollisionSource source)
         {
             if (mesh.Version is not (1 or 2 or 3 or 5 or 6 or 7))
             {
-                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Unsupported));
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Unsupported, source));
                 Issue(path, "collision-mesh-version", ItemSceneState.Unsupported, mesh.Version == 4
                     ? "Mesh version 4 has no decoded geometry payload in the bundled serializer; native collision meaning is not established."
                     : $"Unsupported collision mesh version {mesh.Version}; array absence does not establish absent collision.");
@@ -222,7 +224,7 @@ public static partial class ItemScene
                 ? mesh.CookedTriangles is null || mesh.Triangles is not null
                 : mesh.Triangles is null || mesh.CookedTriangles is not null))
             {
-                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid));
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid, source));
                 Issue(path, "collision-mesh-layout", ItemSceneState.Invalid, "Collision mesh has missing arrays or arrays incompatible with its serialized version; no alternate layout is inferred.");
                 return;
             }
@@ -231,19 +233,19 @@ public static partial class ItemScene
                 : mesh.Triangles!.SelectMany(x => new[] { x.Indices.X, x.Indices.Y, x.Indices.Z }).ToArray();
             if (mesh.Vertices.Any(p => !Finite(V(p))))
             {
-                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid));
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid, source));
                 Issue(path, "nonfinite-position", ItemSceneState.Invalid, "Collision mesh contains nonfinite vertices.");
                 return;
             }
             if (indices.Length == 0)
             {
-                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Absent));
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Absent, source));
                 Issue(path, "empty-collision-mesh", ItemSceneState.Absent, "Supported collision layout contains zero triangles.");
                 return;
             }
             if (mesh.Vertices.Length == 0)
             {
-                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid));
+                collisions.Add(new(path, entry?.Path, "Mesh", ItemSceneState.Invalid, source));
                 Issue(path, "collision-mesh-layout", ItemSceneState.Invalid, "Collision triangles have no vertices.");
                 return;
             }
@@ -251,7 +253,7 @@ public static partial class ItemScene
             EmitGeometry(path, entry?.Path, mesh, true, mesh.Vertices, null, new(), indices, world);
             var state = diagnostics.Skip(diagnosticOffset).Any(d => d.State == ItemSceneState.Invalid)
                 ? ItemSceneState.Invalid : ItemSceneState.Present;
-            collisions.Add(new(path, entry?.Path, "Mesh", state));
+            collisions.Add(new(path, entry?.Path, "Mesh", state, source));
         }
     }
 }
