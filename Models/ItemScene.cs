@@ -9,6 +9,9 @@ namespace TM_Item_Studio.Models;
 public enum ItemSceneState { Present, Absent, Unsupported, Unresolved, Invalid, Cycle }
 public enum ItemSceneKind { Item, Variant, Prefab, Entity, StaticObject, DynamicObject, Solid, Visual, Collision, Light, Constraint, Other, Tree }
 
+/// <summary>Which authored structure places a light; uninstanced models and legacy arrays stay diagnostic-only.</summary>
+public enum ItemSceneLightOwnership { PrefabEntry, SolidInstance, SceneTransform }
+
 public sealed record ItemSceneDiagnostic(string Path, string Code, ItemSceneState State, string Message);
 public sealed record ItemSceneNode(string Path, string? ParentPath, int? SourceId, ItemSceneKind Kind,
     ItemSceneState State, string Type, float[]? LocalTransform, float[]? WorldTransform);
@@ -19,7 +22,8 @@ public sealed record ItemSceneMapping(string Path, string SolidPath, int VisualI
 public sealed record ItemSceneSolid(string Path, int SourceId, float[]? LodDistances, int VisualCount,
     int MaterialCount, bool HasSkeleton, bool HasPreLightGenerator);
 public sealed record ItemSceneLight(string Path, string? EntityPath, int SourceId, int? ModelIndex,
-    int? SocketIndex, float[]? Position, float[] Color, float Intensity, float Distance, ItemSceneState State);
+    int? SocketIndex, float[]? Position, float[] Color, float Intensity, float Distance, ItemSceneState State,
+    ItemSceneLightOwnership Ownership = ItemSceneLightOwnership.PrefabEntry, bool ValuesPersist = true);
 public sealed record ItemSceneCollision(string Path, string? EntityPath, string Representation, ItemSceneState State);
 
 /// <summary>Snapshot buffers, separate from authored arrays. Positions are before viewer framing.</summary>
