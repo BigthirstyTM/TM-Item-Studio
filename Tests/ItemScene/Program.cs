@@ -288,6 +288,10 @@ Check("light ownership classes and value persistence capability", () =>
     var bare = ItemScene.Build(light, 0).Preview;
     Require(bare.Lights.Single().Ownership == ItemSceneLightOwnership.SceneTransform && Has(bare, "light-owner-scene")
         && !Has(bare, "light-owner-entry"), "Scene-transform ownership misclassified.");
+    var invalidOwner = ItemScene.Build(new CPlugPrefab { Ents = new[] { Ent(light, default, new Quat(0, 0, 0, 2)) } }, 0).Preview;
+    Require(invalidOwner.Lights.Single().Ownership == ItemSceneLightOwnership.PrefabEntry
+        && invalidOwner.Lights.Single().State == ItemSceneState.Invalid && !Has(invalidOwner, "light-owner-entry"),
+        "Invalid entry transform reported as an owned position.");
 
     var socketLight = new CPlugLightUserModel { Color = new Vec3(.2f, .4f, .6f), Intensity = 3, Distance = 8 };
     socketLight.CreateChunk<CPlugLightUserModel.Chunk090F9000>();

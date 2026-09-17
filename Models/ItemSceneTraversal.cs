@@ -348,7 +348,7 @@ public static partial class ItemScene
                 ownership, persists));
             if (instance is not null)
                 Issue(path, "light-socket-transform", ItemSceneState.Unsupported, "LightInst.ModelIndex selects LightUserModels; the position needs the skeleton socket transform, and CPlugSkel socket records are serialized by chunk 090BA000 but not exposed by the bundled GBX.NET 2.4.4 public API. SocketIndex is retained as typed data and is not an array index into positions; no position inferred.");
-            else if (entry is not null)
+            else if (entry is not null && world.HasValue)
                 Issue(path, "light-owner-entry", ItemSceneState.Present, $"Position is owned by the prefab entry transform at {entry.Path}; the light model itself carries no placement.");
             else if (world.HasValue)
                 Issue(path, "light-owner-scene", ItemSceneState.Present, "No prefab entry owns this light; its position is the composed scene transform chain applied to the model.");

@@ -39,7 +39,9 @@ Every light in the preview carries an `Ownership` classification plus a `ValuesP
 
 - `PrefabEntry` — the light is a direct prefab entry model; the entry transform owns its
   position and the owning entry path is reported in `EntityPath` and in a
-  `light-owner-entry` (Present) diagnostic.
+  `light-owner-entry` (Present) diagnostic. A nonfinite or non-unit entry transform keeps
+  the `PrefabEntry` classification but marks the light Invalid without the Present
+  ownership diagnostic, matching the scene-transform branch.
 - `SolidInstance` — the light is `LightUserModels[LightInst.ModelIndex]`. Position is
   explicitly uninferrable: the socket transform needs `CPlugSkel` socket records, which are
   serialized by chunk `090BA000` but kept private in the bundled GBX.NET 2.4.4 public API.
