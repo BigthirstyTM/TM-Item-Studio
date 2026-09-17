@@ -375,6 +375,93 @@ Check("collision mesh, compound transform, cycle and generated status", () =>
     Require(generated.Collisions.Single().State == ItemSceneState.Unsupported && Has(generated, "generated-collision"), "Generated collision claimed absent or verified.");
 });
 
+Check("collision sources classify slots without resolving externals", () =>
+{
+    var mesh = ReopenSurface(new CPlugSurface.Mesh { Version = 6, Vertices = [new(1, 0, 0), new(0, 1, 0), Vec3.Zero],
+        Triangles = [new(new(0, 1, 2), 0, 0, 0)] });
+    var calls = 0;
+    var table = new GbxRefTable();
+    table.ExternalNodes["phy.Gbx"] = () => { calls++; throw new Exception("Unexpected phy resolution"); };
+    var external = new GbxRefTableFile(table, 0, false, "phy.Gbx");
+
+    var present = ItemScene.Build(new CPlugStaticObjectModel { Shape = mesh }, 0).Preview;
+    Require(present.Collisions.Single(x => x.Source == ItemSceneCollisionSource.StaticObjectShape).State == ItemSceneState.Present, "Present static shape misclassified.");
+    var absent = ItemScene.Build(new CPlugStaticObjectModel(), 0).Preview;
+    Require(absent.Collisions.Single(x => x.Source == ItemSceneCollisionSource.StaticObjectShape).State == ItemSceneState.Absent, "Absent static shape misclassified.");
+    var ext = ItemScene.Build(new CPlugStaticObjectModel { ShapeFile = external }, 0).Preview;
+    Require(ext.Collisions.Single(x => x.Source == ItemSceneCollisionSource.StaticObjectShape).State == ItemSceneState.Unresolved && calls == 0, "External static shape misclassified or resolved.");
+    var generated = ItemScene.Build(new CPlugStaticObjectModel { Mesh = Solid(), IsMeshCollidable = true }, 0).Preview;
+    Require(generated.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GeneratedMeshCollision).State == ItemSceneState.Unsupported
+        && Has(generated, "generated-collision"), "Generated collision misclassified.");
+
+    var trigger = ItemScene.Build(new CGameCommonItemEntityModel { TriggerShape = mesh }, 0).Preview;
+    Require(trigger.Collisions.Single(x => x.Source == ItemSceneCollisionSource.CommonItemTrigger).State == ItemSceneState.Present
+        && Has(trigger, "trigger-transform"), "Present trigger misclassified.");
+    var noTrigger = ItemScene.Build(new CGameCommonItemEntityModel(), 0).Preview;
+    Require(noTrigger.Collisions.Single(x => x.Source == ItemSceneCollisionSource.CommonItemTrigger).State == ItemSceneState.Absent, "Absent trigger misclassified.");
+    var oddTrigger = ItemScene.Build(new CGameCommonItemEntityModel { TriggerShape = new CPlugCrystal() }, 0).Preview;
+    Require(oddTrigger.Collisions.Single(x => x.Source == ItemSceneCollisionSource.CommonItemTrigger).State == ItemSceneState.Unsupported, "Non-surface trigger node misclassified.");
+
+    var dyna = ItemScene.Build(new CPlugDynaObjectModel { DynaShape = mesh }, 0).Preview;
+    Require(dyna.Collisions.Single(x => x.Source == ItemSceneCollisionSource.DynamicObjectShape).State == ItemSceneState.Present, "Dynamic shape misclassified.");
+    Require(dyna.Collisions.Single(x => x.Source == ItemSceneCollisionSource.DynamicObjectStaticShape).State == ItemSceneState.Absent, "Dynamic static shape misclassified.");
+
+    var phy = new CGameObjectPhyModel { HitShapeFid = mesh, MoveShapeFidFile = external };
+    var phyScene = ItemScene.Build(phy, 0).Preview;
+    Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectHitShape).State == ItemSceneState.Present, "Phy hit shape misclassified.");
+    Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectMoveShape).State == ItemSceneState.Unresolved && calls == 0, "Phy move shape resolved or misclassified.");
+    Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectTriggerShape).State == ItemSceneState.Absent, "Phy trigger shape misclassified.");
+
+    var item = ItemScene.Build(new CGameItemModel { PhyModelCustomFile = external }, 0).Preview;
+    Require(item.Collisions.Single(x => x.Source == ItemSceneCollisionSource.ItemPhyModel).State == ItemSceneState.Unresolved && calls == 0, "Item phy model resolved or misclassified.");
+    Require(ItemScene.Build(mesh, 0).Preview.Collisions.Single().Source == ItemSceneCollisionSource.SurfaceSlot, "Plain surface visit misclassified.");
+});
+
+Check("collision inventory is read-only over serialized item bytes", () =>
+{
+    var shapeMesh = ReopenSurface(new CPlugSurface.Mesh { Version = 6, Vertices = [new(1, 0, 0), new(0, 1, 0), Vec3.Zero],
+        Triangles = [new(new(0, 1, 2), 0, 0, 0)] });
+    var common = new CGameCommonItemEntityModel {
+        StaticObject = new CPlugStaticObjectModel { Version = 3, Shape = shapeMesh },
+        TriggerShape = ReopenSurface(new CPlugSurface.Mesh { Version = 6, Vertices = [new(2, 0, 0), new(0, 2, 0), Vec3.Zero],
+            Triangles = [new(new(0, 1, 2), 0, 0, 0)] }) };
+    common.CreateChunk<CGameCommonItemEntityModel.Chunk2E027000>().Version = 4;
+    var item = new CGameItemModel { EntityModel = common, ItemType = CGameItemModel.EItemType.Ornament };
+    item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+    item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
+    var file = new Gbx<CGameItemModel>(item) { BodyCompression = GbxCompression.Uncompressed };
+    using var before = new MemoryStream(); file.Save(before);
+    ItemScene.Build(item, 0);
+    using var after = new MemoryStream(); file.Save(after);
+    Require(before.ToArray().SequenceEqual(after.ToArray()), "Traversal changed serialized source bytes.");
+    after.Position = 0;
+    var reopened = Gbx.Parse<CGameItemModel>(after).Node;
+    var result = ItemScene.Build(reopened, 0).Preview;
+    var sources = result.Collisions.Select(c => (c.Source, c.State)).ToArray();
+    Require(sources.Contains((ItemSceneCollisionSource.StaticObjectShape, ItemSceneState.Present)), "Static shape lost after reparse.");
+    Require(sources.Contains((ItemSceneCollisionSource.CommonItemTrigger, ItemSceneState.Present)) && Has(result, "trigger-transform"), "Trigger lost after reparse.");
+    Require(result.Geometry.Count(x => x.IsCollision) == 1, "Collision geometry count changed after reparse.");
+
+    // The common entity model serializes PhyModel/VisModel only at body version 0, so the
+    // phy-model layout is exercised on its own ancient-layout node and as a standalone file.
+    var phy = new CGameObjectPhyModel { HitShapeFid = ReopenSurface(new CPlugSurface.Mesh { Version = 6,
+        Vertices = [new(3, 0, 0), new(0, 3, 0), Vec3.Zero], Triangles = [new(new(0, 1, 2), 0, 0, 0)] }) };
+    phy.CreateChunk<CGameObjectPhyModel.Chunk2E006001>().Version = 0;
+    var ancient = new CGameCommonItemEntityModel { PhyModel = phy };
+    ancient.CreateChunk<CGameCommonItemEntityModel.Chunk2E027000>().Version = 0;
+    var phyFile = new Gbx<CGameCommonItemEntityModel>(ancient) { BodyCompression = GbxCompression.Uncompressed };
+    using var phyBefore = new MemoryStream(); phyFile.Save(phyBefore);
+    ItemScene.Build(ancient, 0);
+    using var phyAfter = new MemoryStream(); phyFile.Save(phyAfter);
+    Require(phyBefore.ToArray().SequenceEqual(phyAfter.ToArray()), "Traversal changed serialized phy bytes.");
+    phyAfter.Position = 0;
+    var phyResult = ItemScene.Build(Gbx.Parse<CGameCommonItemEntityModel>(phyAfter).Node, 0).Preview;
+    Require(phyResult.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectHitShape).State == ItemSceneState.Present, "Phy hit shape lost after reparse.");
+    Require(phyResult.Collisions.Where(x => x.Source is ItemSceneCollisionSource.GameObjectMoveShape or ItemSceneCollisionSource.GameObjectTriggerShape)
+        .All(x => x.State == ItemSceneState.Absent), "Absent phy shape slots changed after reparse.");
+    Require(phyResult.Geometry.Count(x => x.IsCollision) == 1, "Phy collision geometry lost after reparse.");
+});
+
 Check("tree roots, solid wrappers and nested affine locations", () =>
 {
     var visual = CpuVisual();
