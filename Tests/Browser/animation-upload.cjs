@@ -44,8 +44,11 @@ const buffer = fs.readFileSync(fixture);
         const observed = await page.evaluate(() => {
             const meshes = [];
             scene.traverse(object => { if (object.isMesh && object.geometry.attributes.position?.count === 3) meshes.push(object); });
-            // Identify authored geometry, not implementation-assigned names or groups.
-            meshes.sort((a, b) => a.geometry.attributes.position.getX(0) - b.geometry.attributes.position.getX(0));
+            // Identify meshes by world placement, not implementation-assigned names,
+            // groups, or part order: both parts author identical local vertices, so
+            // only the entity transform (static at x=0, moving at x=2) tells them apart.
+            scene.updateMatrixWorld(true);
+            meshes.sort((a, b) => a.matrixWorld.elements[12] - b.matrixWorld.elements[12]);
             const snapshot = () => {
                 scene.updateMatrixWorld(true);
                 return meshes.map(mesh => Array.from({ length: 3 }, (_, i) =>
