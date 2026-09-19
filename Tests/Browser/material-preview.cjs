@@ -88,7 +88,7 @@ const MATERIALS = [
     ['solid:11/material:0', 'SWAP']                                // stale-version probe
 ];
 const EXPECTED_FILES = {
-    'solid:0/material:0': 'roadtech.png', 'solid:1/material:0': 'roadtech.png',
+    'solid:0/material:0': 'roadtech_d.png', 'solid:1/material:0': 'roadtech_d.png',
     'solid:2/material:0': 'signage_d.dds', 'solid:3/material:0': 'weird.webp',
     'solid:4/material:0': 'sub/folder/casemixed.png', 'solid:5/material:0': 'multi_d.png',
     'solid:6/material:0': null, 'solid:7/material:0': null, 'solid:8/material:0': null,
@@ -103,10 +103,10 @@ const EXPECTED_MAPS = { // applied texture image dimensions, per material slot
     'solid:6/material:0': null, 'solid:7/material:0': null, 'solid:8/material:0': null,
     'solid:9/material:0': null, 'solid:10/material:0': [2, 2], 'solid:11/material:0': [4, 4]
 };
-const MUST_READ = ['roadtech.png', 'signage_d.dds', 'weird.webp', 'Sub/Folder/CaSeMiXeD.PNG',
+const MUST_READ = ['roadtech_d.png', 'roadtech_n.png', 'roadtech_r.png', 'signage_d.dds', 'weird.webp', 'Sub/Folder/CaSeMiXeD.PNG',
     'multi_d.png', 'dup.png', 'corrupt.dds', 'slowload.png', 'fastswap.png'];
-const NEVER_READ = ['multi.png', 'sub/dup.png', 'clash_a.png', 'readme.txt'];
-const FILE_COUNT = 13; // 12 images + readme.txt (indexed but never matched)
+const NEVER_READ = ['multi.png', 'sub/dup.png', 'clash_a.png', 'clash_d.png', 'readme.txt'];
+const FILE_COUNT = 16; // 15 images + readme.txt (indexed but never matched)
 
 function scenePayload(swapLink) {
     const materials = MATERIALS.map(([slot, link, name]) => ({ path: slot, index: 0, sourceId: 1,
@@ -180,12 +180,15 @@ function scenePayload(swapLink) {
             wire(root);
             window.showDirectoryPicker = async (...args) => { state.picks++; state.pickArgs = args; return root; };
         }, {
-            'roadtech.png': { type: 'image/png', bytes: [...syntheticPng(3, [200, 40, 40])] },
+            'roadtech_d.png': { type: 'image/png', bytes: [...syntheticPng(3, [200, 40, 40])] },
+            'roadtech_n.png': { type: 'image/png', bytes: [...syntheticPng(3, [128, 128, 255])] },
+            'roadtech_r.png': { type: 'image/png', bytes: [...syntheticPng(3, [100, 180, 0])] },
             'signage_d.dds': { type: 'image/vnd.ms-dds', bytes: [...syntheticDds(4, [40, 80, 220])] },
             'weird.webp': { type: 'image/webp', bytes: webp },
             'Sub/Folder/CaSeMiXeD.PNG': { type: 'image/png', bytes: [...syntheticPng(6, [20, 160, 170])] },
             'multi.png': { type: 'image/png', bytes: [...syntheticPng(9, [120, 120, 120])] },
             'multi_d.png': { type: 'image/png', bytes: [...syntheticPng(7, [130, 130, 130])] },
+            'clash_d.png': { type: 'image/png', bytes: [...syntheticPng(5, [230, 140, 30])] },
             'clash_a.png': { type: 'image/png', bytes: [...syntheticPng(5, [230, 140, 30])] },
             'corrupt.dds': { type: 'image/vnd.ms-dds', bytes: [...syntheticDds(4, [90, 30, 160]).subarray(0, 136)] }, // truncated mid-block
             'dup.png': { type: 'image/png', bytes: [...syntheticPng(2, [40, 190, 60])] },
@@ -229,6 +232,26 @@ function scenePayload(swapLink) {
             return Object.entries(expected).every(([key, value]) => JSON.stringify(seen[key] ?? null) === JSON.stringify(value));
         }, EXPECTED_MAPS);
         console.log('PASS: matched textures applied to the right meshes; neutral fallback for absent/ambiguous/unreadable.');
+
+        assert.deepEqual(await page.evaluate(() => {
+            let material;
+            staticGroup.traverse(mesh => {
+                if (mesh.isMesh && mesh.userData.mappings?.some(mapping => mapping.materialPath === 'solid:0/material:0'))
+                    material ??= mesh.material;
+            });
+            return {
+                map: [material.map.image.width, material.map.image.height],
+                normal: [material.normalMap.image.width, material.normalMap.image.height],
+                roughness: [material.roughnessMap.image.width, material.roughnessMap.image.height],
+                metalness: [material.metalnessMap.image.width, material.metalnessMap.image.height],
+                baseEncoding: material.map.encoding,
+                normalEncoding: material.normalMap.encoding
+            };
+        }), {
+            map: [3, 3], normal: [3, 3], roughness: [3, 3], metalness: [3, 3],
+            baseEncoding: 3001, normalEncoding: 3000
+        }, 'Trackmania _D/_N/_R maps were not assigned with the expected color spaces');
+        console.log('PASS: Trackmania _D/_N/_R maps bind to the PBR material with sRGB base color.');
 
         const info = await page.evaluate(() => getStudioTexturePreviewInfo());
         assert.equal(info.directory, 'SyntheticTextures');

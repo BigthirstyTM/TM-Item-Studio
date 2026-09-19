@@ -18,6 +18,8 @@ All notable changes to TM Item Studio are documented in this file.
   prove serialization and preview invariants only, not in-game chained motion.
 - Deterministic local texture matching with safe DDS loading and neutral
   fallbacks for ambiguous or unreadable textures.
+- Trackmania PBR local-preview support for `_D`, `_N`, `_R`, and `_I` texture
+  sets, including sRGB base color and native roughness/metallic channels.
 
 ### Changed
 
