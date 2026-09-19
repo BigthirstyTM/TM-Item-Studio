@@ -12,11 +12,22 @@ All notable changes to TM Item Studio are documented in this file.
   the Materials & LOD inspector.
 - Read-only capability-fixture scene inspection for material, collision,
   light, and mapping discovery.
+- Typed light ownership/value-persistence diagnostics and collision/trigger
+  source classification.
+- Kinematic-reference and synthetic multi-constraint regression suites. These
+  prove serialization and preview invariants only, not in-game chained motion.
+- Deterministic local texture matching with safe DDS loading and neutral
+  fallbacks for ambiguous or unreadable textures.
 
 ### Changed
 
 - Removed the Native Trackmania pivot export section from the product UI. The
   Openplanet bridge remains an internal regression utility under `Tests`.
+- Marked unproven controls as read-only or unsupported: light position and
+  light/socket authoring, collision toggling, and static/kinematic conversion.
+  Existing light color, intensity, and radius edits remain supported.
+- Corrected browser contracts for shared geometry, typed variants, and
+  asynchronous variant selection.
 
 ## [0.3.0] - 2026-09-15
 
