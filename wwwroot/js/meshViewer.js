@@ -44,19 +44,31 @@ function materialToken(material) {
     const last = source.replaceAll('\\', '/').split('/').pop() || '';
     return last.replace(/_asset(?:\.\d+)?$/i, '').toLowerCase();
 }
+const pbrTextureRoles = {
+    base: ['d', 'diffuse', 'albedo', 'color', ''],
+    normal: ['n', 'normal'],
+    surface: ['r', 'roughness', 'metallic'],
+    emissive: ['i', 'illum', 'emissive']
+};
 function comparePaths(first, second) {
     // Codepoint ordering (not localeCompare) keeps matching identical across
     // browsers, locales and reloads.
     return first < second ? -1 : first > second ? 1 : 0;
 }
-function textureCandidates(token) {
+function textureCandidates(token, suffixes) {
     if (!token) return [];
     const candidates = [...textureFiles.entries()].filter(([path]) => {
-        const filename = path.split('/').pop();
-        return isPreviewTexture(filename) && (filename === `${token}.dds` || filename.startsWith(`${token}_`) || filename.startsWith(`${token}.`));
+        const filename = path.split('/').pop(), extension = filename.lastIndexOf('.');
+        if (!isPreviewTexture(filename) || extension < 1) return false;
+        const stem = filename.slice(0, extension);
+        return suffixes.some(suffix => stem === (suffix ? `${token}_${suffix}` : token));
     });
     candidates.sort(([first], [second]) => {
-        const rank = path => /(?:_d|_diffuse|_albedo|_color)\.(?:dds|png|jpe?g|webp)$/i.test(path) ? 0 : 1;
+        const rank = path => {
+            const filename = path.split('/').pop(), stem = filename.slice(0, filename.lastIndexOf('.'));
+            const suffix = stem === token ? '' : stem.slice(token.length + 1);
+            return suffixes.indexOf(suffix);
+        };
         return rank(first) - rank(second) || comparePaths(first, second);
     });
     return candidates;
@@ -76,19 +88,24 @@ function matchTextureFiles(materials) {
     }
     const shared = new Map();
     for (const [identity, match] of identities) {
-        const candidates = textureCandidates(match.token);
-        if (!candidates.length) continue;
-        match.key = candidates.map(([path]) => path).join('\n');
-        match.file = candidates[0][0]; match.handle = candidates[0][1]; match.status = 'matched';
+        const textures = Object.fromEntries(Object.entries(pbrTextureRoles).map(([role, suffixes]) => {
+            const [file, handle] = textureCandidates(match.token, suffixes)[0] ?? [];
+            return [role, file ? { file, handle } : null];
+        }));
+        if (!textures.base) continue;
+        match.key = Object.values(textures).flatMap(texture => texture?.file ?? []).join('\n');
+        match.file = textures.base.file; match.handle = textures.base.handle; match.textures = textures; match.status = 'matched';
         shared.set(match.key, (shared.get(match.key) ?? new Set()).add(identity));
     }
     for (const match of identities.values())
-        if (match.key != null && shared.get(match.key).size > 1) { match.status = 'ambiguous'; match.file = match.handle = null; }
+        if (match.key != null && shared.get(match.key).size > 1) {
+            match.status = 'ambiguous'; match.file = match.handle = null; match.textures = null;
+        }
     const matches = new Map();
     for (const material of materials) {
         if (!material?.path) continue;
         const match = identities.get(material.gameMaterialLink || material.gameMaterialName || '');
-        matches.set(material.path, { token: match.token, status: match.status, file: match.file, handle: match.handle });
+        matches.set(material.path, { token: match.token, status: match.status, file: match.file, handle: match.handle, textures: match.textures ?? null });
     }
     return matches;
 }
@@ -133,11 +150,33 @@ function loadImageTexture(file) {
 function loadTexture(handle, path) {
     return handle.getFile().then(file => /\.dds$/i.test(path) ? loadDdsTexture(file, path) : loadImageTexture(file));
 }
+function configureTexture(texture, color) {
+    if (color) texture.encoding = THREE.sRGBEncoding;
+    texture.needsUpdate = true;
+    return texture;
+}
+function applyTrackmaniaPbr(material, textures) {
+    material.map = textures.base ? configureTexture(textures.base, true) : null;
+    material.normalMap = textures.normal ? configureTexture(textures.normal, false) : null;
+    material.roughnessMap = textures.surface ? configureTexture(textures.surface, false) : null;
+    material.metalnessMap = textures.surface ? configureTexture(textures.surface, false) : null;
+    material.emissiveMap = textures.emissive ? configureTexture(textures.emissive, true) : null;
+    material.emissive.setHex(textures.emissive ? 0xffffff : 0x000000);
+    // Trackmania's _R map uses red for roughness and green for metallic,
+    // whereas Three.js MeshStandardMaterial normally reads green and blue.
+    material.onBeforeCompile = shader => {
+        shader.fragmentShader = shader.fragmentShader
+            .replace('roughnessFactor *= texelRoughness.g;', 'roughnessFactor *= texelRoughness.r;')
+            .replace('metalnessFactor *= texelMetalness.b;', 'metalnessFactor *= texelMetalness.g;');
+    };
+    material.needsUpdate = true;
+}
 async function applyLocalTextures(data, renderVersion) {
     if (!textureDirectory || !Array.isArray(data.materials)) return;
     const matches = matchTextureFiles(data.materials);
     lastTextureMatches = [...matches.entries()]
-        .map(([materialPath, match]) => ({ materialPath, token: match.token, status: match.status, file: match.file }))
+        .map(([materialPath, match]) => ({ materialPath, token: match.token, status: match.status, file: match.file,
+            textures: Object.fromEntries(Object.entries(match.textures ?? {}).map(([role, texture]) => [role, texture?.file ?? null])) }))
         .sort((first, second) => comparePaths(first.materialPath, second.materialPath));
     const requested = new Map();
     for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
@@ -145,15 +184,17 @@ async function applyLocalTextures(data, renderVersion) {
         const mapping = mesh.userData.mappings.find(candidate => matches.has(candidate.materialPath));
         if (!mapping || requested.has(mapping.materialPath)) return;
         const match = matches.get(mapping.materialPath);
-        if (match.status === 'matched') requested.set(mapping.materialPath, loadTexture(match.handle, match.file));
+        if (match.status !== 'matched') return;
+        requested.set(mapping.materialPath, Promise.all(Object.entries(match.textures).filter(([, texture]) => texture).map(async ([role, texture]) =>
+            [role, await loadTexture(texture.handle, texture.file)])));
     });
     for (const [materialPath, texturePromise] of requested) {
         try {
-            const texture = await texturePromise;
-            if (renderVersion !== textureRenderVersion) { texture.dispose(); continue; }
+            const textures = Object.fromEntries(await texturePromise);
+            if (renderVersion !== textureRenderVersion) { Object.values(textures).forEach(texture => texture.dispose()); continue; }
             for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
                 if (!mesh.isMesh || !mesh.userData.mappings?.some(mapping => mapping.materialPath === materialPath)) return;
-                mesh.material.map = texture; mesh.material.needsUpdate = true;
+                applyTrackmaniaPbr(mesh.material, textures);
             });
         } catch (error) {
             console.warn(`Could not load local texture for ${materialPath}.`, error);
@@ -336,7 +377,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
     const width = container.clientWidth || 800, height = container.clientHeight || 550;
     scene = new THREE.Scene(); scene.background = new THREE.Color(0x131316);
     camera = new THREE.PerspectiveCamera(45, width / height, .1, 2000); camera.position.set(12, 10, 12);
-    renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(width, height); renderer.shadowMap.enabled = true;
+    renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(width, height); renderer.outputEncoding = THREE.sRGBEncoding; renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
     controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = .05;
     transformControls = new THREE.TransformControls(camera, renderer.domElement); transformControls.size = .75; scene.add(transformControls);
@@ -390,7 +431,13 @@ function disposeObjectResources(root) {
         if (child.geometry && !pooledGeometry.has(child.geometry)) geometries.add(child.geometry);
         if (child.material) (Array.isArray(child.material) ? child.material : [child.material]).forEach(m => materials.add(m));
     });
-    geometries.forEach(g => g.dispose()); materials.forEach(m => { if (m.map) textures.add(m.map); m.dispose(); }); textures.forEach(texture => texture.dispose());
+    geometries.forEach(g => g.dispose());
+    materials.forEach(material => {
+        for (const property of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap', 'alphaMap'])
+            if (material[property]) textures.add(material[property]);
+        material.dispose();
+    });
+    textures.forEach(texture => texture.dispose());
 }
 window.dispose3DViewer = function () {
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
