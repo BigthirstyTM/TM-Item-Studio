@@ -66,6 +66,7 @@ const path = require('node:path');
             name: `File${i}-${'long-name-'.repeat(20)}.Item.Gbx`, mimeType: 'application/octet-stream', buffer: cube
         })));
         await page.getByRole('button', { name: /^16\. File15/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
         const multiple = await measure();
         assert.equal(multiple.overflow, false, 'Long filenames must not overflow the page');
         assert.ok(multiple.canvas.height >= 400 && multiple.inspector.bottom <= 720, JSON.stringify(multiple));

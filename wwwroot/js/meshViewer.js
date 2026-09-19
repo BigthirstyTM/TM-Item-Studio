@@ -413,6 +413,11 @@ function selectGizmo(obj) {
     if (obj.userData.editable) transformControls.attach(obj);
     if (dotNetHelper) dotNetHelper.invokeMethodAsync('OnGizmoSelected', obj.userData.type, obj.userData.index);
 }
+window.scrollSelectedVariantIntoView = function () {
+    document.querySelector('.studio-variant-buttons button[aria-pressed="true"]')
+        ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+};
+
 window.selectGizmoFromUI = function (type, index) {
     const group = { pivot: pivotsGroup, light: lightsGroup }[type];
     const obj = group?.children.find(child => child.userData.index === index); if (obj) selectGizmo(obj);

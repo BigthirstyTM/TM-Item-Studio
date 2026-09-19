@@ -638,15 +638,15 @@
                                 <div class="row g-1 mb-1">
                                     <div class="col-4">
                                         <label class="form-label mb-0" style="font-size: 0.75em;">X (read-only)</label>
-                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.X" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} X (read-only)")" title="Light position is not serialized by this editor." />
+                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.X.ToString(CultureInfo.InvariantCulture)" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} X (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label mb-0" style="font-size: 0.75em;">Y (read-only)</label>
-                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Y" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Y (read-only)")" title="Light position is not serialized by this editor." />
+                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Y.ToString(CultureInfo.InvariantCulture)" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Y (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label mb-0" style="font-size: 0.75em;">Z (read-only)</label>
-                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Z" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Z (read-only)")" title="Light position is not serialized by this editor." />
+                                        <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Z.ToString(CultureInfo.InvariantCulture)" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Z (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                 </div>
 
@@ -1052,6 +1052,9 @@
             StateHasChanged();
             await Task.Yield();
             await LoadVariant(index);
+            StateHasChanged();
+            await Task.Yield();
+            await JS.InvokeVoidAsync("scrollSelectedVariantIntoView");
         }
         catch (Exception ex) { errorMessage = "Error while loading variant: " + ex.Message; }
         finally { isSelectingVariant = false; }
