@@ -24,9 +24,15 @@ needed for the currently loaded item.
 
 The current package is about 918 MB, so Studio intentionally does not import
 the zip into browser memory. A Chromium-based browser is required for the
-local folder picker. Texture matching is best-effort and based on the native
-material link (for example `Stadium\Media\Material\RoadTech`); a missing or
-ambiguous filename leaves the neutral preview in place. This preview never
+local folder picker. Texture matching is deterministic and based on the
+native material link (for example `Stadium\Media\Material\RoadTech`), or on
+the material name when a slot has no link: Studio lower-cases the final path
+segment, strips a trailing `_asset`/`_asset.N` suffix, and prefers a
+diffuse-suffixed file (`_d`, `_diffuse`, `_albedo`, `_color`) before falling
+back to plain filename order. A missing token, a filename set that several
+distinct materials share, or an unreadable file (including malformed DDS)
+leaves the neutral preview in place. DDS textures are decoded through an
+on-demand loader pinned to the bundled three.js revision. This preview never
 changes GBX material data, UVs, collision, or the exported item.
 
 ## Exporting files and variants
