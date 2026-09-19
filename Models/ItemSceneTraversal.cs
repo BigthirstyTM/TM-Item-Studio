@@ -316,7 +316,7 @@ public static partial class ItemScene
                     var modelPath = path + $"/lightModel:{i}";
                     handles.Lights.Add(new(modelPath, models[i], solid, null, null));
                     Node(modelPath, path, models[i], ItemSceneKind.Light, ItemSceneState.Present, null, null);
-                    Issue(modelPath, "uninstanced-light", ItemSceneState.Unsupported, "Authored light model has no instance; no position is inferred.");
+                    Issue(modelPath, "uninstanced-light", ItemSceneState.Unsupported, "Authored light model has no instance; no position is inferred and the model stays diagnostic-only.");
                 }
             if (solid.Lights is not null)
                 for (var i = 0; i < solid.Lights.Length; i++)
@@ -324,7 +324,7 @@ public static partial class ItemScene
                     var light = solid.Lights[i];
                     var lightPath = path + $"/light:{i}";
                     Node(lightPath, path, light, ItemSceneKind.Light, ItemSceneState.Unsupported, null, world);
-                    Issue(lightPath, "legacy-light", ItemSceneState.Unsupported, "Legacy Solid2 light representation retained without interpreting unknown fields.");
+                    Issue(lightPath, "legacy-light", ItemSceneState.Unsupported, "Legacy Solid2 light representation retained; it is legacy/diagnostic-only and its unknown fields are not interpreted.");
                     if (light?.U03File is not null)
                         Issue(lightPath + "/model", "external-reference", ItemSceneState.Unresolved, $"External light reference: {light.U03File.FilePath}");
                 }
@@ -336,13 +336,24 @@ public static partial class ItemScene
             handles.Lights.Add(new(path, light, solid, instance, entry));
             var valid = Finite(V(light.Color)) && float.IsFinite(light.Intensity) && float.IsFinite(light.Distance)
                 && light.Intensity >= 0 && light.Distance >= 0;
+            // Chunk 090F9000 is the only serializer of Color/Intensity/Distance; without it the values exist in memory only.
+            var persists = light.GetChunk<CPlugLightUserModel.Chunk090F9000>() is not null;
+            var ownership = instance is not null ? ItemSceneLightOwnership.SolidInstance
+                : entry is not null ? ItemSceneLightOwnership.PrefabEntry : ItemSceneLightOwnership.SceneTransform;
             var state = !valid ? ItemSceneState.Invalid : instance is not null ? ItemSceneState.Unsupported
                 : world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid;
             lights.Add(new(path, entry?.Path, Id(light), instance?.ModelIndex, instance?.SocketIndex,
                 instance is null && world.HasValue ? Pack(world.Value.Translation) : null,
-                valid ? Pack(V(light.Color)) : Array.Empty<float>(), valid ? light.Intensity : 0, valid ? light.Distance : 0, state));
+                valid ? Pack(V(light.Color)) : Array.Empty<float>(), valid ? light.Intensity : 0, valid ? light.Distance : 0, state,
+                ownership, persists));
             if (instance is not null)
-                Issue(path, "light-socket-transform", ItemSceneState.Unsupported, "LightInst.ModelIndex selects LightUserModels; SocketIndex requires skeleton socket data not exposed by the bundled public API. No position inferred.");
+                Issue(path, "light-socket-transform", ItemSceneState.Unsupported, "LightInst.ModelIndex selects LightUserModels; the position needs the skeleton socket transform, and CPlugSkel socket records are serialized by chunk 090BA000 but not exposed by the bundled GBX.NET 2.4.4 public API. SocketIndex is retained as typed data and is not an array index into positions; no position inferred.");
+            else if (entry is not null && world.HasValue)
+                Issue(path, "light-owner-entry", ItemSceneState.Present, $"Position is owned by the prefab entry transform at {entry.Path}; the light model itself carries no placement.");
+            else if (world.HasValue)
+                Issue(path, "light-owner-scene", ItemSceneState.Present, "No prefab entry owns this light; its position is the composed scene transform chain applied to the model.");
+            if (!persists)
+                Issue(path, "light-values-not-persisted", ItemSceneState.Unsupported, "Color, intensity and distance are serialized by CPlugLightUserModel chunk 090F9000, which this node does not carry; value edits would not persist.");
             if (!valid) Issue(path, "light-values", ItemSceneState.Invalid, "Invalid light color, intensity or distance; preview omitted.");
         }
     }

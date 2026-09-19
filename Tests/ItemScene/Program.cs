@@ -272,6 +272,94 @@ Check("light zero values and explicit socket ownership", () =>
     Require(Has(ItemScene.Build(solid, 0).Preview, "light-model-index"), "Invalid model index accepted.");
 });
 
+Check("light ownership classes and value persistence capability", () =>
+{
+    var light = new CPlugLightUserModel { Color = new Vec3(0, .5f, 0), Intensity = 2, Distance = 5 };
+    light.CreateChunk<CPlugLightUserModel.Chunk090F9000>();
+    var direct = ItemScene.Build(new CPlugPrefab { Ents = new[] { Ent(light, new Vec3(1, 2, 3)) } }, 0).Preview;
+    var dto = direct.Lights.Single();
+    Require(dto.Ownership == ItemSceneLightOwnership.PrefabEntry && dto.ValuesPersist, "Entry ownership or persistence misclassified.");
+    Require(dto.EntityPath!.EndsWith("/ent:0"), "Entry owner path missing.");
+    Near(dto.Position!, 1, 2, 3);
+    var owner = direct.Diagnostics.Single(x => x.Code == "light-owner-entry");
+    Require(owner.State == ItemSceneState.Present && owner.Message.Contains("/ent:0"), "Entry ownership diagnostic missing the entry path.");
+    Require(!Has(direct, "light-socket-transform") && !Has(direct, "light-values-not-persisted"), "Entry light misreported as blocked.");
+
+    var bare = ItemScene.Build(light, 0).Preview;
+    Require(bare.Lights.Single().Ownership == ItemSceneLightOwnership.SceneTransform && Has(bare, "light-owner-scene")
+        && !Has(bare, "light-owner-entry"), "Scene-transform ownership misclassified.");
+    var invalidOwner = ItemScene.Build(new CPlugPrefab { Ents = new[] { Ent(light, default, new Quat(0, 0, 0, 2)) } }, 0).Preview;
+    Require(invalidOwner.Lights.Single().Ownership == ItemSceneLightOwnership.PrefabEntry
+        && invalidOwner.Lights.Single().State == ItemSceneState.Invalid && !Has(invalidOwner, "light-owner-entry"),
+        "Invalid entry transform reported as an owned position.");
+
+    var socketLight = new CPlugLightUserModel { Color = new Vec3(.2f, .4f, .6f), Intensity = 3, Distance = 8 };
+    socketLight.CreateChunk<CPlugLightUserModel.Chunk090F9000>();
+    var solid = Solid();
+    solid.LightUserModels = new[] { socketLight, new CPlugLightUserModel { Color = new Vec3(1, 0, 0), Intensity = 5, Distance = 9 },
+        new CPlugLightUserModel { Color = new Vec3(0, 0, 1), Intensity = 1, Distance = 2 } };
+    solid.LightInsts = new[] { new CPlugSolid2Model.LightInst { ModelIndex = 0, SocketIndex = 7 },
+        new CPlugSolid2Model.LightInst { ModelIndex = 1, SocketIndex = 3 } };
+    var owned = ItemScene.Build(solid, 0).Preview;
+    var instanced = owned.Lights.Single(x => x.SocketIndex == 7);
+    Require(instanced.Ownership == ItemSceneLightOwnership.SolidInstance, "Instance ownership misclassified.");
+    Require(instanced.Position is null && instanced.ModelIndex == 0, "Socket data not retained as typed ownership.");
+    var blocked = owned.Diagnostics.Single(x => x.Code == "light-socket-transform" && x.Path.EndsWith("lightInst:0"));
+    Require(blocked.Message.Contains("090BA000") && blocked.Message.Contains("not an array index into positions"), "Socket diagnostic does not state the exact blocker.");
+    Require(owned.Lights.Count(x => x.Ownership == ItemSceneLightOwnership.SolidInstance) == 2
+        && Has(owned, "uninstanced-light"), "Uninstanced model leaked into the editable inventory.");
+    Require(owned.Diagnostics.Any(x => x.Code == "uninstanced-light" && x.Path.EndsWith("lightModel:2")), "Uninstanced light not reported at its slot.");
+
+    var unpersisted = owned.Lights.Single(x => !x.ValuesPersist);
+    Require(unpersisted.Path.EndsWith("lightInst:1") && unpersisted.SocketIndex == 3 && Has(owned, "light-values-not-persisted"), "Missing chunk not surfaced as capability info.");
+    var legacy = Solid();
+    legacy.Lights = new[] { new CPlugSolid2Model.Light() };
+    var legacyScene = ItemScene.Build(legacy, 0).Preview;
+    Require(legacyScene.Lights.Count == 0 && Has(legacyScene, "legacy-light"), "Legacy array must stay diagnostic-only.");
+    Require(legacyScene.Nodes.Any(x => x.Kind == ItemSceneKind.Light && x.State == ItemSceneState.Unsupported), "Legacy light node missing.");
+});
+
+Check("light save/reparse keeps ownership, sockets and persisted values", () =>
+{
+    var persisted = new CPlugLightUserModel { Color = new Vec3(.2f, .4f, .6f), Intensity = 3, Distance = 8 };
+    persisted.CreateChunk<CPlugLightUserModel.Chunk090F9000>().Version = 1;
+    var volatileLight = new CPlugLightUserModel { Color = new Vec3(1, 0, 0), Intensity = 5, Distance = 9 };
+    var solid = new CPlugSolid2Model { Visuals = Array.Empty<CPlugVisual>(), CustomMaterials = Array.Empty<CPlugSolid2Model.Material>(), ShadedGeoms = Array.Empty<CPlugSolid2Model.ShadedGeom>() };
+    solid.CreateChunk<CPlugSolid2Model.Chunk090BB000>().Version = 34;
+    solid.LightUserModels = new[] { persisted, volatileLight };
+    solid.LightInsts = new[] { new CPlugSolid2Model.LightInst { ModelIndex = 0, SocketIndex = 7 },
+        new CPlugSolid2Model.LightInst { ModelIndex = 1, SocketIndex = 3 } };
+    var file = new Gbx<CPlugSolid2Model>(solid) { BodyCompression = GbxCompression.Uncompressed };
+    using var before = new MemoryStream(); file.Save(before);
+    ItemScene.Build(solid, 0);
+    using var after = new MemoryStream(); file.Save(after);
+    Require(before.ToArray().SequenceEqual(after.ToArray()), "Traversal changed serialized source bytes.");
+    after.Position = 0;
+    var reopened = Gbx.Parse<CPlugSolid2Model>(after).Node;
+    var result = ItemScene.Build(reopened, 0).Preview;
+    var instanced = result.Lights.Single(x => x.SocketIndex == 7);
+    Require(instanced.Ownership == ItemSceneLightOwnership.SolidInstance, "Instance ownership lost on reparse.");
+    Require(instanced.SocketIndex == 7 && instanced.ModelIndex == 0, "Socket/model indices did not round-trip.");
+    Require(instanced.ValuesPersist && instanced.Intensity == 3 && instanced.Distance == 8, "Persisted light levels lost.");
+    Near(instanced.Color, .2f, .4f, .6f);
+    var lost = result.Lights.Single(x => !x.ValuesPersist);
+    Require(Has(result, "light-values-not-persisted") && !(lost.Color[0] == 1 && lost.Intensity == 5), "Values without chunk 090F9000 falsely persisted.");
+    Require(!Has(result, "light-model-index"), "Valid instance rejected after reparse.");
+
+    var item = new CGameItemModel { EntityModel = new CPlugPrefab { Ents = new[] { Ent(persisted, new Vec3(10, 0, 0)) } },
+        ItemType = CGameItemModel.EItemType.Ornament };
+    item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+    item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
+    var itemFile = new Gbx<CGameItemModel>(item) { BodyCompression = GbxCompression.Uncompressed };
+    using var itemStream = new MemoryStream(); itemFile.Save(itemStream);
+    itemStream.Position = 0;
+    var reparsed = ItemScene.Build(Gbx.Parse<CGameItemModel>(itemStream).Node, 0).Preview;
+    var entryLight = reparsed.Lights.Single();
+    Require(entryLight.Ownership == ItemSceneLightOwnership.PrefabEntry, "Entry ownership lost on reparse.");
+    Near(entryLight.Position!, 10, 0, 0);
+    Require(Has(reparsed, "light-owner-entry") && entryLight.ValuesPersist, "Entry capability lost on reparse.");
+});
+
 Check("collision mesh, compound transform, cycle and generated status", () =>
 {
     var mesh = new CPlugSurface.Mesh { Version = 6, Vertices = new[] { new Vec3(1, 0, 0), new Vec3(0, 1, 0), new Vec3(0, 0, 0) },
