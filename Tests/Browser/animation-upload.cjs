@@ -35,12 +35,16 @@ const buffer = fs.readFileSync(fixture);
         await page.getByLabel('Open item files').setInputFiles({
             name: 'bespoke-animation.Item.Gbx', mimeType: 'application/octet-stream', buffer
         });
+        // Interval polling: requestAnimationFrame is replaced above so playback
+        // advances only via advanceUploadTest, but waitForFunction's default
+        // 'raf' polling would then never re-fire — an upload that outlasts the
+        // first evaluation would hang for the full timeout.
         await page.waitForFunction(() => {
             if (typeof scene === 'undefined' || !scene) return false;
             let triangles = 0;
             scene.traverse(object => { if (object.isMesh && object.geometry.attributes.position?.count === 3) triangles++; });
             return triangles === 2;
-        });
+        }, null, { polling: 50 });
         const observed = await page.evaluate(() => {
             const meshes = [];
             scene.traverse(object => { if (object.isMesh && object.geometry.attributes.position?.count === 3) meshes.push(object); });
