@@ -6,6 +6,7 @@
     "test:animation-upload": "node run-animation-upload.cjs",
     "test:collection-export": "node run-collection-export.cjs",
     "test:debug-export": "node run-debug-export.cjs",
+    "test:capability-gating": "node run-capability-gating.cjs",
     "test:kinematic-preservation": "node run-kinematic-preservation.cjs",
     "test:variant-navigation": "node run-kinematic-preservation.cjs --variants"
   },

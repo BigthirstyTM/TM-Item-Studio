@@ -57,6 +57,10 @@ module.exports = async function checkCollection(baseUrl, work) {
                     throw new Error(`${test.name}: ${await page.locator('.alert-danger').innerText()}`);
                 }),
             ]);
+            // Game-derived fixtures re-encode on save in this WASM writer; the export
+            // gate added with standalone exports requires the acknowledgement checkbox.
+            const gate = page.locator('#acknowledge-reencoded-export');
+            if (await gate.count()) await gate.check();
             await exportButton.click();
             const download = await downloadPromise;
             const exported = path.join(work, 'exported.Item.Gbx');

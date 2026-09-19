@@ -101,7 +101,7 @@ public partial class Home
                 vertices = modelParts.Sum(p => p.Positions.Length / 3),
                 triangles = modelParts.Sum(p => p.Indices.Length / 3),
                 movingParts = modelParts.Count(p => p.IsMoving),
-                pivots = detectedPivots.Count, lights = detectedLights.Count, sockets = detectedSockets.Count,
+                pivots = detectedPivots.Count, lights = detectedLights.Count,
                 playing = isPlaying, materialMode = "neutral-untextured",
                 note = "Viewer counts describe the displayed payload; typed scene inventory below may have different coverage."
             },

@@ -68,6 +68,43 @@ foreach (var staticFirst in new[] { true, false })
     Console.WriteLine($"PASS: generated and reparsed {name}, {bytes.Length} bytes, two triangles.");
 }
 
+// Static ornament carrying one serialized CPlugLightUserModel for the
+// capability-gating browser check: light color/intensity/radius edits must
+// round-trip while position/add/remove stay read-only.
+{
+    var light = new CPlugLightUserModel { Color = new Vec3(0.25f, 0.5f, 0.75f), Intensity = 4, Distance = 12 };
+    light.CreateChunk<CPlugLightUserModel.Chunk090F9000>().Version = 1;
+    var lightItem = new CGameItemModel
+    {
+        Ident = new Ident("BespokeLight", 26, "FixtureGenerator"),
+        ItemType = CGameItemModel.EItemType.Ornament,
+        EntityModel = new CPlugPrefab
+        {
+            Version = 11,
+            Ents =
+            [
+                new CPlugPrefab.EntRef { Model = new CPlugStaticObjectModel { Mesh = Solid() }, Rotation = Quat.Identity },
+                new CPlugPrefab.EntRef { Model = light, Position = new Vec3(1, 2, 3), Rotation = Quat.Identity }
+            ]
+        }
+    };
+    lightItem.CreateChunk<CGameCtnCollector.HeaderChunk2E001003>().Version = 8;
+    lightItem.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+    lightItem.CreateChunk<CGameItemModel.Chunk2E002015>();
+    lightItem.ItemTypeE = CGameItemModel.EItemType.Ornament;
+    lightItem.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
+    using var bytes = new MemoryStream();
+    new Gbx<CGameItemModel>(lightItem) { BodyCompression = GbxCompression.Uncompressed }.Save(bytes);
+    bytes.Position = 0;
+    var reopened = Gbx.Parse<CGameItemModel>(bytes);
+    var reopenedLight = ((CPlugPrefab)reopened.Node.EntityModel!).Ents![1].Model as CPlugLightUserModel;
+    if (reopenedLight is null || reopenedLight.Color != new Vec3(0.25f, 0.5f, 0.75f)
+        || reopenedLight.Intensity != 4 || reopenedLight.Distance != 12)
+        throw new InvalidOperationException("Generated light fixture lost its serialized light.");
+    File.WriteAllBytes(Path.Combine(args[0], "light-capability.Item.Gbx"), bytes.ToArray());
+    Console.WriteLine($"PASS: generated and reparsed light-capability.Item.Gbx, {bytes.Length} bytes.");
+}
+
 static CPlugPrefab.EntRef Entry(bool isStatic) => new()
 {
     Position = new Vec3(isStatic ? 0 : 2, 0, 0),

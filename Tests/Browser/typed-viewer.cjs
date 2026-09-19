@@ -252,12 +252,15 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                     lights: [{ index: 4, x: 12, y: 3, z: 4, colorHex: 0, intensity: 0, radius: 0, editable: false }] });
                 const container = lightsGroup.children[0], light = container.getObjectByName('realLight'), wire = container.getObjectByName('radiusWire');
                 require(light.color.getHex() === 0 && light.intensity === 0 && light.distance === 0 && wire.scale.x === 0, 'Zero light values defaulted');
-                for (const radius of [2, 12, 0, 12]) { updateLightRealtime(4, 0, 0, radius, 12, 3, 4); require(wire.geometry.parameters.radius * wire.scale.x === radius && light.distance === radius, 'Radius drift'); }
+                // Positional args are gone from the realtime contract: color/intensity/radius only.
+                for (const radius of [2, 12, 0, 12]) { updateLightRealtime(4, 0, 0, radius); require(wire.geometry.parameters.radius * wire.scale.x === radius && light.distance === radius, 'Radius drift'); }
+                updateLightRealtime(4, 0x123456, 5, 9); require(light.color.getHex() === 0x123456 && light.intensity === 5, 'Color/intensity realtime update lost');
+                near(container.position.toArray(), [12, 3, 4]);
                 selectGizmoFromUI('light', 4); require(transformControls.object === undefined && selectedGizmo === container, 'Uneditable light attached for dragging');
                 require(messages.some(m => m[0] === 'OnGizmoSelected' && m[1] === 'light'), 'Readonly light cannot be selected');
                 updatePivotRealtime(7, 15, 25, 35); near(pivotsGroup.children[0].position.toArray(), [15, 25, 35]);
                 selectGizmoFromUI('pivot', 7); require(transformControls.object === pivotsGroup.children[0], 'Original pivot index lost after filtering');
-                reject(() => updateLightRealtime(4, 0xffffff, 3, -1, 9, 9, 9)); near(container.position.toArray(), [12, 3, 4]);
+                reject(() => updateLightRealtime(4, 0xffffff, 3, -1)); near(container.position.toArray(), [12, 3, 4]);
             });
             tick(0);
             return results;

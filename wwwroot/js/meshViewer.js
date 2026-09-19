@@ -1,10 +1,10 @@
 let scene, camera, renderer, controls, transformControls, gridHelper;
-let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsGroup;
+let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup;
 let dotNetHelper = null, selectedGizmo = null;
 let isWireframe = false, isPlaying = true, animSpeed = 1;
 let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler = null;
 let resizeObserver = null;
-let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showSockets = true;
+let showMeshes = true, showCollision = false, showPivots = true, showLights = true;
 let typedMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
 let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
@@ -106,7 +106,7 @@ window.getStudioViewerDebugInfo = function () {
         cameraPosition: camera?.position.toArray() ?? null,
         cameraTarget: controls?.target.toArray() ?? null,
         playing: isPlaying, wireframe: isWireframe,
-        layers: { meshes: showMeshes, collision: showCollision, pivots: showPivots, lights: showLights, sockets: showSockets }
+        layers: { meshes: showMeshes, collision: showCollision, pivots: showPivots, lights: showLights }
     };
 };
 
@@ -279,7 +279,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
         raycaster.setFromCamera(mouse, camera);
-        const groups = [pivotsGroup, lightsGroup, socketsGroup];
+        const groups = [pivotsGroup, lightsGroup];
         const hits = raycaster.intersectObjects(groups.filter(g => g.visible).flatMap(g => g.children), true);
         if (hits.length) {
             let obj = hits[0].object;
@@ -290,8 +290,8 @@ window.init3DViewer = function (containerId, dotNetRef) {
     scene.add(new THREE.AmbientLight(0xffffff, .5));
     const light = new THREE.DirectionalLight(0xffffff, .7); light.position.set(30, 50, 30); scene.add(light);
     gridHelper = new THREE.GridHelper(50, 50, 0x38bdf8, 0x27272a); scene.add(gridHelper, new THREE.AxesHelper(4));
-    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsGroup] = Array.from({ length: 6 }, () => new THREE.Group());
-    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsGroup); applyLayerVisibility();
+    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup] = Array.from({ length: 5 }, () => new THREE.Group());
+    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup); applyLayerVisibility();
     function animate(timestamp) {
         if (!renderer) return;
         animationFrameId = requestAnimationFrame(animate);
@@ -329,7 +329,7 @@ window.dispose3DViewer = function () {
     releaseGeometryPool();
     if (renderer) { renderer.dispose(); renderer.domElement.remove(); }
     renderer = scene = camera = controls = transformControls = null;
-    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = socketsGroup = gridHelper = null;
+    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = gridHelper = null;
     typedMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
 };
 function selectGizmo(obj) {
@@ -340,7 +340,7 @@ function selectGizmo(obj) {
     if (dotNetHelper) dotNetHelper.invokeMethodAsync('OnGizmoSelected', obj.userData.type, obj.userData.index);
 }
 window.selectGizmoFromUI = function (type, index) {
-    const group = { pivot: pivotsGroup, light: lightsGroup, socket: socketsGroup }[type];
+    const group = { pivot: pivotsGroup, light: lightsGroup }[type];
     const obj = group?.children.find(child => child.userData.index === index); if (obj) selectGizmo(obj);
 };
 function mapping(value) {
@@ -405,10 +405,7 @@ function makeGizmo(data, index, type) {
         const wire = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 12), new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: .15 }));
         wire.name = 'radiusWire'; wire.scale.setScalar(radius); group.add(wire);
     } else if (type === 'pivot') group.add(new THREE.Mesh(new THREE.SphereGeometry(.22, 16, 16), new THREE.MeshBasicMaterial({ color: 0xfacc15 })), new THREE.AxesHelper(.9));
-    else {
-        const ring = new THREE.Mesh(new THREE.TorusGeometry(.4, .06, 8, 24), new THREE.MeshBasicMaterial({ color: 0x06b6d4 })); ring.rotation.x = Math.PI / 2;
-        group.add(ring, new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), .7, 0x06b6d4, .2, .1));
-    }
+    else throw new Error('Unknown gizmo type.');
     return group;
 }
 function frameCamera(bounds) {
@@ -430,7 +427,7 @@ function renderPayload(input, preserveCamera) {
             translation: data.hasTranslationMotion ? data.translationAxis : null, harmonic: data.harmonicEasing }
         : null;
     const motions = compileMotions(data.motions ?? []), offset = phase(data.previewPhase01 ?? 0), owners = new Map(motions.map(m => [m.childPath, m]));
-    const staged = Array.from({ length: 6 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
+    const staged = Array.from({ length: 5 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
     const epoch = data.geometryEpoch ?? null;
     if (epoch !== null && (!Number.isSafeInteger(epoch) || epoch < 0)) throw new Error('Invalid geometry epoch.');
     const pool = epoch === geometryEpoch ? new Map(sharedGeometry) : new Map();
@@ -453,13 +450,13 @@ function renderPayload(input, preserveCamera) {
             if (owner) groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
             else staged[part.isCollision ? 2 : (part.isMoving ? 1 : 0)].add(mesh);
         }
-        for (const [property, type, target] of [['pivots', 'pivot', 3], ['lights', 'light', 4], ['sockets', 'socket', 5]])
+        for (const [property, type, target] of [['pivots', 'pivot', 3], ['lights', 'light', 4]])
             (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type); staged[target].add(group); bounds.expandByPoint(group.position); });
     } catch (error) { staged.forEach(disposeObjectResources); added.forEach(g => g.dispose()); throw error; }
     window.clearViewerScene(true);
     if (epoch !== geometryEpoch) releaseGeometryPool();
     sharedGeometry = pool; geometryEpoch = epoch;
-    const destinations = [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsGroup];
+    const destinations = [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup];
     staged.forEach((group, index) => { while (group.children.length) destinations[index].add(group.children[0]); });
     isPlaying = data.playing !== false; legacyMotion = nextLegacyMotion;
     typedMotions = motions; motionGroups = groups; previewPhase01 = offset;
@@ -480,7 +477,7 @@ function releaseGeometryPool() {
 }
 window.clearViewerScene = function (keepGeometry = false) {
     transformControls?.detach(); selectedGizmo = null;
-    for (const group of [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, socketsGroup]) {
+    for (const group of [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup]) {
         if (!group) continue;
         while (group.children.length) { const child = group.children[0]; group.remove(child); disposeObjectResources(child); }
         group.position.set(0, 0, 0); group.rotation.set(0, 0, 0); group.scale.set(1, 1, 1);
@@ -496,7 +493,7 @@ window.setAnimationSpeed = speed => { animSpeed = nonnegative(Number(speed), 'Pl
 function applyLayerVisibility() {
     if (!staticGroup) return;
     staticGroup.visible = movingGroup.visible = showMeshes; collisionGroup.visible = showCollision;
-    pivotsGroup.visible = showPivots; lightsGroup.visible = showLights; socketsGroup.visible = showSockets;
+    pivotsGroup.visible = showPivots; lightsGroup.visible = showLights;
 }
 window.toggleLayer = function (name) {
     let value;
@@ -505,7 +502,6 @@ window.toggleLayer = function (name) {
         case 'collision': value = showCollision = !showCollision; break;
         case 'pivots': value = showPivots = !showPivots; break;
         case 'lights': value = showLights = !showLights; break;
-        case 'sockets': value = showSockets = !showSockets; break;
         default: throw new Error('Unknown scene layer.');
     }
     applyLayerVisibility(); return value;
@@ -522,12 +518,12 @@ function applySceneFilter() {
 window.setSceneFilter = function (value) {
     const filter = mapping(value ?? {}); sceneFilter = filter; applySceneFilter();
 };
-window.updateLightRealtime = function (index, color, intensity, radius, x, y, z) {
+// Light realtime updates cover color/intensity/radius only: position is display-only
+// (owner transform is not serialized), so this API takes no coordinates.
+window.updateLightRealtime = function (index, color, intensity, radius) {
     const group = lightsGroup?.children.find(child => child.userData.index === index); if (!group) return;
     if (!Number.isInteger(color) || color < 0 || color > 0xffffff) throw new Error('Light color must be RGB24.');
     nonnegative(intensity, 'Light intensity'); nonnegative(radius, 'Light radius');
-    if ([x, y, z].some(v => v !== undefined)) [x, y, z].forEach(v => finite(v, 'Light position'));
-    if (x !== undefined) group.position.set(x, y, z);
     const point = group.getObjectByName('realLight'); point.color.setHex(color); point.intensity = intensity; point.distance = radius;
     group.getObjectByName('bulb').material.color.setHex(color);
     const wire = group.getObjectByName('radiusWire'); wire.material.color.setHex(color); wire.scale.setScalar(radius);
@@ -536,7 +532,6 @@ function updateGizmo(group, index, x, y, z) {
     [x, y, z].forEach(v => finite(v, 'Gizmo position')); group?.children.find(child => child.userData.index === index)?.position.set(x, y, z);
 }
 window.updatePivotRealtime = (index, x, y, z) => updateGizmo(pivotsGroup, index, x, y, z);
-window.updateSocketRealtime = (index, x, y, z) => updateGizmo(socketsGroup, index, x, y, z);
 window.toggleWireframe = function () {
     isWireframe = !isWireframe;
     for (const group of [staticGroup, movingGroup]) group?.traverse(child => { if (child.isMesh) child.material.wireframe = isWireframe; });
