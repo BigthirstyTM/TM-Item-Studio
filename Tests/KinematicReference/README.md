@@ -26,3 +26,11 @@ diagnosis; it writes no files. Expectations in the checks are derived from the
 reference dump documented in `docs/kinematic-conversion-analysis.md`, not from
 the code under test. No claim in this suite establishes game behaviour; the
 fresh-game step remains open.
+
+The experiment checks build the issue #22 minimal pair from scratch (two
+kinematic objects, world→A and A→B constraints, distinct axes/ranges,
+synchronized timelines, compact and alternating entity layouts) and assert
+save/reparse invariance, filtered slot-table ordering, binding-resolver
+classification with every guard still active, edit/rebind round-trips and a
+composed preview pose. See `docs/kinematic-multi-constraint-experiment.md`.
+Nothing is written to disk; the synthetic graphs exist only in memory.
