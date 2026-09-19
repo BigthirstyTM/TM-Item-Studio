@@ -24,7 +24,12 @@ public sealed record ItemSceneSolid(string Path, int SourceId, float[]? LodDista
 public sealed record ItemSceneLight(string Path, string? EntityPath, int SourceId, int? ModelIndex,
     int? SocketIndex, float[]? Position, float[] Color, float Intensity, float Distance, ItemSceneState State,
     ItemSceneLightOwnership Ownership = ItemSceneLightOwnership.PrefabEntry, bool ValuesPersist = true);
-public sealed record ItemSceneCollision(string Path, string? EntityPath, string Representation, ItemSceneState State);
+
+/// <summary>Which native slot a collision record was classified from; SurfaceSlot covers plain CPlugSurface references such as tree surfaces.</summary>
+public enum ItemSceneCollisionSource { StaticObjectShape, GeneratedMeshCollision, DynamicObjectShape, DynamicObjectStaticShape,
+    CommonItemTrigger, ItemPhyModel, GameObjectHitShape, GameObjectMoveShape, GameObjectTriggerShape, SurfaceSlot }
+public sealed record ItemSceneCollision(string Path, string? EntityPath, string Representation, ItemSceneState State,
+    ItemSceneCollisionSource Source = ItemSceneCollisionSource.SurfaceSlot);
 
 /// <summary>Snapshot buffers, separate from authored arrays. Positions are before viewer framing.</summary>
 public sealed record ItemSceneGeometry(string Path, string? EntityPath, int SourceId, bool IsCollision,

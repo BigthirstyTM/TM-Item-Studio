@@ -31,6 +31,22 @@ Ordinary `CPlugTree` graphs expose their Visual, Surface and Children, including
 
 Collision mesh versions 1/2/3/5 select CookedTriangles; versions 6/7 select Triangles. Missing required arrays or an incompatible/ambiguous alternate array are invalid, never silently substituted. Supported empty triangle arrays are absent geometry; invalid vertices/indices/transforms are diagnosed. All other mesh versions are unsupported even if public arrays are populated. Version 4 explicitly reads/writes no mesh payload in the bundled serializer, but that alone does not prove absent native collision, so it also remains unsupported. Tests save/reparse every supported version, version 4 and unknown versions before classifying them.
 
+Every collision record carries a machine-checkable `Source` naming the native slot it
+was classified from — `StaticObjectShape`, `GeneratedMeshCollision` (the
+`IsMeshCollidable` regenerated layout, which serializes no shape to inspect),
+`DynamicObjectShape`/`DynamicObjectStaticShape`, `CommonItemTrigger`,
+`ItemPhyModel`, `GameObjectHitShape`/`GameObjectMoveShape`/`GameObjectTriggerShape`
+and `SurfaceSlot` for plain surface references — combined with a
+present/absent/external/unsupported state. See
+[docs/collision-capabilities.md](../docs/collision-capabilities.md) for the capability
+inventory and the NadeoImporter persistence findings. Trigger slots are classified
+shallowly: presence is reported, but the transform companion is not exposed by the
+bundled public API (`trigger-transform`). Game-object phy model fid getters resolve
+external files, so the traversal reads their nodes only when no file reference is set
+and external slots stay unresolved (with an `external-reference` diagnostic); a shape
+referenced only by name (the chunk `2E006001` v11+ string layout) is unresolved, not
+absent; trigger action records are counted, not interpreted.
+
 The bundled public API does not expose vertex-stream counts/declarations/shared-model slots or skeleton socket arrays. Decoded stream geometry carries a `stream-layout-opaque` diagnostic; an empty/opaque stream is unsupported rather than absent. Duplicate attributes and mixed CPU/stream layouts are rejected. No private-field reflection is used. `CPlugVisualTriangles` is not a public type in this DLL and is not inferred from its CPU base class. Legacy/unknown visuals, analytic collision tessellation, skinning/morph/subvisual animation and trigger transforms remain unsupported.
 
 `Solid.LightInsts[i].ModelIndex` selects `Solid.LightUserModels`; `SocketIndex` is retained but does not become a guessed light position. Those light instances are unsupported for positional preview and retain typed model/instance ownership for editing. A direct prefab light model has an explicit prefab-entry transform. Existing zero color, intensity and distance values remain zero.

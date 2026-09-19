@@ -39,7 +39,8 @@ public static partial class ItemScene
                 state, source?.GetType().Name ?? "null", local.HasValue ? Pack(local.Value) : null, world.HasValue ? Pack(world.Value) : null));
 
         private void Edge(GbxRefTableFile? file, Func<CMwNod?> readInline, string path, string parent,
-            Matrix4x4? world, ItemSceneEntryHandle? entry, int depth)
+            Matrix4x4? world, ItemSceneEntryHandle? entry, int depth,
+            ItemSceneCollisionSource collisionSource = ItemSceneCollisionSource.SurfaceSlot)
         {
             if (file is not null)
             {
@@ -48,11 +49,12 @@ public static partial class ItemScene
                 Issue(path, "external-reference", ItemSceneState.Unresolved, $"External reference: {file.FilePath}");
                 return;
             }
-            Visit(readInline(), path, parent, Matrix4x4.Identity, world, entry, depth + 1);
+            Visit(readInline(), path, parent, Matrix4x4.Identity, world, entry, depth + 1, collisionSource);
         }
 
         internal void Visit(CMwNod? source, string path, string? parent, Matrix4x4? local,
-            Matrix4x4? world, ItemSceneEntryHandle? entry, int depth)
+            Matrix4x4? world, ItemSceneEntryHandle? entry, int depth,
+            ItemSceneCollisionSource collisionSource = ItemSceneCollisionSource.SurfaceSlot)
         {
             if (source is null)
             {
@@ -92,6 +94,8 @@ public static partial class ItemScene
                     case CGameItemModel item:
                         Visit(item.EntityModel, path + "/entityModel", path, Matrix4x4.Identity, world, entry, depth + 1);
                         Edge(item.VisModelCustomFile, () => item.VisModelCustom, path + "/visModelCustom", path, world, entry, depth);
+                        if (item.PhyModelCustomFile is not null)
+                            collisions.Add(new(path + "/phyModelCustom", entry?.Path, "Item PhyModel reference", ItemSceneState.Unresolved, ItemSceneCollisionSource.ItemPhyModel));
                         Edge(item.PhyModelCustomFile, () => item.PhyModelCustom, path + "/phyModelCustom", path, world, entry, depth);
                         // An edition model is source-authoring data, not a second renderable copy.
                         if (item.EntityModelEditionFile is not null)
@@ -140,26 +144,28 @@ public static partial class ItemScene
                         Visit(common.StaticObject, path + "/staticObject", path, Matrix4x4.Identity, world, entry, depth + 1);
                         Visit(common.VisModel, path + "/visModel", path, Matrix4x4.Identity, world, entry, depth + 1);
                         Visit(common.PhyModel, path + "/phyModel", path, Matrix4x4.Identity, world, entry, depth + 1);
-                        if (common.TriggerShape is not null)
+                        if (common.TriggerShape is { } trigger)
                         {
-                            Node(path + "/triggerShape", path, common.TriggerShape, ItemSceneKind.Collision, ItemSceneState.Unsupported, null, null);
-                            collisions.Add(new(path + "/triggerShape", entry?.Path, "Common-item trigger", ItemSceneState.Unsupported));
+                            Node(path + "/triggerShape", path, trigger, ItemSceneKind.Collision, ItemSceneState.Unsupported, null, null);
+                            collisions.Add(new(path + "/triggerShape", entry?.Path, "Common-item trigger",
+                                trigger is CPlugSurface ? ItemSceneState.Present : ItemSceneState.Unsupported, ItemSceneCollisionSource.CommonItemTrigger));
                             Issue(path + "/triggerShape", "trigger-transform", ItemSceneState.Unsupported, "Trigger source retained; its chunk-specific transform is not interpreted.");
                         }
+                        else collisions.Add(new(path + "/triggerShape", entry?.Path, "No trigger shape", ItemSceneState.Absent, ItemSceneCollisionSource.CommonItemTrigger));
                         break;
                     case CPlugStaticObjectModel model:
                         Edge(model.MeshFile, () => model.Mesh, path + "/mesh", path, world, entry, depth);
                         if (model.IsMeshCollidable)
                         {
-                            collisions.Add(new(path + "/shape", entry?.Path, "Mesh-collidable flag", ItemSceneState.Unsupported));
+                            collisions.Add(new(path + "/shape", entry?.Path, "Mesh-collidable flag", ItemSceneState.Unsupported, ItemSceneCollisionSource.GeneratedMeshCollision));
                             Issue(path + "/shape", "generated-collision", ItemSceneState.Unsupported, "Mesh collision is requested; no generated collision shape is available to inspect.");
                         }
-                        else CollisionEdge(model.ShapeFile, () => model.Shape, path + "/shape", path, world, entry, depth);
+                        else CollisionEdge(model.ShapeFile, () => model.Shape, path + "/shape", path, world, entry, depth, ItemSceneCollisionSource.StaticObjectShape);
                         break;
                     case CPlugDynaObjectModel model:
                         Edge(model.MeshFile, () => model.Mesh, path + "/mesh", path, world, entry, depth);
-                        CollisionEdge(model.DynaShapeFile, () => model.DynaShape, path + "/dynaShape", path, world, entry, depth);
-                        CollisionEdge(model.StaticShapeFile, () => model.StaticShape, path + "/staticShape", path, world, entry, depth);
+                        CollisionEdge(model.DynaShapeFile, () => model.DynaShape, path + "/dynaShape", path, world, entry, depth, ItemSceneCollisionSource.DynamicObjectShape);
+                        CollisionEdge(model.StaticShapeFile, () => model.StaticShape, path + "/staticShape", path, world, entry, depth, ItemSceneCollisionSource.DynamicObjectStaticShape);
                         if (model.LocAnimFile is not null)
                             Edge(model.LocAnimFile, () => null, path + "/locAnim", path, world, entry, depth);
                         else if (model.LocAnim is not null)
@@ -194,13 +200,16 @@ public static partial class ItemScene
                         Visual(visual, path, world, entry, null, null);
                         break;
                     case CPlugSurface surface:
-                        Surface(surface, path, world, entry);
+                        Surface(surface, path, world, entry, collisionSource);
                         break;
                     case CPlugLightUserModel light:
                         Light(light, path, world, entry, null, null);
                         break;
                     case NPlugDyna_SKinematicConstraint:
                         // Resolution belongs to ItemMotion, using handles.Prefabs and original entry arrays.
+                        break;
+                    case CGameObjectPhyModel phy:
+                        PhyShapes(phy, path, world, entry);
                         break;
                     default:
                         Issue(path, "unsupported-node", ItemSceneState.Unsupported, $"No typed scene adapter for {source.GetType().Name}.");
@@ -222,11 +231,54 @@ public static partial class ItemScene
         };
 
         private void CollisionEdge(GbxRefTableFile? file, Func<CMwNod?> inline, string path, string parent,
-            Matrix4x4? world, ItemSceneEntryHandle? entry, int depth)
+            Matrix4x4? world, ItemSceneEntryHandle? entry, int depth, ItemSceneCollisionSource source)
         {
-            if (file is not null) collisions.Add(new(path, entry?.Path, "External shape", ItemSceneState.Unresolved));
-            else if (inline() is null) collisions.Add(new(path, entry?.Path, "No shape", ItemSceneState.Absent));
-            Edge(file, inline, path, parent, world, entry, depth);
+            if (file is not null) collisions.Add(new(path, entry?.Path, "External shape", ItemSceneState.Unresolved, source));
+            else if (inline() is null) collisions.Add(new(path, entry?.Path, "No shape", ItemSceneState.Absent, source));
+            Edge(file, inline, path, parent, world, entry, depth, source);
+        }
+
+        /// <summary>
+        /// Inventory the hit/move/trigger shape references of a game-object phy model. The fid getters resolve
+        /// external files, so the node is only read through the inline path when no file reference is set; a
+        /// non-empty shape name (the chunk 2E006001 v11+ layout serializes a name instead of a node ref) is an
+        /// unresolvable reference, not an absent shape.
+        /// </summary>
+        private void PhyShapes(CGameObjectPhyModel phy, string path, Matrix4x4? world, ItemSceneEntryHandle? entry)
+        {
+            PhyShape(phy.HitShapeFidFile, () => phy.HitShapeFid, path + "/hitShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectHitShape, phy.HitShape);
+            PhyShape(phy.MoveShapeFidFile, () => phy.MoveShapeFid, path + "/moveShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectMoveShape, phy.MoveShape);
+            PhyShape(phy.TriggerShapeFidFile, () => phy.TriggerShapeFid, path + "/triggerShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectTriggerShape, phy.TriggerShape);
+            if (phy.Triggers is { Length: > 0 })
+                Issue(path + "/triggers", "phy-trigger-actions", ItemSceneState.Unsupported,
+                    $"{phy.Triggers.Length} trigger action records retained; their semantics are not interpreted.");
+        }
+
+        private void PhyShape(GbxRefTableFile? file, Func<CPlugSurface?> inline, string path, string parent,
+            Matrix4x4? world, ItemSceneEntryHandle? entry, ItemSceneCollisionSource source, string? namedReference)
+        {
+            if (file is not null)
+            {
+                Node(path, parent, file, ItemSceneKind.Collision, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
+                collisions.Add(new(path, entry?.Path, "External shape reference", ItemSceneState.Unresolved, source));
+                Issue(path, "external-reference", ItemSceneState.Unresolved, $"External shape reference: {file.FilePath}");
+                return;
+            }
+            var surface = inline();
+            if (surface is null)
+            {
+                if (!string.IsNullOrEmpty(namedReference))
+                {
+                    Node(path, parent, null, ItemSceneKind.Collision, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
+                    collisions.Add(new(path, entry?.Path, $"Named shape reference '{namedReference}'", ItemSceneState.Unresolved, source));
+                    return;
+                }
+                Node(path, parent, null, ItemSceneKind.Collision, ItemSceneState.Absent, Matrix4x4.Identity, world);
+                collisions.Add(new(path, entry?.Path, "No shape", ItemSceneState.Absent, source));
+                return;
+            }
+            Node(path, parent, surface, ItemSceneKind.Collision, world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid, Matrix4x4.Identity, world);
+            Surface(surface, path, world, entry, source);
         }
 
         private void TreeAuxiliary(GbxRefTableFile? file, Func<CMwNod?> inline, string path, string parent, Matrix4x4? world)
