@@ -23,6 +23,101 @@ if (args.Length > 0 && args[0] == "--dump")
         DumpItem(path);
     return 0;
 }
+if (args.Length > 1 && args[0] == "--fix-carrier")
+{
+    var targetPath = Path.IsPathRooted(args[1]) ? args[1] : Path.Combine(repoRoot, args[1]);
+    var item = ParseItem(targetPath);
+    var prefab = (CPlugPrefab)item.EntityModel!;
+    int patched = 0;
+    foreach (var ent in prefab.Ents!)
+    {
+        if (ent.Model is CPlugDynaObjectModel dyna && dyna.Mesh is null)
+        {
+            var mesh = Solid();
+            var shape = new CPlugSurface
+            {
+                Surf = new CPlugSurface.Mesh
+                {
+                    Version = 6,
+                    Vertices = [new(0, 0, 0), new(0.0001f, 0, 0), new(0, 0.0001f, 0)],
+                    Triangles = [new(new Int3(0, 1, 2), 0, 0, 0)]
+                }
+            };
+            shape.CreateChunk<CPlugSurface.Chunk0900C003>().Version = 2;
+            dyna.Mesh = mesh;
+            dyna.StaticShape = shape;
+            dyna.DynaShape = shape;
+            patched++;
+        }
+    }
+    File.WriteAllBytes(targetPath, Save(item));
+    Console.WriteLine($"Successfully patched {patched} carrier bodies in {targetPath}");
+    return 0;
+}
+if (args.Length > 1 && args[0] == "--fix-collision")
+{
+    var targetPath = Path.IsPathRooted(args[1]) ? args[1] : Path.Combine(repoRoot, args[1]);
+    var item = ParseItem(targetPath);
+    var prefab = (CPlugPrefab)item.EntityModel!;
+    var dyna0 = (CPlugDynaObjectModel)prefab.Ents[0].Model!;
+    var mesh = (CPlugSolid2Model)dyna0.Mesh!;
+    if (mesh.Visuals?.Length > 0 && mesh.Visuals[0] is CPlugVisualIndexedTriangles vit
+        && vit.VertexStreams?.Count > 0 && vit.IndexBuffer?.Indices is not null)
+    {
+        var positions = vit.VertexStreams[0].Positions!;
+        var indices = vit.IndexBuffer.Indices;
+        var tris = new CPlugSurface.Mesh.Triangle[indices.Length / 3];
+        for (int i = 0; i < tris.Length; i++)
+        {
+            tris[i] = new CPlugSurface.Mesh.Triangle(new Int3(indices[i * 3], indices[i * 3 + 1], indices[i * 3 + 2]), 0, 0, 0);
+        }
+        var surfMesh = new CPlugSurface.Mesh
+        {
+            Version = 6,
+            Vertices = positions,
+            Triangles = tris
+        };
+        var newShape = new CPlugSurface { Surf = surfMesh };
+        newShape.CreateChunk<CPlugSurface.Chunk0900C003>().Version = 2;
+        dyna0.StaticShape = newShape;
+        dyna0.DynaShape = newShape;
+        File.WriteAllBytes(targetPath, Save(item));
+        Console.WriteLine($"Successfully regenerated collision surface from visual mesh: {positions.Length} verts, {tris.Length} tris");
+    }
+    return 0;
+}
+if (args.Length > 1 && args[0] == "--inspect-mesh")
+{
+    var targetPath = Path.IsPathRooted(args[1]) ? args[1] : Path.Combine(repoRoot, args[1]);
+    var item = ParseItem(targetPath);
+    var prefab = (CPlugPrefab)item.EntityModel!;
+    var dyna0 = (CPlugDynaObjectModel)prefab.Ents[0].Model!;
+    var mesh = (CPlugSolid2Model)dyna0.Mesh!;
+    Console.WriteLine($"Visuals count: {mesh.Visuals?.Length}");
+    if (mesh.Visuals?.Length > 0 && mesh.Visuals[0] is CPlugVisualIndexedTriangles vit)
+    {
+        Console.WriteLine($"Mesh BoundingBox: {vit.BoundingBox}");
+        var verts = vit.VertexStreams![0].Positions!;
+        Console.WriteLine($"Mesh verts count: {verts.Length}");
+        Console.WriteLine($"Mesh vert[0]: {verts[0]} vert[max]: {verts[^1]}");
+        Console.WriteLine($"IndexBuffer indices: {vit.IndexBuffer?.Indices?.Length}");
+    }
+    var surf = (CPlugSurface)dyna0.StaticShape!;
+    Console.WriteLine($"StaticShape Materials: {surf.Materials?.Length ?? 0}");
+    if (surf.Surf is CPlugSurface.Mesh sm)
+    {
+        Console.WriteLine($"Surface Mesh Triangles: {sm.Triangles?.Length ?? 0}");
+        if (sm.Triangles?.Length > 0)
+        {
+            var tri = sm.Triangles[0];
+            foreach (var prop in tri.GetType().GetProperties())
+                Console.WriteLine($"  Tri prop: {prop.Name} = {prop.GetValue(tri)}");
+            foreach (var field in tri.GetType().GetFields())
+                Console.WriteLine($"  Tri field: {field.Name} = {field.GetValue(tri)}");
+        }
+    }
+    return 0;
+}
 
 int passed = 0, failed = 0;
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
@@ -434,8 +529,12 @@ static void DumpItem(string path)
     Gbx.Decompress(path, decompressed);
     Console.WriteLine($"  decompressed-bytes={decompressed.Length}");
     var file = Gbx.Parse<CGameItemModel>(new MemoryStream(bytes), new GbxReadSettings { SafeSkippableChunks = true });
+    using var serialized = new MemoryStream();
+    file.Save(serialized);
+    _ = Gbx.Parse<CGameItemModel>(new MemoryStream(serialized.ToArray()), new GbxReadSettings { SafeSkippableChunks = true });
     Console.WriteLine($"  root={file.Node.GetType().Name} ident={file.Node.Ident} itemtype={file.Node.ItemType} itemtypee={file.Node.ItemTypeE}");
     Console.WriteLine($"  defaultplacement={(file.Node.DefaultPlacement is null ? "null" : "present")}");
+    Console.WriteLine($"  parse-save-reparse=ok bytes={serialized.Length}");
     var seen = new HashSet<CMwNod>();
     DumpNode(file.Node.EntityModel, "  entity-model", seen, 0);
     Console.WriteLine();
@@ -482,6 +581,14 @@ static void DumpNode(CMwNod? node, string label, HashSet<CMwNod> seen, int depth
             return;
         case CPlugSurface surface:
             Console.WriteLine($"{indent}{label}: CPlugSurface surf={surface.Surf?.GetType().Name ?? "null"} geom={TypeName(surface.Geom)} materials={surface.Materials?.Length.ToString() ?? "null"}");
+            if (surface.Surf is CPlugSurface.Mesh surfMesh)
+            {
+                Console.WriteLine($"{indent}  surfMesh: verts={surfMesh.Vertices?.Length} tris={surfMesh.Triangles?.Length}");
+                if (surfMesh.Vertices?.Length > 0)
+                {
+                    Console.WriteLine($"{indent}    vert[0]={surfMesh.Vertices[0]} vert[max]={surfMesh.Vertices[^1]}");
+                }
+            }
             return;
         case CPlugStaticObjectModel staticModel:
             Console.WriteLine($"{indent}{label}: CPlugStaticObjectModel version={staticModel.Version} mesh={TypeName(staticModel.Mesh)} shape={TypeName(staticModel.Shape)} meshcollidable={staticModel.IsMeshCollidable}");

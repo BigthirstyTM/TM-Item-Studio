@@ -12,6 +12,7 @@
     <Compile Remove="Tests/**/*.cs" />
     <Content Remove="Tests/**" />
     <None Remove="Tests/**" />
+    <EmbeddedResource Include="Resources\MovingItemTemplate.Item.Gbx" />
   </ItemGroup>
 
   <ItemGroup>

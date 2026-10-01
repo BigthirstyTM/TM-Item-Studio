@@ -12,6 +12,7 @@
 @using System.Globalization
 @using System.Reflection
 @using TM_Item_Studio.Models
+@using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 @inject IJSRuntime JS
 
 <PageTitle>Trackmania 2020 Item Studio</PageTitle>
@@ -468,27 +469,231 @@
                         @if (!isMovingItem)
                         {
                             <p class="small text-muted mb-2">
-                                This item is a <strong>static object</strong>. Changing <code>ItemType</code> alone does not author the
-                                <code>NPlugDyna*</code> objects and constraints a moving item needs, so this editor cannot convert it.
+                                Dit item is een <strong>statisch object</strong>. Converteer het naar een <strong>KinematicObject</strong> om beweging toe te voegen.
+                                De botsing (collision surface) wordt automatisch afgeleid van het visuele 3D-model, zodat de auto direct correct botst.
                             </p>
-                            <button class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true"
-                                    title="Conversion is unsupported: the dynamic object/constraint graph must be authored by an external tool.">
-                                ⚙️ Convert to KinematicObject (unsupported)
-                            </button>
-                            <p class="small text-muted mt-2 mb-0">
-                                Author moving items with an external tool; the kinematic graph must already exist in the file.
-                            </p>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <button class="btn btn-sm btn-primary" @onclick="ConvertStaticItemToKinematic"
+                                        title="Converteert dit statische item met 1 klik naar een bewegend item met 100% accurate botsing.">
+                                    ⚙️ Converteer naar KinematicObject (1-klik)
+                                </button>
+                                <span class="badge text-bg-success">Inclusief auto-collision</span>
+                            </div>
+                            <details class="text-muted small mt-2">
+                                <summary class="cursor-pointer">Optioneel: eigen templates uploaden (voor gevorderden)</summary>
+                                <div class="mt-2">
+                                    <label class="form-label mb-1 small fw-bold">Moving item template (.Item.Gbx)</label>
+                                    <InputFile OnChange="UploadMovingTemplate" accept=".gbx" class="form-control form-control-sm" />
+                                    @if (!string.IsNullOrWhiteSpace(movingTemplateStatus))
+                                    {
+                                        <div class="small text-muted mt-1">@movingTemplateStatus</div>
+                                    }
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label mb-1 small fw-bold">Constraint template (.Constraint.Gbx)</label>
+                                    <InputFile OnChange="UploadConstraintTemplate" accept=".gbx" class="form-control form-control-sm" />
+                                    @if (!string.IsNullOrWhiteSpace(constraintTemplateStatus))
+                                    {
+                                        <div class="small text-muted mt-1">@constraintTemplateStatus</div>
+                                    }
+                                </div>
+                            </details>
                         }
                         else if (authoredConstraints.Count > 0)
                         {
-                            <p role="status" class="small text-muted mb-2" title="Only explicit edits change the file. A shared constraint affects all its instances.">Using authored motion settings</p>
+                            <!-- Path & Collision Generator Card -->
+                            <div class="card border-primary mb-3 shadow-sm">
+                                <div class="card-header bg-primary text-white py-1 d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold"><i class="bi bi-bezier2"></i> Beweging & Pad Assistent (A ➔ B ➔ C)</span>
+                                    <span class="badge bg-light text-primary">1-Klik Generatie</span>
+                                </div>
+                                <div class="card-body p-2 small">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">Kies Bewegingstype / Preset</label>
+                                        <div class="d-flex flex-column gap-1">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetRelay" value="relay" checked="@(pathPresetMode == "relay")" @onchange="@(() => pathPresetMode = "relay")" />
+                                                <label class="form-check-label" for="presetRelay">
+                                                    <strong>A ➔ B ➔ C Pad (100% Havok Collision - Relay)</strong>
+                                                    <span class="badge text-bg-success ms-1">Aanbevolen voor gameplay</span>
+                                                    <div class="text-muted" style="font-size: 0.85em;">Gebruikt gesynchroniseerde root-bodies. De auto botst fysiek op élk deel van het pad.</div>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetChained" value="chained" checked="@(pathPresetMode == "chained")" @onchange="@(() => pathPresetMode = "chained")" />
+                                                <label class="form-check-label" for="presetChained">
+                                                    <strong>A ➔ B ➔ C Pad (Enkel Lichaam - Vloeiend Chained)</strong>
+                                                    <span class="badge text-bg-warning text-dark ms-1">Visueel vloeiend</span>
+                                                    <div class="text-muted" style="font-size: 0.85em;">Eén enkel blok volgt visueel een L-pad via een veilige carrier. Collision werkt in TM op de hoofdas.</div>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetSingle" value="single_axis" checked="@(pathPresetMode == "single_axis")" @onchange="@(() => pathPresetMode = "single_axis")" />
+                                                <label class="form-check-label" for="presetSingle">
+                                                    <strong>1-As Lineaire Beweging (Heen & Weer / Lift / Deur)</strong>
+                                                    <span class="badge text-bg-success ms-1">100% Collision</span>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetRotation" value="rotation" checked="@(pathPresetMode == "rotation")" @onchange="@(() => pathPresetMode = "rotation")" />
+                                                <label class="form-check-label" for="presetRotation">
+                                                    <strong>Rotatie / Draaiend Obstakel (360° Molen / Spinner)</strong>
+                                                    <span class="badge text-bg-success ms-1">100% Collision</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if (pathPresetMode is "relay" or "chained")
+                                    {
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-12 fw-bold text-secondary">Segment 1 (A ➔ B)</div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">As</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment1Axis">
+                                                    <option value="x">X As</option>
+                                                    <option value="y">Y As</option>
+                                                    <option value="z">Z As</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Afstand (m)</label>
+                                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment1Distance" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-12 fw-bold text-secondary">Segment 2 (B ➔ C)</div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">As</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment2Axis">
+                                                    <option value="x">X As</option>
+                                                    <option value="y">Y As</option>
+                                                    <option value="z">Z As</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Afstand (m)</label>
+                                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment2Distance" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment2Duration" />
+                                            </div>
+                                        </div>
+
+                                        @if (pathPresetMode == "chained")
+                                        {
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="pathLoopType" @bind="pathIsPingPong" />
+                                                <label class="form-check-label" for="pathLoopType">
+                                                    @(pathIsPingPong ? "Ping-Pong (A ➔ B ➔ C ➔ B ➔ A)" : "Gesloten Lus (Rechthoek A ➔ B ➔ C ➔ D ➔ A)")
+                                                </label>
+                                            </div>
+                                        }
+                                    }
+                                    else if (pathPresetMode == "single_axis")
+                                    {
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">As</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment1Axis">
+                                                    <option value="x">X As</option>
+                                                    <option value="y">Y As</option>
+                                                    <option value="z">Z As</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Afstand (m)</label>
+                                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment1Distance" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
+                                            </div>
+                                            <div class="col-12 mt-1">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="singlePingPong" @bind="pathIsPingPong" />
+                                                    <label class="form-check-label" for="singlePingPong">
+                                                        @(pathIsPingPong ? "Heen & Weer (Ping-Pong)" : "Éénrichting (Loop)")
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (pathPresetMode == "rotation")
+                                    {
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Draai-as</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment1Axis">
+                                                    <option value="y">Y As (Horizontaal draaien)</option>
+                                                    <option value="x">X As (Wiel/Rol)</option>
+                                                    <option value="z">Z As (Windmolen)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur per ronde (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" @onclick="ApplyPathPreset">
+                                        🚀 Genereer & Toepassen op Item
+                                    </button>
+
+                                    @if (!string.IsNullOrWhiteSpace(pathStatusMessage))
+                                    {
+                                        <div class="alert alert-success py-1 mt-2 mb-0 small">@pathStatusMessage</div>
+                                    }
+
+                                    <div class="alert alert-light border mt-2 mb-0 text-muted" style="font-size: 0.8em;">
+                                        <strong>💡 Havok Collision Kennis (Trackmania 2020):</strong>
+                                        <ul class="mb-0 ps-3">
+                                            <li><strong>Root Constraints (<code>Ent1 = -1</code>):</strong> Hebben 100% dynamische botsing in de game (de auto stuitert/rijdt op het blok).</li>
+                                            <li><strong>Chained Constraints (<code>Ent1 &ge; 0</code>):</strong> Volgen het pad visueel vloeiend, maar de game-engine van Nadeo verplaatst het Havok-fysica lichaam niet mee. Voor gameplay-obstakels raden we de <strong>Relay</strong> preset aan!</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p role="status" class="small text-muted mb-2" title="Only explicit edits change the file. A shared constraint affects all its instances.">Gedetailleerde Constraints & Timeline Edits</p>
+                            @if (!string.IsNullOrWhiteSpace(kinematicTemplateStatus))
+                            {
+                                <p role="status" class="small text-info">@kinematicTemplateStatus</p>
+                            }
                             @foreach (var diagnostic in motionDiagnostics)
                             {
                                 <p role="status" class="small text-warning">Preview unavailable: @diagnostic</p>
                             }
                             @for (var i = 0; i < authoredConstraints.Count; i++)
                             {
-                                <AuthoredMotionEditor @key="authoredConstraints[i]" Name="@($"Constraint {i + 1}")" Source="authoredConstraints[i]" Changed="UpdateScenePayload" />
+                                var constraint = authoredConstraints[i];
+                                <AuthoredMotionEditor @key="constraint" Name="@($"Constraint {i + 1}")" Source="constraint"
+                                                      IsInvisibleDriver="@IsInvisibleDriverConstraint(constraint)"
+                                                      IsVisualPathProxy="@IsVisiblePathProxyConstraint(constraint)"
+                                                      IsRootConstraint="@IsRootConstraint(constraint)"
+                                                      BindingDescription="@GetBindingDescription(constraint)"
+                                                      Changed="UpdateScenePayload" />
+                                <button class="btn btn-sm btn-outline-warning mb-3" disabled="@(!acknowledgeKinematicTemplate)"
+                                        @onclick="@(() => AddKinematicEntity(constraint))">
+                                    Add kinematic entity from Constraint @(i + 1)
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary mb-3 ms-2" disabled="@(!acknowledgeKinematicTemplate)"
+                                        title="Adds a complete, visible proxy body before this constraint to test a native parent-child path safely."
+                                        @onclick="@(() => InsertVisiblePathProxy(constraint))">
+                                    Add visible path proxy before Constraint @(i + 1)
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary mb-3 ms-2" disabled="@(!acknowledgeKinematicTemplate)"
+                                        title="Adds a mesh-hidden carrier parent before this constraint so one visible body can follow chained segments."
+                                        @onclick="@(() => InsertHiddenCarrierParent(constraint))">
+                                    Add hidden carrier parent before Constraint @(i + 1)
+                                </button>
                             }
                         }
                         else
@@ -863,6 +1068,22 @@
     private readonly ItemSceneGeometryCache geometryCache = new();
     private readonly HashSet<int> uploadedGeometry = new();
     private readonly List<NPlugDyna_SKinematicConstraint> authoredConstraints = new();
+    private readonly HashSet<NPlugDyna_SKinematicConstraint> visualPathProxies = new();
+    private bool acknowledgeKinematicTemplate = true;
+    private string? kinematicTemplateStatus;
+    private string pathPresetMode = "relay";
+    private string pathSegment1Axis = "x";
+    private float pathSegment1Distance = 5.0f;
+    private float pathSegment1Duration = 2.0f;
+    private string pathSegment2Axis = "y";
+    private float pathSegment2Distance = 5.0f;
+    private float pathSegment2Duration = 2.0f;
+    private bool pathIsPingPong = true;
+    private string? pathStatusMessage;
+    private CGameItemModel? uploadedMovingTemplate;
+    private NPlugDyna_SKinematicConstraint? uploadedConstraintTemplate;
+    private string? movingTemplateStatus;
+    private string? constraintTemplateStatus;
     private IReadOnlyList<string> motionDiagnostics = Array.Empty<string>();
     private bool showOriginalMotion;
     private string originalConstraintType = "Not found";
@@ -998,6 +1219,7 @@
         activeKinematicConstraint = null;
         authoredMotionScene = null;
         authoredConstraints.Clear();
+        visualPathProxies.Clear();
         motionDiagnostics = Array.Empty<string>();
         showOriginalMotion = false;
         originalConstraintType = "Not found";
@@ -1162,6 +1384,333 @@
         geometryCache.Clear();
         uploadedGeometry.Clear();
         return UpdateScenePayload(null);
+    }
+
+    private async Task AddKinematicEntity(NPlugDyna_SKinematicConstraint source)
+    {
+        if (!acknowledgeKinematicTemplate || authoredMotionScene is null)
+            return;
+
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry is null)
+        {
+            errorMessage = "The selected constraint is no longer attached to a local prefab entry.";
+            return;
+        }
+
+        var result = ItemKinematicEntityTemplate.AppendFromConstraint(entry.Prefab, source, entry.PrefabPath);
+        if (!result.Success)
+        {
+            errorMessage = "Could not add a kinematic entity: " + result.Reason;
+            return;
+        }
+
+        errorMessage = null;
+        kinematicTemplateStatus = $"Added kinematic entity in slot {result.Value + 1}. It inherits Constraint {authoredConstraints.IndexOf(source) + 1}'s world/parent binding.";
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task InsertVisiblePathProxy(NPlugDyna_SKinematicConstraint source)
+    {
+        if (!acknowledgeKinematicTemplate || authoredMotionScene is null)
+            return;
+
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry is null)
+        {
+            errorMessage = "The selected constraint is no longer attached to a local prefab entry.";
+            return;
+        }
+
+        var result = ItemKinematicEntityTemplate.InsertVisiblePathProxy(entry.Prefab, source, entry.PrefabPath);
+        if (!result.Success)
+        {
+            errorMessage = "Could not add a visible path proxy: " + result.Reason;
+            return;
+        }
+
+        errorMessage = null;
+        visualPathProxies.Add(result.Value!);
+        kinematicTemplateStatus = "Added a visible path proxy. The blue proxy constraint drives the first segment; the selected original constraint now drives the next segment.";
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task InsertHiddenCarrierParent(NPlugDyna_SKinematicConstraint source)
+    {
+        if (!acknowledgeKinematicTemplate || authoredMotionScene is null)
+            return;
+
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry is null)
+        {
+            errorMessage = "The selected constraint is no longer attached to a local prefab entry.";
+            return;
+        }
+
+        var result = ItemKinematicEntityTemplate.InsertHiddenCarrierParent(entry.Prefab, source, entry.PrefabPath);
+        if (!result.Success)
+        {
+            errorMessage = "Could not add a hidden carrier parent: " + result.Reason;
+            return;
+        }
+
+        errorMessage = null;
+        kinematicTemplateStatus = "Added a hidden carrier parent. Use this for one-visible-body chained path experiments (A→B via carrier, then B→C on the visible child).";
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task ConvertStaticItemToKinematic()
+    {
+        if (itemModel is null)
+            return;
+
+        var movingTemplate = uploadedMovingTemplate ?? FindMovingTemplateVariant() ?? ItemKinematicEntityTemplate.GetDefaultMovingTemplate();
+        var constraintTemplate = uploadedConstraintTemplate;
+        var result = ItemKinematicEntityTemplate.ConvertStaticToKinematic(itemModel, movingTemplate, constraintTemplate);
+        if (!result.Success)
+        {
+            errorMessage = "Could not convert this static item: " + result.Reason;
+            return;
+        }
+
+        var converted = result.Value!;
+        itemModel.EntityModel = converted.EntityModel;
+        itemModel.ItemType = converted.ItemType;
+        itemModel.ItemTypeE = converted.ItemTypeE;
+        itemModel.DefaultPlacement = converted.DefaultPlacement;
+        itemModel.GroundPoint = converted.GroundPoint;
+        itemModel.Name = converted.Name;
+        itemModel.Ident = converted.Ident;
+        itemModel.Icon = converted.Icon;
+        itemModel.IconWebP = converted.IconWebP;
+        itemModel.OrbitalCenterHeightFromGround = converted.OrbitalCenterHeightFromGround;
+        itemModel.OrbitalPreviewAngle = converted.OrbitalPreviewAngle;
+        itemModel.OrbitalRadiusBase = converted.OrbitalRadiusBase;
+
+        isMovingItem = true;
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        errorMessage = null;
+        kinematicTemplateStatus = uploadedMovingTemplate is null && FindMovingTemplateVariant() is null
+            ? "Converteerd naar KinematicObject met ingebouwde template en accurate collision mesh."
+            : (uploadedConstraintTemplate is null
+                ? "Converted the static mesh into a kinematic prefab graph and copied body/constraint settings from the loaded kinematic template."
+                : "Converted the static mesh into a kinematic prefab graph using the uploaded moving-item and constraint templates.");
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task ApplyPathPreset()
+    {
+        if (authoredConstraints.Count == 0 || authoredMotionScene is null)
+            return;
+
+        var firstConstraint = authoredConstraints[0];
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, firstConstraint));
+        if (entry is null) return;
+
+        var axis1 = pathSegment1Axis.ToLowerInvariant() switch
+        {
+            "x" => KC.EAxis.X,
+            "y" => KC.EAxis.Y,
+            "z" => KC.EAxis.Z,
+            _ => KC.EAxis.X
+        };
+        var axis2 = pathSegment2Axis.ToLowerInvariant() switch
+        {
+            "x" => KC.EAxis.X,
+            "y" => KC.EAxis.Y,
+            "z" => KC.EAxis.Z,
+            _ => KC.EAxis.Y
+        };
+        var dur1Ms = Math.Max(50, (int)(pathSegment1Duration * 1000));
+        var dur2Ms = Math.Max(50, (int)(pathSegment2Duration * 1000));
+
+        switch (pathPresetMode)
+        {
+            case "relay":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureRelayCollisionPath(
+                    entry.Prefab, firstConstraint, entry.PrefabPath,
+                    axis1, pathSegment1Distance, dur1Ms,
+                    axis2, pathSegment2Distance, dur2Ms);
+                if (result.Success)
+                    pathStatusMessage = "A ➔ B ➔ C Relay Pad gegenereerd met 100% Havok collision!";
+                else
+                    errorMessage = "Fout bij genereren relay pad: " + result.Reason;
+                break;
+            }
+            case "chained":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureChainedLPath(
+                    entry.Prefab, firstConstraint, entry.PrefabPath,
+                    axis1, pathSegment1Distance, dur1Ms,
+                    axis2, pathSegment2Distance, dur2Ms, pathIsPingPong);
+                if (result.Success)
+                    pathStatusMessage = "Vloeiend L-pad gegenereerd (visueel vloeiend, collision op hoofdas).";
+                else
+                    errorMessage = "Fout bij genereren chained pad: " + result.Reason;
+                break;
+            }
+            case "single_axis":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureSingleAxisMotion(
+                    firstConstraint, axis1, pathSegment1Distance, dur1Ms, pathIsPingPong);
+                if (result.Success)
+                    pathStatusMessage = "1-As lineaire beweging ingesteld met 100% Havok collision!";
+                break;
+            }
+            case "rotation":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureRotationMotion(
+                    firstConstraint, axis1, 0, 360, dur1Ms, isOscillating: false);
+                if (result.Success)
+                    pathStatusMessage = "Rotatiebeweging ingesteld met 100% Havok collision!";
+                break;
+            }
+        }
+
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<KC>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+        StateHasChanged();
+    }
+
+    private bool IsRootConstraint(NPlugDyna_SKinematicConstraint source)
+    {
+        if (authoredMotionScene is null) return true;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return true;
+        return parameters.Ent1 == -1;
+    }
+
+    private string? GetBindingDescription(NPlugDyna_SKinematicConstraint source)
+    {
+        if (authoredMotionScene is null) return null;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return null;
+        var parentLabel = parameters.Ent1 == -1 ? "Wereld (Vaste Grond)" : $"Carrier / Parent (Body {parameters.Ent1})";
+        var childLabel = $"Lichaam {parameters.Ent2}";
+        return $"{parentLabel} ➔ {childLabel}";
+    }
+
+    private async Task UploadMovingTemplate(InputFileChangeEventArgs e)
+    {
+        if (e.File is null)
+            return;
+        try
+        {
+            using var stream = new MemoryStream();
+            await e.File.OpenReadStream(maxAllowedSize: 25 * 1024 * 1024).CopyToAsync(stream);
+            var parsed = Gbx.Parse<CGameItemModel>(new MemoryStream(stream.ToArray()));
+            uploadedMovingTemplate = parsed.Node;
+            movingTemplateStatus = $"Loaded moving template: {e.File.Name}";
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            uploadedMovingTemplate = null;
+            movingTemplateStatus = null;
+            errorMessage = "Could not load moving template item: " + ex.Message;
+        }
+    }
+
+    private async Task UploadConstraintTemplate(InputFileChangeEventArgs e)
+    {
+        if (e.File is null)
+            return;
+        try
+        {
+            using var stream = new MemoryStream();
+            await e.File.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
+            var parsed = Gbx.Parse<NPlugDyna_SKinematicConstraint>(new MemoryStream(stream.ToArray()));
+            uploadedConstraintTemplate = parsed.Node;
+            constraintTemplateStatus = $"Loaded constraint template: {e.File.Name}";
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            uploadedConstraintTemplate = null;
+            constraintTemplateStatus = null;
+            errorMessage = "Could not load constraint template: " + ex.Message;
+        }
+    }
+
+    private CGameItemModel? FindMovingTemplateVariant()
+    {
+        for (var index = 0; index < variantSources.Count; index++)
+        {
+            if (index == activeVariantIndex)
+                continue;
+
+            var candidate = variantSources[index].Model;
+            if (candidate.EntityModel is CPlugPrefab { Ents: { Length: > 0 } entries }
+                && entries.Any(static entry => entry.Model is NPlugDyna_SKinematicConstraint))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsInvisibleDriverConstraint(NPlugDyna_SKinematicConstraint source)
+    {
+        if (authoredMotionScene is null) return false;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return false;
+        var binding = ItemMotionBindings.Resolve(source, entry.Prefab, parameters, entry.PrefabPath);
+        return binding.Status == ItemMotionStatus.Supported
+            && binding.Child.SourceEntry?.Model is CPlugDynaObjectModel
+            {
+                Mesh: null,
+                StaticShape: null,
+                DynaShape: null
+            };
+    }
+
+    private bool IsVisiblePathProxyConstraint(NPlugDyna_SKinematicConstraint source)
+    {
+        if (visualPathProxies.Contains(source)) return true;
+        if (authoredMotionScene is null) return false;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return false;
+        var binding = ItemMotionBindings.Resolve(source, entry.Prefab, parameters, entry.PrefabPath);
+        if (binding.Status != ItemMotionStatus.Supported || binding.Child.SourceEntry?.Model is not CPlugDynaObjectModel { Mesh: not null })
+            return false;
+
+        // A visible body's world-relative constraint becomes a path proxy when
+        // another local constraint names its filtered slot as the parent.
+        return authoredMotionScene.Handles.Entries.Any(candidate =>
+            candidate.Prefab == entry.Prefab
+            && candidate.Entry.Params is NPlugDyna_SPrefabConstraintParams candidateParameters
+            && !ReferenceEquals(candidate.Entry.Model, source)
+            && candidateParameters.Ent1 == binding.Child.RawSlot);
     }
 
     private async Task UpdateScenePayload(ItemSceneResult? selectedScene)

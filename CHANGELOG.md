@@ -20,6 +20,16 @@ All notable changes to TM Item Studio are documented in this file.
   fallbacks for ambiguous or unreadable textures.
 - Trackmania PBR local-preview support for `_D`, `_N`, `_R`, and `_I` texture
   sets, including sRGB base color and native roughness/metallic channels.
+- Experimental addition of one kinematic body/constraint template at a time for
+  supported flat local prefabs. The template shares an existing proven
+  mesh/collision source and preserves its parent/world binding; native gameplay
+  still requires a fresh Trackmania placement and playback test.
+- Detection and red native-unsafe marking for model-less `World → driver →
+  visible body` probes. Trackmania crashes while loading that driver layout, so
+  the corresponding authoring action is not exposed.
+- Experimental blue **VISIBLE PATH PROXY** constraints. These use a complete
+  existing dyna model to test a native parent-child motion chain safely, with
+  an intentional extra visible copy.
 
 ### Changed
 

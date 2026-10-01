@@ -151,6 +151,22 @@ edits those stored fields directly; it does not replace them with a preset.
 Unsupported preview modes (including `IsDuration=true`) are reported and preserved,
 with no generic fallback animation. This is not a native-playback parity claim.
 
+For a flat, locally stored prefab with a supported existing kinematic body and
+constraint, the kinematics panel can experimentally append one additional
+body/constraint template. The new body deliberately shares the selected template's
+mesh and collision shapes and retains its world/parent binding; it does not convert
+static items, create collision geometry, or author a waypoint chain. Exported files
+must still be verified after a fresh Trackmania start: inventory discovery, placement,
+and in-map playback are all required checks.
+
+The first `World → driver → visible body` probe established that Trackmania crashes
+when loading a model-less, collision-less dyna driver. Studio therefore does not offer
+that authoring action. If such a probe is loaded, its constraint is highlighted in red
+as **INVISIBLE DRIVER — native-unsafe**; do not export it for the game. The separate
+blue **VISIBLE PATH PROXY** action uses a complete existing dyna model instead. It
+creates a visible duplicate to test `parent → proxy → original body` safely before an
+unproven hiding strategy is attempted.
+
 Run `npm --prefix Tests/Browser run test:kinematic-preservation` for the real
 SnowCar upload → variant switching → explicit edit → export → reopen regression.
 See [the test contract](Tests/Browser/MotionArchive/README.md) and the

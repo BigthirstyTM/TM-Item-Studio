@@ -1,7 +1,37 @@
 @using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 
-<fieldset class="motion-constraint">
-    <legend class="small fw-bold">@Name</legend>
+<fieldset class="motion-constraint @(IsInvisibleDriver ? "motion-invisible-driver" : IsVisualPathProxy ? "motion-path-proxy" : "")">
+    <legend class="small fw-bold d-flex flex-wrap align-items-center gap-1">
+        <span>@Name</span>
+        @if (IsInvisibleDriver)
+        {
+            <span class="badge text-bg-secondary ms-1" title="Carrier helper body. Includes a minimal safe mesh to prevent Trackmania crash.">CARRIER HELPER</span>
+        }
+        else if (IsVisualPathProxy)
+        {
+            <span class="badge text-bg-primary ms-1">VISIBLE PATH PROXY</span>
+        }
+
+        @if (IsRootConstraint)
+        {
+            <span class="badge text-bg-success ms-1" title="Directly attached to world (Ent1 = -1). Trackmania updates Havok collision in real time.">🟢 100% Havok Collision</span>
+        }
+        else
+        {
+            <span class="badge text-bg-warning text-dark ms-1" title="Chained to parent entity (Ent1 >= 0). Visually moves with parent, but Trackmania does not update Havok child collision.">🟡 Visueel (Geen child-collision in TM)</span>
+        }
+    </legend>
+    @if (!string.IsNullOrWhiteSpace(BindingDescription))
+    {
+        <div class="small text-muted mb-2"><span class="badge text-bg-light border text-secondary">@BindingDescription</span></div>
+    }
+    @if (IsInvisibleDriver)
+    {
+        <p class="motion-driver-warning">
+            This constraint targets a model-less driver. Trackmania crashes when loading this layout; do not export it for the game.
+            This warning itself does not block Studio export.
+        </p>
+    }
     <section class="motion-channel" aria-label="Translation controls">
         <h6>Translation <span class="small text-muted">m</span></h6>
         <div class="motion-range">
@@ -43,6 +73,10 @@
 @code {
     [Parameter, EditorRequired] public string Name { get; set; } = "Constraint";
     [Parameter, EditorRequired] public KC Source { get; set; } = null!;
+    [Parameter] public bool IsInvisibleDriver { get; set; }
+    [Parameter] public bool IsVisualPathProxy { get; set; }
+    [Parameter] public bool IsRootConstraint { get; set; } = true;
+    [Parameter] public string? BindingDescription { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
 
     private Task NotifyChanged() => Changed.InvokeAsync();
