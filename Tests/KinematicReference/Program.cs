@@ -118,6 +118,320 @@ if (args.Length > 1 && args[0] == "--inspect-mesh")
     }
     return 0;
 }
+if (args.Length > 0 && args[0] == "--generate-test-items")
+{
+    var folder = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items";
+    if (args.Length > 1) folder = args[1];
+
+    // 1. Relay A->B->C (100% Havok Collision)
+    {
+        var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()!;
+        var prefab = (CPlugPrefab)template.EntityModel!;
+        var constraint = (KC)prefab.Ents![1].Model!;
+        var res = ItemKinematicEntityTemplate.ConfigureRelayCollisionPath(
+            prefab, constraint, "doc:0/variant:none/root",
+            KC.EAxis.X, 5f, 2000,
+            KC.EAxis.Y, 5f, 2000);
+        Console.WriteLine($"Relay config: {res.Success} ({res.Reason})");
+        var path = Path.Combine(folder, "Test_Relay_Collision_A_B_C.Item.Gbx");
+        File.WriteAllBytes(path, Save(template));
+        Console.WriteLine($"Saved Relay item to: {path}");
+    }
+
+    // 2. Chained L-Path (Single body, smooth visual path)
+    {
+        var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()!;
+        var prefab = (CPlugPrefab)template.EntityModel!;
+        var constraint = (KC)prefab.Ents![1].Model!;
+        var res = ItemKinematicEntityTemplate.ConfigureChainedLPath(
+            prefab, constraint, "doc:0/variant:none/root",
+            KC.EAxis.X, 5f, 2000,
+            KC.EAxis.Y, 5f, 2000, isPingPong: true);
+        Console.WriteLine($"Chained config: {res.Success} ({res.Reason})");
+        var path = Path.Combine(folder, "Test_Chained_Visual_A_B_C.Item.Gbx");
+        File.WriteAllBytes(path, Save(template));
+        Console.WriteLine($"Saved Chained item to: {path}");
+    }
+
+    return 0;
+}
+if (args.Length > 0 && args[0] == "--create-l-item")
+{
+    var folder = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items";
+    var customItemPath = Path.Combine(folder, "CustomItem.Item.Gbx");
+    var existingItem = ParseItem(customItemPath);
+    var existingPrefab = (CPlugPrefab)existingItem.EntityModel!;
+    var userDyna = (CPlugDynaObjectModel)existingPrefab.Ents![0].Model!;
+    var userMesh = (CPlugSolid2Model)userDyna.Mesh!;
+
+    // Generate accurate collision surface from user mesh
+    var userShape = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh)
+        ?? (CPlugSurface)userDyna.StaticShape!;
+
+    // 1. Clean Topological Parent-Child L-Path (Carrier Ent 0 -> Visible Ent 2)
+    {
+        var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()!;
+        template.Ident = existingItem.Ident;
+        template.Name = existingItem.Name;
+        template.DefaultPlacement = existingItem.DefaultPlacement;
+
+        var carrierMesh = (CPlugSolid2Model)typeof(ItemKinematicEntityTemplate)
+            .GetMethod("CreateCarrierMesh", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, null)!;
+        var carrierShape = (CPlugSurface)typeof(ItemKinematicEntityTemplate)
+            .GetMethod("CreateCarrierShape", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, null)!;
+
+        var carrierBody = new CPlugDynaObjectModel
+        {
+            Version = 13,
+            IsStatic = false,
+            DynamizeOnSpawn = false,
+            Mass = 100,
+            BreakSpeedKmh = 100,
+            Mesh = carrierMesh,
+            StaticShape = carrierShape,
+            DynaShape = carrierShape
+        };
+        var carrierInstance = new NPlugDynaObjectModel_SInstanceParams
+        {
+            Version = 2,
+            PeriodSc = 1,
+            PeriodScMax = -1,
+            Phase01 = -1,
+            Phase01Max = -1,
+            TextureId = 0,
+            IsKinematic = true,
+            CastStaticShadow = false
+        };
+
+        var visibleBody = new CPlugDynaObjectModel
+        {
+            Version = 13,
+            IsStatic = false,
+            DynamizeOnSpawn = false,
+            Mass = 100,
+            BreakSpeedKmh = 100,
+            Mesh = userMesh,
+            StaticShape = userShape,
+            DynaShape = userShape
+        };
+        var visibleInstance = new NPlugDynaObjectModel_SInstanceParams
+        {
+            Version = 2,
+            PeriodSc = 1,
+            PeriodScMax = -1,
+            Phase01 = -1,
+            Phase01Max = -1,
+            TextureId = 0,
+            IsKinematic = true,
+            CastStaticShadow = true
+        };
+
+        // Constraint 0: Carrier to World (Ent1 = -1, Ent2 = 0) -> Moves X 0..5
+        var c0 = new KC
+        {
+            Version = 0,
+            SubVersion = 3,
+            TransAxis = KC.EAxis.X,
+            TransMin = 0,
+            TransMax = 5,
+            RotAxis = KC.EAxis.Y,
+            AngleMinDeg = 0,
+            AngleMaxDeg = 0,
+            TransAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs =
+                [
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(4000) },
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(2000) }
+                ]
+            },
+            RotAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(6600) }]
+            }
+        };
+        var p0 = new NPlugDyna_SPrefabConstraintParams
+        {
+            Version = 0,
+            Ent1 = -1,
+            Ent2 = 0,
+            Pos1 = default,
+            Pos2 = default
+        };
+
+        // Constraint 1: Visible to Carrier (Ent1 = 0, Ent2 = 1) -> Moves Y 0..5
+        var c1 = new KC
+        {
+            Version = 0,
+            SubVersion = 3,
+            TransAxis = KC.EAxis.Y,
+            TransMin = 0,
+            TransMax = 5,
+            RotAxis = KC.EAxis.Y,
+            AngleMinDeg = 0,
+            AngleMaxDeg = 0,
+            TransAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs =
+                [
+                    new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(2000) }
+                ]
+            },
+            RotAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(6600) }]
+            }
+        };
+        var p1 = new NPlugDyna_SPrefabConstraintParams
+        {
+            Version = 0,
+            Ent1 = 0,
+            Ent2 = 1,
+            Pos1 = default,
+            Pos2 = default
+        };
+
+        var prefab = (CPlugPrefab)template.EntityModel!;
+        prefab.Ents =
+        [
+            new() { Model = carrierBody, Params = carrierInstance, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+            new() { Model = c0, Params = p0, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+            new() { Model = visibleBody, Params = visibleInstance, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+            new() { Model = c1, Params = p1, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" }
+        ];
+
+        File.WriteAllBytes(customItemPath, Save(template));
+        Console.WriteLine($"[1] Saved clean topological L-item to: {customItemPath}");
+    }
+
+    // 2. Single Body Dual Root Constraints (Ent1 = -1, Ent2 = 0 on both)
+    {
+        var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()!;
+        template.Ident = existingItem.Ident;
+        template.Name = existingItem.Name;
+        template.DefaultPlacement = existingItem.DefaultPlacement;
+
+        var visibleBody = new CPlugDynaObjectModel
+        {
+            Version = 13,
+            IsStatic = false,
+            DynamizeOnSpawn = false,
+            Mass = 100,
+            BreakSpeedKmh = 100,
+            Mesh = userMesh,
+            StaticShape = userShape,
+            DynaShape = userShape
+        };
+        var visibleInstance = new NPlugDynaObjectModel_SInstanceParams
+        {
+            Version = 2,
+            PeriodSc = 1,
+            PeriodScMax = -1,
+            Phase01 = -1,
+            Phase01Max = -1,
+            TextureId = 0,
+            IsKinematic = true,
+            CastStaticShadow = true
+        };
+
+        // Constraint 0: X axis (0..5m)
+        var c0 = new KC
+        {
+            Version = 0,
+            SubVersion = 3,
+            TransAxis = KC.EAxis.X,
+            TransMin = 0,
+            TransMax = 5,
+            RotAxis = KC.EAxis.Y,
+            AngleMinDeg = 0,
+            AngleMaxDeg = 0,
+            TransAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs =
+                [
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(4000) },
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(2000) }
+                ]
+            },
+            RotAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(6600) }]
+            }
+        };
+        var p0 = new NPlugDyna_SPrefabConstraintParams
+        {
+            Version = 0,
+            Ent1 = -1,
+            Ent2 = 0,
+            Pos1 = default,
+            Pos2 = default
+        };
+
+        // Constraint 1: Y axis (0..5m)
+        var c1 = new KC
+        {
+            Version = 0,
+            SubVersion = 3,
+            TransAxis = KC.EAxis.Y,
+            TransMin = 0,
+            TransMax = 5,
+            RotAxis = KC.EAxis.Y,
+            AngleMinDeg = 0,
+            AngleMaxDeg = 0,
+            TransAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs =
+                [
+                    new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(2000) },
+                    new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(2000) }
+                ]
+            },
+            RotAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(6600) }]
+            }
+        };
+        var p1 = new NPlugDyna_SPrefabConstraintParams
+        {
+            Version = 0,
+            Ent1 = -1,
+            Ent2 = 0,
+            Pos1 = default,
+            Pos2 = default
+        };
+
+        var prefab = (CPlugPrefab)template.EntityModel!;
+        prefab.Ents =
+        [
+            new() { Model = visibleBody, Params = visibleInstance, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+            new() { Model = c0, Params = p0, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+            new() { Model = c1, Params = p1, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" }
+        ];
+
+        var dualPath = Path.Combine(folder, "CustomItem_DualRoot.Item.Gbx");
+        File.WriteAllBytes(dualPath, Save(template));
+        Console.WriteLine($"[2] Saved single-body dual-root L-item to: {dualPath}");
+    }
+
+    return 0;
+}
 
 int passed = 0, failed = 0;
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
