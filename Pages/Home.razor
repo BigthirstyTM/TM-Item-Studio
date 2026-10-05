@@ -11,7 +11,9 @@
 @using System.Text
 @using System.Globalization
 @using System.Reflection
+@using System.Numerics
 @using TM_Item_Studio.Models
+@using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 @inject IJSRuntime JS
 
 <PageTitle>Trackmania 2020 Item Studio</PageTitle>
@@ -81,6 +83,12 @@
                         <button class="btn @(showLights ? "btn-info text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("lights"))">
                             Lights (@detectedLights.Count)
                         </button>
+                        @if (authoredConstraints.Count > 0)
+                        {
+                            <button class="btn @(showWaypoints ? "btn-success text-white" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("waypoints"))" title="Toon/verberg interactieve 3D Waypoints (A/B punten)">
+                                Paden (@authoredConstraints.Count)
+                            </button>
+                        }
                     </div>
 
                     <div class="studio-variants" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
@@ -104,6 +112,17 @@
                         }
                         <span class="visually-hidden" role="status">@(isSelectingVariant ? "Loading variant…" : "Variant ready. Export preserves every variant in the selected file.")</span>
                     </div>
+                    @if (CanCombineFiles)
+                    {
+                        <div class="form-check form-switch ms-2">
+                            <input class="form-check-input" id="compositeViewportMode" type="checkbox" @bind="compositeViewportMode" @bind:after="OnCompositeModeChanged" />
+                            <label class="form-check-label small" for="compositeViewportMode">Composite viewport (multi-item)</label>
+                        </div>
+                    }
+                    @if (compositeViewportMode && SelectedSource is not null)
+                    {
+                        <span class="small text-info">Active item: <strong>@SelectedSource.Name</strong></span>
+                    }
 
                     <!-- Animation and general controls -->
                     <div class="studio-view-controls">
@@ -144,9 +163,22 @@
                     <span><span style="color: #b8bdc6;">■</span> Mesh</span>
                     <span class="ms-2"><span style="color: #facc15;">●</span> Pivot</span>
                     <span class="ms-2"><span style="color: #fffbeb;">💡</span> Light</span>
+                    @if (authoredConstraints.Count > 0)
+                    {
+                        <span class="ms-2"><span style="color: #22c55e;">●</span> Punt A (Start)</span>
+                        <span class="ms-2"><span style="color: #f97316;">●</span> Punt B (Eind)</span>
+                        <span class="ms-2"><span style="color: #00ffff;">➔</span> Bewegingspad</span>
+                    }
                 </div>
                 <div>
-                    <em>Tip: Select a pivot gizmo and move it with the transform arrows. Lights can be selected but not moved.</em>
+                    @if (authoredConstraints.Count > 0)
+                    {
+                        <em>Tip: Klik op een constraint of de 3D waypoints (A/B) om het pad direct in 3D te verplaatsen met de transform gizmo.</em>
+                    }
+                    else
+                    {
+                        <em>Tip: Select a pivot gizmo and move it with the transform arrows. Lights can be selected but not moved.</em>
+                    }
                 </div>
             </div>
             @if (hasMesh)
@@ -468,27 +500,247 @@
                         @if (!isMovingItem)
                         {
                             <p class="small text-muted mb-2">
-                                This item is a <strong>static object</strong>. Changing <code>ItemType</code> alone does not author the
-                                <code>NPlugDyna*</code> objects and constraints a moving item needs, so this editor cannot convert it.
+                                Dit item is een <strong>statisch object</strong>. Converteer het naar een <strong>KinematicObject</strong> om beweging toe te voegen.
+                                De botsing (collision surface) wordt automatisch afgeleid van het visuele 3D-model, zodat de auto direct correct botst.
                             </p>
-                            <button class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true"
-                                    title="Conversion is unsupported: the dynamic object/constraint graph must be authored by an external tool.">
-                                ⚙️ Convert to KinematicObject (unsupported)
-                            </button>
-                            <p class="small text-muted mt-2 mb-0">
-                                Author moving items with an external tool; the kinematic graph must already exist in the file.
-                            </p>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <button class="btn btn-sm btn-primary" @onclick="ConvertStaticItemToKinematic"
+                                        title="Converteert dit statische item met 1 klik naar een bewegend item met 100% accurate botsing.">
+                                    ⚙️ Converteer naar KinematicObject (1-klik)
+                                </button>
+                                <span class="badge text-bg-success">Inclusief auto-collision</span>
+                            </div>
+                            <details class="text-muted small mt-2">
+                                <summary class="cursor-pointer">Optioneel: eigen templates uploaden (voor gevorderden)</summary>
+                                <div class="mt-2">
+                                    <label class="form-label mb-1 small fw-bold">Moving item template (.Item.Gbx)</label>
+                                    <InputFile OnChange="UploadMovingTemplate" accept=".gbx" class="form-control form-control-sm" />
+                                    @if (!string.IsNullOrWhiteSpace(movingTemplateStatus))
+                                    {
+                                        <div class="small text-muted mt-1">@movingTemplateStatus</div>
+                                    }
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label mb-1 small fw-bold">Constraint template (.Constraint.Gbx)</label>
+                                    <InputFile OnChange="UploadConstraintTemplate" accept=".gbx" class="form-control form-control-sm" />
+                                    @if (!string.IsNullOrWhiteSpace(constraintTemplateStatus))
+                                    {
+                                        <div class="small text-muted mt-1">@constraintTemplateStatus</div>
+                                    }
+                                </div>
+                            </details>
                         }
                         else if (authoredConstraints.Count > 0)
                         {
-                            <p role="status" class="small text-muted mb-2" title="Only explicit edits change the file. A shared constraint affects all its instances.">Using authored motion settings</p>
+                            <!-- Path & Collision Generator Card -->
+                            <div class="card border-primary mb-3 shadow-sm">
+                                <div class="card-header bg-primary text-white py-1 d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold"><i class="bi bi-bezier2"></i> Beweging & Pad Assistent (A ➔ B ➔ C)</span>
+                                    <span class="badge bg-light text-primary">1-Klik Generatie</span>
+                                </div>
+                                <div class="card-body p-2 small">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">Kies Bewegingstype / Preset</label>
+                                        <div class="d-flex flex-column gap-1">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetRelay" value="relay" checked="@(pathPresetMode == "relay")" @onchange="@(() => pathPresetMode = "relay")" />
+                                                <label class="form-check-label" for="presetRelay">
+                                                    <strong>A ➔ B ➔ C Pad (100% Havok Collision - Relay)</strong>
+                                                    <span class="badge text-bg-success ms-1">Aanbevolen voor gameplay</span>
+                                                    <div class="text-muted" style="font-size: 0.85em;">Gebruikt gesynchroniseerde root-bodies. De auto botst fysiek op élk deel van het pad.</div>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetHandover" value="handover" checked="@(pathPresetMode == "handover")" @onchange="@(() => pathPresetMode = "handover")" />
+                                                <label class="form-check-label" for="presetHandover">
+                                                    <strong>L-Pad met Occluder / Parked Handover (100% Collision)</strong>
+                                                    <span class="badge text-bg-success ms-1">Bewezen Root-Bodies</span>
+                                                    <div class="text-muted" style="font-size: 0.85em;">Body 1 beweegt A➔B. Body 2 (onzichtbaar in tunnel/wand of geparkeerd) neemt bij B over naar C➔B waarna Body 1 teruggaat.</div>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetChained" value="chained" checked="@(pathPresetMode == "chained")" @onchange="@(() => pathPresetMode = "chained")" />
+                                                <label class="form-check-label" for="presetChained">
+                                                    <strong>A ➔ B ➔ C Pad (Enkel Lichaam - Vloeiend Chained)</strong>
+                                                    <span class="badge text-bg-warning text-dark ms-1">Visueel vloeiend</span>
+                                                    <div class="text-muted" style="font-size: 0.85em;">Eén enkel blok volgt visueel een L-pad via een veilige carrier. Collision werkt in TM op de hoofdas.</div>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetSingle" value="single_axis" checked="@(pathPresetMode == "single_axis")" @onchange="@(() => pathPresetMode = "single_axis")" />
+                                                <label class="form-check-label" for="presetSingle">
+                                                    <strong>1-As Lineaire Beweging (Heen & Weer / Lift / Deur)</strong>
+                                                    <span class="badge text-bg-success ms-1">100% Collision</span>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="pathPresetMode" id="presetRotation" value="rotation" checked="@(pathPresetMode == "rotation")" @onchange="@(() => pathPresetMode = "rotation")" />
+                                                <label class="form-check-label" for="presetRotation">
+                                                    <strong>Rotatie / Draaiend Obstakel (360° Molen / Spinner)</strong>
+                                                    <span class="badge text-bg-success ms-1">100% Collision</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if (pathPresetMode is "relay" or "chained" or "handover")
+                                    {
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-12 fw-bold text-secondary">Segment 1 (A ➔ B)</div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">As</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment1Axis">
+                                                    <option value="x">X As</option>
+                                                    <option value="y">Y As</option>
+                                                    <option value="z">Z As</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Afstand (m)</label>
+                                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment1Distance" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-12 fw-bold text-secondary">Segment 2 (B ➔ C)</div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">As</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment2Axis">
+                                                    <option value="x">X As</option>
+                                                    <option value="y">Y As</option>
+                                                    <option value="z">Z As</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Afstand (m)</label>
+                                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment2Distance" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment2Duration" />
+                                            </div>
+                                        </div>
+
+                                        @if (pathPresetMode == "chained")
+                                        {
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="pathLoopType" @bind="pathIsPingPong" />
+                                                <label class="form-check-label" for="pathLoopType">
+                                                    @(pathIsPingPong ? "Ping-Pong (A ➔ B ➔ C ➔ B ➔ A)" : "Gesloten Lus (Rechthoek A ➔ B ➔ C ➔ D ➔ A)")
+                                                </label>
+                                            </div>
+                                        }
+                                    }
+                                    else if (pathPresetMode == "single_axis")
+                                    {
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">As</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment1Axis">
+                                                    <option value="x">X As</option>
+                                                    <option value="y">Y As</option>
+                                                    <option value="z">Z As</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Afstand (m)</label>
+                                                <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment1Distance" />
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
+                                            </div>
+                                            <div class="col-12 mt-1">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="singlePingPong" @bind="pathIsPingPong" />
+                                                    <label class="form-check-label" for="singlePingPong">
+                                                        @(pathIsPingPong ? "Heen & Weer (Ping-Pong)" : "Éénrichting (Loop)")
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (pathPresetMode == "rotation")
+                                    {
+                                        <div class="row g-2 border-top pt-2 mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Draai-as</label>
+                                                <select class="form-select form-select-sm" @bind="pathSegment1Axis">
+                                                    <option value="y">Y As (Horizontaal draaien)</option>
+                                                    <option value="x">X As (Wiel/Rol)</option>
+                                                    <option value="z">Z As (Windmolen)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duur per ronde (sec)</label>
+                                                <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" @onclick="ApplyPathPreset">
+                                        🚀 Genereer & Toepassen op Item
+                                    </button>
+
+                                    @if (!string.IsNullOrWhiteSpace(pathStatusMessage))
+                                    {
+                                        <div class="alert alert-success py-1 mt-2 mb-0 small">@pathStatusMessage</div>
+                                    }
+
+                                    <div class="alert alert-light border mt-2 mb-0 text-muted" style="font-size: 0.8em;">
+                                        <strong>💡 Havok Collision Kennis (Trackmania 2020):</strong>
+                                        <ul class="mb-0 ps-3">
+                                            <li><strong>Root Constraints (<code>Ent1 = -1</code>):</strong> Hebben 100% dynamische botsing in de game (de auto stuitert/rijdt op het blok).</li>
+                                            <li><strong>Chained Constraints (<code>Ent1 &ge; 0</code>):</strong> Volgen het pad visueel vloeiend, maar de game-engine van Nadeo verplaatst het Havok-fysica lichaam niet mee. Voor gameplay-obstakels raden we de <strong>Relay</strong> preset aan!</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p role="status" class="small text-muted mb-2" title="Only explicit edits change the file. A shared constraint affects all its instances.">Gedetailleerde Constraints & Timeline Edits</p>
+                            @if (!string.IsNullOrWhiteSpace(kinematicTemplateStatus))
+                            {
+                                <p role="status" class="small text-info">@kinematicTemplateStatus</p>
+                            }
                             @foreach (var diagnostic in motionDiagnostics)
                             {
                                 <p role="status" class="small text-warning">Preview unavailable: @diagnostic</p>
                             }
                             @for (var i = 0; i < authoredConstraints.Count; i++)
                             {
-                                <AuthoredMotionEditor @key="authoredConstraints[i]" Name="@($"Constraint {i + 1}")" Source="authoredConstraints[i]" Changed="UpdateScenePayload" />
+                                var constraint = authoredConstraints[i];
+                                var cIdx = i;
+                                <AuthoredMotionEditor @key="constraint" Name="@($"Constraint {i + 1}")" Source="constraint"
+                                                      ConstraintIndex="cIdx"
+                                                      IsSelected="@(selectedConstraintIndex == cIdx)"
+                                                      SelectedWaypointIsPointB="@(selectedConstraintIndex == cIdx ? selectedWaypointIsPointB : (bool?)null)"
+                                                      OnSelectConstraint="@(idx => SelectConstraint(idx))"
+                                                      OnSelectWaypoint="@(isB => SelectWaypoint(cIdx, isB))"
+                                                      IsInvisibleDriver="@IsInvisibleDriverConstraint(constraint)"
+                                                      IsVisualPathProxy="@IsVisiblePathProxyConstraint(constraint)"
+                                                      IsRootConstraint="@IsRootConstraint(constraint)"
+                                                      BindingDescription="@GetBindingDescription(constraint)"
+                                                      CanRemove="@(authoredConstraints.Count > 1)"
+                                                      OnRemoveConstraint="@(c => RemoveConstraint(c))"
+                                                      Changed="UpdateScenePayload" />
+                                <button class="btn btn-sm btn-outline-warning mb-3" disabled="@(!acknowledgeKinematicTemplate)"
+                                        @onclick="@(() => AddKinematicEntity(constraint))">
+                                    Add kinematic entity from Constraint @(i + 1)
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary mb-3 ms-2" disabled="@(!acknowledgeKinematicTemplate)"
+                                        title="Adds a complete, visible proxy body before this constraint to test a native parent-child path safely."
+                                        @onclick="@(() => InsertVisiblePathProxy(constraint))">
+                                    Add visible path proxy before Constraint @(i + 1)
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary mb-3 ms-2" disabled="@(!acknowledgeKinematicTemplate)"
+                                        title="Adds a mesh-hidden carrier parent before this constraint so one visible body can follow chained segments."
+                                        @onclick="@(() => InsertHiddenCarrierParent(constraint))">
+                                    Add hidden carrier parent before Constraint @(i + 1)
+                                </button>
                             }
                         }
                         else
@@ -723,6 +975,100 @@
                         <div class="col-6"><div class="card bg-light p-2 small"><strong>Visual geometry</strong><br />@vertexCount vertices</div></div>
                         <div class="col-6"><div class="card bg-light p-2 small"><strong>LOD</strong><br />@(HasNode("LOD", "Lod") ? "Present" : "Not found")</div></div>
                     </div>
+                    <div class="card mb-2">
+                        <div class="card-header py-1 fw-bold">Mesh configuration (@modelParts.Count)</div>
+                        <div class="card-body p-2">
+                            @if (modelParts.Count == 0)
+                            {
+                                <p class="small text-muted mb-0">No mesh parts found.</p>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0 mesh-config-table">
+                                        <thead>
+                                        <tr>
+                                            <th class="mesh-col-part">Part</th>
+                                            <th>Type</th>
+                                            <th class="text-end">Verts</th>
+                                            <th class="text-end">Tris</th>
+                                            <th class="text-center">En</th>
+                                            <th class="text-center">Vis</th>
+                                            <th class="text-center">Col</th>
+                                            <th class="text-center">Eff</th>
+                                            <th class="text-center">Way</th>
+                                            <th class="text-center">Mov</th>
+                                            <th class="mesh-col-materials">Materials</th>
+                                            <th style="min-width: 160px;">Motion</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach (var part in modelParts)
+                                        {
+                                            var selected = selectedMeshPartPath == part.Path;
+                                            var cfg = GetMeshPartConfig(part.Path);
+                                            <tr class="@(selected ? "table-primary" : "")"
+                                                style="cursor:pointer"
+                                                @onclick="@(() => SelectMeshPart(part.Path))">
+                                                <td>
+                                                    <div class="fw-semibold">@part.Name</div>
+                                                    <div class="text-muted small text-break">@part.Path</div>
+                                                </td>
+                                                <td class="small">Mesh</td>
+                                                <td class="text-end">@part.VertexCount</td>
+                                                <td class="text-end">@part.TriangleCount</td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Enabled" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Visible" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Collidable" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Effect" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Waypoint" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Movable" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                </td>
+                                                <td class="small">@part.MaterialSummary</td>
+                                                <td>
+                                                    <select class="form-select form-select-sm"
+                                                            value="@GetMeshPartMode(part.Path)"
+                                                            @onclick:stopPropagation="true"
+                                                            @onchange="@(e => OnMeshPartModeChanged(part.Path, e))">
+                                                        <option value="auto">Auto</option>
+                                                        <option value="static">Static</option>
+                                                        <option value="kinematic">Kinematic</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @if (selectedMeshPartPath is not null)
+                                {
+                                    var selectedPart = modelParts.FirstOrDefault(part => part.Path == selectedMeshPartPath);
+                                    if (selectedPart is not null)
+                                    {
+                                        var selectedCfg = GetMeshPartConfig(selectedPart.Path);
+                                        <div class="alert alert-info py-2 mt-2 mb-0 small mesh-selection-summary">
+                                            <div class="fw-bold mb-1">Selected part</div>
+                                            <div class="mb-1"><code>@selectedPart.Name</code></div>
+                                            <div class="mb-1 text-break">@selectedPart.Path</div>
+                                            <div><strong>Function:</strong> @DescribeMeshFunction(selectedPart, selectedCfg)</div>
+                                        </div>
+                                    }
+                                }
+                                <p class="small text-muted mb-0 mt-2">Klik in de lijst of in de viewport om een part te selecteren. En/Vis/Col/Eff/Way/Mov werken direct in de preview. Motion beïnvloedt ook export waar het eenduidig per entiteit kan; gemixte modes binnen één entiteit blijven read-only.</p>
+                            }
+                        </div>
+                    </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <strong class="small">Authored materials (@detectedMaterials.Count)</strong>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="SelectTextureDirectory">Choose local texture folder</button>
@@ -786,7 +1132,194 @@
             {
                 <div class="p-2 border-top bg-light">
                     <button class="btn btn-sm btn-outline-primary" disabled="@(!CanExportCombinedFiles)" @onclick="@(() => ExportGbx(combineFiles: true))">Combine loaded files as variants</button>
+                    <button class="btn btn-sm btn-outline-success ms-2" disabled="@(!CanExportCompositeMerged)" @onclick="ExportMergedCompositeGbx">Merge loaded files into one item</button>
                     <small class="d-block text-muted">Uses item metadata, icon and placement from @variantSources[0].Name.</small>
+                    <small class="d-block text-muted">Merge creates one root prefab with nested prefab parts (DeathPit-style multipart assembly).</small>
+                    <details class="mt-2 studio-composite-details">
+                        <summary class="small fw-semibold">Composite world transforms & group motion</summary>
+                        <div class="mt-2">
+                        <div class="d-flex align-items-center gap-2 fw-semibold small">
+                            <span>Merged source world transforms</span>
+                            <button class="btn btn-xs @(compositeTransformMode == "translate" ? "btn-primary" : "btn-outline-secondary")"
+                                    style="font-size:0.7em;" @onclick="@(() => SetCompositeTransformMode("translate"))">Move</button>
+                            <button class="btn btn-xs @(compositeTransformMode == "rotate" ? "btn-primary" : "btn-outline-secondary")"
+                                    style="font-size:0.7em;" @onclick="@(() => SetCompositeTransformMode("rotate"))">Rotate</button>
+                            <button class="btn btn-xs btn-outline-success" style="font-size:0.7em;"
+                                    disabled="@(compositeSelectionOrder.Count < 2)" @onclick="ConnectCompositePivotSelection">Connect pivots</button>
+                            <button class="btn btn-xs btn-outline-info" style="font-size:0.7em;"
+                                    disabled="@(compositeSelectionOrder.Count < 2)" @onclick="CreateCompositeGroupFromSelection">Create group</button>
+                            <button class="btn btn-xs btn-outline-warning" style="font-size:0.7em;"
+                                    disabled="@(compositeSelectionOrder.Count == 0)" @onclick="UngroupCompositeSelection">Ungroup selection</button>
+                            <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;"
+                                    disabled="@(compositeSelectionOrder.Count == 0)" @onclick="ClearCompositePivotSelection">Clear selection</button>
+                        </div>
+                        <small class="text-muted">Select item(s) in viewport: first click = leader, Ctrl/Shift click = add followers.</small>
+                        @foreach (var part in CompositeViewportSources())
+                        {
+                            var offset = GetCompositeWorldOffset(part.SourceIndex);
+                            var selected = compositeSelectionOrder.Contains(part.SourceIndex);
+                            var isLeader = compositeSelectionOrder.Count > 0 && compositeSelectionOrder[0] == part.SourceIndex;
+                            var hasGroup = compositeGroupBySourceIndex.TryGetValue(part.SourceIndex, out var sourceGroupId);
+                            var sourceGroupColor = hasGroup ? CompositeGroupColor(sourceGroupId) : "#6b7280";
+                            <div class="d-flex align-items-center flex-wrap gap-2 mt-1 small studio-transform-row @(selected ? "studio-transform-row-selected" : "") @(isLeader ? "studio-transform-row-leader" : "")">
+                                <span style="min-width: 190px;" class="text-truncate @(selected ? "fw-semibold text-info" : "")">@part.Source.Name</span>
+                                @if (isLeader)
+                                {
+                                    <span class="badge rounded-pill text-bg-primary">Leader</span>
+                                }
+                                @if (selected && !isLeader)
+                                {
+                                    <span class="badge rounded-pill text-bg-info text-dark">Selected</span>
+                                }
+                                @if (hasGroup)
+                                {
+                                    <span class="badge rounded-pill studio-group-badge" style="@($"--group-color:{sourceGroupColor}")">Group @(sourceGroupId + 1)</span>
+                                }
+                                <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" title="Selecteer world offset gizmo in viewport"
+                                        @onclick="@(() => SelectCompositeOffsetGizmo(part.SourceIndex))">🎯</button>
+                                <label class="mb-0">X</label>
+                                <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                       @bind="offset.X" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0">Y</label>
+                                <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                       @bind="offset.Y" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0">Z</label>
+                                <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                       @bind="offset.Z" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0">RX</label>
+                                <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
+                                       @bind="offset.RotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0">RY</label>
+                                <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
+                                       @bind="offset.RotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0">RZ</label>
+                                <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
+                                       @bind="offset.RotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                            </div>
+                        }
+                        @if (compositeGroupTransforms.Count > 0)
+                        {
+                            <div class="fw-semibold small mt-2">Group transforms</div>
+                            @foreach (var group in CompositeGroups())
+                            {
+                                var transform = group.Transform;
+                                var motion = GetCompositeGroupMotion(group.GroupId);
+                                var groupColor = CompositeGroupColor(group.GroupId);
+                                <div class="d-flex align-items-center flex-wrap gap-2 mt-1 small studio-transform-row studio-group-row" style="@($"--group-color:{groupColor}")">
+                                    <span style="min-width: 190px;" class="text-truncate text-warning fw-semibold">@group.Label</span>
+                                    <span class="badge rounded-pill studio-group-badge" style="@($"--group-color:{groupColor}")">Members @CompositeGroupMembersCount(group.GroupId)</span>
+                                    <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;"
+                                            title="Selecteer group gizmo in viewport"
+                                            @onclick="@(() => SelectCompositeGroupGizmo(group.GroupId))">🎯</button>
+                                    <label class="mb-0">X</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                           @bind="transform.X" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">Y</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                           @bind="transform.Y" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">Z</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                           @bind="transform.Z" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">RX</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
+                                           @bind="transform.RotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">RY</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
+                                           @bind="transform.RotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">RZ</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
+                                           @bind="transform.RotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">PX</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                           @bind="transform.PivotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">PY</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                           @bind="transform.PivotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                    <label class="mb-0">PZ</label>
+                                    <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
+                                           @bind="transform.PivotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                </div>
+                                <div class="motion-constraint mt-2 mb-2">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <strong>Group motion</strong>
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" type="checkbox" id="@($"group-motion-{group.GroupId}")" @bind="motion.Enabled" @bind:after="OnCompositeWorldOffsetChanged" />
+                                            <label class="form-check-label" for="@($"group-motion-{group.GroupId}")">Active</label>
+                                        </div>
+                                    </div>
+                                    <div class="motion-channel">
+                                        <h6>Translation m</h6>
+                                        <div class="motion-range">
+                                            <label class="small text-muted mb-0">Axis</label>
+                                            <label class="small text-muted mb-0">From</label>
+                                            <label class="small text-muted mb-0">To</label>
+                                            <select class="form-select form-select-sm" @bind="motion.TransAxis" @bind:after="OnCompositeWorldOffsetChanged">
+                                                <option value="X">X</option>
+                                                <option value="Y">Y</option>
+                                                <option value="Z">Z</option>
+                                            </select>
+                                            <input type="number" class="form-control form-control-sm" step="0.1" @bind="motion.TransMin" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                            <input type="number" class="form-control form-control-sm" step="0.1" @bind="motion.TransMax" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        </div>
+                                        <div class="motion-segment-grid motion-segment-labels">
+                                            <span>#</span><span>Duration ms</span><span>Easing</span><span>Reverse</span>
+                                        </div>
+                                        <div class="motion-segment-grid">
+                                            <span class="motion-segment-number">1</span>
+                                            <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.TransDurationA" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                            <select class="form-select form-select-sm" @bind="motion.TransEaseA" @bind:after="OnCompositeWorldOffsetChanged">
+                                                <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
+                                            </select>
+                                            <input type="checkbox" @bind="motion.TransReverseA" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        </div>
+                                        <div class="motion-segment-grid">
+                                            <span class="motion-segment-number">2</span>
+                                            <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.TransDurationB" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                            <select class="form-select form-select-sm" @bind="motion.TransEaseB" @bind:after="OnCompositeWorldOffsetChanged">
+                                                <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
+                                            </select>
+                                            <input type="checkbox" @bind="motion.TransReverseB" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        </div>
+                                    </div>
+                                    <div class="motion-channel">
+                                        <h6>Rotation °</h6>
+                                        <div class="motion-range">
+                                            <label class="small text-muted mb-0">Axis</label>
+                                            <label class="small text-muted mb-0">From</label>
+                                            <label class="small text-muted mb-0">To</label>
+                                            <select class="form-select form-select-sm" @bind="motion.RotAxis" @bind:after="OnCompositeWorldOffsetChanged">
+                                                <option value="X">X</option>
+                                                <option value="Y">Y</option>
+                                                <option value="Z">Z</option>
+                                            </select>
+                                            <input type="number" class="form-control form-control-sm" step="1" @bind="motion.RotMinDeg" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                            <input type="number" class="form-control form-control-sm" step="1" @bind="motion.RotMaxDeg" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        </div>
+                                        <div class="motion-segment-grid motion-segment-labels">
+                                            <span>#</span><span>Duration ms</span><span>Easing</span><span>Reverse</span>
+                                        </div>
+                                        <div class="motion-segment-grid">
+                                            <span class="motion-segment-number">1</span>
+                                            <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.RotDurationA" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                            <select class="form-select form-select-sm" @bind="motion.RotEaseA" @bind:after="OnCompositeWorldOffsetChanged">
+                                                <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
+                                            </select>
+                                            <input type="checkbox" @bind="motion.RotReverseA" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        </div>
+                                        <div class="motion-segment-grid">
+                                            <span class="motion-segment-number">2</span>
+                                            <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.RotDurationB" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                            <select class="form-select form-select-sm" @bind="motion.RotEaseB" @bind:after="OnCompositeWorldOffsetChanged">
+                                                <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
+                                            </select>
+                                            <input type="checkbox" @bind="motion.RotReverseB" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        </div>
+                    </details>
                 </div>
             }
         </div>
@@ -806,6 +1339,210 @@
         }
     }
 
+    private IReadOnlyList<(int SourceIndex, ItemVariantSource Source, int DocumentOrdinal)> CompositeViewportSources()
+    {
+        var grouped = variantSources.Select((source, index) => (source, index)).GroupBy(item => item.source.GbxFile).ToArray();
+        var selected = new List<(int SourceIndex, ItemVariantSource Source, int DocumentOrdinal)>(grouped.Length);
+        var doc = 0;
+        foreach (var fileGroup in grouped)
+        {
+            var file = fileGroup.Key;
+            var sourceIndex = compositeVariantSelection.TryGetValue(file, out var mapped)
+                && mapped >= 0 && mapped < variantSources.Count
+                && ReferenceEquals(variantSources[mapped].GbxFile, file)
+                ? mapped
+                : fileGroup.First().index;
+            _ = GetCompositeWorldOffset(sourceIndex);
+            selected.Add((sourceIndex, variantSources[sourceIndex], doc));
+            doc++;
+        }
+        return selected;
+    }
+
+    private CompositeWorldTransform GetCompositeWorldOffset(int sourceIndex)
+    {
+        if (!compositeWorldOffsets.TryGetValue(sourceIndex, out var offset))
+        {
+            offset = new CompositeWorldTransform();
+            compositeWorldOffsets[sourceIndex] = offset;
+        }
+        return offset;
+    }
+
+    private static Matrix4x4 MatrixFromPacked(float[] packed)
+        => new(packed[0], packed[1], packed[2], packed[3],
+            packed[4], packed[5], packed[6], packed[7],
+            packed[8], packed[9], packed[10], packed[11],
+            packed[12], packed[13], packed[14], packed[15]);
+
+    private static float[] PackMatrix(Matrix4x4 matrix)
+        => [matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24,
+            matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44];
+
+    private Vector3 GetSourcePivotPosition(int sourceIndex)
+    {
+        if (sourceIndex < 0 || sourceIndex >= variantSources.Count)
+            return Vector3.Zero;
+        var pivots = variantSources[sourceIndex].Model.DefaultPlacement?.PivotPositions;
+        if (pivots is null || pivots.Length == 0)
+            return Vector3.Zero;
+        var pivot = pivots[0];
+        return new Vector3(pivot.X, pivot.Y, pivot.Z);
+    }
+
+    private static Quaternion QuaternionFromDegrees(float x, float y, float z)
+        => Quaternion.CreateFromYawPitchRoll(
+            MathF.PI * y / 180f,
+            MathF.PI * x / 180f,
+            MathF.PI * z / 180f);
+
+    private Matrix4x4 BuildCompositeRigidTransform(int sourceIndex)
+    {
+        var offset = GetCompositeWorldOffset(sourceIndex);
+        var pivot = GetSourcePivotPosition(sourceIndex);
+        var rotation = QuaternionFromDegrees(offset.RotX, offset.RotY, offset.RotZ);
+        var rotate = Matrix4x4.CreateFromQuaternion(rotation);
+        var rotatedPivot = Vector3.Transform(pivot, rotation);
+        var translation = new Vector3(offset.X, offset.Y, offset.Z) + pivot - rotatedPivot;
+        rotate.M41 = translation.X;
+        rotate.M42 = translation.Y;
+        rotate.M43 = translation.Z;
+        return rotate;
+    }
+
+    private CompositeWorldTransform GetCompositeGroupTransform(int groupId)
+    {
+        if (!compositeGroupTransforms.TryGetValue(groupId, out var transform))
+        {
+            transform = new CompositeWorldTransform();
+            compositeGroupTransforms[groupId] = transform;
+        }
+        return transform;
+    }
+
+    private CompositeGroupMotion GetCompositeGroupMotion(int groupId)
+    {
+        if (!compositeGroupMotions.TryGetValue(groupId, out var motion))
+        {
+            motion = new CompositeGroupMotion();
+            compositeGroupMotions[groupId] = motion;
+        }
+        return motion;
+    }
+
+    private Matrix4x4 BuildCompositeGroupRigidTransform(int groupId)
+    {
+        var offset = GetCompositeGroupTransform(groupId);
+        var rotation = QuaternionFromDegrees(offset.RotX, offset.RotY, offset.RotZ);
+        var matrix = Matrix4x4.CreateFromQuaternion(rotation);
+        var pivot = new Vector3(offset.PivotX, offset.PivotY, offset.PivotZ);
+        var rotatedPivot = Vector3.Transform(pivot, rotation);
+        var translation = new Vector3(offset.X, offset.Y, offset.Z) + pivot - rotatedPivot;
+        matrix.M41 = translation.X;
+        matrix.M42 = translation.Y;
+        matrix.M43 = translation.Z;
+        return matrix;
+    }
+
+    private Matrix4x4 BuildCompositeEffectiveRigidTransform(int sourceIndex)
+    {
+        var sourceRigid = BuildCompositeRigidTransform(sourceIndex);
+        if (!compositeGroupBySourceIndex.TryGetValue(sourceIndex, out var groupId))
+            return sourceRigid;
+        var groupRigid = BuildCompositeGroupRigidTransform(groupId);
+        return sourceRigid * groupRigid;
+    }
+
+    private void UpdateCompositeTransformFromRigid(int sourceIndex, Matrix4x4 rigid)
+    {
+        var offset = GetCompositeWorldOffset(sourceIndex);
+        var rotation = Quaternion.CreateFromRotationMatrix(rigid);
+        var euler = ToEulerDegrees(rotation);
+        var pivot = GetSourcePivotPosition(sourceIndex);
+        var rotatedPivot = Vector3.Transform(pivot, rotation);
+        var translation = new Vector3(rigid.M41, rigid.M42, rigid.M43);
+        var worldOffset = translation - pivot + rotatedPivot;
+        offset.X = worldOffset.X;
+        offset.Y = worldOffset.Y;
+        offset.Z = worldOffset.Z;
+        offset.RotX = euler.X;
+        offset.RotY = euler.Y;
+        offset.RotZ = euler.Z;
+    }
+
+    private static Vector3 ToEulerDegrees(Quaternion quaternion)
+    {
+        quaternion = Quaternion.Normalize(quaternion);
+        var sinrCosp = 2f * (quaternion.W * quaternion.X + quaternion.Y * quaternion.Z);
+        var cosrCosp = 1f - 2f * (quaternion.X * quaternion.X + quaternion.Y * quaternion.Y);
+        var pitch = MathF.Atan2(sinrCosp, cosrCosp);
+
+        var sinp = 2f * (quaternion.W * quaternion.Y - quaternion.Z * quaternion.X);
+        var yaw = MathF.Abs(sinp) >= 1f ? MathF.CopySign(MathF.PI / 2f, sinp) : MathF.Asin(sinp);
+
+        var sinyCosp = 2f * (quaternion.W * quaternion.Z + quaternion.X * quaternion.Y);
+        var cosyCosp = 1f - 2f * (quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
+        var roll = MathF.Atan2(sinyCosp, cosyCosp);
+        return new Vector3(
+            pitch * 180f / MathF.PI,
+            yaw * 180f / MathF.PI,
+            roll * 180f / MathF.PI);
+    }
+
+    private void ApplyCompositePivotLinks()
+    {
+        var pending = compositePivotLeaderByFollower.Keys.ToHashSet();
+        var guard = 0;
+        while (pending.Count > 0 && guard++ < 64)
+        {
+            var progressed = false;
+            foreach (var follower in pending.ToArray())
+            {
+                if (!compositePivotLeaderByFollower.TryGetValue(follower, out var leader)
+                    || !compositePivotRelativeByFollower.TryGetValue(follower, out var relative))
+                {
+                    pending.Remove(follower);
+                    progressed = true;
+                    continue;
+                }
+                if (pending.Contains(leader))
+                    continue;
+                var leaderRigid = BuildCompositeRigidTransform(leader);
+                var followerRigid = leaderRigid * relative;
+                UpdateCompositeTransformFromRigid(follower, followerRigid);
+                pending.Remove(follower);
+                progressed = true;
+            }
+            if (!progressed)
+                break;
+        }
+    }
+
+    private float[]? ApplyCompositeWorldOffset(float[]? worldTransform, int sourceIndex, bool useComposite)
+    {
+        if (!useComposite || worldTransform is null || worldTransform.Length != 16)
+            return worldTransform;
+        var local = MatrixFromPacked(worldTransform);
+        var global = BuildCompositeEffectiveRigidTransform(sourceIndex);
+        return PackMatrix(local * global);
+    }
+
+    private float[]? ApplyCompositeOffsetToMotionRest(float[]? restTransform, int sourceIndex, bool useComposite)
+    {
+        if (!useComposite || restTransform is null || restTransform.Length != 16)
+            return restTransform;
+        var local = MatrixFromPacked(restTransform);
+        var global = BuildCompositeEffectiveRigidTransform(sourceIndex);
+        return PackMatrix(local * global);
+    }
+
+    private async Task OnCompositeWorldOffsetChanged()
+    {
+        ApplyCompositePivotLinks();
+        if (isViewerInitialized)
+            await UpdateScenePayload(authoredMotionScene);
+    }
+
     private CGameItemModel? itemModel;
     private Gbx<CGameItemModel>? gbxFile;
     private bool isLoading = false;
@@ -819,6 +1556,9 @@
     private string activeTab = "general";
     private DotNetObjectReference<Home>? dotNetHelper;
     private readonly List<ItemVariantSource> variantSources = new();
+    private readonly Dictionary<Gbx<CGameItemModel>, int> compositeVariantSelection = new(ReferenceEqualityComparer.Instance);
+    private readonly Dictionary<int, int> compositeDocToSourceIndex = new();
+    private bool compositeViewportMode;
     private bool CanCombineFiles => variantSources.Select(source => source.GbxFile).Distinct().Take(2).Count() > 1;
     private int activeVariantIndex;
     private bool acknowledgeReencodedExport;
@@ -826,6 +1566,8 @@
     private bool SelectedSourceRequiresReencodingAcknowledgement => SelectedSource?.RequiresReencodingAcknowledgement == true;
     private bool CanExportSelectedFile => !SelectedSourceRequiresReencodingAcknowledgement || acknowledgeReencodedExport;
     private bool CanExportCombinedFiles => !variantSources.Any(source => source.RequiresReencodingAcknowledgement) || acknowledgeReencodedExport;
+    private bool CanExportCompositeMerged => CompositeViewportSources().Count >= 2
+        && (!variantSources.Any(source => source.RequiresReencodingAcknowledgement) || acknowledgeReencodedExport);
     private string? iconFileName;
     private string? iconStatus;
     private bool iconPreviewPending;
@@ -840,6 +1582,9 @@
     private bool showMeshes = true;
     private bool showPivots = true;
     private bool showLights = true;
+    private bool showWaypoints = true;
+    private int selectedConstraintIndex = 0;
+    private bool? selectedWaypointIsPointB = null;
 
     // Animation.
     private string detectedAxis = "y";
@@ -863,6 +1608,22 @@
     private readonly ItemSceneGeometryCache geometryCache = new();
     private readonly HashSet<int> uploadedGeometry = new();
     private readonly List<NPlugDyna_SKinematicConstraint> authoredConstraints = new();
+    private readonly HashSet<NPlugDyna_SKinematicConstraint> visualPathProxies = new();
+    private bool acknowledgeKinematicTemplate = true;
+    private string? kinematicTemplateStatus;
+    private string pathPresetMode = "relay";
+    private string pathSegment1Axis = "x";
+    private float pathSegment1Distance = 5.0f;
+    private float pathSegment1Duration = 2.0f;
+    private string pathSegment2Axis = "y";
+    private float pathSegment2Distance = 5.0f;
+    private float pathSegment2Duration = 2.0f;
+    private bool pathIsPingPong = true;
+    private string? pathStatusMessage;
+    private CGameItemModel? uploadedMovingTemplate;
+    private NPlugDyna_SKinematicConstraint? uploadedConstraintTemplate;
+    private string? movingTemplateStatus;
+    private string? constraintTemplateStatus;
     private IReadOnlyList<string> motionDiagnostics = Array.Empty<string>();
     private bool showOriginalMotion;
     private string originalConstraintType = "Not found";
@@ -883,10 +1644,16 @@
 
     public class ModelPart
     {
+        public string Path { get; set; } = "";
         public string Name { get; set; } = "";
+        public string? EntityPath { get; set; }
         public bool IsMoving { get; set; }
+        public int MaterialSlotCount { get; set; }
+        public string MaterialSummary { get; set; } = "";
         public float[] Positions { get; set; } = Array.Empty<float>();
         public int[] Indices { get; set; } = Array.Empty<int>();
+        public int VertexCount => Positions.Length / 3;
+        public int TriangleCount => Indices.Length / 3;
     }
 
     public class PivotDto
@@ -925,7 +1692,66 @@
         public string WebPBase64 { get; set; } = "";
     }
 
+    private sealed class MeshPartConfig
+    {
+        public bool Enabled { get; set; } = true;
+        public bool Visible { get; set; } = true;
+        public bool Collidable { get; set; }
+        public bool Effect { get; set; }
+        public bool Waypoint { get; set; }
+        public bool Movable { get; set; }
+    }
+
+    private sealed class CompositeWorldTransform
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+        public float RotX { get; set; }
+        public float RotY { get; set; }
+        public float RotZ { get; set; }
+        public float PivotX { get; set; }
+        public float PivotY { get; set; }
+        public float PivotZ { get; set; }
+    }
+
+    private sealed class CompositeGroupMotion
+    {
+        public bool Enabled { get; set; }
+        public string TransAxis { get; set; } = "Y";
+        public float TransMin { get; set; }
+        public float TransMax { get; set; } = 3f;
+        public int TransDurationA { get; set; } = 2000;
+        public int TransDurationB { get; set; } = 1000;
+        public string TransEaseA { get; set; } = "Linear";
+        public string TransEaseB { get; set; } = "Linear";
+        public bool TransReverseA { get; set; }
+        public bool TransReverseB { get; set; } = true;
+        public string RotAxis { get; set; } = "Y";
+        public float RotMinDeg { get; set; }
+        public float RotMaxDeg { get; set; } = 25f;
+        public int RotDurationA { get; set; } = 2000;
+        public int RotDurationB { get; set; } = 1000;
+        public string RotEaseA { get; set; } = "Linear";
+        public string RotEaseB { get; set; } = "QuadInOut";
+        public bool RotReverseA { get; set; }
+        public bool RotReverseB { get; set; } = true;
+    }
+
     private List<ModelPart> modelParts = new();
+    private readonly Dictionary<string, string> meshPartModes = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, MeshPartConfig> meshPartConfigs = new(StringComparer.Ordinal);
+    private readonly HashSet<string> forcedRenderableGeometryPaths = new(StringComparer.Ordinal);
+    private readonly Dictionary<int, CompositeWorldTransform> compositeWorldOffsets = new();
+    private readonly Dictionary<int, CompositeWorldTransform> compositeGroupTransforms = new();
+    private readonly Dictionary<int, CompositeGroupMotion> compositeGroupMotions = new();
+    private readonly Dictionary<int, int> compositeGroupBySourceIndex = new();
+    private readonly List<int> compositeSelectionOrder = new();
+    private readonly Dictionary<int, int> compositePivotLeaderByFollower = new();
+    private readonly Dictionary<int, Matrix4x4> compositePivotRelativeByFollower = new();
+    private int nextCompositeGroupId;
+    private string compositeTransformMode = "translate";
+    private string? selectedMeshPartPath;
     private List<PivotDto> detectedPivots = new();
     private List<LightDto> detectedLights = new();
     private List<string> debugLog = new();
@@ -967,6 +1793,17 @@
         isLoading = true;
         errorMessage = null;
         variantSources.Clear();
+        compositeVariantSelection.Clear();
+        compositeDocToSourceIndex.Clear();
+        compositeWorldOffsets.Clear();
+        compositeGroupTransforms.Clear();
+        compositeGroupMotions.Clear();
+        compositeGroupBySourceIndex.Clear();
+        compositeSelectionOrder.Clear();
+        compositePivotLeaderByFollower.Clear();
+        compositePivotRelativeByFollower.Clear();
+        nextCompositeGroupId = 0;
+        compositeTransformMode = "translate";
         geometryCache.Clear();
         uploadedGeometry.Clear();
         activeVariantIndex = 0;
@@ -998,6 +1835,7 @@
         activeKinematicConstraint = null;
         authoredMotionScene = null;
         authoredConstraints.Clear();
+        visualPathProxies.Clear();
         motionDiagnostics = Array.Empty<string>();
         showOriginalMotion = false;
         originalConstraintType = "Not found";
@@ -1027,6 +1865,9 @@
 
             if (variantSources.Count > 0)
             {
+                compositeViewportMode = CanCombineFiles;
+                foreach (var selected in CompositeViewportSources())
+                    compositeVariantSelection[selected.Source.GbxFile] = selected.SourceIndex;
                 await SelectVariant(0);
             }
         }
@@ -1045,6 +1886,7 @@
     private async Task SelectVariant(int index)
     {
         if (isSelectingVariant || index < 0 || index >= variantSources.Count) return;
+        compositeVariantSelection[variantSources[index].GbxFile] = index;
         isSelectingVariant = true;
         errorMessage = null;
         try
@@ -1058,6 +1900,13 @@
         }
         catch (Exception ex) { errorMessage = "Error while loading variant: " + ex.Message; }
         finally { isSelectingVariant = false; }
+    }
+
+    private async Task OnCompositeModeChanged()
+    {
+        if (!CanCombineFiles) compositeViewportMode = false;
+        await UpdateScenePayload(authoredMotionScene);
+        StateHasChanged();
     }
 
     private async Task LoadVariant(int index)
@@ -1106,10 +1955,17 @@
         isMovingItem = isMovingItem || authoredConstraints.Count > 0;
         motionDiagnostics = AuthoredMotionPreview.Build(authoredMotionScene).Diagnostics;
 
+        var sceneHasGeometry = authoredMotionScene.Preview.Geometry.Count > 0;
         if (modelParts.Count > 0)
         {
             hasMesh = true;
             vertexCount = modelParts.Sum(p => p.Positions.Length / 3);
+        }
+        else if (sceneHasGeometry)
+        {
+            hasMesh = true;
+            vertexCount = authoredMotionScene.Preview.Geometry
+                .Sum(g => (g.Positions?.Length ?? 0) / 3);
         }
 
         if (isViewerInitialized)
@@ -1136,23 +1992,155 @@
         return sb.ToString();
     }
 
+    private string GetMeshPartMode(string path)
+        => meshPartModes.TryGetValue(path, out var mode) && (mode == "static" || mode == "kinematic") ? mode : "auto";
+
+    private async Task OnMeshPartModeChanged(string path, ChangeEventArgs args)
+    {
+        var mode = (args.Value?.ToString() ?? "auto").Trim().ToLowerInvariant();
+        meshPartModes[path] = mode is "static" or "kinematic" ? mode : "auto";
+        await UpdateScenePayload(authoredMotionScene);
+    }
+
+    private async Task SelectMeshPart(string path)
+    {
+        selectedMeshPartPath = path;
+        activeTab = "visual";
+        await JS.InvokeVoidAsync("selectMeshPartFromUI", path);
+        StateHasChanged();
+    }
+
+    private MeshPartConfig GetMeshPartConfig(string path)
+    {
+        if (!meshPartConfigs.TryGetValue(path, out var config))
+        {
+            var part = modelParts.FirstOrDefault(part => part.Path == path);
+            config = new MeshPartConfig
+            {
+                Enabled = true,
+                Visible = true,
+                Movable = part?.IsMoving == true
+            };
+            meshPartConfigs[path] = config;
+        }
+        return config;
+    }
+
+    private async Task OnMeshPartFlagChanged(string path)
+    {
+        _ = GetMeshPartConfig(path);
+        await UpdateScenePayload(authoredMotionScene);
+    }
+
+    private static string DescribeMeshFunction(ModelPart part, MeshPartConfig cfg)
+    {
+        if (!cfg.Enabled) return "Disabled (uitgeschakeld in preview).";
+        var roles = new List<string>();
+        if (cfg.Visible) roles.Add("Visible mesh");
+        if (cfg.Collidable) roles.Add("Collidable");
+        if (cfg.Waypoint) roles.Add("Waypoint / trigger");
+        if (cfg.Effect) roles.Add("Effect");
+        if (cfg.Movable || part.IsMoving) roles.Add("Movable / kinematic");
+        if (roles.Count == 0) roles.Add("Configured part");
+        return string.Join(" · ", roles);
+    }
+
+    private void SyncMeshPartModes()
+    {
+        var valid = modelParts.Select(part => part.Path).ToHashSet(StringComparer.Ordinal);
+        foreach (var key in meshPartModes.Keys.Where(key => !valid.Contains(key)).ToArray())
+            meshPartModes.Remove(key);
+        foreach (var key in meshPartConfigs.Keys.Where(key => !valid.Contains(key)).ToArray())
+            meshPartConfigs.Remove(key);
+        foreach (var part in modelParts)
+        {
+            if (!meshPartModes.ContainsKey(part.Path))
+                meshPartModes[part.Path] = "auto";
+            if (!meshPartConfigs.ContainsKey(part.Path))
+                meshPartConfigs[part.Path] = new MeshPartConfig
+                {
+                    Enabled = true,
+                    Visible = true,
+                    Movable = part.IsMoving
+                };
+        }
+        if (selectedMeshPartPath is not null && !valid.Contains(selectedMeshPartPath))
+            selectedMeshPartPath = null;
+    }
+
+    private static string SolidPathFromVisualPath(string visualPath)
+    {
+        const string marker = "/visual:";
+        var markerIndex = visualPath.LastIndexOf(marker, StringComparison.Ordinal);
+        return markerIndex < 0 ? visualPath : visualPath[..markerIndex];
+    }
+
+    private static string SolidPathFromMaterialPath(string materialPath)
+    {
+        const string marker = "/material:";
+        var markerIndex = materialPath.LastIndexOf(marker, StringComparison.Ordinal);
+        return markerIndex < 0 ? materialPath : materialPath[..markerIndex];
+    }
+
     private void UseAuthoredModelParts(ItemSceneResult selectedScene)
     {
         var movingPaths = AuthoredMotionPreview.Build(selectedScene).Tracks.Select(t => t.ChildPath).ToHashSet();
-        modelParts = selectedScene.Preview.Geometry.Where(g => !g.IsCollision).Select(g => new ModelPart
+        var materialBySolidAndIndex = selectedScene.Preview.Materials
+            .GroupBy(m => (SolidPathFromMaterialPath(m.Path), m.Index))
+            .ToDictionary(g => g.Key, g => g.First());
+        var fallbackMaterialByIndex = selectedScene.Preview.Materials
+            .GroupBy(m => m.Index)
+            .ToDictionary(g => g.Key, g => g.First());
+        var renderGeometry = selectedScene.Preview.Geometry.Where(g => !g.IsCollision).ToArray();
+        forcedRenderableGeometryPaths.Clear();
+        if (renderGeometry.Length == 0)
         {
-            Name = g.Path, IsMoving = g.EntityPath is not null && movingPaths.Contains(g.EntityPath),
-            Positions = g.Positions, Indices = g.Indices
+            renderGeometry = selectedScene.Preview.Geometry.ToArray();
+            foreach (var geometry in renderGeometry)
+                forcedRenderableGeometryPaths.Add(geometry.Path);
+        }
+
+        modelParts = renderGeometry.Select(g =>
+        {
+            var solidPath = SolidPathFromVisualPath(g.Path);
+            return new ModelPart
+            {
+                Path = g.Path,
+                Name = g.Path.Split('/').LastOrDefault() ?? g.Path,
+                EntityPath = g.EntityPath,
+                IsMoving = g.EntityPath is not null && movingPaths.Contains(g.EntityPath),
+                MaterialSlotCount = selectedScene.Preview.Mappings.Where(mapping => mapping.SolidPath == solidPath)
+                    .Select(mapping => mapping.MaterialIndex).Distinct().Count(),
+                MaterialSummary = string.Join(", ", selectedScene.Preview.Mappings
+                    .Where(mapping => mapping.SolidPath == solidPath)
+                    .Select(mapping => mapping.MaterialIndex).Distinct()
+                    .Select(index => (materialBySolidAndIndex.TryGetValue((solidPath, index), out var material)
+                                   || fallbackMaterialByIndex.TryGetValue(index, out material))
+                        ? (material.GameMaterialName ?? material.Name ?? $"Slot {index}")
+                        : $"Slot {index}")),
+                Positions = g.Positions,
+                Indices = g.Indices
+            };
         }).ToList();
+        foreach (var part in modelParts)
+            if (string.IsNullOrWhiteSpace(part.MaterialSummary))
+                part.MaterialSummary = "None";
+        SyncMeshPartModes();
     }
 
     private ItemSceneResult ReadSelectedScene()
     {
-        var source = variantSources[activeVariantIndex];
+        return ReadSceneForSourceIndex(activeVariantIndex, variantSources.Select(s => s.GbxFile).Distinct().ToList().IndexOf(variantSources[activeVariantIndex].GbxFile));
+    }
+
+    private ItemSceneResult ReadSceneForSourceIndex(int sourceIndex, int documentOrdinal)
+    {
+        var source = variantSources[sourceIndex];
         var document = variantSources.Select(s => s.GbxFile).Distinct().ToList().IndexOf(source.GbxFile);
         int? variant = source.Model.EntityModel is NPlugItem_SVariantList { Variants: { } variants } && source.Variant is { } selected
             ? Array.IndexOf(variants, selected) : null;
-        return ItemScene.Build(source.PreviewRoot, document, variant, geometryCache);
+        var doc = documentOrdinal >= 0 ? documentOrdinal : document;
+        return ItemScene.Build(source.PreviewRoot, doc, variant, geometryCache);
     }
 
     private Task UpdateScenePayload()
@@ -1164,39 +2152,624 @@
         return UpdateScenePayload(null);
     }
 
+    private async Task AddKinematicEntity(NPlugDyna_SKinematicConstraint source)
+    {
+        if (!acknowledgeKinematicTemplate || authoredMotionScene is null)
+            return;
+
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry is null)
+        {
+            errorMessage = "The selected constraint is no longer attached to a local prefab entry.";
+            return;
+        }
+
+        var result = ItemKinematicEntityTemplate.AppendFromConstraint(entry.Prefab, source, entry.PrefabPath);
+        if (!result.Success)
+        {
+            errorMessage = "Could not add a kinematic entity: " + result.Reason;
+            return;
+        }
+
+        errorMessage = null;
+        kinematicTemplateStatus = $"Added kinematic entity in slot {result.Value + 1}. It inherits Constraint {authoredConstraints.IndexOf(source) + 1}'s world/parent binding.";
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task InsertVisiblePathProxy(NPlugDyna_SKinematicConstraint source)
+    {
+        if (!acknowledgeKinematicTemplate || authoredMotionScene is null)
+            return;
+
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry is null)
+        {
+            errorMessage = "The selected constraint is no longer attached to a local prefab entry.";
+            return;
+        }
+
+        var result = ItemKinematicEntityTemplate.InsertVisiblePathProxy(entry.Prefab, source, entry.PrefabPath);
+        if (!result.Success)
+        {
+            errorMessage = "Could not add a visible path proxy: " + result.Reason;
+            return;
+        }
+
+        errorMessage = null;
+        visualPathProxies.Add(result.Value!);
+        kinematicTemplateStatus = "Added a visible path proxy. The blue proxy constraint drives the first segment; the selected original constraint now drives the next segment.";
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task InsertHiddenCarrierParent(NPlugDyna_SKinematicConstraint source)
+    {
+        if (!acknowledgeKinematicTemplate || authoredMotionScene is null)
+            return;
+
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry is null)
+        {
+            errorMessage = "The selected constraint is no longer attached to a local prefab entry.";
+            return;
+        }
+
+        var result = ItemKinematicEntityTemplate.InsertHiddenCarrierParent(entry.Prefab, source, entry.PrefabPath);
+        if (!result.Success)
+        {
+            errorMessage = "Could not add a hidden carrier parent: " + result.Reason;
+            return;
+        }
+
+        errorMessage = null;
+        kinematicTemplateStatus = "Added a hidden carrier parent. Use this for one-visible-body chained path experiments (A→B via carrier, then B→C on the visible child).";
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task RemoveConstraint(NPlugDyna_SKinematicConstraint source)
+    {
+        if (authoredMotionScene is null)
+            return;
+
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry is null)
+        {
+            errorMessage = "The selected constraint is no longer attached to a local prefab entry.";
+            return;
+        }
+
+        var result = ItemKinematicEntityTemplate.RemoveConstraint(entry.Prefab, source, entry.PrefabPath);
+        if (!result.Success)
+        {
+            errorMessage = "Could not remove constraint: " + result.Reason;
+            return;
+        }
+
+        errorMessage = null;
+        kinematicTemplateStatus = "Constraint en bijbehorende entity succesvol verwijderd.";
+        selectedConstraintIndex = -1;
+        selectedWaypointIsPointB = null;
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task ConvertStaticItemToKinematic()
+    {
+        if (itemModel is null)
+            return;
+
+        var movingTemplate = uploadedMovingTemplate ?? FindMovingTemplateVariant() ?? ItemKinematicEntityTemplate.GetDefaultMovingTemplate();
+        var constraintTemplate = uploadedConstraintTemplate;
+        var result = ItemKinematicEntityTemplate.ConvertStaticToKinematic(itemModel, movingTemplate, constraintTemplate);
+        if (!result.Success)
+        {
+            errorMessage = "Could not convert this static item: " + result.Reason;
+            return;
+        }
+
+        var converted = result.Value!;
+        itemModel.EntityModel = converted.EntityModel;
+        itemModel.ItemType = converted.ItemType;
+        itemModel.ItemTypeE = converted.ItemTypeE;
+        itemModel.DefaultPlacement = converted.DefaultPlacement;
+        itemModel.GroundPoint = converted.GroundPoint;
+        itemModel.Name = converted.Name;
+        itemModel.Ident = converted.Ident;
+        itemModel.Icon = converted.Icon;
+        itemModel.IconWebP = converted.IconWebP;
+        itemModel.OrbitalCenterHeightFromGround = converted.OrbitalCenterHeightFromGround;
+        itemModel.OrbitalPreviewAngle = converted.OrbitalPreviewAngle;
+        itemModel.OrbitalRadiusBase = converted.OrbitalRadiusBase;
+
+        isMovingItem = true;
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
+        errorMessage = null;
+        kinematicTemplateStatus = uploadedMovingTemplate is null && FindMovingTemplateVariant() is null
+            ? "Converteerd naar KinematicObject met ingebouwde template en accurate collision mesh."
+            : (uploadedConstraintTemplate is null
+                ? "Converted the static mesh into a kinematic prefab graph and copied body/constraint settings from the loaded kinematic template."
+                : "Converted the static mesh into a kinematic prefab graph using the uploaded moving-item and constraint templates.");
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+    }
+
+    private async Task ApplyPathPreset()
+    {
+        if (authoredConstraints.Count == 0 || authoredMotionScene is null)
+            return;
+
+        var firstConstraint = authoredConstraints[0];
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, firstConstraint));
+        if (entry is null) return;
+
+        var axis1 = pathSegment1Axis.ToLowerInvariant() switch
+        {
+            "x" => KC.EAxis.X,
+            "y" => KC.EAxis.Y,
+            "z" => KC.EAxis.Z,
+            _ => KC.EAxis.X
+        };
+        var axis2 = pathSegment2Axis.ToLowerInvariant() switch
+        {
+            "x" => KC.EAxis.X,
+            "y" => KC.EAxis.Y,
+            "z" => KC.EAxis.Z,
+            _ => KC.EAxis.Y
+        };
+        var dur1Ms = Math.Max(50, (int)(pathSegment1Duration * 1000));
+        var dur2Ms = Math.Max(50, (int)(pathSegment2Duration * 1000));
+
+        switch (pathPresetMode)
+        {
+            case "relay":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureRelayCollisionPath(
+                    entry.Prefab, firstConstraint, entry.PrefabPath,
+                    axis1, pathSegment1Distance, dur1Ms,
+                    axis2, pathSegment2Distance, dur2Ms);
+                if (result.Success)
+                    pathStatusMessage = "A ➔ B ➔ C Relay Pad gegenereerd met 100% Havok collision!";
+                else
+                    errorMessage = "Fout bij genereren relay pad: " + result.Reason;
+                break;
+            }
+            case "handover":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureParkedHandoverCollisionPath(
+                    entry.Prefab, firstConstraint, entry.PrefabPath,
+                    axis1, pathSegment1Distance, dur1Ms,
+                    axis2, pathSegment2Distance, dur2Ms);
+                if (result.Success)
+                    pathStatusMessage = "Occluder / Parked Handover L-Pad gegenereerd met 100% Havok collision!";
+                else
+                    errorMessage = "Fout bij genereren handover pad: " + result.Reason;
+                break;
+            }
+            case "chained":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureChainedLPath(
+                    entry.Prefab, firstConstraint, entry.PrefabPath,
+                    axis1, pathSegment1Distance, dur1Ms,
+                    axis2, pathSegment2Distance, dur2Ms, pathIsPingPong);
+                if (result.Success)
+                    pathStatusMessage = "Vloeiend L-pad gegenereerd (visueel vloeiend, collision op hoofdas).";
+                else
+                    errorMessage = "Fout bij genereren chained pad: " + result.Reason;
+                break;
+            }
+            case "single_axis":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureSingleAxisMotion(
+                    firstConstraint, axis1, pathSegment1Distance, dur1Ms, pathIsPingPong);
+                if (result.Success)
+                    pathStatusMessage = "1-As lineaire beweging ingesteld met 100% Havok collision!";
+                break;
+            }
+            case "rotation":
+            {
+                var result = ItemKinematicEntityTemplate.ConfigureRotationMotion(
+                    firstConstraint, axis1, 0, 360, dur1Ms, isOscillating: false);
+                if (result.Success)
+                    pathStatusMessage = "Rotatiebeweging ingesteld met 100% Havok collision!";
+                break;
+            }
+        }
+
+        geometryCache.Clear();
+        uploadedGeometry.Clear();
+        authoredMotionScene = ReadSelectedScene();
+        authoredConstraints.Clear();
+        authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<KC>());
+        await UpdateScenePayload(authoredMotionScene);
+        await RefreshDebugDiagnostics();
+        StateHasChanged();
+    }
+
+    private bool IsRootConstraint(NPlugDyna_SKinematicConstraint source)
+    {
+        if (authoredMotionScene is null) return true;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return true;
+        return parameters.Ent1 == -1;
+    }
+
+    private string? GetBindingDescription(NPlugDyna_SKinematicConstraint source)
+    {
+        if (authoredMotionScene is null) return null;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return null;
+        var parentLabel = parameters.Ent1 == -1 ? "Wereld (Vaste Grond)" : $"Carrier / Parent (Body {parameters.Ent1})";
+        var childLabel = $"Lichaam {parameters.Ent2}";
+        return $"{parentLabel} ➔ {childLabel}";
+    }
+
+    private async Task UploadMovingTemplate(InputFileChangeEventArgs e)
+    {
+        if (e.File is null)
+            return;
+        try
+        {
+            using var stream = new MemoryStream();
+            await e.File.OpenReadStream(maxAllowedSize: 25 * 1024 * 1024).CopyToAsync(stream);
+            var parsed = Gbx.Parse<CGameItemModel>(new MemoryStream(stream.ToArray()));
+            uploadedMovingTemplate = parsed.Node;
+            movingTemplateStatus = $"Loaded moving template: {e.File.Name}";
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            uploadedMovingTemplate = null;
+            movingTemplateStatus = null;
+            errorMessage = "Could not load moving template item: " + ex.Message;
+        }
+    }
+
+    private async Task UploadConstraintTemplate(InputFileChangeEventArgs e)
+    {
+        if (e.File is null)
+            return;
+        try
+        {
+            using var stream = new MemoryStream();
+            await e.File.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
+            var parsed = Gbx.Parse<NPlugDyna_SKinematicConstraint>(new MemoryStream(stream.ToArray()));
+            uploadedConstraintTemplate = parsed.Node;
+            constraintTemplateStatus = $"Loaded constraint template: {e.File.Name}";
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            uploadedConstraintTemplate = null;
+            constraintTemplateStatus = null;
+            errorMessage = "Could not load constraint template: " + ex.Message;
+        }
+    }
+
+    private CGameItemModel? FindMovingTemplateVariant()
+    {
+        for (var index = 0; index < variantSources.Count; index++)
+        {
+            if (index == activeVariantIndex)
+                continue;
+
+            var candidate = variantSources[index].Model;
+            if (candidate.EntityModel is CPlugPrefab { Ents: { Length: > 0 } entries }
+                && entries.Any(static entry => entry.Model is NPlugDyna_SKinematicConstraint))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsInvisibleDriverConstraint(NPlugDyna_SKinematicConstraint source)
+    {
+        if (authoredMotionScene is null) return false;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return false;
+        var binding = AuthoredMotionPreview.Resolve(source, authoredMotionScene, parameters);
+        return binding.Status == ItemMotionStatus.Supported
+            && binding.Child.SourceEntry?.Model is CPlugDynaObjectModel
+            {
+                Mesh: null,
+                StaticShape: null,
+                DynaShape: null
+            };
+    }
+
+    private bool IsVisiblePathProxyConstraint(NPlugDyna_SKinematicConstraint source)
+    {
+        if (visualPathProxies.Contains(source)) return true;
+        if (authoredMotionScene is null) return false;
+        var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => ReferenceEquals(handle.Entry.Model, source));
+        if (entry?.Entry.Params is not NPlugDyna_SPrefabConstraintParams parameters) return false;
+        var binding = AuthoredMotionPreview.Resolve(source, authoredMotionScene, parameters);
+        if (binding.Status != ItemMotionStatus.Supported || binding.Child.SourceEntry?.Model is not CPlugDynaObjectModel { Mesh: not null })
+            return false;
+
+        // A visible body's world-relative constraint becomes a path proxy when
+        // another local constraint names its filtered slot as the parent.
+        return authoredMotionScene.Handles.Entries.Any(candidate =>
+            candidate.Prefab == entry.Prefab
+            && candidate.Entry.Params is NPlugDyna_SPrefabConstraintParams candidateParameters
+            && !ReferenceEquals(candidate.Entry.Model, source)
+            && candidateParameters.Ent1 == binding.Child.RawSlot);
+    }
+
+    private sealed record CompositeSceneEntry(int SourceIndex, int DocumentOrdinal, ItemVariantSource Source, ItemSceneResult Scene);
+
+    private IReadOnlyList<CompositeSceneEntry> BuildCompositeScenes()
+    {
+        var selected = CompositeViewportSources();
+        var scenes = new List<CompositeSceneEntry>(selected.Count);
+        compositeDocToSourceIndex.Clear();
+        foreach (var part in selected)
+        {
+            var scene = ReadSceneForSourceIndex(part.SourceIndex, part.DocumentOrdinal);
+            scenes.Add(new CompositeSceneEntry(part.SourceIndex, part.DocumentOrdinal, part.Source, scene));
+            compositeDocToSourceIndex[part.DocumentOrdinal] = part.SourceIndex;
+        }
+        return scenes;
+    }
+
     private async Task UpdateScenePayload(ItemSceneResult? selectedScene)
     {
         if (authoredMotionScene is { } authoredScene)
         {
             // Traversal and motion stay fresh; immutable geometry survives selection.
-            authoredScene = selectedScene ?? ReadSelectedScene();
+            var useComposite = compositeViewportMode && CanCombineFiles;
+            var composite = useComposite ? BuildCompositeScenes() : Array.Empty<CompositeSceneEntry>();
+            var selectedComposite = useComposite
+                ? composite.FirstOrDefault(entry => entry.SourceIndex == activeVariantIndex) ?? composite.First()
+                : null;
+
+            authoredScene = selectedScene ?? selectedComposite?.Scene ?? ReadSelectedScene();
             authoredMotionScene = authoredScene;
+            if (selectedComposite is not null && selectedComposite.SourceIndex != activeVariantIndex)
+            {
+                activeVariantIndex = selectedComposite.SourceIndex;
+                itemModel = selectedComposite.Source.Model;
+                gbxFile = selectedComposite.Source.GbxFile;
+            }
+
             UseAuthoredModelParts(authoredScene);
-            var motion = AuthoredMotionPreview.Build(authoredScene);
-            motionDiagnostics = motion.Diagnostics;
-            var definitions = authoredScene.Preview.Geometry.Where(g => g.GeometryId.HasValue && !uploadedGeometry.Contains(g.GeometryId.Value))
-                .GroupBy(g => g.GeometryId!.Value).Select(group => group.First()).ToArray();
+            var selectedMotion = AuthoredMotionPreview.Build(authoredScene);
+            motionDiagnostics = selectedMotion.Diagnostics;
             var epoch = geometryCache.Epoch;
+
+            var allScenes = useComposite ? composite.Select(entry => entry.Scene).ToArray() : new[] { authoredScene };
+            var definitions = allScenes.SelectMany(scene => scene.Preview.Geometry)
+                .Where(geometry => geometry.GeometryId.HasValue && !uploadedGeometry.Contains(geometry.GeometryId.Value))
+                .GroupBy(geometry => geometry.GeometryId!.Value)
+                .Select(group => group.First())
+                .ToArray();
+
+            var rawTracks = (useComposite ? composite : [new CompositeSceneEntry(activeVariantIndex, 0, variantSources[activeVariantIndex], authoredScene)])
+                .SelectMany(entry =>
+                {
+                    var motion = AuthoredMotionPreview.Build(entry.Scene);
+                    return motion.Tracks.Select(track =>
+                    {
+                        var handle = entry.Scene.Handles.Entries.FirstOrDefault(e => e.Path == track.Path);
+                        var constraint = handle?.Entry.Model as NPlugDyna_SKinematicConstraint;
+                        var index = entry.SourceIndex == activeVariantIndex && constraint is not null
+                            ? authoredConstraints.IndexOf(constraint)
+                            : -1;
+                        return new
+                        {
+                            entry.SourceIndex,
+                            Track = track,
+                            ConstraintIndex = index >= 0 ? index : (int?)null
+                        };
+                    });
+                })
+                .ToArray();
+
+            var adjustedChildRestByPath = new Dictionary<string, float[]>(StringComparer.Ordinal);
+            foreach (var row in rawTracks)
+            {
+                var adjustedChild = ApplyCompositeOffsetToMotionRest(row.Track.ChildRest, row.SourceIndex, useComposite);
+                adjustedChildRestByPath[row.Track.ChildPath] = adjustedChild ?? row.Track.ChildRest;
+            }
+
+            var tracksPayload = rawTracks.Select(row =>
+            {
+                var parentRest = row.Track.ParentPath is not null
+                    && adjustedChildRestByPath.TryGetValue(row.Track.ParentPath, out var parentChildRest)
+                    ? parentChildRest
+                    : row.Track.ParentRest;
+                return new
+                {
+                    row.Track.Path,
+                    row.Track.ChildPath,
+                    row.Track.ParentPath,
+                    ChildRest = adjustedChildRestByPath[row.Track.ChildPath],
+                    ParentRest = parentRest,
+                    row.Track.Fields,
+                    constraintIndex = row.ConstraintIndex
+                };
+            });
+            static int AxisToIndex(string? axis)
+                => axis?.ToUpperInvariant() switch { "X" => 0, "Z" => 2, _ => 1 };
+            static int EaseToInt(string? ease)
+                => ease?.ToLowerInvariant() switch
+                {
+                    "constant" => 0,
+                    "linear" => 1,
+                    "quadin" => 2,
+                    "quadout" => 3,
+                    "quadinout" => 4,
+                    _ => 1
+                };
+            var sourcePrimaryChildPath = rawTracks
+                .GroupBy(track => track.SourceIndex)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(track => track.Track.ChildPath).FirstOrDefault(path => !string.IsNullOrWhiteSpace(path)) ?? "");
+            var groupMotionsPayload = useComposite
+                ? compositeGroupBySourceIndex
+                    .Where(pair => compositeGroupMotions.TryGetValue(pair.Value, out var motion) && motion.Enabled)
+                    .Select(pair =>
+                    {
+                        var sourcePath = sourcePrimaryChildPath.TryGetValue(pair.Key, out var childPath) ? childPath : "";
+                        if (string.IsNullOrWhiteSpace(sourcePath))
+                            return null;
+                        var motion = GetCompositeGroupMotion(pair.Value);
+                        return new
+                        {
+                            childPath = sourcePath,
+                            fields = new
+                            {
+                                translationAxis = AxisToIndex(motion.TransAxis),
+                                translationMin = motion.TransMin,
+                                translationMax = motion.TransMax,
+                                angleMinDegrees = motion.RotMinDeg,
+                                angleMaxDegrees = motion.RotMaxDeg,
+                                rotationAxis = AxisToIndex(motion.RotAxis),
+                                translation = new
+                                {
+                                    isDuration = true,
+                                    keys = new[]
+                                    {
+                                        new { ease = EaseToInt(motion.TransEaseA), reverse = motion.TransReverseA, durationMilliseconds = Math.Max(50, motion.TransDurationA) },
+                                        new { ease = EaseToInt(motion.TransEaseB), reverse = motion.TransReverseB, durationMilliseconds = Math.Max(50, motion.TransDurationB) }
+                                    }
+                                },
+                                rotation = new
+                                {
+                                    isDuration = true,
+                                    keys = new[]
+                                    {
+                                        new { ease = EaseToInt(motion.RotEaseA), reverse = motion.RotReverseA, durationMilliseconds = Math.Max(50, motion.RotDurationA) },
+                                        new { ease = EaseToInt(motion.RotEaseB), reverse = motion.RotReverseB, durationMilliseconds = Math.Max(50, motion.RotDurationB) }
+                                    }
+                                }
+                            }
+                        };
+                    })
+                    .Where(entry => entry is not null)
+                    .Select(entry => (object)entry!)
+                    .ToArray()
+                : Array.Empty<object>();
+
+            var allParts = (useComposite ? composite : [new CompositeSceneEntry(activeVariantIndex, 0, variantSources[activeVariantIndex], authoredScene)])
+                .SelectMany(entry => entry.Scene.Preview.Geometry.Select(geometry => new { entry, geometry }))
+                .ToArray();
+
             await JS.InvokeVoidAsync("renderStudioScene", new
             {
                 geometryEpoch = epoch,
-                geometryDefinitions = definitions.Select(g => new { geometryId = g.GeometryId,
-                    positionsBytes = ViewerBuffers.Pack(g.LocalPositions), indicesBytes = ViewerBuffers.Pack(g.Indices),
-                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals) }),
-                parts = authoredScene.Preview.Geometry.Select(g => new
+                geometryDefinitions = definitions.Select(g => new
                 {
-                    path = g.Path, entityPath = g.EntityPath, geometryId = g.GeometryId, worldTransform = g.WorldTransform,
-                    positionsBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Positions),
-                    indicesBytes = g.GeometryId.HasValue ? null : ViewerBuffers.Pack(g.Indices),
-                    normalsBytes = g.GeometryId.HasValue || g.Normals is null ? null : ViewerBuffers.Pack(g.Normals),
-                    isCollision = g.IsCollision,
-                    mappings = MappingsForVisual(authoredScene.Preview, g.Path)
+                    geometryId = g.GeometryId,
+                    positionsBytes = ViewerBuffers.Pack(g.LocalPositions),
+                    indicesBytes = ViewerBuffers.Pack(g.Indices),
+                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals)
+                }),
+                parts = allParts.Select(part => new
+                {
+                    path = part.geometry.Path,
+                    entityPath = part.geometry.EntityPath,
+                    sourceIndex = part.entry.SourceIndex,
+                    groupId = useComposite && compositeGroupBySourceIndex.TryGetValue(part.entry.SourceIndex, out var sourceGroupId)
+                        ? sourceGroupId
+                        : (int?)null,
+                    geometryId = part.geometry.GeometryId,
+                    worldTransform = ApplyCompositeWorldOffset(part.geometry.WorldTransform, part.entry.SourceIndex, useComposite),
+                    positionsBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Positions),
+                    indicesBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Indices),
+                    normalsBytes = part.geometry.GeometryId.HasValue || part.geometry.Normals is null ? null : ViewerBuffers.Pack(part.geometry.Normals),
+                    isCollision = part.geometry.IsCollision && !forcedRenderableGeometryPaths.Contains(part.geometry.Path),
+                    meshMode = GetMeshPartMode(part.geometry.Path),
+                    enabled = GetMeshPartConfig(part.geometry.Path).Enabled,
+                    visible = GetMeshPartConfig(part.geometry.Path).Visible,
+                    collidable = GetMeshPartConfig(part.geometry.Path).Collidable,
+                    effect = GetMeshPartConfig(part.geometry.Path).Effect,
+                    waypoint = GetMeshPartConfig(part.geometry.Path).Waypoint,
+                    movable = GetMeshPartConfig(part.geometry.Path).Movable,
+                    mappings = MappingsForVisual(part.entry.Scene.Preview, part.geometry.Path)
                 }),
                 materials = authoredScene.Preview.Materials.Select(material => new
                 {
                     material.Path, material.GameMaterialName, material.GameMaterialLink
                 }),
-                motions = motion.Tracks,
+                compositeOffsets = useComposite
+                    ? composite.Select(part =>
+                    {
+                        var offset = GetCompositeWorldOffset(part.SourceIndex);
+                        return (object)new
+                        {
+                            index = part.SourceIndex,
+                            x = offset.X,
+                            y = offset.Y,
+                            z = offset.Z,
+                            rotX = offset.RotX,
+                            rotY = offset.RotY,
+                            rotZ = offset.RotZ,
+                            editable = true
+                        };
+                    })
+                    : Array.Empty<object>(),
+                compositeGroups = useComposite
+                    ? compositeGroupTransforms
+                        .Where(group => compositeGroupBySourceIndex.Values.Contains(group.Key))
+                        .OrderBy(group => group.Key)
+                        .Select(group => (object)new
+                        {
+                            index = group.Key,
+                            x = group.Value.X,
+                            y = group.Value.Y,
+                            z = group.Value.Z,
+                            rotX = group.Value.RotX,
+                            rotY = group.Value.RotY,
+                            rotZ = group.Value.RotZ,
+                            pivotX = group.Value.PivotX,
+                            pivotY = group.Value.PivotY,
+                            pivotZ = group.Value.PivotZ,
+                            editable = true
+                        })
+                    : Array.Empty<object>(),
+                motions = tracksPayload,
+                groupMotions = groupMotionsPayload,
+                activeConstraintIndex = selectedConstraintIndex,
+                selectedMeshPath = selectedMeshPartPath,
+                compositeSelection = useComposite
+                    ? new
+                    {
+                        selectedSourceIndices = compositeSelectionOrder.ToArray(),
+                        leaderSourceIndex = compositeSelectionOrder.Count > 0 ? compositeSelectionOrder[0] : -1,
+                        sourceGroups = compositeGroupBySourceIndex
+                            .Select(pair => new { sourceIndex = pair.Key, groupId = pair.Value })
+                            .ToArray()
+                    }
+                    : null,
                 pivots = detectedPivots, lights = detectedLights,
                 playing = isPlaying
             });
@@ -1207,13 +2780,21 @@
         var scenePayload = new
         {
             geometryEpoch = geometryCache.Epoch,
-            parts = modelParts.Select(p => new { p.Name, p.IsMoving,
+            parts = modelParts.Select(p => new { path = p.Path, name = p.Name, p.IsMoving,
                 positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices),
-                mappings = authoredMotionScene is null ? [] : MappingsForVisual(authoredMotionScene.Preview, p.Name) }),
+                meshMode = GetMeshPartMode(p.Path),
+                enabled = GetMeshPartConfig(p.Path).Enabled,
+                visible = GetMeshPartConfig(p.Path).Visible,
+                collidable = GetMeshPartConfig(p.Path).Collidable,
+                effect = GetMeshPartConfig(p.Path).Effect,
+                waypoint = GetMeshPartConfig(p.Path).Waypoint,
+                movable = GetMeshPartConfig(p.Path).Movable,
+                mappings = authoredMotionScene is null ? [] : MappingsForVisual(authoredMotionScene.Preview, p.Path) }),
             materials = authoredMotionScene?.Preview.Materials.Select(material => new
             {
                 material.Path, material.GameMaterialName, material.GameMaterialLink
             }),
+            selectedMeshPath = selectedMeshPartPath,
             pivots = detectedPivots,
             lights = detectedLights,
             animAxis = detectedAxis,
@@ -1381,6 +2962,40 @@
             detectedPivots[index].Z = (float)Math.Round(z, 2);
             SyncPivotsToGbx();
         }
+        else if (type == "composite-offset")
+        {
+            var offset = GetCompositeWorldOffset(index);
+            offset.X = (float)Math.Round(x, 2);
+            offset.Y = (float)Math.Round(y, 2);
+            offset.Z = (float)Math.Round(z, 2);
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnCompositeOffsetTransformMoved(int index, float x, float y, float z, float rotX, float rotY, float rotZ)
+    {
+        var offset = GetCompositeWorldOffset(index);
+        offset.X = (float)Math.Round(x, 2);
+        offset.Y = (float)Math.Round(y, 2);
+        offset.Z = (float)Math.Round(z, 2);
+        offset.RotX = (float)Math.Round(rotX, 2);
+        offset.RotY = (float)Math.Round(rotY, 2);
+        offset.RotZ = (float)Math.Round(rotZ, 2);
+        ApplyCompositePivotLinks();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnCompositeGroupTransformMoved(int groupId, float x, float y, float z, float rotX, float rotY, float rotZ)
+    {
+        var offset = GetCompositeGroupTransform(groupId);
+        offset.X = (float)Math.Round(x, 2);
+        offset.Y = (float)Math.Round(y, 2);
+        offset.Z = (float)Math.Round(z, 2);
+        offset.RotX = (float)Math.Round(rotX, 2);
+        offset.RotY = (float)Math.Round(rotY, 2);
+        offset.RotZ = (float)Math.Round(rotZ, 2);
         StateHasChanged();
     }
 
@@ -1389,12 +3004,305 @@
     {
         if (type == "pivot") activeTab = "placement";
         else if (type == "light") activeTab = "lights";
+        else if (type == "composite-offset" || type == "composite-group") activeTab = "visual";
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnGizmoDragEnded(string type, int index)
+    {
+        if (type == "composite-offset" || type == "composite-group")
+        {
+            if (authoredMotionScene is not null)
+                await UpdateScenePayload(authoredMotionScene);
+            else
+                await UpdateScenePayload();
+        }
+    }
+
+    [JSInvokable]
+    public void OnWaypointMoved(int constraintIndex, bool isPointB, float minVal, float maxVal, string transAxis)
+    {
+        if (constraintIndex >= 0 && constraintIndex < authoredConstraints.Count)
+        {
+            var constraint = authoredConstraints[constraintIndex];
+            constraint.TransMin = (float)Math.Round(minVal, 2);
+            constraint.TransMax = (float)Math.Round(maxVal, 2);
+            if (Enum.TryParse<KC.EAxis>(transAxis, true, out var parsedAxis))
+            {
+                constraint.TransAxis = parsedAxis;
+            }
+            selectedConstraintIndex = constraintIndex;
+            selectedWaypointIsPointB = isPointB;
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public void OnWaypointSelected(int constraintIndex, bool isPointB)
+    {
+        selectedConstraintIndex = constraintIndex;
+        selectedWaypointIsPointB = isPointB;
+        activeTab = "gameplay";
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnMeshPartSelected(string path)
+    {
+        selectedMeshPartPath = string.IsNullOrWhiteSpace(path) ? null : path;
+        activeTab = "visual";
+        if (compositeViewportMode && selectedMeshPartPath is not null
+            && TryExtractDocumentOrdinal(selectedMeshPartPath, out var docOrdinal)
+            && compositeDocToSourceIndex.TryGetValue(docOrdinal, out var sourceIndex)
+            && sourceIndex != activeVariantIndex)
+        {
+            _ = SelectVariant(sourceIndex);
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnMeshPartSelectedWithModifiers(string path, bool additive, bool range)
+    {
+        OnMeshPartSelected(path);
+        if (!compositeViewportMode || selectedMeshPartPath is null
+            || !TryExtractDocumentOrdinal(selectedMeshPartPath, out var docOrdinal)
+            || !compositeDocToSourceIndex.TryGetValue(docOrdinal, out var sourceIndex))
+            return;
+
+        if (!additive && !range)
+        {
+            compositeSelectionOrder.Clear();
+            compositeSelectionOrder.Add(sourceIndex);
+        }
+        else if (!compositeSelectionOrder.Contains(sourceIndex))
+        {
+            compositeSelectionOrder.Add(sourceIndex);
+        }
+
+        if (authoredMotionScene is not null)
+            await UpdateScenePayload(authoredMotionScene);
+        else
+            await UpdateScenePayload();
+    }
+
+    private static bool TryExtractDocumentOrdinal(string path, out int ordinal)
+    {
+        ordinal = -1;
+        if (string.IsNullOrWhiteSpace(path)) return false;
+        const string prefix = "doc:";
+        var index = path.IndexOf(prefix, StringComparison.Ordinal);
+        if (index < 0) return false;
+        index += prefix.Length;
+        var end = path.IndexOf('/', index);
+        if (end < 0) end = path.Length;
+        return int.TryParse(path[index..end], NumberStyles.Integer, CultureInfo.InvariantCulture, out ordinal) && ordinal >= 0;
+    }
+
+    [JSInvokable]
+    public async Task OnWaypointDragEnded()
+    {
+        if (authoredMotionScene != null)
+        {
+            await UpdateScenePayload(authoredMotionScene);
+        }
+        else
+        {
+            await UpdateScenePayload();
+        }
+        StateHasChanged();
+    }
+
+    private async Task SelectConstraint(int index)
+    {
+        selectedConstraintIndex = index;
+        selectedWaypointIsPointB = null;
+        activeTab = "gameplay";
+        await JS.InvokeVoidAsync("highlightConstraintInViewer", index);
+        StateHasChanged();
+    }
+
+    private async Task SelectWaypoint(int constraintIndex, bool isPointB)
+    {
+        selectedConstraintIndex = constraintIndex;
+        selectedWaypointIsPointB = isPointB;
+        activeTab = "gameplay";
+        await JS.InvokeVoidAsync("selectWaypointFromUI", constraintIndex, isPointB);
         StateHasChanged();
     }
 
     private async Task SelectGizmoIn3D(string type, int index)
     {
         await JS.InvokeVoidAsync("selectGizmoFromUI", type, index);
+    }
+
+    private async Task SelectCompositeOffsetGizmo(int sourceIndex)
+    {
+        await JS.InvokeVoidAsync("setTransformMode", compositeTransformMode);
+        await JS.InvokeVoidAsync("selectGizmoFromUI", "composite-offset", sourceIndex);
+    }
+
+    private async Task SelectCompositeGroupGizmo(int groupId)
+    {
+        await JS.InvokeVoidAsync("setTransformMode", compositeTransformMode);
+        await JS.InvokeVoidAsync("selectGizmoFromUI", "composite-group", groupId);
+    }
+
+    private async Task SetCompositeTransformMode(string mode)
+    {
+        compositeTransformMode = mode == "rotate" ? "rotate" : "translate";
+        await JS.InvokeVoidAsync("setTransformMode", compositeTransformMode);
+    }
+
+    private async Task ConnectCompositePivotSelection()
+    {
+        if (compositeSelectionOrder.Count < 2)
+            return;
+        var leader = compositeSelectionOrder[0];
+        var leaderRigid = BuildCompositeRigidTransform(leader);
+        if (!Matrix4x4.Invert(leaderRigid, out var leaderInverse))
+            return;
+
+        foreach (var follower in compositeSelectionOrder.Skip(1))
+        {
+            if (follower == leader)
+                continue;
+            if (WouldCreatePivotCycle(leader, follower))
+                continue;
+            var followerRigid = BuildCompositeRigidTransform(follower);
+            compositePivotLeaderByFollower[follower] = leader;
+            compositePivotRelativeByFollower[follower] = leaderInverse * followerRigid;
+        }
+
+        ApplyCompositePivotLinks();
+        await OnCompositeWorldOffsetChanged();
+    }
+
+    private bool WouldCreatePivotCycle(int leader, int follower)
+    {
+        var current = leader;
+        var guard = 0;
+        while (guard++ < 64 && compositePivotLeaderByFollower.TryGetValue(current, out var parent))
+        {
+            if (parent == follower)
+                return true;
+            current = parent;
+        }
+        return false;
+    }
+
+    private IReadOnlyList<(int GroupId, string Label, CompositeWorldTransform Transform)> CompositeGroups()
+    {
+        var labels = compositeGroupTransforms.Keys.OrderBy(id => id).Select(groupId =>
+        {
+            var members = compositeGroupBySourceIndex
+                .Where(pair => pair.Value == groupId)
+                .Select(pair => pair.Key)
+                .Where(index => index >= 0 && index < variantSources.Count)
+                .Select(index => variantSources[index].Name)
+                .Distinct()
+                .ToArray();
+            var label = members.Length == 0
+                ? $"Group {groupId + 1}"
+                : $"Group {groupId + 1}: {string.Join(", ", members)}";
+            return (GroupId: groupId, Label: label, Transform: compositeGroupTransforms[groupId]);
+        }).ToArray();
+        return labels;
+    }
+
+    private string CompositeGroupColor(int groupId)
+    {
+        var palette = new[]
+        {
+            "#f43f5e", "#f59e0b", "#10b981", "#22d3ee", "#6366f1", "#a855f7", "#e879f9", "#84cc16"
+        };
+        return palette[Math.Abs(groupId) % palette.Length];
+    }
+
+    private int CompositeGroupMembersCount(int groupId)
+        => compositeGroupBySourceIndex.Count(pair => pair.Value == groupId);
+
+    private Vector3 ComputeCompositeGroupPivotCenter(IEnumerable<int> sourceIndices)
+    {
+        var members = sourceIndices.Distinct().ToArray();
+        if (members.Length == 0)
+            return Vector3.Zero;
+        var sum = Vector3.Zero;
+        var count = 0;
+        foreach (var sourceIndex in members)
+        {
+            if (sourceIndex < 0 || sourceIndex >= variantSources.Count)
+                continue;
+            var sourceRigid = BuildCompositeRigidTransform(sourceIndex);
+            var sourcePivot = GetSourcePivotPosition(sourceIndex);
+            var worldPivot = Vector3.Transform(sourcePivot, sourceRigid);
+            sum += worldPivot;
+            count++;
+        }
+        return count == 0 ? Vector3.Zero : sum / count;
+    }
+
+    private async Task CreateCompositeGroupFromSelection()
+    {
+        if (compositeSelectionOrder.Count < 2)
+            return;
+        var existingGroups = compositeSelectionOrder
+            .Select(source => compositeGroupBySourceIndex.TryGetValue(source, out var groupId) ? groupId : (int?)null)
+            .Where(groupId => groupId.HasValue)
+            .Select(groupId => groupId!.Value)
+            .Distinct()
+            .ToArray();
+
+        var targetGroup = existingGroups.Length == 1 ? existingGroups[0] : nextCompositeGroupId++;
+        var transform = GetCompositeGroupTransform(targetGroup);
+        if (existingGroups.Length > 1 || existingGroups.Length == 0)
+        {
+            transform.X = 0;
+            transform.Y = 0;
+            transform.Z = 0;
+            transform.RotX = 0;
+            transform.RotY = 0;
+            transform.RotZ = 0;
+            var center = ComputeCompositeGroupPivotCenter(compositeSelectionOrder);
+            transform.PivotX = center.X;
+            transform.PivotY = center.Y;
+            transform.PivotZ = center.Z;
+        }
+
+        foreach (var sourceIndex in compositeSelectionOrder)
+            compositeGroupBySourceIndex[sourceIndex] = targetGroup;
+        RemoveEmptyCompositeGroups();
+
+        await OnCompositeWorldOffsetChanged();
+    }
+
+    private async Task UngroupCompositeSelection()
+    {
+        if (compositeSelectionOrder.Count == 0)
+            return;
+        foreach (var sourceIndex in compositeSelectionOrder)
+            compositeGroupBySourceIndex.Remove(sourceIndex);
+        RemoveEmptyCompositeGroups();
+        await OnCompositeWorldOffsetChanged();
+    }
+
+    private void RemoveEmptyCompositeGroups()
+    {
+        var used = compositeGroupBySourceIndex.Values.ToHashSet();
+        foreach (var groupId in compositeGroupTransforms.Keys.Where(id => !used.Contains(id)).ToArray())
+            compositeGroupTransforms.Remove(groupId);
+        foreach (var groupId in compositeGroupMotions.Keys.Where(id => !used.Contains(id)).ToArray())
+            compositeGroupMotions.Remove(groupId);
+    }
+
+    private async Task ClearCompositePivotSelection()
+    {
+        compositeSelectionOrder.Clear();
+        if (authoredMotionScene is not null)
+            await UpdateScenePayload(authoredMotionScene);
+        else
+            await UpdateScenePayload();
     }
 
     private async Task OnLightChanged(int idx)
@@ -1584,10 +3492,13 @@
                         bool isMoving = ent.Model is CPlugDynaObjectModel dyna
                             ? !dyna.IsStatic && (constraintSeen || modelEntityIndex > 0)
                             : modelEntityIndex > 0 || (constraintSeen && ent.Model.GetType().Name.Contains("Dyna", StringComparison.OrdinalIgnoreCase));
+                        var name = isMoving ? $"Moving Part {modelEntityIndex}" : "Static Base";
                         modelParts.Add(new ModelPart
                         {
-                            Name = isMoving ? $"Moving Part {modelEntityIndex}" : "Static Base",
+                            Path = name,
+                            Name = name,
                             IsMoving = isMoving,
+                            MaterialSummary = "Unknown",
                             Positions = positions.ToArray(),
                             Indices = indices.ToArray()
                         });
@@ -1609,13 +3520,16 @@
             {
                 modelParts.Add(new ModelPart
                 {
+                    Path = "Static Model",
                     Name = "Static Model",
                     IsMoving = false,
+                    MaterialSummary = "Unknown",
                     Positions = positions.ToArray(),
                     Indices = indices.ToArray()
                 });
             }
         }
+        SyncMeshPartModes();
     }
 
     private void InspectConstraint(object constraint)
@@ -2009,6 +3923,7 @@
         if (layerName == "meshes") showMeshes = visible;
         else if (layerName == "pivots") showPivots = visible;
         else if (layerName == "lights") showLights = visible;
+        else if (layerName == "waypoints") showWaypoints = visible;
     }
 
     private async Task ToggleAnimation()
@@ -2046,6 +3961,182 @@
         }
     }
 
+    private async Task ExportMergedCompositeGbx()
+    {
+        if (!CanExportCompositeMerged || itemModel is null)
+            return;
+
+        try
+        {
+            UpdateIdent();
+            var selectedParts = CompositeViewportSources();
+            var selected = selectedParts.Select(part => part.Source).ToArray();
+            ItemExportValidator.EnsureGameReady(selected[0].Model, $"{(string.IsNullOrWhiteSpace(identId) ? "CustomItem" : identId)}_Merged");
+            var worldOffsets = selectedParts
+                .Select(part =>
+                {
+                    var rigid = compositeGroupBySourceIndex.ContainsKey(part.SourceIndex)
+                        ? BuildCompositeRigidTransform(part.SourceIndex)
+                        : BuildCompositeEffectiveRigidTransform(part.SourceIndex);
+                    var rotation = Quaternion.Normalize(Quaternion.CreateFromRotationMatrix(rigid));
+                    if (!float.IsFinite(rotation.X) || !float.IsFinite(rotation.Y) || !float.IsFinite(rotation.Z) || !float.IsFinite(rotation.W))
+                        throw new InvalidOperationException("Merged transform rotation contains invalid values.");
+                    var position = new Vec3(rigid.M41, rigid.M42, rigid.M43);
+                    if (!float.IsFinite(position.X) || !float.IsFinite(position.Y) || !float.IsFinite(position.Z))
+                        throw new InvalidOperationException("Merged transform translation contains invalid values.");
+                    return new ItemVariantSource.MergeRootTransform(
+                        position,
+                        new Quat(rotation.X, rotation.Y, rotation.Z, rotation.W));
+                })
+                .ToArray();
+            var selectedPositionBySource = selectedParts
+                .Select((part, position) => (part.SourceIndex, position))
+                .ToDictionary(entry => entry.SourceIndex, entry => entry.position);
+            var groupedMergeDefinitions = compositeGroupBySourceIndex
+                .Where(pair => selectedPositionBySource.ContainsKey(pair.Key))
+                .GroupBy(pair => pair.Value)
+                .Select(group =>
+                {
+                    var members = group
+                        .Select(pair => selectedPositionBySource[pair.Key])
+                        .Distinct()
+                        .OrderBy(position => position)
+                        .ToArray();
+                    if (members.Length < 2)
+                        return (ItemVariantSource.GroupMergeDefinition?)null;
+                    compositeGroupTransforms.TryGetValue(group.Key, out var transform);
+                    var motion = GetCompositeGroupMotion(group.Key);
+                    var motionExport = motion.Enabled
+                        ? new ItemVariantSource.GroupKinematicMotion(
+                            motion.TransAxis?.ToUpperInvariant() switch
+                            {
+                                "X" => KC.EAxis.X,
+                                "Z" => KC.EAxis.Z,
+                                _ => KC.EAxis.Y
+                            },
+                            motion.TransMin,
+                            motion.TransMax,
+                            new ItemVariantSource.GroupAnimKey(
+                                ParseAnimEase(motion.TransEaseA, KC.AnimEase.Linear),
+                                motion.TransReverseA,
+                                Math.Max(50, motion.TransDurationA)),
+                            new ItemVariantSource.GroupAnimKey(
+                                ParseAnimEase(motion.TransEaseB, KC.AnimEase.Linear),
+                                motion.TransReverseB,
+                                Math.Max(50, motion.TransDurationB)),
+                            motion.RotAxis?.ToUpperInvariant() switch
+                            {
+                                "X" => KC.EAxis.X,
+                                "Z" => KC.EAxis.Z,
+                                _ => KC.EAxis.Y
+                            },
+                            motion.RotMinDeg,
+                            motion.RotMaxDeg,
+                            new ItemVariantSource.GroupAnimKey(
+                                ParseAnimEase(motion.RotEaseA, KC.AnimEase.Linear),
+                                motion.RotReverseA,
+                                Math.Max(50, motion.RotDurationA)),
+                            new ItemVariantSource.GroupAnimKey(
+                                ParseAnimEase(motion.RotEaseB, KC.AnimEase.QuadInOut),
+                                motion.RotReverseB,
+                                Math.Max(50, motion.RotDurationB)))
+                        : (ItemVariantSource.GroupKinematicMotion?)null;
+                    var groupTransform = transform is null
+                        ? new ItemVariantSource.MergeRootTransform(new Vec3(0, 0, 0), new Quat(0, 0, 0, 1))
+                        : BuildGroupRootTransform(transform);
+                    return new ItemVariantSource.GroupMergeDefinition(group.Key, members, groupTransform, motionExport);
+                })
+                .Where(definition => definition.HasValue)
+                .Select(definition => definition!.Value)
+                .ToArray();
+            using var memoryStream = new MemoryStream();
+            ItemVariantSource.SaveMergedPrefab(selected, memoryStream, worldOffsets, groupedMergeDefinitions);
+            var bytes = memoryStream.ToArray();
+            _ = Gbx.Parse<CGameItemModel>(new MemoryStream(bytes));
+            var exportId = itemModel.Ident?.Id;
+            var filename = (string.IsNullOrEmpty(exportId) ? "CustomItem" : exportId) + "_Merged.Item.Gbx";
+            await JS.InvokeVoidAsync("downloadBinaryGbx", filename, Convert.ToBase64String(bytes));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error while merging files into one item: " + ex.Message;
+        }
+    }
+
+    private static ItemVariantSource.MergeRootTransform BuildGroupRootTransform(CompositeWorldTransform transform)
+    {
+        var rotation = QuaternionFromDegrees(transform.RotX, transform.RotY, transform.RotZ);
+        var pivot = new Vector3(transform.PivotX, transform.PivotY, transform.PivotZ);
+        var rotatedPivot = Vector3.Transform(pivot, rotation);
+        var translation = new Vector3(transform.X, transform.Y, transform.Z) + pivot - rotatedPivot;
+        return new ItemVariantSource.MergeRootTransform(
+            new Vec3(translation.X, translation.Y, translation.Z),
+            new Quat(rotation.X, rotation.Y, rotation.Z, rotation.W));
+    }
+
+    private static KC.AnimEase ParseAnimEase(string? value, KC.AnimEase fallback)
+        => Enum.TryParse<KC.AnimEase>(value, ignoreCase: true, out var ease) ? ease : fallback;
+
+    private void ApplyMeshPartConfigurationToVariant()
+    {
+        if (authoredMotionScene is null || meshPartModes.Count == 0)
+            return;
+
+        var root = authoredMotionScene.Handles.Prefabs.FirstOrDefault(handle => !handle.Path.Contains("/ent:", StringComparison.Ordinal))
+            ?? authoredMotionScene.Handles.Prefabs.FirstOrDefault();
+        if (root is null)
+            return;
+        var slots = ItemMotionBindings.CollectSlots(root.Source, root.Path).Slots;
+        var slotByPath = slots.ToDictionary(slot => slot.Path, slot => slot.Slot, StringComparer.Ordinal);
+
+        var configured = authoredMotionScene.Preview.Geometry
+            .Where(part => !part.IsCollision)
+            .Select(part => new
+            {
+                PartPath = part.Path,
+                part.EntityPath,
+                Mode = meshPartModes.TryGetValue(part.Path, out var mode) && mode is "static" or "kinematic"
+                    ? mode
+                    : (meshPartConfigs.TryGetValue(part.Path, out var cfg) && cfg.Movable ? "kinematic" : "auto")
+            })
+            .Where(part => !string.IsNullOrWhiteSpace(part.EntityPath) && part.Mode is "static" or "kinematic")
+            .GroupBy(part => part.EntityPath!, StringComparer.Ordinal);
+
+        foreach (var entryGroup in configured)
+        {
+            var distinctModes = entryGroup.Select(part => part.Mode).Distinct(StringComparer.Ordinal).ToArray();
+            if (distinctModes.Length != 1)
+            {
+                errorMessage = $"Mesh config niet toegepast voor {entryGroup.Key}: één entiteit bevat zowel static als kinematic parts. Splits de mesh eerst in aparte entiteiten.";
+                continue;
+            }
+
+            var mode = distinctModes[0];
+            if (mode == "static" && slotByPath.TryGetValue(entryGroup.Key, out var slot)
+                && authoredMotionScene.Handles.Entries.Any(handle =>
+                    handle.Entry.Params is NPlugDyna_SPrefabConstraintParams parameters && (parameters.Ent1 == slot || parameters.Ent2 == slot)))
+            {
+                errorMessage = $"Mesh config niet toegepast voor {entryGroup.Key}: deze entiteit zit in een kinematic constraint chain.";
+                continue;
+            }
+
+            var entry = authoredMotionScene.Handles.Entries.FirstOrDefault(handle => handle.Path == entryGroup.Key);
+            if (entry?.Entry.Model is not CPlugDynaObjectModel dyna || entry.Entry.Params is not NPlugDynaObjectModel_SInstanceParams instance)
+                continue;
+
+            if (mode == "static")
+            {
+                dyna.IsStatic = true;
+                instance.IsKinematic = false;
+            }
+            else if (mode == "kinematic")
+            {
+                dyna.IsStatic = false;
+                instance.IsKinematic = true;
+            }
+        }
+    }
+
     private async Task ExportGbx(bool combineFiles = false)
     {
         if (gbxFile != null && itemModel != null)
@@ -2062,9 +4153,10 @@
                 }
 
                 UpdateIdent();
-                ItemExportValidator.EnsureGameReady(combineFiles ? variantSources[0].Model : itemModel);
+                ItemExportValidator.EnsureGameReady(combineFiles ? variantSources[0].Model : itemModel, identId);
                 SyncPivotsToGbx();
                 for (int i = 0; i < detectedLights.Count; i++) SyncLightsToGbx(i);
+                ApplyMeshPartConfigurationToVariant();
 
                 using var memoryStream = new MemoryStream();
                 if (combineFiles)

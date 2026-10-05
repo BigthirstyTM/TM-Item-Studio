@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Models/ItemMotion*.cs" Link="Models/%(Filename)%(Extension)" />
+    <Compile Include="../../Models/ItemScene*.cs" Link="Models/%(Filename)%(Extension)" />
+    <Compile Include="../../Models/AuthoredMotionPreview.cs" Link="Models/AuthoredMotionPreview.cs" />
     <Reference Include="GBX.NET"><HintPath>../../lib/GBX.NET.dll</HintPath><Private>true</Private></Reference>
     <PackageReference Include="GBX.NET.LZO" Version="2.1.6" ExcludeAssets="compile;runtime" />
     <Reference Include="GBX.NET.LZO"><HintPath>$(NuGetPackageRoot)gbx.net.lzo/2.1.6/lib/net8.0/GBX.NET.LZO.dll</HintPath><Private>true</Private></Reference>

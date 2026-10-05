@@ -118,5 +118,117 @@ public static class ItemMotionBindings
         return ItemMotionResult<bool>.Ok(true);
     }
 
+    /// <summary>Traverses a root prefab hierarchy in depth-first order to construct the flattened kinematic slot table.</summary>
+    public static (List<ItemMotionSlot> Slots, string? Error, ItemMotionStatus Status) CollectSlots(CPlugPrefab rootPrefab, string rootPath)
+    {
+        ArgumentNullException.ThrowIfNull(rootPrefab);
+        ArgumentException.ThrowIfNullOrWhiteSpace(rootPath);
+        var slots = new List<ItemMotionSlot>();
+        var visited = new HashSet<CPlugPrefab>(ReferenceEqualityComparer.Instance);
+        string? tableError = null;
+        var tableStatus = ItemMotionStatus.Unresolved;
+
+        void Traverse(CPlugPrefab prefab, string currentPath)
+        {
+            if (!visited.Add(prefab))
+            {
+                tableError ??= "Cyclic prefab references prevent reliable slot classification.";
+                tableStatus = ItemMotionStatus.Unsupported;
+                return;
+            }
+
+            if (prefab.Ents is null)
+            {
+                tableError ??= "Owning prefab has no entity array.";
+                return;
+            }
+
+            for (int index = 0; index < prefab.Ents.Length; index++)
+            {
+                var entry = prefab.Ents[index];
+                if (entry is null)
+                {
+                    tableError ??= "Null prefab entry prevents reliable slot-table construction.";
+                    continue;
+                }
+                if (entry.ModelFile is not null)
+                {
+                    tableError ??= "External model prevents reliable slot classification; no resolution was attempted.";
+                    continue;
+                }
+                var entPath = $"{currentPath}/ent:{index}";
+                var model = entry.Model;
+                if (model is CPlugPrefab nested)
+                {
+                    Traverse(nested, entPath);
+                    continue;
+                }
+                if (model is not CPlugDynaObjectModel) continue;
+                if (entry.Params is null) continue;
+                if (entry.Params is not NPlugDynaObjectModel_SInstanceParams instance)
+                {
+                    tableError ??= "Dyna entry has an unsupported instance-params type.";
+                    tableStatus = ItemMotionStatus.Unsupported;
+                    continue;
+                }
+                if (instance.Version is < 0 or > 2)
+                {
+                    tableError ??= "Dyna entry has an unsupported instance-params version.";
+                    tableStatus = ItemMotionStatus.Unsupported;
+                    continue;
+                }
+                if (instance.IsKinematic)
+                {
+                    slots.Add(new(slots.Count, index, entPath) { SourceEntry = entry });
+                }
+            }
+
+            visited.Remove(prefab);
+        }
+
+        Traverse(rootPrefab, rootPath);
+        return (slots, tableError, tableStatus);
+    }
+
+    /// <summary>Resolves a kinematic constraint against an explicit flattened slot table.</summary>
+    public static ItemMotionBinding Resolve(KC constraint, IReadOnlyList<ItemMotionSlot> slots,
+        NPlugDyna_SPrefabConstraintParams? parameters, string worldPath,
+        string? tableError = null, ItemMotionStatus tableStatus = ItemMotionStatus.Unresolved)
+    {
+        ArgumentNullException.ThrowIfNull(constraint);
+        ArgumentNullException.ThrowIfNull(slots);
+        ArgumentException.ThrowIfNullOrWhiteSpace(worldPath);
+
+        ItemMotionTarget Target(int raw, bool parent)
+        {
+            if (tableError is not null) return new(raw, null, null, tableStatus, false, tableError);
+            if (raw >= 0 && raw < slots.Count)
+            {
+                var slot = slots[raw];
+                return new(raw, slot.OriginalArrayIndex, slot.Path, ItemMotionStatus.Supported, false, null) { SourceEntry = slot.SourceEntry };
+            }
+            if (parent) return new(raw, null, worldPath, ItemMotionStatus.Supported, true,
+                "Parent slot is outside the kinematic table: owning occurrence world context.");
+            return new(raw, null, null, ItemMotionStatus.Unresolved, false, "Child slot is outside the kinematic table; no fallback target.");
+        }
+        if (parameters is null)
+        {
+            var absent = new ItemMotionTarget(0, null, null, ItemMotionStatus.Absent, false, "Constraint parameters are absent; no default binding is assumed.");
+            return new(absent, absent, slots, ItemMotionStatus.Absent, absent.Reason) { Source = constraint };
+        }
+        var parent = Target(parameters.Ent1, true);
+        var child = Target(parameters.Ent2, false);
+        var status = parent.Status != ItemMotionStatus.Supported ? parent.Status : child.Status;
+        string? reason = parent.Status != ItemMotionStatus.Supported ? parent.Reason : child.Reason;
+        if (parameters.Version != 0) { status = ItemMotionStatus.Unsupported; reason = "Unsupported constraint-params version."; }
+        if (!Finite(parameters.Pos1) || !Finite(parameters.Pos2))
+        { status = ItemMotionStatus.Invalid; reason = "Constraint anchor positions contain nonfinite values."; }
+        if (status == ItemMotionStatus.Supported && !parent.IsWorld && (parent.Path == child.Path || parent.RawSlot == child.RawSlot))
+        { status = ItemMotionStatus.Unsupported; reason = "Self-parented constraints are not supported in preview."; }
+        if (status == ItemMotionStatus.Supported && (parameters.Pos1 != default || parameters.Pos2 != default))
+        { status = ItemMotionStatus.Unsupported; reason = "Nonzero constraint anchor positions are preserved but their preview semantics are unverified."; }
+        return new(parent, child, slots, status, reason) { Source = constraint, Parameters = parameters };
+    }
+
     private static bool Finite(GBX.NET.Vec3 value) => float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
 }

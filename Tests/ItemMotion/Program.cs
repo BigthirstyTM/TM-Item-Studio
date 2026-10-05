@@ -2,6 +2,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using GBX.NET;
 using GBX.NET.Components;
+using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Meta;
 using GBX.NET.Engines.Plug;
 using GBX.NET.Serialization;
@@ -11,7 +12,58 @@ using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 
 // Synthetic authored data only. Expected numbers below are hand-calculated, not produced by the evaluator.
 int passed = 0, failed = 0;
+Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
+
+Check("static-to-kinematic conversion requires a valid kinematic template body", () =>
+{
+    var staticItem = new CGameItemModel
+    {
+        Ident = new Ident("ConvertedMotion", 26, "FixtureGenerator"),
+        Name = "Converted Motion",
+        ItemType = CGameItemModel.EItemType.Ornament,
+        ItemTypeE = CGameItemModel.EItemType.Ornament,
+        EntityModel = new CPlugStaticObjectModel { Mesh = new CPlugSolid2Model() }
+    };
+    var result = ItemKinematicEntityTemplate.ConvertStaticToKinematic(staticItem, movingTemplate: null);
+    Require(!result.Success && result.Status == ItemMotionStatus.Unsupported, "conversion without template should be rejected");
+
+    var template = KinematicTemplate();
+    var explicitConstraint = new KC
+    {
+        Version = 0,
+        SubVersion = 3,
+        TransAxis = KC.EAxis.Z,
+        TransMin = -2,
+        TransMax = 5,
+        RotAxis = KC.EAxis.X,
+        AngleMinDeg = -45,
+        AngleMaxDeg = 45,
+        TransAnimFunc = Timeline(Key(KC.AnimEase.Constant, 500)),
+        RotAnimFunc = Timeline(Key(KC.AnimEase.QuadInOut, 1200))
+    };
+    result = ItemKinematicEntityTemplate.ConvertStaticToKinematic(staticItem, template, explicitConstraint);
+    Require(result.Success, result.Reason ?? "conversion failed");
+    var prefab = (CPlugPrefab)result.Value!.EntityModel!;
+    Require(prefab.Ents!.Length == 2, "conversion did not build a two-entry prefab");
+    var body = (CPlugDynaObjectModel)prefab.Ents[0].Model!;
+    Require(!body.IsStatic && body.Mesh is not null && body.StaticShape is CPlugSurface && body.DynaShape is CPlugSurface,
+        "dyna body did not reuse the static mesh and surface nodes");
+    Require(((CPlugSurface)body.StaticShape).Surf is not null && ((CPlugSurface)body.DynaShape).Surf is not null,
+        "converted body lost required collision surface payload");
+    var instance = (NPlugDynaObjectModel_SInstanceParams)prefab.Ents[0].Params!;
+    Require(instance.Version == 2 && instance.IsKinematic, "instance params did not set kinematic mode");
+    Require(instance.PeriodSc == 1 && instance.PeriodScMax == -1 && instance.Phase01 == -1 && instance.Phase01Max == -1,
+        "template timing sentinels were not preserved");
+    var constraint = (NPlugDyna_SKinematicConstraint)prefab.Ents[1].Model!;
+    Require(constraint.SubVersion == 3 && constraint.TransAxis == NPlugDyna_SKinematicConstraint.EAxis.Z
+        && constraint.RotAxis == NPlugDyna_SKinematicConstraint.EAxis.X
+        && constraint.TransMin == -2 && constraint.TransMax == 5
+        && constraint.AngleMinDeg == -45 && constraint.AngleMaxDeg == 45,
+        "explicit constraint template was not applied");
+    var binding = ItemMotionBindings.Resolve(constraint, prefab, (NPlugDyna_SPrefabConstraintParams)prefab.Ents[1].Params!, "doc:0/variant:none/root");
+    Require(binding.Status == ItemMotionStatus.Supported, binding.Reason ?? "binding failed");
+});
 
 Check("segment count edits retain existing keys and timing mode, append in the right units, and reject atomically", () =>
 {
@@ -340,6 +392,83 @@ Check("target editing validates before either slot changes", () =>
     Require(parameters.Ent1 == -1 && parameters.Ent2 == 1, "valid targets not persisted");
 });
 
+Check("kinematic entity template appends one independently bound body and constraint atomically", () =>
+{
+    var (prefab, source, parameters) = Prefab();
+    source.Version = 0;
+    source.SubVersion = 3;
+    var result = ItemKinematicEntityTemplate.AppendFromConstraint(prefab, source, "doc:0/variant:none/root");
+    Require(result.Success && result.Value == 2, result.Reason ?? "template append failed");
+    Require(prefab.Ents!.Length == 8, "template did not append exactly two entries");
+    var body = prefab.Ents[6];
+    var instance = (NPlugDynaObjectModel_SInstanceParams)body.Params!;
+    Require(ReferenceEquals(body.Model, prefab.Ents[4].Model) && instance.Version == 2 && instance.IsKinematic,
+        "template did not preserve the proven shared dyna model and kinematic instance classification");
+    var constraint = (KC)prefab.Ents[7].Model!;
+    var binding = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[7].Params!;
+    Require(binding.Ent1 == parameters.Ent1 && binding.Ent2 == 2 && binding.Pos1 == default && binding.Pos2 == default,
+        "template binding did not target the new filtered slot");
+    Require(constraint.SubVersion == 3 && constraint.TransAnimFunc!.SubFuncs![0].Duration == source.TransAnimFunc!.SubFuncs![0].Duration,
+        "template did not copy typed constraint fields");
+    Require(ItemMotionBindings.Resolve(constraint, prefab, binding, "doc:0/variant:none/root").Status == ItemMotionStatus.Supported,
+        "appended binding is not independently resolvable");
+
+    var length = prefab.Ents.Length;
+    source.SubVersion = 2;
+    var rejected = ItemKinematicEntityTemplate.AppendFromConstraint(prefab, source, "doc:0/variant:none/root");
+    Require(!rejected.Success && prefab.Ents.Length == length, "unsupported template partially mutated the entity list");
+});
+
+Check("visible path proxy inserts a complete body before the original visible constraint", () =>
+{
+    var (prefab, source, parameters) = Prefab();
+    source.Version = 0;
+    source.SubVersion = 3;
+    var result = ItemKinematicEntityTemplate.InsertVisiblePathProxy(prefab, source, "doc:0/variant:none/root");
+    Require(result.Success, result.Reason ?? "visible path proxy insertion failed");
+    Require(prefab.Ents!.Length == 8 && parameters.Ent1 == 2 && parameters.Ent2 == 1,
+        "original visible constraint was not rebound to the proxy");
+    Require(ReferenceEquals(prefab.Ents[6].Model, prefab.Ents[4].Model),
+        "path proxy did not reuse the proven complete dyna model");
+    var proxyParameters = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[7].Params!;
+    Require(proxyParameters.Ent1 == 0 && proxyParameters.Ent2 == 2,
+        "path proxy constraint did not preserve the old parent and target the new slot");
+    Require(ItemMotionBindings.Resolve(source, prefab, parameters, "doc:0/variant:none/root").Status == ItemMotionStatus.Supported,
+        "original child constraint is not resolvable after proxy insertion");
+    Require(ItemMotionBindings.Resolve(result.Value!, prefab, proxyParameters, "doc:0/variant:none/root").Status == ItemMotionStatus.Supported,
+        "new proxy constraint is not independently resolvable");
+});
+
+Check("hidden carrier parent inserts one meshless helper and keeps chain bindings supported", () =>
+{
+    var (prefab, source, parameters) = Prefab();
+    source.Version = 0;
+    source.SubVersion = 3;
+    var sourceBody = (CPlugDynaObjectModel)prefab.Ents![4].Model!;
+    sourceBody.StaticShape = ReopenSurface(new CPlugSurface.Mesh
+    {
+        Version = 6,
+        Vertices = [new(0, 0, 0), new(1, 0, 0), new(0, 1, 0)],
+        Triangles = [new(new Int3(0, 1, 2), 0, 0, 0)]
+    });
+    sourceBody.DynaShape = sourceBody.StaticShape;
+
+    var result = ItemKinematicEntityTemplate.InsertHiddenCarrierParent(prefab, source, "doc:0/variant:none/root");
+    Require(result.Success, result.Reason ?? "hidden carrier insertion failed");
+    Require(prefab.Ents.Length == 8 && parameters.Ent1 == 2 && parameters.Ent2 == 1,
+        "visible constraint was not rebound to the carrier slot");
+    var carrier = (CPlugDynaObjectModel)prefab.Ents[6].Model!;
+    Require(carrier.Mesh is not null && carrier.StaticShape is CPlugSurface { Surf: not null } && carrier.DynaShape is CPlugSurface { Surf: not null },
+        "carrier body is not safely mesh-backed and collision-complete");
+    var carrierParameters = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[7].Params!;
+    Require(carrierParameters.Ent1 == 0 && carrierParameters.Ent2 == 2,
+        "carrier constraint did not preserve parent slot and target new helper slot");
+    Require(ItemMotionBindings.Resolve(source, prefab, parameters, "doc:0/variant:none/root").Status == ItemMotionStatus.Supported,
+        "visible child constraint is not resolvable after carrier insertion");
+    Require(ItemMotionBindings.Resolve(result.Value!, prefab, carrierParameters, "doc:0/variant:none/root").Status == ItemMotionStatus.Supported,
+        "carrier constraint is not independently resolvable");
+});
+
 Check("binding preview serialization excludes source graph", () =>
 {
     var (prefab, model, parameters) = Prefab();
@@ -370,6 +499,72 @@ Check("rest-relative motion uses parent and child rotations independently", () =
     Require(!ItemMotionTransforms.ComposeVisual(bad, owner, live, signal).Success, "nonfinite child accepted");
     Require(!ItemMotionTransforms.ComposeVisual(child, new(), live, signal).Success, "singular parent accepted");
     Require(!ItemMotionTransforms.ComposeVisual(child, owner, Matrix4x4.CreateScale(2), signal).Success, "scaled parent accepted");
+});
+
+Check("multi-constraint chain follows A-to-E axis path with supported slot bindings", () =>
+{
+    static CPlugPrefab.EntRef Body() => new()
+    {
+        Model = new CPlugDynaObjectModel { IsStatic = false, Mesh = new CPlugSolid2Model() },
+        Params = new NPlugDynaObjectModel_SInstanceParams { Version = 2, IsKinematic = true },
+        Position = default,
+        Rotation = Quat.Identity
+    };
+    static KC Constraint(KC.EAxis axis) => new()
+    {
+        Version = 0,
+        SubVersion = 3,
+        TransAxis = axis,
+        TransMin = 0,
+        TransMax = 5,
+        RotAxis = KC.EAxis.Y,
+        AngleMinDeg = 0,
+        AngleMaxDeg = 0,
+        TransAnimFunc = new KC.AnimFunc { IsDuration = true, SubFuncs = [new() { Ease = KC.AnimEase.Linear, Duration = new TimeInt32(1000) }] },
+        RotAnimFunc = new KC.AnimFunc { IsDuration = true, SubFuncs = [new() { Ease = KC.AnimEase.Linear, Duration = new TimeInt32(1000) }] }
+    };
+
+    var a = Body(); var b = Body(); var c = Body(); var d = Body(); var e = Body();
+    var ab = Constraint(KC.EAxis.X);
+    var bc = Constraint(KC.EAxis.Y);
+    var cd = Constraint(KC.EAxis.Z);
+    var de = Constraint(KC.EAxis.X);
+    var pAb = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = -1, Ent2 = 0 };
+    var pBc = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = 0, Ent2 = 1 };
+    var pCd = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = 1, Ent2 = 2 };
+    var pDe = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = 2, Ent2 = 3 };
+    var prefab = new CPlugPrefab
+    {
+        Ents =
+        [
+            a, b, c, d, e,
+            new() { Model = ab, Params = pAb, Rotation = Quat.Identity },
+            new() { Model = bc, Params = pBc, Rotation = Quat.Identity },
+            new() { Model = cd, Params = pCd, Rotation = Quat.Identity },
+            new() { Model = de, Params = pDe, Rotation = Quat.Identity }
+        ]
+    };
+
+    foreach (var (constraint, parameters, parent, child) in new[] { (ab, pAb, -1, 0), (bc, pBc, 0, 1), (cd, pCd, 1, 2), (de, pDe, 2, 3) })
+    {
+        var binding = ItemMotionBindings.Resolve(constraint, prefab, parameters, "doc:0/variant:none/root");
+        Require(binding.Status == ItemMotionStatus.Supported, binding.Reason ?? "binding rejected");
+        Require(binding.Parent.RawSlot == parent && binding.Child.RawSlot == child, "unexpected slot table mapping");
+    }
+
+    var aLive = Value(ItemMotion.Evaluate(ab, 0.5)).Signal;
+    var bSignal = Value(ItemMotion.Evaluate(bc, 0.5)).Signal;
+    var cSignal = Value(ItemMotion.Evaluate(cd, 0.5)).Signal;
+    var dSignal = Value(ItemMotion.Evaluate(de, 0.5)).Signal;
+    var aWorld = Value(ItemMotionTransforms.ComposeVisual(Matrix4x4.Identity, Matrix4x4.Identity, Matrix4x4.Identity, aLive));
+    var bWorld = Value(ItemMotionTransforms.ComposeVisual(Matrix4x4.Identity, Matrix4x4.Identity, aWorld, bSignal));
+    var cWorld = Value(ItemMotionTransforms.ComposeVisual(Matrix4x4.Identity, Matrix4x4.Identity, bWorld, cSignal));
+    var dWorld = Value(ItemMotionTransforms.ComposeVisual(Matrix4x4.Identity, Matrix4x4.Identity, cWorld, dSignal));
+
+    Vector(Vector3.Transform(Vector3.Zero, aWorld), new(2.5f, 0, 0));
+    Vector(Vector3.Transform(Vector3.Zero, bWorld), new(2.5f, 2.5f, 0));
+    Vector(Vector3.Transform(Vector3.Zero, cWorld), new(2.5f, 2.5f, 2.5f));
+    Vector(Vector3.Transform(Vector3.Zero, dWorld), new(5f, 2.5f, 2.5f));
 });
 
 Check("version-gated exact timing storage and save/reparse", () =>
@@ -418,6 +613,66 @@ Check("timing edits reject absent and invalid fields atomically", () =>
     Require(read.Status == ItemMotionStatus.Invalid && float.IsNaN(read.Value!.Phase01!.Value), "stored invalid timing hidden");
 });
 
+Check("default template fallback and collision generation from visual mesh", () =>
+{
+    var defaultTemplate = ItemKinematicEntityTemplate.GetDefaultMovingTemplate();
+    Require(defaultTemplate is not null, "default moving template should load from bundled resources/disk");
+    var prefab = defaultTemplate!.EntityModel as CPlugPrefab;
+    Require(prefab?.Ents?.Length >= 2, "template should contain valid prefab entities");
+
+    var stream = new CPlugVertexStream { Positions = [new(0, 0, 0), new(2, 0, 0), new(0, 2, 0)] };
+    var indexBuffer = new CPlugIndexBuffer { Indices = [0, 1, 2] };
+    var vit = new CPlugVisualIndexedTriangles
+    {
+        VertexStreams = [stream],
+        IndexBuffer = indexBuffer,
+        BoundingBox = new BoxAligned(0, 0, 0, 2, 2, 0)
+    };
+    var solid = new CPlugSolid2Model { Visuals = [vit] };
+    var generatedSurface = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(solid);
+    var sm = generatedSurface?.Surf as CPlugSurface.Mesh;
+    Require(sm is not null, "collision generation failed");
+    Require(sm.Vertices?.Length == 3 && sm.Triangles?.Length == 1, "generated surface mesh did not match source");
+});
+
+Check("relay collision path configures two root bodies with 100% collision", () =>
+{
+    var template = KinematicTemplate();
+    var prefab = (CPlugPrefab)template.EntityModel!;
+    var constraint = (KC)prefab.Ents![1].Model!;
+    var result = ItemKinematicEntityTemplate.ConfigureRelayCollisionPath(
+        prefab, constraint, "doc:0/variant:none/root",
+        KC.EAxis.X, 5f, 2000,
+        KC.EAxis.Y, 5f, 2000);
+    Require(result.Success, result.Reason ?? "relay configuration failed");
+    Require(prefab.Ents.Length == 4, "relay path did not build 4 entries (2 bodies + 2 constraints)");
+    var p0 = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[1].Params!;
+    var p1 = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[3].Params!;
+    Require(p0.Ent1 == -1 && p0.Ent2 == 0, "body 0 constraint must be root-bound for full collision");
+    Require(p1.Ent1 == -1 && p1.Ent2 == 1, "body 1 constraint must be root-bound for full collision");
+    var c0 = (KC)prefab.Ents[1].Model!;
+    var c1 = (KC)prefab.Ents[3].Model!;
+    Require(c0.TransAxis == KC.EAxis.X && c0.TransMax == 5f, "c0 axis/max mismatch");
+    Require(c1.TransAxis == KC.EAxis.Y && c1.TransMax == 5f, "c1 axis/max mismatch");
+});
+
+Check("chained L-path configures carrier helper and synchronized child", () =>
+{
+    var template = KinematicTemplate();
+    var prefab = (CPlugPrefab)template.EntityModel!;
+    var constraint = (KC)prefab.Ents![1].Model!;
+    var result = ItemKinematicEntityTemplate.ConfigureChainedLPath(
+        prefab, constraint, "doc:0/variant:none/root",
+        KC.EAxis.X, 5f, 2000,
+        KC.EAxis.Y, 5f, 2000, isPingPong: true);
+    Require(result.Success, result.Reason ?? "chained L-path configuration failed");
+    Require(prefab.Ents.Length == 4, "chained path did not insert carrier body and constraint");
+    var carrierParams = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[3].Params!;
+    var childParams = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[1].Params!;
+    Require(carrierParams.Ent1 == -1, "carrier constraint must be attached to world");
+    Require(childParams.Ent1 == 1, "visible constraint must be attached to carrier body");
+});
+
 Console.WriteLine($"{passed} passed, {failed} failed.");
 return failed == 0 ? 0 : 1;
 
@@ -430,6 +685,68 @@ static KC.SubAnimFunc Key(KC.AnimEase ease, int duration, bool reverse = false) 
 static KC.AnimFunc Timeline(params KC.SubAnimFunc[] keys) => new() { IsDuration = true, SubFuncs = keys };
 static KC Model() => new() { TransAxis = KC.EAxis.X, TransMin = 2, TransMax = 10, RotAxis = KC.EAxis.Z, AngleMinDeg = 0, AngleMaxDeg = 180,
     TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 2000)), RotAnimFunc = Timeline(Key(KC.AnimEase.Linear, 1000)) };
+static CGameItemModel KinematicTemplate()
+{
+    var surfaceMesh = new CPlugSurface.Mesh
+    {
+        Version = 6,
+        Vertices = [new(0, 0, 0), new(1, 0, 0), new(0, 1, 0)],
+        Triangles = [new(new Int3(0, 1, 2), 0, 0, 0)]
+    };
+    var surface = ReopenSurface(surfaceMesh);
+    var item = new CGameItemModel
+    {
+        Ident = new Ident("KinematicTemplate", 26, "FixtureGenerator"),
+        ItemType = CGameItemModel.EItemType.Ornament,
+        ItemTypeE = CGameItemModel.EItemType.Ornament,
+        EntityModel = new CPlugPrefab
+        {
+            Ents =
+            [
+                new()
+                {
+                    Model = new CPlugDynaObjectModel
+                    {
+                        Version = 13,
+                        IsStatic = false,
+                        Mesh = new CPlugSolid2Model(),
+                        StaticShape = surface,
+                        DynaShape = surface
+                    },
+                    Params = new NPlugDynaObjectModel_SInstanceParams
+                    {
+                        Version = 2,
+                        PeriodSc = 1,
+                        PeriodScMax = -1,
+                        Phase01 = -1,
+                        Phase01Max = -1,
+                        IsKinematic = true
+                    }
+                },
+                new()
+                {
+                    Model = new KC
+                    {
+                        Version = 0,
+                        SubVersion = 3,
+                        TransAxis = KC.EAxis.Y,
+                        TransMin = 0,
+                        TransMax = 1,
+                        RotAxis = KC.EAxis.Y,
+                        TransAnimFunc = Timeline(Key(KC.AnimEase.Linear, 1000)),
+                        RotAnimFunc = Timeline(Key(KC.AnimEase.Linear, 1000))
+                    },
+                    Params = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = -1, Ent2 = 0 }
+                }
+            ]
+        }
+    };
+    item.CreateChunk<CGameCtnCollector.HeaderChunk2E001003>().Version = 8;
+    item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+    item.CreateChunk<CGameItemModel.Chunk2E002015>();
+    item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
+    return item;
+}
 static (CPlugPrefab Prefab, KC Model, NPlugDyna_SPrefabConstraintParams Parameters) Prefab()
 {
     var model = Model();
@@ -450,6 +767,15 @@ static byte[] Bytes(GBX.NET.Engines.MwFoundations.CMwNod model)
     using var rw = new GbxReaderWriter(writer);
     model.ReadWrite(rw);
     return stream.ToArray();
+}
+static CPlugSurface ReopenSurface(CPlugSurface.Mesh mesh)
+{
+    var surface = new CPlugSurface { Surf = mesh };
+    surface.CreateChunk<CPlugSurface.Chunk0900C003>().Version = 2;
+    using var stream = new MemoryStream();
+    new Gbx<CPlugSurface>(surface) { BodyCompression = GbxCompression.Uncompressed }.Save(stream);
+    stream.Position = 0;
+    return Gbx.Parse<CPlugSurface>(stream).Node;
 }
 static T Reparse<T>(byte[] bytes) where T : GBX.NET.Engines.MwFoundations.CMwNod, new()
 {

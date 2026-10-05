@@ -19,11 +19,19 @@ public static class AuthoredMotionPreview
         var childClaims = new Dictionary<string, int>();
         var entries = scene.Handles.Entries.ToDictionary(e => e.Path);
         var prefabs = scene.Handles.Prefabs.ToDictionary(p => p.Path);
+
+        var rootPrefab = scene.Handles.Prefabs.FirstOrDefault(p => !p.Path.Contains("/ent:", StringComparison.Ordinal))
+            ?? scene.Handles.Prefabs.FirstOrDefault();
+        var (slots, tableError, tableStatus) = rootPrefab is not null
+            ? ItemMotionBindings.CollectSlots(rootPrefab.Source, rootPrefab.Path)
+            : (new List<ItemMotionSlot>(), (string?)"Scene contains no prefabs.", ItemMotionStatus.Absent);
+        var worldPath = rootPrefab?.Path ?? "root";
+
         foreach (var entry in scene.Handles.Entries)
         {
             if (entry.Entry.ModelFile is not null || entry.Entry.Model is not NPlugDyna_SKinematicConstraint source) continue;
-            var binding = ItemMotionBindings.Resolve(source, entry.Prefab,
-                entry.Entry.Params as NPlugDyna_SPrefabConstraintParams, entry.PrefabPath);
+            var binding = ItemMotionBindings.Resolve(source, slots,
+                entry.Entry.Params as NPlugDyna_SPrefabConstraintParams, worldPath, tableError, tableStatus);
             if (binding.Child.Path is { } childPath)
                 childClaims[childPath] = childClaims.GetValueOrDefault(childPath) + 1;
             var sample = ItemMotion.Evaluate(source, 0);
@@ -33,7 +41,7 @@ public static class AuthoredMotionPreview
                 continue;
             }
             var child = entries.GetValueOrDefault(binding.Child.Path!);
-            var parentRest = binding.Parent.IsWorld ? prefabs[entry.PrefabPath].WorldTransform
+            var parentRest = binding.Parent.IsWorld ? Matrix4x4.Identity
                 : entries.GetValueOrDefault(binding.Parent.Path!)?.WorldTransform;
             if (child?.WorldTransform is not Matrix4x4 childRest || parentRest is not Matrix4x4 parent
                 || !ItemMotionTransforms.IsRigid(childRest) || !ItemMotionTransforms.IsRigid(parent)
@@ -68,6 +76,32 @@ public static class AuthoredMotionPreview
             return true;
         });
         return new(tracks, diagnostics);
+    }
+
+    public static (List<ItemMotionSlot> Slots, string? Error, ItemMotionStatus Status) CollectSlots(ItemSceneResult scene)
+    {
+        ArgumentNullException.ThrowIfNull(scene);
+        var rootPrefab = scene.Handles.Prefabs.FirstOrDefault(p => !p.Path.Contains("/ent:", StringComparison.Ordinal))
+            ?? scene.Handles.Prefabs.FirstOrDefault();
+        if (rootPrefab is null)
+            return (new List<ItemMotionSlot>(), "Scene contains no prefabs.", ItemMotionStatus.Absent);
+        return ItemMotionBindings.CollectSlots(rootPrefab.Source, rootPrefab.Path);
+    }
+
+    public static ItemMotionBinding Resolve(NPlugDyna_SKinematicConstraint constraint, ItemSceneResult scene,
+        NPlugDyna_SPrefabConstraintParams? parameters)
+    {
+        ArgumentNullException.ThrowIfNull(constraint);
+        ArgumentNullException.ThrowIfNull(scene);
+        var rootPrefab = scene.Handles.Prefabs.FirstOrDefault(p => !p.Path.Contains("/ent:", StringComparison.Ordinal))
+            ?? scene.Handles.Prefabs.FirstOrDefault();
+        if (rootPrefab is null)
+        {
+            var absent = new ItemMotionTarget(0, null, null, ItemMotionStatus.Absent, false, "Scene contains no prefabs.");
+            return new(absent, absent, Array.Empty<ItemMotionSlot>(), ItemMotionStatus.Absent, absent.Reason) { Source = constraint };
+        }
+        var (slots, tableError, tableStatus) = CollectSlots(scene);
+        return ItemMotionBindings.Resolve(constraint, slots, parameters, rootPrefab.Path, tableError, tableStatus);
     }
 
     private static float[] Pack(Matrix4x4 m) => new[] { m.M11, m.M12, m.M13, m.M14,

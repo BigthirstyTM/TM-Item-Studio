@@ -246,6 +246,153 @@ if (args.Length == 2 && args[0] == "--verify-browser")
     Check(combinedDownload.Node.Name == "Fixture", "Browser combine must use first file metadata even when second is selected");
     Check(Download("browser-single").Node.EntityModel is NPlugItem_SVariantList { Variants.Length: 1 }, "Browser one-entry export must retain variant wrapper");
 }
+
+// Merged composite export with group motion chains carrier and member constraints
+CGameItemModel MakeKinematicItem(string name)
+{
+    var surface = new CPlugSurface
+    {
+        Surf = new CPlugSurface.Mesh
+        {
+            Version = 6,
+            Vertices = [new(0, 0, 0), new(1, 0, 0), new(0, 1, 0)],
+            Triangles = [new(new Int3(0, 1, 2), 0, 0, 0)]
+        }
+    };
+    surface.CreateChunk<CPlugSurface.Chunk0900C003>().Version = 2;
+    var dyna = new CPlugDynaObjectModel
+    {
+        Version = 13,
+        IsStatic = false,
+        Mesh = new CPlugSolid2Model(),
+        StaticShape = surface,
+        DynaShape = surface
+    };
+    var constraint = new NPlugDyna_SKinematicConstraint
+    {
+        Version = 0,
+        SubVersion = 3,
+        TransAxis = NPlugDyna_SKinematicConstraint.EAxis.Y,
+        TransMin = 0,
+        TransMax = 1,
+        TransAnimFunc = new() { IsDuration = true, SubFuncs = [new() { Ease = NPlugDyna_SKinematicConstraint.AnimEase.Linear, Duration = new(1000) }] },
+        RotAnimFunc = new() { IsDuration = true, SubFuncs = [new() { Ease = NPlugDyna_SKinematicConstraint.AnimEase.Linear, Duration = new(1000) }] }
+    };
+    var prefab = new CPlugPrefab
+    {
+        Version = 11,
+        Ents =
+        [
+            new()
+            {
+                Rotation = new Quat(0, 0, 0, 1),
+                Model = dyna,
+                Params = new NPlugDynaObjectModel_SInstanceParams
+                {
+                    Version = 2,
+                    IsKinematic = true,
+                    PeriodSc = 1,
+                    PeriodScMax = -1,
+                    Phase01 = -1,
+                    Phase01Max = -1
+                }
+            },
+            new()
+            {
+                Rotation = new Quat(0, 0, 0, 1),
+                Model = constraint,
+                Params = new NPlugDyna_SPrefabConstraintParams
+                {
+                    Version = 0,
+                    Ent1 = -1,
+                    Ent2 = 0,
+                    Pos1 = default,
+                    Pos2 = default
+                }
+            }
+        ]
+    };
+    var item = new CGameItemModel
+    {
+        Ident = new Ident(name, 26, "FixtureGenerator"),
+        Name = name,
+        ItemType = CGameItemModel.EItemType.Ornament,
+        EntityModel = prefab
+    };
+    item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+    item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
+    item.CreateChunk<CGameCtnCollector.Chunk2E00100C>();
+    return item;
+}
+
+var kItem1 = MakeKinematicItem("Kin1");
+var kDoc1 = new Gbx<CGameItemModel>(kItem1);
+var kSource1 = ItemVariantSource.FromFile("kin1", kDoc1)[0];
+
+var kItem2 = MakeKinematicItem("Kin2");
+var kDoc2 = new Gbx<CGameItemModel>(kItem2);
+var kSource2 = ItemVariantSource.FromFile("kin2", kDoc2)[0];
+
+var groupMotion = new ItemVariantSource.GroupKinematicMotion(
+    NPlugDyna_SKinematicConstraint.EAxis.Y, 0, 5,
+    new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
+    new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, true, 1000),
+    NPlugDyna_SKinematicConstraint.EAxis.Y, 0, 90,
+    new(NPlugDyna_SKinematicConstraint.AnimEase.Constant, false, 1000),
+    new(NPlugDyna_SKinematicConstraint.AnimEase.QuadInOut, false, 1000));
+var groupDef = new ItemVariantSource.GroupMergeDefinition(
+    1,
+    [0, 1],
+    new ItemVariantSource.MergeRootTransform(new Vec3(0, 0, 0), new Quat(0, 0, 0, 1)),
+    groupMotion);
+
+using var mergedMs = new MemoryStream();
+ItemVariantSource.SaveMergedPrefab([kSource1, kSource2], mergedMs, null, [groupDef]);
+var mergedBytes = mergedMs.ToArray();
+var reloadedGbx = Gbx.Parse<CGameItemModel>(new MemoryStream(mergedBytes));
+var mergedScene = ItemScene.Build(reloadedGbx.Node, 0);
+Check(!mergedScene.Preview.Diagnostics.Any(d => d.Code == "unmapped-visual"),
+    "Merged export contains an unmapped visual; Trackmania may reject or crash while loading.");
+
+var entries = mergedScene.Handles.Entries.ToDictionary(e => e.Path);
+var rootP = mergedScene.Handles.Prefabs.FirstOrDefault(p => !p.Path.Contains("/ent:", StringComparison.Ordinal));
+var (sl, _, _) = ItemMotionBindings.CollectSlots(rootP.Source, rootP.Path);
+foreach (var entry in mergedScene.Handles.Entries)
+{
+    if (entry.Entry.Model is NPlugDyna_SKinematicConstraint kc)
+    {
+        var binding = ItemMotionBindings.Resolve(kc, sl, entry.Entry.Params as NPlugDyna_SPrefabConstraintParams, rootP.Path);
+        var ch = binding.Child.Path is null ? null : entries.GetValueOrDefault(binding.Child.Path);
+        var pr = binding.Parent.IsWorld
+            ? System.Numerics.Matrix4x4.Identity
+            : binding.Parent.Path is null ? null : entries.GetValueOrDefault(binding.Parent.Path)?.WorldTransform;
+        Console.WriteLine($"ENTRY: {entry.Path}");
+        Console.WriteLine($"  childPath: {binding.Child.Path}, found: {ch != null}, childRest: {ch?.WorldTransform}");
+        Console.WriteLine($"  parentPath: {binding.Parent.Path}, isWorld: {binding.Parent.IsWorld}, found: {pr != null}, parentRest: {pr}");
+        if (ch?.WorldTransform is System.Numerics.Matrix4x4 cr)
+            Console.WriteLine($"  child rigid: {ItemMotionTransforms.IsRigid(cr)}");
+        if (pr is System.Numerics.Matrix4x4 prVal)
+            Console.WriteLine($"  parent rigid: {ItemMotionTransforms.IsRigid(prVal)}");
+    }
+}
+
+var mergedPreview = AuthoredMotionPreview.Build(mergedScene);
+Console.WriteLine($"Tracks: {mergedPreview.Tracks.Count}");
+foreach (var diag in mergedPreview.Diagnostics) Console.WriteLine($"  DIAG: {diag}");
+foreach (var tr in mergedPreview.Tracks) Console.WriteLine($"  TRACK: child={tr.ChildPath}, parent={tr.ParentPath ?? "<world>"}");
+var unexpectedDiagnostics = mergedPreview.Diagnostics
+    .Where(diag => !diag.Contains("Child slot is outside the kinematic table; no fallback target.", StringComparison.Ordinal))
+    .ToArray();
+Check(unexpectedDiagnostics.Length == 0, $"Unexpected diagnostics: {string.Join("; ", unexpectedDiagnostics)}");
+var rootTrack = mergedPreview.Tracks.FirstOrDefault(t => t.ParentPath is null && t.ChildPath.EndsWith("/ent:0/ent:0", StringComparison.Ordinal))
+    ?? mergedPreview.Tracks.FirstOrDefault(t => t.ParentPath is null)
+    ?? throw new Exception("Expected at least one world-root track.");
+var childTracks = mergedPreview.Tracks.Where(t => t.ParentPath == rootTrack.ChildPath).ToArray();
+Check(mergedPreview.Tracks.Count >= 3, $"Expected at least 3 tracks, got {mergedPreview.Tracks.Count}");
+Check(mergedPreview.Tracks.Count(t => t.ParentPath is null) >= 1, "Expected at least one world-root track.");
+Check(mergedPreview.Tracks.Count(t => t.ParentPath == rootTrack.ChildPath) >= 2,
+    "Expected at least two child tracks parented to the group carrier.");
+
 Console.WriteLine($"PASS: {passed} variant preservation checks (parse/save/reparse and failed output).");
 
 sealed class FailingStream : MemoryStream

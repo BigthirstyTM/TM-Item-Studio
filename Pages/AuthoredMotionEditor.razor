@@ -1,9 +1,73 @@
 @using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 
-<fieldset class="motion-constraint">
-    <legend class="small fw-bold">@Name</legend>
+<fieldset class="motion-constraint @(IsSelected ? "motion-constraint-selected" : "") @(IsInvisibleDriver ? "motion-invisible-driver" : IsVisualPathProxy ? "motion-path-proxy" : "")"
+          @onclick="@(() => OnSelectConstraint.InvokeAsync(ConstraintIndex))">
+    <legend class="small fw-bold d-flex flex-wrap align-items-center gap-1 cursor-pointer">
+        <span>@Name</span>
+        @if (IsSelected)
+        {
+            <span class="badge bg-info text-dark ms-1">🎯 Actief in 3D</span>
+        }
+        @if (IsInvisibleDriver)
+        {
+            <span class="badge text-bg-secondary ms-1" title="Carrier helper body. Includes a minimal safe mesh to prevent Trackmania crash.">CARRIER HELPER</span>
+        }
+        else if (IsVisualPathProxy)
+        {
+            <span class="badge text-bg-primary ms-1">VISIBLE PATH PROXY</span>
+        }
+
+        @if (IsRootConstraint)
+        {
+            <span class="badge text-bg-success ms-1" title="Directly attached to world (Ent1 = -1). Trackmania updates Havok collision in real time.">🟢 100% Havok Collision</span>
+        }
+        else
+        {
+            <span class="badge text-bg-warning text-dark ms-1" title="Chained to parent entity (Ent1 >= 0). Visually moves with parent, but Trackmania does not update Havok child collision.">🟡 Visueel (Geen child-collision in TM)</span>
+        }
+
+        <button type="button" class="btn btn-xs @(IsSelected ? "btn-primary" : "btn-outline-primary") ms-auto" style="font-size: 0.72rem; padding: 1px 6px;"
+                @onclick:stopPropagation="true" @onclick="@(() => OnSelectConstraint.InvokeAsync(ConstraintIndex))" title="Selecteer & toon in 3D Viewport">
+            🔍 Focus 3D
+        </button>
+        @if (CanRemove)
+        {
+            <button type="button" class="btn btn-xs btn-outline-danger ms-1" style="font-size: 0.72rem; padding: 1px 6px;"
+                    @onclick:stopPropagation="true" @onclick="@(() => OnRemoveConstraint.InvokeAsync(Source))" title="Verwijder deze constraint & bijbehorende body">
+                🗑️ Verwijder
+            </button>
+        }
+    </legend>
+    @if (!string.IsNullOrWhiteSpace(BindingDescription))
+    {
+        <div class="small text-muted mb-2"><span class="badge text-bg-light border text-secondary">@BindingDescription</span></div>
+    }
+    @if (IsInvisibleDriver)
+    {
+        <p class="motion-driver-warning">
+            This constraint targets a model-less driver. Trackmania crashes when loading this layout; do not export it for the game.
+            This warning itself does not block Studio export.
+        </p>
+    }
     <section class="motion-channel" aria-label="Translation controls">
-        <h6>Translation <span class="small text-muted">m</span></h6>
+        <div class="d-flex align-items-center justify-content-between mb-1">
+            <h6 class="mb-0">Translation <span class="small text-muted">m</span></h6>
+            <div class="d-flex align-items-center gap-1">
+                <span class="text-muted" style="font-size: 0.75rem;">3D Punten:</span>
+                <button type="button" class="btn btn-xs @(IsSelected && SelectedWaypointIsPointB == false ? "btn-success" : "btn-outline-success")"
+                        style="font-size: 0.72rem; padding: 1px 6px;"
+                        @onclick:stopPropagation="true" @onclick="@(() => OnSelectWaypoint.InvokeAsync(false))"
+                        title="Selecteer Startpunt A (@(ConstraintIndex + 1)A) in de 3D viewport om te verslepen">
+                    📍 @(ConstraintIndex + 1)A (Start)
+                </button>
+                <button type="button" class="btn btn-xs @(IsSelected && SelectedWaypointIsPointB == true ? "btn-warning text-dark" : "btn-outline-warning")"
+                        style="font-size: 0.72rem; padding: 1px 6px;"
+                        @onclick:stopPropagation="true" @onclick="@(() => OnSelectWaypoint.InvokeAsync(true))"
+                        title="Selecteer Eindpunt B (@(ConstraintIndex + 1)B) in de 3D viewport om te verslepen">
+                    📍 @(ConstraintIndex + 1)B (Eind)
+                </button>
+            </div>
+        </div>
         <div class="motion-range">
             <label class="small">Axis
                 <select aria-label="Translation axis" class="form-select form-select-sm" @bind="Source.TransAxis" @bind:after="NotifyChanged">
@@ -43,6 +107,17 @@
 @code {
     [Parameter, EditorRequired] public string Name { get; set; } = "Constraint";
     [Parameter, EditorRequired] public KC Source { get; set; } = null!;
+    [Parameter] public int ConstraintIndex { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public bool? SelectedWaypointIsPointB { get; set; }
+    [Parameter] public EventCallback<int> OnSelectConstraint { get; set; }
+    [Parameter] public EventCallback<bool> OnSelectWaypoint { get; set; }
+    [Parameter] public bool IsInvisibleDriver { get; set; }
+    [Parameter] public bool IsVisualPathProxy { get; set; }
+    [Parameter] public bool IsRootConstraint { get; set; } = true;
+    [Parameter] public string? BindingDescription { get; set; }
+    [Parameter] public bool CanRemove { get; set; } = false;
+    [Parameter] public EventCallback<KC> OnRemoveConstraint { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
 
     private Task NotifyChanged() => Changed.InvokeAsync();
