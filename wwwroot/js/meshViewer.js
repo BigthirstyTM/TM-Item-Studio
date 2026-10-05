@@ -1,16 +1,21 @@
 let scene, camera, renderer, controls, transformControls, gridHelper;
-let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup;
+let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup;
 let dotNetHelper = null, selectedGizmo = null;
 let isWireframe = false, isPlaying = true, animSpeed = 1;
 let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler = null;
 let resizeObserver = null;
-let showMeshes = true, showCollision = false, showPivots = true, showLights = true;
-let typedMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
+let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showWaypoints = true;
+let activeConstraintIndex = 0, activeMeshHelper = null;
+let selectedMeshPath = null, selectedMeshObject = null, selectedMeshHelper = null;
+let typedMotions = [], typedGroupMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
+let selectedCompositeSources = new Set(), compositeGroupBySource = new Map(), compositeLeaderSource = null;
+let compositeSelectionHelpers = [], compositeGroupHelpers = [];
 let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
 const pooledGeometry = new WeakSet();
 let sceneFilter = { materialIndex: null, materialPath: null, lodMask: null };
 let textureDirectory = null, textureFiles = new Map(), textureRenderVersion = 0, lastTextureMatches = null;
+const compositeGroupPalette = [0xf43f5e, 0xf59e0b, 0x10b981, 0x22d3ee, 0x6366f1, 0xa855f7, 0xe879f9, 0x84cc16];
 
 function normalizedPath(value) {
     return value.replaceAll('\\', '/').toLowerCase();
@@ -297,7 +302,7 @@ function compileMotions(sources) {
         const childRest = restMatrix(source.childRest, 'Child rest'), parentRest = restMatrix(source.parentRest, 'Parent rest');
         if (source.parentPath == null && !parentRest.equals(new THREE.Matrix4())) throw new Error('World parent requires identity parent rest.');
         paths.add(source.path);
-        byChild.set(source.childPath, { ...source, fields: { ...fields }, childRest, parentRest,
+        byChild.set(source.childPath, { ...source, constraintIndex: source.constraintIndex, fields: { ...fields }, childRest, parentRest,
             inverseChild: childRest.clone().invert(), inverseParent: parentRest.clone().invert(), live: childRest.clone(),
             translation: timeline(fields.translation), rotation: timeline(fields.rotation) });
     }
@@ -317,6 +322,23 @@ function compileMotions(sources) {
     }
     for (const motion of byChild.values()) visit(motion);
     return ordered;
+}
+function compileGroupMotions(sources, owners) {
+    if (!Array.isArray(sources)) throw new Error('Group motions must be an array.');
+    const compiled = [];
+    for (const source of sources) {
+        if (!source || typeof source.childPath !== 'string' || !source.childPath || !owners.has(source.childPath)) continue;
+        const fields = source.fields;
+        if (!fields || ![0, 1, 2].includes(fields.translationAxis) || ![0, 1, 2].includes(fields.rotationAxis)) continue;
+        for (const key of ['translationMin', 'translationMax', 'angleMinDegrees', 'angleMaxDegrees']) finite(fields[key], key);
+        compiled.push({
+            childPath: source.childPath,
+            fields: { ...fields },
+            translation: timeline(fields.translation),
+            rotation: timeline(fields.rotation)
+        });
+    }
+    return compiled;
 }
 function sampleTimeline(track, seconds, offset, min, max) {
     if (track.keys.length === 0) return min;
@@ -357,6 +379,187 @@ function applyTypedMotion() {
             .multiply(motion.inverseParent).multiply(motion.childRest).multiply(signal);
         for (const group of motionGroups.get(motion.childPath) || []) { group.matrix.copy(motion.live); group.matrixWorldNeedsUpdate = true; }
     }
+    for (const motion of typedGroupMotions) {
+        const groups = motionGroups.get(motion.childPath) || [];
+        if (groups.length === 0) continue;
+        const f = motion.fields;
+        const distance = sampleTimeline(motion.translation, animTime / 1000, previewPhase01, f.translationMin, f.translationMax);
+        const angle = sampleTimeline(motion.rotation, animTime / 1000, previewPhase01, f.angleMinDegrees, f.angleMaxDegrees);
+        const axis = new THREE.Vector3().setComponent(f.rotationAxis, 1), translation = new THREE.Vector3().setComponent(f.translationAxis, distance);
+        const signal = new THREE.Matrix4().makeTranslation(translation.x, translation.y, translation.z)
+            .multiply(new THREE.Matrix4().makeRotationAxis(axis, THREE.MathUtils.degToRad(angle)));
+        for (const group of groups) {
+            group.matrix.multiply(signal);
+            group.matrixWorldNeedsUpdate = true;
+        }
+    }
+}
+function compositeGroupColor(groupId) {
+    return compositeGroupPalette[Math.abs(groupId) % compositeGroupPalette.length];
+}
+function clearCompositeHelpers() {
+    for (const helper of [...compositeSelectionHelpers, ...compositeGroupHelpers]) {
+        scene?.remove(helper);
+        helper.geometry?.dispose?.();
+        helper.material?.dispose?.();
+    }
+    compositeSelectionHelpers = [];
+    compositeGroupHelpers = [];
+}
+function applyCompositeVisualState() {
+    if (!staticGroup || !movingGroup) return;
+    clearCompositeHelpers();
+    const groups = [staticGroup, movingGroup];
+    const hasSelection = selectedCompositeSources.size > 0;
+
+    for (const group of groups) {
+        group.traverse(child => {
+            if (!child?.isMesh || !child.material) return;
+            const material = child.material;
+            const sourceIndex = Number.isInteger(child.userData?.sourceIndex) ? child.userData.sourceIndex : null;
+            const groupId = Number.isInteger(child.userData?.groupId) ? child.userData.groupId : null;
+            const isSelected = sourceIndex !== null && selectedCompositeSources.has(sourceIndex);
+
+            if (child.userData.__baseColor == null) {
+                child.userData.__baseColor = material.color?.getHex?.() ?? 0xb8bdc6;
+            }
+            if (material.emissive && child.userData.__baseEmissive == null) {
+                child.userData.__baseEmissive = material.emissive.getHex();
+                child.userData.__baseEmissiveIntensity = material.emissiveIntensity ?? 0;
+            }
+            if (child.userData.__baseOpacity == null) {
+                child.userData.__baseOpacity = material.opacity ?? 1;
+                child.userData.__baseTransparent = Boolean(material.transparent);
+            }
+
+            const baseColor = new THREE.Color(child.userData.__baseColor);
+            const displayColor = baseColor.clone();
+            if (groupId !== null) {
+                displayColor.lerp(new THREE.Color(compositeGroupColor(groupId)), 0.22);
+            }
+            if (isSelected) {
+                displayColor.lerp(new THREE.Color(0xff2ea6), 0.6);
+            }
+            material.color?.copy?.(displayColor);
+
+            const baseOpacity = child.userData.__baseOpacity;
+            if (hasSelection && sourceIndex !== null && !isSelected) {
+                material.transparent = true;
+                material.opacity = Math.max(0.18, Math.min(baseOpacity, 0.45));
+            } else {
+                material.transparent = child.userData.__baseTransparent;
+                material.opacity = baseOpacity;
+            }
+
+            if (material.emissive) {
+                if (isSelected) {
+                    material.emissive.setHex(0xff2ea6);
+                    material.emissiveIntensity = 0.9;
+                } else if (groupId !== null) {
+                    material.emissive.setHex(compositeGroupColor(groupId));
+                    material.emissiveIntensity = 0.12;
+                } else {
+                    material.emissive.setHex(child.userData.__baseEmissive ?? 0x000000);
+                    material.emissiveIntensity = child.userData.__baseEmissiveIntensity ?? 0;
+                }
+            }
+        });
+    }
+
+    const selectedBySource = new Map();
+    const groupedByGroupId = new Map();
+    for (const group of groups) {
+        group.traverse(child => {
+            if (!child?.isMesh || !child.visible) return;
+            const sourceIndex = Number.isInteger(child.userData?.sourceIndex) ? child.userData.sourceIndex : null;
+            const groupId = Number.isInteger(child.userData?.groupId) ? child.userData.groupId : null;
+            if (sourceIndex !== null && selectedCompositeSources.has(sourceIndex)) {
+                if (!selectedBySource.has(sourceIndex)) selectedBySource.set(sourceIndex, []);
+                selectedBySource.get(sourceIndex).push(child);
+            }
+            if (groupId !== null) {
+                if (!groupedByGroupId.has(groupId)) groupedByGroupId.set(groupId, []);
+                groupedByGroupId.get(groupId).push(child);
+            }
+        });
+    }
+
+    for (const [groupId, meshes] of groupedByGroupId.entries()) {
+        if (!meshes.length) continue;
+        const box = new THREE.Box3();
+        meshes.forEach(mesh => box.expandByObject(mesh));
+        if (box.isEmpty()) continue;
+        const helper = new THREE.Box3Helper(box, compositeGroupColor(groupId));
+        compositeGroupHelpers.push(helper);
+        scene?.add(helper);
+    }
+    for (const [sourceIndex, meshes] of selectedBySource.entries()) {
+        if (!meshes.length) continue;
+        const box = new THREE.Box3();
+        meshes.forEach(mesh => box.expandByObject(mesh));
+        if (box.isEmpty()) continue;
+        const color = sourceIndex === compositeLeaderSource ? 0xffffff : 0xff2ea6;
+        const helper = new THREE.Box3Helper(box, color);
+        compositeSelectionHelpers.push(helper);
+        scene?.add(helper);
+    }
+}
+function clearSelectedMeshHighlight() {
+    if (selectedMeshHelper) {
+        scene?.remove(selectedMeshHelper);
+        selectedMeshHelper.dispose?.();
+        selectedMeshHelper = null;
+    }
+    const groups = [staticGroup, movingGroup, collisionGroup].filter(Boolean);
+    for (const group of groups) {
+        group.traverse(child => {
+            if (!child?.isMesh || !child?.material) return;
+            const material = child.material;
+            if (material.emissive && child.userData?.__baseEmissive) {
+                material.emissive.setHex(child.userData.__baseEmissive);
+            }
+            if (typeof child.userData?.__baseEmissiveIntensity === 'number') {
+                material.emissiveIntensity = child.userData.__baseEmissiveIntensity;
+            }
+            if (child.userData) child.userData.__selected = false;
+        });
+    }
+}
+function updateSelectedMeshHighlight() {
+    clearSelectedMeshHighlight();
+    if (!selectedMeshObject || !scene) return;
+    selectedMeshHelper = new THREE.BoxHelper(selectedMeshObject, 0xff2ea6);
+    scene.add(selectedMeshHelper);
+    if (selectedMeshObject.material) {
+        const material = selectedMeshObject.material;
+        if (material.emissive) {
+            selectedMeshObject.userData.__baseEmissive = material.emissive.getHex();
+            selectedMeshObject.userData.__baseEmissiveIntensity = material.emissiveIntensity ?? 0;
+            material.emissive.setHex(0xff2ea6);
+            material.emissiveIntensity = 0.85;
+        }
+        selectedMeshObject.userData.__selected = true;
+    }
+}
+function findMeshByPath(path) {
+    if (!path) return null;
+    const groups = [staticGroup, movingGroup, collisionGroup].filter(Boolean);
+    for (const group of groups) {
+        let found = null;
+        group.traverse(child => {
+            if (!found && child.isMesh && child.userData?.path === path) found = child;
+        });
+        if (found) return found;
+    }
+    return null;
+}
+function selectMeshObject(mesh, notify = true, additive = false, range = false) {
+    selectedMeshObject = mesh ?? null;
+    selectedMeshPath = mesh?.userData?.path ?? null;
+    updateSelectedMeshHighlight();
+    if (notify && dotNetHelper && selectedMeshPath) {
+        dotNetHelper.invokeMethodAsync('OnMeshPartSelectedWithModifiers', selectedMeshPath, Boolean(additive), Boolean(range));
+    }
 }
 function applyLegacyMotion() {
     if (!legacyMotion) return;
@@ -381,11 +584,39 @@ window.init3DViewer = function (containerId, dotNetRef) {
     container.appendChild(renderer.domElement);
     controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = .05;
     transformControls = new THREE.TransformControls(camera, renderer.domElement); transformControls.size = .75; scene.add(transformControls);
-    transformControls.addEventListener('dragging-changed', event => { if (controls) controls.enabled = !event.value; });
+    transformControls.addEventListener('dragging-changed', event => {
+        if (controls) controls.enabled = !event.value;
+        if (!event.value && selectedGizmo?.userData.type === 'waypoint' && dotNetHelper) {
+            dotNetHelper.invokeMethodAsync('OnWaypointDragEnded', selectedGizmo.userData.constraintIndex);
+        }
+        if (!event.value && selectedGizmo?.userData?.editable && selectedGizmo?.userData?.type !== 'waypoint' && dotNetHelper) {
+            dotNetHelper.invokeMethodAsync('OnGizmoDragEnded', selectedGizmo.userData.type, selectedGizmo.userData.index ?? -1);
+        }
+    });
     transformControls.addEventListener('change', () => {
         if (selectedGizmo?.userData.editable && transformControls.dragging && dotNetHelper) {
             const d = selectedGizmo.userData, p = selectedGizmo.position;
-            dotNetHelper.invokeMethodAsync('OnGizmoMoved', d.type, d.index, p.x, p.y, p.z);
+            if (d.type === 'waypoint') {
+                handleWaypointDrag(d.constraintIndex, d.isPointB, p);
+            } else if (d.type === 'composite-offset') {
+                dotNetHelper.invokeMethodAsync(
+                    'OnCompositeOffsetTransformMoved',
+                    d.index,
+                    p.x, p.y, p.z,
+                    THREE.MathUtils.radToDeg(selectedGizmo.rotation.x),
+                    THREE.MathUtils.radToDeg(selectedGizmo.rotation.y),
+                    THREE.MathUtils.radToDeg(selectedGizmo.rotation.z));
+            } else if (d.type === 'composite-group') {
+                dotNetHelper.invokeMethodAsync(
+                    'OnCompositeGroupTransformMoved',
+                    d.index,
+                    p.x, p.y, p.z,
+                    THREE.MathUtils.radToDeg(selectedGizmo.rotation.x),
+                    THREE.MathUtils.radToDeg(selectedGizmo.rotation.y),
+                    THREE.MathUtils.radToDeg(selectedGizmo.rotation.z));
+            } else {
+                dotNetHelper.invokeMethodAsync('OnGizmoMoved', d.type, d.index, p.x, p.y, p.z);
+            }
         }
     });
     const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
@@ -394,26 +625,42 @@ window.init3DViewer = function (containerId, dotNetRef) {
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
         raycaster.setFromCamera(mouse, camera);
-        const groups = [pivotsGroup, lightsGroup];
-        const hits = raycaster.intersectObjects(groups.filter(g => g.visible).flatMap(g => g.children), true);
+        const groups = [pivotsGroup, lightsGroup, waypointsGroup].filter(g => g && g.visible);
+        const hits = raycaster.intersectObjects(groups.flatMap(g => g.children), true);
         if (hits.length) {
             let obj = hits[0].object;
             while (obj.parent && !groups.includes(obj.parent)) obj = obj.parent;
             selectGizmo(obj);
+            return;
         }
+        const meshGroups = [staticGroup, movingGroup].filter(g => g && g.visible);
+        const meshHits = raycaster.intersectObjects(meshGroups.flatMap(g => g.children), true)
+            .find(hit => hit.object?.isMesh);
+        const additive = event.ctrlKey || event.metaKey;
+        const range = event.shiftKey;
+        if (meshHits?.object?.isMesh) {
+            selectMeshObject(meshHits.object, true, additive, range);
+            return;
+        }
+        // Fallback: pick any visible mesh in scene if grouped lookup missed.
+        const fallback = raycaster.intersectObjects(scene.children, true).find(hit => hit.object?.isMesh && hit.object.visible);
+        if (fallback?.object?.isMesh) selectMeshObject(fallback.object, true, additive, range);
     });
     scene.add(new THREE.AmbientLight(0xffffff, .5));
     const light = new THREE.DirectionalLight(0xffffff, .7); light.position.set(30, 50, 30); scene.add(light);
     gridHelper = new THREE.GridHelper(50, 50, 0x38bdf8, 0x27272a); scene.add(gridHelper, new THREE.AxesHelper(4));
-    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup] = Array.from({ length: 5 }, () => new THREE.Group());
-    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup); applyLayerVisibility();
+    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup] = Array.from({ length: 6 }, () => new THREE.Group());
+    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup); applyLayerVisibility();
     function animate(timestamp) {
         if (!renderer) return;
         animationFrameId = requestAnimationFrame(animate);
         const delta = lastFrameTime === null ? 0 : Math.min(Math.max(timestamp - lastFrameTime, 0), 50);
         lastFrameTime = timestamp;
         if (isPlaying) animTime += delta * animSpeed;
-        applyTypedMotion(); applyLegacyMotion(); controls.update(); renderer.render(scene, camera);
+        applyTypedMotion(); applyLegacyMotion();
+        if (activeMeshHelper) activeMeshHelper.update();
+        if (selectedMeshHelper) selectedMeshHelper.update();
+        controls.update(); renderer.render(scene, camera);
     }
     animationFrameId = requestAnimationFrame(animate);
     resizeHandler = () => {
@@ -442,23 +689,33 @@ function disposeObjectResources(root) {
 window.dispose3DViewer = function () {
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
     animationFrameId = null; selectedGizmo = dotNetHelper = null;
+    selectedMeshObject = null; selectedMeshPath = null; clearSelectedMeshHighlight();
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     resizeObserver?.disconnect(); resizeObserver = null;
     resizeHandler = null;
+    if (activeMeshHelper) { scene?.remove(activeMeshHelper); activeMeshHelper.dispose?.(); activeMeshHelper = null; }
     if (transformControls) { transformControls.detach(); transformControls.dispose(); scene?.remove(transformControls); }
     controls?.dispose(); if (scene) disposeObjectResources(scene);
+    clearCompositeHelpers();
     releaseGeometryPool();
     if (renderer) { renderer.dispose(); renderer.domElement.remove(); }
     renderer = scene = camera = controls = transformControls = null;
-    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = gridHelper = null;
-    typedMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
+    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = waypointsGroup = gridHelper = null;
+    typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
+    selectedCompositeSources = new Set(); compositeGroupBySource = new Map(); compositeLeaderSource = null;
 };
 function selectGizmo(obj) {
     if (!transformControls) return;
     transformControls.detach(); selectedGizmo = obj;
     if (!obj) return;
     if (obj.userData.editable) transformControls.attach(obj);
-    if (dotNetHelper) dotNetHelper.invokeMethodAsync('OnGizmoSelected', obj.userData.type, obj.userData.index);
+    if (obj.userData.type === 'waypoint') {
+        activeConstraintIndex = obj.userData.constraintIndex;
+        updateWaypointHighlights();
+        if (dotNetHelper) dotNetHelper.invokeMethodAsync('OnWaypointSelected', obj.userData.constraintIndex, obj.userData.isPointB);
+    } else {
+        if (dotNetHelper) dotNetHelper.invokeMethodAsync('OnGizmoSelected', obj.userData.type, obj.userData.index);
+    }
 }
 window.scrollSelectedVariantIntoView = function () {
     document.querySelector('.studio-variant-buttons button[aria-pressed="true"]')
@@ -466,8 +723,32 @@ window.scrollSelectedVariantIntoView = function () {
 };
 
 window.selectGizmoFromUI = function (type, index) {
-    const group = { pivot: pivotsGroup, light: lightsGroup }[type];
+    if (type === 'waypoint') {
+        const handle = findWaypointHandle(index, true);
+        if (handle) selectGizmo(handle);
+        return;
+    }
+    const group = { pivot: pivotsGroup, light: lightsGroup, 'composite-offset': pivotsGroup, 'composite-group': pivotsGroup }[type];
     const obj = group?.children.find(child => child.userData.index === index); if (obj) selectGizmo(obj);
+};
+
+window.highlightConstraintInViewer = function (constraintIndex) {
+    activeConstraintIndex = constraintIndex;
+    updateWaypointHighlights();
+    const handleB = findWaypointHandle(constraintIndex, true);
+    if (handleB) selectGizmo(handleB);
+};
+
+window.selectWaypointFromUI = function (constraintIndex, isPointB) {
+    activeConstraintIndex = constraintIndex;
+    updateWaypointHighlights();
+    const handle = findWaypointHandle(constraintIndex, isPointB);
+    if (handle) selectGizmo(handle);
+};
+window.selectMeshPartFromUI = function (path) {
+    selectedMeshPath = path ?? null;
+    const mesh = selectedMeshPath ? findMeshByPath(selectedMeshPath) : null;
+    selectMeshObject(mesh, false);
 };
 function mapping(value) {
     if (!value || value.materialIndex != null && (!Number.isInteger(value.materialIndex) || value.materialIndex < 0)) throw new Error('Invalid material mapping.');
@@ -510,18 +791,46 @@ function makePart(part, owner, bounds, pool) {
         throw new Error('Rest transform overflows geometry.');
     }
     bounds.union(box);
-    // Game textures are not available in this payload. Keep real geometry
-    // readable with a neutral, lit material; never substitute fake geometry.
-    const material = new THREE.MeshStandardMaterial({ color: part.isCollision ? 0x38d9b3 : 0xb8bdc6,
+    const enabled = part.enabled !== false;
+    const visible = part.visible !== false;
+    const movable = Boolean(part.movable);
+    const collidable = Boolean(part.collidable);
+    const waypoint = Boolean(part.waypoint);
+    const effect = Boolean(part.effect);
+    // Mapping-tools-like part coloring in preview:
+    // default=neutral, collidable=yellow, waypoint/trigger=pink, movable=green.
+    const color = waypoint ? 0xec4899 : collidable ? 0xeab308 : movable ? 0x34d399 : effect ? 0x22d3ee : (part.isCollision ? 0x38d9b3 : 0xb8bdc6);
+    const material = new THREE.MeshStandardMaterial({ color,
         metalness: 0, roughness: .75, side: THREE.DoubleSide, wireframe: part.isCollision || isWireframe, transparent: Boolean(part.isCollision), opacity: part.isCollision ? .35 : 1 });
     const mesh = new THREE.Mesh(geometry, material); mesh.name = part.name ?? part.path ?? '';
     mesh.matrixAutoUpdate = false; mesh.matrix.copy(instance);
-    mesh.userData = { path: part.path, entityPath: part.entityPath, isCollision: Boolean(part.isCollision), mappings }; return mesh;
+    mesh.visible = enabled && visible;
+    mesh.userData = {
+        path: part.path ?? part.name ?? '',
+        entityPath: part.entityPath,
+        sourceIndex: Number.isInteger(part.sourceIndex) ? part.sourceIndex : null,
+        groupId: Number.isInteger(part.groupId) ? part.groupId : null,
+        isCollision: Boolean(part.isCollision),
+        mappings,
+        meshMode: part.meshMode ?? 'auto',
+        enabled,
+        visible,
+        collidable,
+        effect,
+        waypoint,
+        movable
+    };
+    return mesh;
 }
 function makeGizmo(data, index, type) {
     const position = ['x', 'y', 'z'].map(key => finite(data[key], `${type} ${key}`));
+    const rotation = ['rotX', 'rotY', 'rotZ'].map(key => Number.isFinite(data[key]) ? Number(data[key]) : 0);
     if (data.index != null && (!Number.isInteger(data.index) || data.index < 0)) throw new Error('Invalid gizmo index.');
-    const group = new THREE.Group(); group.position.fromArray(position); group.userData = { type, index: data.index ?? index, editable: data.editable !== false };
+    const group = new THREE.Group(); group.position.fromArray(position); group.rotation.set(
+        THREE.MathUtils.degToRad(rotation[0]),
+        THREE.MathUtils.degToRad(rotation[1]),
+        THREE.MathUtils.degToRad(rotation[2]));
+    group.userData = { type, index: data.index ?? index, editable: data.editable !== false };
     if (type === 'light') {
         const color = data.colorHex ?? 0xfffbeb, intensity = data.intensity ?? 1.5, radius = data.radius ?? 15;
         if (!Number.isInteger(color) || color < 0 || color > 0xffffff) throw new Error('Light color must be RGB24.');
@@ -530,7 +839,14 @@ function makeGizmo(data, index, type) {
         const bulb = new THREE.Mesh(new THREE.SphereGeometry(.28, 16, 16), new THREE.MeshBasicMaterial({ color })); bulb.name = 'bulb'; group.add(bulb);
         const wire = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 12), new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: .15 }));
         wire.name = 'radiusWire'; wire.scale.setScalar(radius); group.add(wire);
-    } else if (type === 'pivot') group.add(new THREE.Mesh(new THREE.SphereGeometry(.22, 16, 16), new THREE.MeshBasicMaterial({ color: 0xfacc15 })), new THREE.AxesHelper(.9));
+    } else if (type === 'pivot') {
+        group.add(new THREE.Mesh(new THREE.SphereGeometry(.22, 16, 16), new THREE.MeshBasicMaterial({ color: 0xfacc15 })), new THREE.AxesHelper(.9));
+    } else if (type === 'composite-offset') {
+        group.add(new THREE.Mesh(new THREE.BoxGeometry(.35, .35, .35), new THREE.MeshBasicMaterial({ color: 0x00ffff })), new THREE.AxesHelper(1.1));
+    } else if (type === 'composite-group') {
+        const groupColor = compositeGroupColor(data.index ?? index);
+        group.add(new THREE.Mesh(new THREE.BoxGeometry(.42, .42, .42), new THREE.MeshBasicMaterial({ color: groupColor })), new THREE.AxesHelper(1.25));
+    }
     else throw new Error('Unknown gizmo type.');
     return group;
 }
@@ -543,6 +859,319 @@ function frameCamera(bounds) {
     camera.near = Math.max(distance / 10000, .001); camera.far = Math.max(distance * 10, radius * 100, 100);
     camera.updateProjectionMatrix(); controls.target.copy(center); controls.update(); controls.saveState();
 }
+
+function getMotionBaseMatrix(motion) {
+    if (!motion.parentMotion) {
+        return motion.childRest.clone();
+    }
+    const parentBase = getMotionBaseMatrix(motion.parentMotion);
+    const parentSignalAtB = new THREE.Matrix4().makeTranslation(
+        motion.parentMotion.fields.translationAxis === 0 ? motion.parentMotion.fields.translationMax : 0,
+        motion.parentMotion.fields.translationAxis === 1 ? motion.parentMotion.fields.translationMax : 0,
+        motion.parentMotion.fields.translationAxis === 2 ? motion.parentMotion.fields.translationMax : 0
+    );
+    const parentWorldAtB = parentBase.clone().multiply(parentSignalAtB);
+    return parentWorldAtB.multiply(motion.inverseParent).multiply(motion.childRest);
+}
+
+function makeTextSprite(text, bgColor = '#22c55e', textColor = '#ffffff') {
+    if (typeof document === 'undefined' || !document.createElement) return new THREE.Group();
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return new THREE.Group();
+
+    const r = 16, x = 4, y = 4, w = 120, h = 56;
+    ctx.fillStyle = bgColor;
+    if (typeof ctx.roundRect === 'function') {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, r);
+    } else {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+    }
+    ctx.fill();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = textColor;
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 64, 32);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false, depthWrite: false });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(1.2, 0.6, 1);
+    return sprite;
+}
+
+function makeWaypointHandle(pos, label, isPointB, constraintIndex, motion) {
+    const group = new THREE.Group();
+    group.position.copy(pos);
+    group.userData = {
+        type: 'waypoint',
+        constraintIndex,
+        isPointB,
+        motionPath: motion.path,
+        childPath: motion.childPath,
+        editable: true
+    };
+
+    const color = isPointB ? 0xf97316 : 0x22c55e;
+    const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.32, 16, 16),
+        new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.2, emissive: color, emissiveIntensity: 0.25 })
+    );
+    sphere.name = 'handleSphere';
+    group.add(sphere);
+
+    const halo = new THREE.Mesh(
+        new THREE.RingGeometry(0.42, 0.55, 24),
+        new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
+    );
+    halo.name = 'handleHalo';
+    halo.rotation.x = Math.PI / 2;
+    group.add(halo);
+
+    const sprite = makeTextSprite(label, isPointB ? '#ea580c' : '#16a34a', '#ffffff');
+    sprite.position.set(0, 0.7, 0);
+    sprite.name = 'handleSprite';
+    group.add(sprite);
+
+    return group;
+}
+
+function makePathLine(worldA, worldB, constraintIndex) {
+    const group = new THREE.Group();
+    group.name = `pathLineGroup_${constraintIndex}`;
+    group.userData = { constraintIndex };
+
+    const geom = new THREE.BufferGeometry().setFromPoints([worldA, worldB]);
+    const mat = new THREE.LineBasicMaterial({
+        color: 0x06b6d4,
+        linewidth: 3,
+        transparent: true,
+        opacity: 0.85
+    });
+    const line = new THREE.Line(geom, mat);
+    line.name = 'pathLine';
+    group.add(line);
+
+    const dir = new THREE.Vector3().subVectors(worldB, worldA);
+    const len = dir.length();
+    if (len > 0.05) {
+        dir.normalize();
+        const arrow = new THREE.Mesh(
+            new THREE.ConeGeometry(0.2, 0.5, 12),
+            new THREE.MeshBasicMaterial({ color: 0x06b6d4 })
+        );
+        arrow.name = 'pathArrow';
+        const arrowPos = new THREE.Vector3().addVectors(worldA, dir.clone().multiplyScalar(len * 0.6));
+        arrow.position.copy(arrowPos);
+        arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+        group.add(arrow);
+    }
+
+    return group;
+}
+
+function buildWaypoints(motions, stagedGroup, bounds) {
+    if (!motions || motions.length === 0) return;
+    for (let i = 0; i < motions.length; i++) {
+        const motion = motions[i];
+        const constraintIndex = motion.constraintIndex ?? i;
+        const baseMat = getMotionBaseMatrix(motion);
+
+        const localA = new THREE.Vector3().setComponent(motion.fields.translationAxis, motion.fields.translationMin);
+        const localB = new THREE.Vector3().setComponent(motion.fields.translationAxis, motion.fields.translationMax);
+
+        const worldA = localA.clone().applyMatrix4(baseMat);
+        const worldB = localB.clone().applyMatrix4(baseMat);
+
+        bounds.expandByPoint(worldA);
+        bounds.expandByPoint(worldB);
+
+        const prefix = motions.length > 1 ? `${constraintIndex + 1}` : '';
+        const labelA = `${prefix}A`;
+        const labelB = `${prefix}B`;
+
+        const handleA = makeWaypointHandle(worldA, labelA, false, constraintIndex, motion);
+        const handleB = makeWaypointHandle(worldB, labelB, true, constraintIndex, motion);
+
+        stagedGroup.add(handleA);
+        stagedGroup.add(handleB);
+
+        const pathLine = makePathLine(worldA, worldB, constraintIndex);
+        stagedGroup.add(pathLine);
+
+        if (motion.parentMotion) {
+            const parentBase = getMotionBaseMatrix(motion.parentMotion);
+            const parentSignalAtB = new THREE.Matrix4().makeTranslation(
+                motion.parentMotion.fields.translationAxis === 0 ? motion.parentMotion.fields.translationMax : 0,
+                motion.parentMotion.fields.translationAxis === 1 ? motion.parentMotion.fields.translationMax : 0,
+                motion.parentMotion.fields.translationAxis === 2 ? motion.parentMotion.fields.translationMax : 0
+            );
+            const parentWorldB = new THREE.Vector3().applyMatrix4(parentBase.clone().multiply(parentSignalAtB));
+            if (parentWorldB.distanceTo(worldA) > 0.05) {
+                const connGeom = new THREE.BufferGeometry().setFromPoints([parentWorldB, worldA]);
+                const connMat = new THREE.LineDashedMaterial({ color: 0x94a3b8, dashSize: 0.3, gapSize: 0.15, opacity: 0.6, transparent: true });
+                const connLine = new THREE.Line(connGeom, connMat);
+                connLine.computeLineDistances();
+                stagedGroup.add(connLine);
+            }
+        }
+    }
+}
+
+function findWaypointHandle(constraintIndex, isPointB) {
+    if (!waypointsGroup) return null;
+    let found = null;
+    waypointsGroup.traverse(child => {
+        if (child.userData?.type === 'waypoint'
+            && child.userData.constraintIndex === constraintIndex
+            && child.userData.isPointB === isPointB) {
+            found = child;
+        }
+    });
+    return found;
+}
+
+function updatePathLineGeometry(constraintIndex, worldA, worldB) {
+    if (!waypointsGroup) return;
+    const pathGroup = waypointsGroup.getObjectByName(`pathLineGroup_${constraintIndex}`);
+    if (!pathGroup) return;
+
+    const line = pathGroup.getObjectByName('pathLine');
+    if (line) {
+        line.geometry.dispose();
+        line.geometry = new THREE.BufferGeometry().setFromPoints([worldA, worldB]);
+    }
+
+    const arrow = pathGroup.getObjectByName('pathArrow');
+    if (arrow) {
+        const dir = new THREE.Vector3().subVectors(worldB, worldA);
+        const len = dir.length();
+        if (len > 0.05) {
+            dir.normalize();
+            const arrowPos = new THREE.Vector3().addVectors(worldA, dir.clone().multiplyScalar(len * 0.6));
+            arrow.position.copy(arrowPos);
+            arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+            arrow.visible = true;
+        } else {
+            arrow.visible = false;
+        }
+    }
+}
+
+function handleWaypointDrag(constraintIndex, isPointB, newPos) {
+    const motion = typedMotions.find(m => (m.constraintIndex ?? 0) === constraintIndex) || typedMotions[constraintIndex];
+    if (!motion) return;
+
+    const baseMat = getMotionBaseMatrix(motion);
+    const invBase = baseMat.clone().invert();
+    const localPos = newPos.clone().applyMatrix4(invBase);
+
+    let axis = motion.fields.translationAxis;
+    let minVal = motion.fields.translationMin;
+    let maxVal = motion.fields.translationMax;
+
+    if (isPointB) {
+        const localA = new THREE.Vector3().setComponent(axis, minVal);
+        const delta = new THREE.Vector3().subVectors(localPos, localA);
+
+        if (transformControls?.axis === 'X') axis = 0;
+        else if (transformControls?.axis === 'Y') axis = 1;
+        else if (transformControls?.axis === 'Z') axis = 2;
+        else {
+            const absX = Math.abs(delta.x), absY = Math.abs(delta.y), absZ = Math.abs(delta.z);
+            if (absX >= absY && absX >= absZ && absX > 0.1) axis = 0;
+            else if (absY >= absX && absY >= absZ && absY > 0.1) axis = 1;
+            else if (absZ >= absX && absZ >= absY && absZ > 0.1) axis = 2;
+        }
+
+        maxVal = localPos.getComponent(axis);
+        motion.fields.translationAxis = axis;
+        motion.fields.translationMax = maxVal;
+    } else {
+        minVal = localPos.getComponent(axis);
+        motion.fields.translationMin = minVal;
+    }
+
+    const worldA = new THREE.Vector3().setComponent(axis, minVal).applyMatrix4(baseMat);
+    const worldB = new THREE.Vector3().setComponent(axis, maxVal).applyMatrix4(baseMat);
+
+    const handleA = findWaypointHandle(constraintIndex, false);
+    const handleB = findWaypointHandle(constraintIndex, true);
+    if (handleA && isPointB) handleA.position.copy(worldA);
+    if (handleB && !isPointB) handleB.position.copy(worldB);
+
+    updatePathLineGeometry(constraintIndex, worldA, worldB);
+
+    const axisNames = ['X', 'Y', 'Z'];
+    const axisName = axisNames[axis] || 'X';
+
+    if (dotNetHelper) {
+        dotNetHelper.invokeMethodAsync('OnWaypointMoved', constraintIndex, isPointB, minVal, maxVal, axisName);
+    }
+}
+
+function updateWaypointHighlights() {
+    if (!waypointsGroup) return;
+
+    if (activeMeshHelper) {
+        scene?.remove(activeMeshHelper);
+        activeMeshHelper.dispose?.();
+        activeMeshHelper = null;
+    }
+
+    const activeMotion = typedMotions.find(m => (m.constraintIndex ?? 0) === activeConstraintIndex) || typedMotions[activeConstraintIndex];
+    if (activeMotion && motionGroups.has(activeMotion.childPath)) {
+        const groupPair = motionGroups.get(activeMotion.childPath);
+        const visualGroup = groupPair[0];
+        if (visualGroup && visualGroup.children.length > 0) {
+            activeMeshHelper = new THREE.BoxHelper(visualGroup, 0x00ffff);
+            scene.add(activeMeshHelper);
+        }
+    }
+
+    waypointsGroup.traverse(child => {
+        if (child.userData?.type === 'waypoint') {
+            const isActive = child.userData.constraintIndex === activeConstraintIndex;
+            const halo = child.getObjectByName('handleHalo');
+            if (halo) {
+                halo.scale.setScalar(isActive ? 1.4 : 1.0);
+                halo.material.opacity = isActive ? 0.9 : 0.4;
+            }
+            const sphere = child.getObjectByName('handleSphere');
+            if (sphere) {
+                sphere.material.emissiveIntensity = isActive ? 0.6 : 0.2;
+            }
+        }
+        if (child.name === 'pathLine') {
+            const parentGroup = child.parent;
+            const isActive = parentGroup?.userData?.constraintIndex === activeConstraintIndex;
+            child.material.color.setHex(isActive ? 0x00ffff : 0x64748b);
+            child.material.opacity = isActive ? 1.0 : 0.35;
+        }
+        if (child.name === 'pathArrow') {
+            const parentGroup = child.parent;
+            const isActive = parentGroup?.userData?.constraintIndex === activeConstraintIndex;
+            child.material.color.setHex(isActive ? 0x00ffff : 0x64748b);
+            child.scale.setScalar(isActive ? 1.3 : 0.9);
+        }
+    });
+}
+
 function renderPayload(input, preserveCamera) {
     if (!scene) return;
     const data = structuredClone(typeof input === 'string' ? JSON.parse(input) : input);
@@ -553,7 +1182,8 @@ function renderPayload(input, preserveCamera) {
             translation: data.hasTranslationMotion ? data.translationAxis : null, harmonic: data.harmonicEasing }
         : null;
     const motions = compileMotions(data.motions ?? []), offset = phase(data.previewPhase01 ?? 0), owners = new Map(motions.map(m => [m.childPath, m]));
-    const staged = Array.from({ length: 5 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
+    const groupMotions = compileGroupMotions(data.groupMotions ?? [], owners);
+    const staged = Array.from({ length: 6 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
     const epoch = data.geometryEpoch ?? null;
     if (epoch !== null && (!Number.isSafeInteger(epoch) || epoch < 0)) throw new Error('Invalid geometry epoch.');
     const pool = epoch === geometryEpoch ? new Map(sharedGeometry) : new Map();
@@ -572,26 +1202,53 @@ function renderPayload(input, preserveCamera) {
             staged[1].add(pair[0]); staged[2].add(pair[1]); groups.set(motion.childPath, pair);
         }
         for (const part of data.parts ?? []) {
+            const mode = (part.meshMode ?? 'auto').toLowerCase();
+            if (part.enabled === false) continue;
             const owner = owners.get(part.entityPath), mesh = makePart(part, owner, bounds, pool);
-            if (owner) groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
-            else staged[part.isCollision ? 2 : (part.isMoving ? 1 : 0)].add(mesh);
+            const asMoving = mode === 'kinematic' || (mode === 'auto' && (Boolean(part.movable) || part.isMoving));
+            if (owner && mode !== 'static') groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
+            else staged[part.isCollision ? 2 : (asMoving ? 1 : 0)].add(mesh);
         }
-        for (const [property, type, target] of [['pivots', 'pivot', 3], ['lights', 'light', 4]])
+        for (const [property, type, target] of [['pivots', 'pivot', 3], ['compositeOffsets', 'composite-offset', 3], ['compositeGroups', 'composite-group', 3], ['lights', 'light', 4]])
             (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type); staged[target].add(group); bounds.expandByPoint(group.position); });
+        if (data.activeConstraintIndex != null) {
+            activeConstraintIndex = data.activeConstraintIndex;
+        }
+        selectedMeshPath = typeof data.selectedMeshPath === 'string' && data.selectedMeshPath.length > 0 ? data.selectedMeshPath : null;
+        const compositeSelection = data.compositeSelection ?? {};
+        selectedCompositeSources = new Set((compositeSelection.selectedSourceIndices ?? []).filter(Number.isInteger));
+        compositeLeaderSource = Number.isInteger(compositeSelection.leaderSourceIndex) && compositeSelection.leaderSourceIndex >= 0
+            ? compositeSelection.leaderSourceIndex
+            : null;
+        compositeGroupBySource = new Map(
+            (compositeSelection.sourceGroups ?? [])
+                .filter(entry => Number.isInteger(entry?.sourceIndex) && Number.isInteger(entry?.groupId))
+                .map(entry => [entry.sourceIndex, entry.groupId]));
+        buildWaypoints(motions, staged[5], bounds);
     } catch (error) { staged.forEach(disposeObjectResources); added.forEach(g => g.dispose()); throw error; }
     window.clearViewerScene(true);
     if (epoch !== geometryEpoch) releaseGeometryPool();
     sharedGeometry = pool; geometryEpoch = epoch;
-    const destinations = [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup];
+    const destinations = [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup];
     staged.forEach((group, index) => { while (group.children.length) destinations[index].add(group.children[0]); });
     isPlaying = data.playing !== false; legacyMotion = nextLegacyMotion;
-    typedMotions = motions; motionGroups = groups; previewPhase01 = offset;
+    typedMotions = motions; typedGroupMotions = groupMotions; motionGroups = groups; previewPhase01 = offset;
     currentPayload = { ...data, geometryDefinitions: [] };
-    applyTypedMotion(); applySceneFilter(); applyLayerVisibility(); if (!preserveCamera) frameCamera(bounds);
+    if (selectedMeshPath) {
+        const mesh = findMeshByPath(selectedMeshPath);
+        selectMeshObject(mesh, false);
+    } else {
+        selectMeshObject(null, false);
+    }
+    applyTypedMotion(); applySceneFilter(); applyCompositeVisualState(); applyLayerVisibility(); updateWaypointHighlights(); if (!preserveCamera) frameCamera(bounds);
     const renderVersion = ++textureRenderVersion;
     void applyLocalTextures(data, renderVersion);
 }
 window.renderStudioScene = payload => renderPayload(payload, false);
+window.setTransformMode = mode => {
+    if (!transformControls) return;
+    transformControls.setMode(mode === 'rotate' ? 'rotate' : 'translate');
+};
 window.setTypedMotionPreview = function (value) {
     if (!value) throw new Error('Typed preview payload required.');
     const motions = value.motions ?? currentPayload?.motions ?? [];
@@ -603,12 +1260,18 @@ function releaseGeometryPool() {
 }
 window.clearViewerScene = function (keepGeometry = false) {
     transformControls?.detach(); selectedGizmo = null;
-    for (const group of [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup]) {
+    selectedMeshObject = null;
+    selectedMeshPath = null;
+    if (activeMeshHelper) { scene?.remove(activeMeshHelper); activeMeshHelper.dispose?.(); activeMeshHelper = null; }
+    clearSelectedMeshHighlight();
+    clearCompositeHelpers();
+    for (const group of [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup]) {
         if (!group) continue;
         while (group.children.length) { const child = group.children[0]; group.remove(child); disposeObjectResources(child); }
         group.position.set(0, 0, 0); group.rotation.set(0, 0, 0); group.scale.set(1, 1, 1);
     }
-    typedMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
+    typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
+    selectedCompositeSources = new Set(); compositeGroupBySource = new Map(); compositeLeaderSource = null;
     if (!keepGeometry) releaseGeometryPool();
 };
 // Older hosts may call these APIs, but generic/fallback motion is never inferred from them.
@@ -620,6 +1283,8 @@ function applyLayerVisibility() {
     if (!staticGroup) return;
     staticGroup.visible = movingGroup.visible = showMeshes; collisionGroup.visible = showCollision;
     pivotsGroup.visible = showPivots; lightsGroup.visible = showLights;
+    if (waypointsGroup) waypointsGroup.visible = showWaypoints;
+    for (const helper of [...compositeSelectionHelpers, ...compositeGroupHelpers]) helper.visible = showMeshes;
 }
 window.toggleLayer = function (name) {
     let value;
@@ -628,6 +1293,7 @@ window.toggleLayer = function (name) {
         case 'collision': value = showCollision = !showCollision; break;
         case 'pivots': value = showPivots = !showPivots; break;
         case 'lights': value = showLights = !showLights; break;
+        case 'waypoints': value = showWaypoints = !showWaypoints; break;
         default: throw new Error('Unknown scene layer.');
     }
     applyLayerVisibility(); return value;
@@ -640,6 +1306,7 @@ function applySceneFilter() {
             && (sceneFilter.materialPath === null || map.materialPath === sceneFilter.materialPath)
             && (sceneFilter.lodMask === null || map.lodMask !== null && (map.lodMask & sceneFilter.lodMask) !== 0));
     });
+    applyCompositeVisualState();
 }
 window.setSceneFilter = function (value) {
     const filter = mapping(value ?? {}); sceneFilter = filter; applySceneFilter();

@@ -23,6 +23,23 @@ if (args.Length > 0 && args[0] == "--dump")
         DumpItem(path);
     return 0;
 }
+if (args.Length > 1 && args[0] == "--verify-item")
+{
+    var targetPath = Path.IsPathRooted(args[1]) ? args[1] : Path.Combine(repoRoot, args[1]);
+    var item = ParseItem(targetPath);
+    var scene = ItemScene.Build(item, 0);
+    Console.WriteLine($"Scene Nodes: {scene.Preview.Nodes.Count}, Diagnostics: {scene.Preview.Diagnostics.Count}");
+    var preview = AuthoredMotionPreview.Build(scene);
+    Console.WriteLine($"Preview Tracks: {preview.Tracks.Count}, Diagnostics: {preview.Diagnostics.Count}");
+    foreach (var d in preview.Diagnostics)
+        Console.WriteLine($"  Diag: {d}");
+    for (int i = 0; i < preview.Tracks.Count; i++)
+    {
+        var t = preview.Tracks[i];
+        Console.WriteLine($"  Track[{i}]: Path={t.Path}, Child={t.ChildPath}, Parent={t.ParentPath ?? "null(World)"}, Axis={t.Fields.TranslationAxis}, Range=[{t.Fields.TranslationMin}..{t.Fields.TranslationMax}]");
+    }
+    return 0;
+}
 if (args.Length > 1 && args[0] == "--fix-carrier")
 {
     var targetPath = Path.IsPathRooted(args[1]) ? args[1] : Path.Combine(repoRoot, args[1]);
@@ -118,6 +135,28 @@ if (args.Length > 1 && args[0] == "--inspect-mesh")
     }
     return 0;
 }
+if (args.Length > 0 && args[0] == "--reflect")
+{
+    var path = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items\CustomItem.Item.Gbx";
+    var item = ParseItem(path);
+    var prefab = (CPlugPrefab)item.EntityModel!;
+    for (int i = 0; i < prefab.Ents!.Length; i++)
+    {
+        var e = prefab.Ents[i];
+        Console.WriteLine($"ent[{i}]: model={e.Model?.GetType().Name}");
+        if (e.Model is CPlugDynaObjectModel d)
+        {
+            Console.WriteLine($"  IsStatic={d.IsStatic}, DynamizeOnSpawn={d.DynamizeOnSpawn}, Mass={d.Mass}, BreakSpeed={d.BreakSpeedKmh}");
+            Console.WriteLine($"  LocAnimIsPhysical={d.LocAnimIsPhysical}, u01-u10={d.U01},{d.U02},{d.U03},{d.U04},{d.U05},{d.U06},{d.U07},{d.U08},{d.U09},{d.U10}");
+            Console.WriteLine($"  StaticShape={d.StaticShape is not null}, DynaShape={d.DynaShape is not null}");
+        }
+        if (e.Model is KC kc)
+        {
+            Console.WriteLine($"  KC: TransAxis={kc.TransAxis}, RotAxis={kc.RotAxis}, SubVersion={kc.SubVersion}");
+        }
+    }
+    return 0;
+}
 if (args.Length > 0 && args[0] == "--generate-test-items")
 {
     var folder = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items";
@@ -155,18 +194,524 @@ if (args.Length > 0 && args[0] == "--generate-test-items")
 
     return 0;
 }
+if (args.Length > 0 && args[0] == "--generate-letter-b")
+{
+    var folder = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items";
+    if (args.Length > 1) folder = args[1];
+
+    CPlugSolid2Model? userMesh = null;
+    CPlugSurface? userShape = null;
+    CGameItemModel? sourceItem = null;
+
+    string[] candidatePaths = [
+        Path.Combine(folder, "CustomItem_DualRoot.Item.Gbx"),
+        Path.Combine(folder, "CustomItem.Item.Gbx"),
+        Path.Combine(repoRoot, @"Test Exported items\CustomItem_Static.Item.Gbx"),
+        Path.Combine(folder, "Test_Chained_Visual_A_B_C.Item.Gbx")
+    ];
+
+    foreach (var cand in candidatePaths)
+    {
+        if (File.Exists(cand))
+        {
+            try
+            {
+                var parsed = ParseItem(cand);
+                sourceItem ??= parsed;
+                if (parsed.EntityModel is CPlugPrefab candPrefab)
+                {
+                    var dyna = candPrefab.Ents!
+                        .Select(e => e.Model as CPlugDynaObjectModel)
+                        .Where(d => d?.Mesh is not null)
+                        .OrderByDescending(d => d!.Mesh!.Visuals?.Length ?? 0)
+                        .FirstOrDefault();
+                    if (dyna?.Mesh is not null)
+                    {
+                        userMesh = dyna.Mesh;
+                        userShape = dyna.StaticShape as CPlugSurface ?? ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh);
+                        Console.WriteLine($"Found user mesh from {Path.GetFileName(cand)}: {userMesh.Visuals?.Length} visuals");
+                        break;
+                    }
+                }
+                else if (parsed.EntityModel is CGameCommonItemEntityModel { StaticObject: CPlugStaticObjectModel som } && som.Mesh is not null)
+                {
+                    userMesh = som.Mesh;
+                    userShape = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh);
+                    Console.WriteLine($"Found user mesh from static {Path.GetFileName(cand)}");
+                    break;
+                }
+            }
+            catch { }
+        }
+    }
+
+    var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()!;
+    if (sourceItem is not null)
+    {
+        template.Ident = new Ident("Letter_B", "Stadium2020", sourceItem.Ident.Author);
+        template.Name = "Letter_B";
+        template.DefaultPlacement = sourceItem.DefaultPlacement;
+        template.GroundPoint = sourceItem.GroundPoint;
+        template.Icon = sourceItem.Icon;
+        template.IconWebP = sourceItem.IconWebP;
+    }
+    else
+    {
+        template.Ident = new Ident("Letter_B", "Stadium2020", "TM_Item_Studio");
+        template.Name = "Letter_B";
+    }
+
+    var carrierMesh = (CPlugSolid2Model)typeof(ItemKinematicEntityTemplate)
+        .GetMethod("CreateCarrierMesh", BindingFlags.NonPublic | BindingFlags.Static)!
+        .Invoke(null, null)!;
+    var carrierShape = (CPlugSurface)typeof(ItemKinematicEntityTemplate)
+        .GetMethod("CreateCarrierShape", BindingFlags.NonPublic | BindingFlags.Static)!
+        .Invoke(null, null)!;
+
+    CPlugDynaObjectModel MakeCarrier() => new()
+    {
+        Version = 13,
+        IsStatic = false,
+        DynamizeOnSpawn = false,
+        Mass = 100,
+        BreakSpeedKmh = 100,
+        Mesh = carrierMesh,
+        StaticShape = carrierShape,
+        DynaShape = carrierShape
+    };
+
+    NPlugDynaObjectModel_SInstanceParams MakeInstance(bool castShadow = false) => new()
+    {
+        Version = 2,
+        PeriodSc = 1,
+        PeriodScMax = -1,
+        Phase01 = -1,
+        Phase01Max = -1,
+        TextureId = 0,
+        IsKinematic = true,
+        CastStaticShadow = castShadow
+    };
+
+    var visibleBody = new CPlugDynaObjectModel
+    {
+        Version = 13,
+        IsStatic = false,
+        DynamizeOnSpawn = false,
+        Mass = 100,
+        BreakSpeedKmh = 100,
+        Mesh = userMesh ?? ((CPlugDynaObjectModel)((CPlugPrefab)template.EntityModel!).Ents![0].Model!).Mesh,
+        StaticShape = userShape ?? ((CPlugDynaObjectModel)((CPlugPrefab)template.EntityModel!).Ents![0].Model!).StaticShape,
+        DynaShape = userShape ?? ((CPlugDynaObjectModel)((CPlugPrefab)template.EntityModel!).Ents![0].Model!).DynaShape
+    };
+
+    // Constraint 0: Z_bottom (Ent1 = -1, Ent2 = 0)
+    // Moves Z from +5 down to 0, holds, then moves 0 up to +5.
+    var c0 = new KC
+    {
+        Version = 0,
+        SubVersion = 3,
+        TransAxis = KC.EAxis.Z,
+        TransMin = 0,
+        TransMax = 5,
+        RotAxis = KC.EAxis.Y,
+        AngleMinDeg = 0,
+        AngleMaxDeg = 0,
+        TransAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs =
+            [
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(1500) },
+                new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(5000) },
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(3500) }
+            ]
+        },
+        RotAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(10000) }]
+        }
+    };
+    var p0 = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = -1, Ent2 = 0, Pos1 = default, Pos2 = default };
+
+    // Constraint 1: Z_top (Ent1 = 0, Ent2 = 1)
+    // Holds at 0, moves 0 down to -5, moves -5 up to 0, holds at 0.
+    var c1 = new KC
+    {
+        Version = 0,
+        SubVersion = 3,
+        TransAxis = KC.EAxis.Z,
+        TransMin = 0,
+        TransMax = -5,
+        RotAxis = KC.EAxis.Y,
+        AngleMinDeg = 0,
+        AngleMaxDeg = 0,
+        TransAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs =
+            [
+                new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(1500) },
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(1500) },
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(3500) },
+                new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(3500) }
+            ]
+        },
+        RotAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(10000) }]
+        }
+    };
+    var p1 = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = 0, Ent2 = 1, Pos1 = default, Pos2 = default };
+
+    // Constraint 2: X_upper (Ent1 = 1, Ent2 = 2)
+    // Holds at 0, arches out to +4 and returns to 0 (upper loop), holds at 0.
+    var c2 = new KC
+    {
+        Version = 0,
+        SubVersion = 3,
+        TransAxis = KC.EAxis.X,
+        TransMin = 0,
+        TransMax = 4,
+        RotAxis = KC.EAxis.Y,
+        AngleMinDeg = 0,
+        AngleMaxDeg = 0,
+        TransAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs =
+            [
+                new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(3000) },
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(1750) },
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(1750) },
+                new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(3500) }
+            ]
+        },
+        RotAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(10000) }]
+        }
+    };
+    var p2 = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = 1, Ent2 = 2, Pos1 = default, Pos2 = default };
+
+    // Constraint 3: X_lower (Ent1 = 2, Ent2 = 3)
+    // Holds at 0, arches out to +4 and returns to 0 (lower loop).
+    var c3 = new KC
+    {
+        Version = 0,
+        SubVersion = 3,
+        TransAxis = KC.EAxis.X,
+        TransMin = 0,
+        TransMax = 4,
+        RotAxis = KC.EAxis.Y,
+        AngleMinDeg = 0,
+        AngleMaxDeg = 0,
+        TransAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs =
+            [
+                new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(6500) },
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(1750) },
+                new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(1750) }
+            ]
+        },
+        RotAnimFunc = new KC.AnimFunc
+        {
+            IsDuration = true,
+            SubFuncs = [new() { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(10000) }]
+        }
+    };
+    var p3 = new NPlugDyna_SPrefabConstraintParams { Version = 0, Ent1 = 2, Ent2 = 3, Pos1 = default, Pos2 = default };
+
+    var prefab = (CPlugPrefab)template.EntityModel!;
+    prefab.Ents =
+    [
+        new() { Model = MakeCarrier(), Params = MakeInstance(false), Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+        new() { Model = c0, Params = p0, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+        new() { Model = MakeCarrier(), Params = MakeInstance(false), Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+        new() { Model = c1, Params = p1, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+        new() { Model = MakeCarrier(), Params = MakeInstance(false), Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+        new() { Model = c2, Params = p2, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+        new() { Model = visibleBody, Params = MakeInstance(true), Position = default, Rotation = new(0, 0, 0, 1), U01 = "" },
+        new() { Model = c3, Params = p3, Position = default, Rotation = new(0, 0, 0, 1), U01 = "" }
+    ];
+
+    var outPath = Path.Combine(folder, "Letter_B.Item.Gbx");
+    File.WriteAllBytes(outPath, Save(template));
+    Console.WriteLine($"Saved Letter B item to: {outPath}");
+
+    var customItemOutPath = Path.Combine(folder, "CustomItem_Letter_B.Item.Gbx");
+    File.WriteAllBytes(customItemOutPath, Save(template));
+    Console.WriteLine($"Saved copy to: {customItemOutPath}");
+
+    return 0;
+}
+if (args.Length > 0 && args[0] == "--generate-loop-relay-proof")
+{
+    var folder = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items";
+    if (args.Length > 1) folder = args[1];
+    var explicitMeshSource = args.Length > 2 ? args[2] : null;
+    Directory.CreateDirectory(folder);
+
+    var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()!;
+    CPlugSolid2Model visualMesh = ProofCubeSolid(1.0f);
+    CPlugSurface? collisionShape = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(visualMesh);
+    var usingFallbackCube = true;
+    CGameItemModel? sourceItem = null;
+
+    var candidatePaths = new List<string>();
+    if (!string.IsNullOrWhiteSpace(explicitMeshSource))
+        candidatePaths.Add(explicitMeshSource);
+    candidatePaths.AddRange(
+    [
+        Path.Combine(folder, "CustomItem_Merged.Item.Gbx"),
+        Path.Combine(folder, "CustomItem_Kinematic.Item.Gbx"),
+        Path.Combine(folder, "CustomItem_Static.Item.Gbx"),
+        Path.Combine(folder, "CustomItem.Item.Gbx"),
+        Path.Combine(repoRoot, @"Test Exported items\CustomItem_Static.Item.Gbx")
+    ]);
+
+    foreach (var candidate in candidatePaths)
+    {
+        if (!File.Exists(candidate))
+            continue;
+
+        try
+        {
+            var parsed = ParseItem(candidate);
+            sourceItem ??= parsed;
+            if (parsed.EntityModel is CPlugPrefab sourcePrefab)
+            {
+                var sourceBody = FindRenderableDynaBody(sourcePrefab);
+                if (sourceBody?.Mesh is CPlugSolid2Model sourceMesh)
+                {
+                    visualMesh = sourceMesh;
+                    collisionShape = sourceBody.StaticShape as CPlugSurface
+                        ?? ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(sourceMesh);
+                    usingFallbackCube = false;
+                    Console.WriteLine($"Using renderable mesh from {candidate}");
+                }
+            }
+            else if (parsed.EntityModel is CGameCommonItemEntityModel { StaticObject: CPlugStaticObjectModel staticModel } && staticModel.Mesh is CPlugSolid2Model staticMesh && HasGameRenderableMesh(staticMesh))
+            {
+                visualMesh = staticMesh;
+                collisionShape = parsed.EntityModel is CGameCommonItemEntityModel { PhyModel: CPlugSurface phyShape } && phyShape.Surf is not null
+                    ? phyShape
+                    : ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(staticMesh);
+                usingFallbackCube = false;
+                Console.WriteLine($"Using renderable static mesh from {candidate}");
+            }
+            Console.WriteLine($"Using metadata source from {candidate}");
+            if (!usingFallbackCube) break;
+        }
+        catch
+        {
+            // Continue scanning fallback candidates.
+        }
+    }
+
+    template.Ident = new Ident("Proof_Relay_Coaster_Loop", "Stadium2020", sourceItem?.Ident.Author ?? "TM_Item_Studio");
+    template.Name = "Proof_Relay_Coaster_Loop";
+    if (sourceItem is not null)
+    {
+        template.DefaultPlacement = sourceItem.DefaultPlacement;
+        template.GroundPoint = sourceItem.GroundPoint;
+        template.Icon = sourceItem.Icon;
+        template.IconWebP = sourceItem.IconWebP;
+    }
+    var exportId = string.IsNullOrWhiteSpace(template.Ident.Id) ? "Proof_Relay_Coaster_Loop" : template.Ident.Id;
+    if (string.IsNullOrWhiteSpace(template.Ident.Author))
+        template.Ident = new Ident(exportId, template.Ident.Collection, "TM_Item_Studio");
+    var inventoryFolder = TryGetInventoryRelativeFolder(folder);
+    template.ArchetypeRef = string.IsNullOrWhiteSpace(inventoryFolder)
+        ? exportId
+        : $"{inventoryFolder}\\{exportId}";
+    if (string.IsNullOrWhiteSpace(template.PageName))
+        template.PageName = "Items";
+    if (template.CatalogPosition <= 0)
+        template.CatalogPosition = 1;
+    template.ItemType = CGameItemModel.EItemType.Ornament;
+    template.ItemTypeE = CGameItemModel.EItemType.Ornament;
+
+    collisionShape ??= ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(visualMesh)
+        ?? (CPlugSurface)typeof(ItemKinematicEntityTemplate)
+            .GetMethod("CreateCarrierShape", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, null)!;
+    if (usingFallbackCube)
+        Console.WriteLine("Falling back to synthetic cube mesh (no source mesh with game-ready render bindings found).");
+
+    var controlPoints = new[]
+    {
+        new Vector3(0f, 0.2f, 0f),
+        new Vector3(4f, 0.8f, 1f),
+        new Vector3(10f, 1.7f, 4f),
+        new Vector3(15f, 2.6f, 10f),
+        new Vector3(13f, 1.8f, 16f),
+        new Vector3(7f, 0.9f, 20f),
+        new Vector3(1f, 0.3f, 18f),
+        new Vector3(-3f, 1.0f, 12f),
+        new Vector3(-1f, 1.8f, 6f),
+        new Vector3(2f, 0.7f, 2f),
+        new Vector3(0f, 0.2f, 0f)
+    };
+    var segments = BuildAxisRelaySegments(controlPoints);
+    if (segments.Count == 0)
+        throw new InvalidOperationException("Loop proof generation produced no motion segments.");
+
+    const int cycleMs = 24000;
+    const int resetMs = 80;
+    var rootEntries = new List<CPlugPrefab.EntRef>(segments.Count * 2);
+
+    for (int i = 0; i < segments.Count; i++)
+    {
+        var segment = segments[i];
+        var startMs = (int)Math.Round(i * cycleMs / (double)segments.Count);
+        var endMs = (int)Math.Round((i + 1) * cycleMs / (double)segments.Count);
+        var windowMs = Math.Max(250, endMs - startMs);
+        var moveMs = Math.Max(170, windowMs - resetMs);
+        var holdMs = Math.Max(0, cycleMs - startMs - moveMs - resetMs);
+
+        var body = new CPlugDynaObjectModel
+        {
+            Version = 13,
+            IsStatic = false,
+            DynamizeOnSpawn = false,
+            Mass = 100,
+            BreakSpeedKmh = 100,
+            Mesh = visualMesh,
+            StaticShape = collisionShape,
+            DynaShape = collisionShape
+        };
+
+        var translationKeys = new List<KC.SubAnimFunc>();
+        if (startMs > 0)
+            translationKeys.Add(new KC.SubAnimFunc { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(startMs) });
+        translationKeys.Add(new KC.SubAnimFunc { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(moveMs) });
+        if (holdMs > 0)
+            translationKeys.Add(new KC.SubAnimFunc { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(holdMs) });
+        translationKeys.Add(new KC.SubAnimFunc { Ease = KC.AnimEase.Linear, Reverse = true, Duration = new TimeInt32(resetMs) });
+
+        var constraint = new KC
+        {
+            Version = 0,
+            SubVersion = 3,
+            TransAxis = segment.Axis,
+            TransMin = 0,
+            TransMax = segment.Delta,
+            RotAxis = KC.EAxis.Y,
+            AngleMinDeg = 0,
+            AngleMaxDeg = 0,
+            TransAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = translationKeys.ToArray()
+            },
+            RotAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = [new KC.SubAnimFunc { Ease = KC.AnimEase.Linear, Reverse = false, Duration = new TimeInt32(cycleMs) }]
+            }
+        };
+
+        rootEntries.Add(new CPlugPrefab.EntRef
+        {
+            Position = new Vec3(segment.Start.X, segment.Start.Y, segment.Start.Z),
+            Rotation = new Quat(0, 0, 0, 1),
+            Model = body,
+            Params = new NPlugDynaObjectModel_SInstanceParams
+            {
+                Version = 2,
+                PeriodSc = 1,
+                PeriodScMax = -1,
+                Phase01 = -1,
+                Phase01Max = -1,
+                TextureId = 0,
+                IsKinematic = true,
+                CastStaticShadow = i == 0
+            }
+        });
+        rootEntries.Add(new CPlugPrefab.EntRef
+        {
+            Position = default,
+            Rotation = new Quat(0, 0, 0, 1),
+            Model = constraint,
+            Params = new NPlugDyna_SPrefabConstraintParams
+            {
+                Version = 0,
+                Ent1 = -1,
+                Ent2 = i,
+                Pos1 = default,
+                Pos2 = default
+            }
+        });
+    }
+
+    template.EntityModel = new CPlugPrefab
+    {
+        Version = 11,
+        Url = "",
+        Ents = rootEntries.ToArray()
+    };
+
+    var outPath = Path.Combine(folder, "Proof_Relay_Coaster_Loop.Item.Gbx");
+    File.WriteAllBytes(outPath, Save(template));
+    var customOutPath = Path.Combine(folder, "CustomItem_Proof_Relay_Coaster_Loop.Item.Gbx");
+    var customCopy = Reparse(Save(template));
+    var customId = "CustomItem_Proof_Relay_Coaster_Loop";
+    customCopy.Ident = new Ident(customId, template.Ident.Collection, template.Ident.Author);
+    customCopy.Name = customId;
+    customCopy.ArchetypeRef = string.IsNullOrWhiteSpace(inventoryFolder)
+        ? customId
+        : $"{inventoryFolder}\\{customId}";
+    File.WriteAllBytes(customOutPath, Save(customCopy));
+    Console.WriteLine($"Saved segmented relay loop proof to: {outPath}");
+    Console.WriteLine($"Saved copy to: {customOutPath}");
+
+    var reparsed = ParseItem(outPath);
+    var scene = ItemScene.Build(reparsed, 0);
+    var preview = AuthoredMotionPreview.Build(scene);
+    Console.WriteLine($"Preview verification: tracks={preview.Tracks.Count}, diagnostics={preview.Diagnostics.Count}");
+    foreach (var diag in preview.Diagnostics)
+        Console.WriteLine($"  Diag: {diag}");
+
+    return 0;
+}
 if (args.Length > 0 && args[0] == "--create-l-item")
 {
     var folder = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items";
     var customItemPath = Path.Combine(folder, "CustomItem.Item.Gbx");
     var existingItem = ParseItem(customItemPath);
-    var existingPrefab = (CPlugPrefab)existingItem.EntityModel!;
-    var userDyna = (CPlugDynaObjectModel)existingPrefab.Ents![0].Model!;
-    var userMesh = (CPlugSolid2Model)userDyna.Mesh!;
+    
+    CPlugSolid2Model? userMesh = null;
+    CPlugSurface? userShape = null;
 
-    // Generate accurate collision surface from user mesh
-    var userShape = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh)
-        ?? (CPlugSurface)userDyna.StaticShape!;
+    var staticItemPath = Path.Combine(repoRoot, @"Test Exported items\CustomItem_Static.Item.Gbx");
+    if (File.Exists(staticItemPath))
+    {
+        var staticItem = ParseItem(staticItemPath);
+        if (staticItem.EntityModel is CGameCommonItemEntityModel { StaticObject: CPlugStaticObjectModel som } && som.Mesh is not null)
+        {
+            userMesh = som.Mesh;
+            userShape = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh);
+            Console.WriteLine($"Loaded user mesh from CustomItem_Static: {(userShape?.Surf is CPlugSurface.Mesh sm ? sm.Vertices.Length : 0)} verts");
+        }
+    }
+
+    if (userMesh is null)
+    {
+        var existingPrefab = (CPlugPrefab)existingItem.EntityModel!;
+        var largestDyna = existingPrefab.Ents!
+            .Select(e => e.Model as CPlugDynaObjectModel)
+            .Where(d => d?.Mesh is not null)
+            .OrderByDescending(d => d!.Mesh!.Visuals?.Length ?? 0)
+            .FirstOrDefault();
+        userMesh = largestDyna?.Mesh!;
+        userShape = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh)
+            ?? largestDyna?.StaticShape as CPlugSurface;
+    }
 
     // 1. Clean Topological Parent-Child L-Path (Carrier Ent 0 -> Visible Ent 2)
     {
@@ -245,7 +790,7 @@ if (args.Length > 0 && args[0] == "--create-l-item")
                 SubFuncs =
                 [
                     new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(2000) },
-                    new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(4000) },
+                    new() { Ease = KC.AnimEase.Constant, Reverse = true, Duration = new TimeInt32(4000) },
                     new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(2000) }
                 ]
             },
@@ -625,6 +1170,61 @@ Check("composed preview evaluates both constraints of the chain independently", 
     Vector(Vector3.Transform(Vector3.Zero, composed), new(5, 0, 1));
 });
 
+Check("nested prefab item DeathPit parses, collects flattened slots, and resolves all 3 constraints", () =>
+{
+    var deathPitPath = Path.Combine(repoRoot, "Tests/Browser/Fixtures/Approved/TM2020/DeathPit.Item.gbx");
+    if (!File.Exists(deathPitPath)) return;
+    var item = ParseItem(deathPitPath);
+    var rootPrefab = (CPlugPrefab)item.EntityModel!;
+    var (slots, error, status) = ItemMotionBindings.CollectSlots(rootPrefab, "root");
+    Require(error is null, "failed to collect slots: " + error);
+    Require(slots.Count == 3, $"expected 3 flattened kinematic slots, got {slots.Count}");
+    Require(slots[0].Path == "root/ent:0/ent:0", "slot 0 path mismatch");
+    Require(slots[1].Path == "root/ent:1/ent:0", "slot 1 path mismatch");
+    Require(slots[2].Path == "root/ent:2/ent:0", "slot 2 path mismatch");
+
+    var sub0 = (CPlugPrefab)rootPrefab.Ents![0].Model!;
+    var c0 = (KC)sub0.Ents![1].Model!;
+    var p0 = (NPlugDyna_SPrefabConstraintParams)sub0.Ents![1].Params!;
+    var b0 = ItemMotionBindings.Resolve(c0, slots, p0, "root");
+    Require(b0.Status == ItemMotionStatus.Supported, "constraint 0 unsupported: " + b0.Reason);
+    Require(b0.Parent.IsWorld, "constraint 0 should be world-relative");
+    Require(b0.Child.Path == "root/ent:0/ent:0", "constraint 0 child mismatch");
+
+    var sub1 = (CPlugPrefab)rootPrefab.Ents![1].Model!;
+    var c1 = (KC)sub1.Ents![1].Model!;
+    var p1 = (NPlugDyna_SPrefabConstraintParams)sub1.Ents![1].Params!;
+    var b1 = ItemMotionBindings.Resolve(c1, slots, p1, "root");
+    Require(b1.Status == ItemMotionStatus.Supported, "constraint 1 unsupported: " + b1.Reason);
+    Require(!b1.Parent.IsWorld && b1.Parent.Path == "root/ent:0/ent:0", "constraint 1 parent mismatch");
+    Require(b1.Child.Path == "root/ent:1/ent:0", "constraint 1 child mismatch");
+
+    var sub2 = (CPlugPrefab)rootPrefab.Ents![2].Model!;
+    var c2 = (KC)sub2.Ents![1].Model!;
+    var p2 = (NPlugDyna_SPrefabConstraintParams)sub2.Ents![1].Params!;
+    var b2 = ItemMotionBindings.Resolve(c2, slots, p2, "root");
+    Require(b2.Status == ItemMotionStatus.Supported, "constraint 2 unsupported: " + b2.Reason);
+    Require(!b2.Parent.IsWorld && b2.Parent.Path == "root/ent:1/ent:0", "constraint 2 parent mismatch");
+    Require(b2.Child.Path == "root/ent:2/ent:0", "constraint 2 child mismatch");
+});
+
+Check("AuthoredMotionPreview builds all 3 valid tracks for DeathPit without diagnostics", () =>
+{
+    var deathPitPath = Path.Combine(repoRoot, "Tests/Browser/Fixtures/Approved/TM2020/DeathPit.Item.gbx");
+    if (!File.Exists(deathPitPath)) return;
+    var item = ParseItem(deathPitPath);
+    var scene = ItemScene.Build(item, 0, null);
+    var preview = AuthoredMotionPreview.Build(scene);
+    Require(preview.Diagnostics.Count == 0, $"expected 0 diagnostics, got {preview.Diagnostics.Count}: {string.Join("; ", preview.Diagnostics)}");
+    Require(preview.Tracks.Count == 3, $"expected 3 tracks, got {preview.Tracks.Count}");
+    Require(preview.Tracks[0].ParentPath is null, "track 0 should be root/world");
+    Require(preview.Tracks[0].ChildPath == "doc:0/variant:none/root/entityModel/ent:0/ent:0", "track 0 child mismatch");
+    Require(preview.Tracks[1].ParentPath == "doc:0/variant:none/root/entityModel/ent:0/ent:0", "track 1 parent mismatch");
+    Require(preview.Tracks[1].ChildPath == "doc:0/variant:none/root/entityModel/ent:1/ent:0", "track 1 child mismatch");
+    Require(preview.Tracks[2].ParentPath == "doc:0/variant:none/root/entityModel/ent:1/ent:0", "track 2 parent mismatch");
+    Require(preview.Tracks[2].ChildPath == "doc:0/variant:none/root/entityModel/ent:2/ent:0", "track 2 child mismatch");
+});
+
 Console.WriteLine($"{passed} passed, {failed} failed.");
 return failed == 0 ? 0 : 1;
 
@@ -782,6 +1382,129 @@ static CPlugSolid2Model Solid()
     return solid;
 }
 
+static CPlugSolid2Model ProofCubeSolid(float size = 1f)
+{
+    const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+    var h = size / 2f;
+    var verts = new[]
+    {
+        new Vec3(-h, -h, -h), // 0
+        new Vec3( h, -h, -h), // 1
+        new Vec3( h,  h, -h), // 2
+        new Vec3(-h,  h, -h), // 3
+        new Vec3(-h, -h,  h), // 4
+        new Vec3( h, -h,  h), // 5
+        new Vec3( h,  h,  h), // 6
+        new Vec3(-h,  h,  h)  // 7
+    };
+
+    var indices = new[]
+    {
+        4, 5, 6, 4, 6, 7, // front
+        0, 2, 1, 0, 3, 2, // back
+        0, 4, 7, 0, 7, 3, // left
+        1, 2, 6, 1, 6, 5, // right
+        3, 7, 6, 3, 6, 2, // top
+        0, 1, 5, 0, 5, 4  // bottom
+    };
+
+    var stream = new CPlugVertexStream { Positions = verts };
+    var declaration = new CPlugVertexStream.DataDecl();
+    typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
+        (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
+    typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
+    typeof(CPlugVertexStream).GetField("count", flags)!.SetValue(stream, verts.Length);
+    stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
+
+    var indexBuffer = new CPlugIndexBuffer { Indices = indices };
+    indexBuffer.CreateChunk<CPlugIndexBuffer.Chunk09057000>();
+
+    var visual = new CPlugVisualIndexedTriangles
+    {
+        VertexStreams = [stream],
+        IndexBuffer = indexBuffer,
+        IsGeometryStatic = true,
+        IsIndexationStatic = true,
+        BoundingBox = new BoxAligned(-h, -h, -h, h, h, h)
+    };
+    typeof(CPlugVisual).GetProperty("Count", flags)!.SetValue(visual, verts.Length);
+    visual.CreateChunk<CPlugVisual.Chunk0900600F>().Version = 6;
+    visual.CreateChunk<CPlugVisualIndexed.Chunk0906A001>();
+
+    var solid = new CPlugSolid2Model { Visuals = [visual], CustomMaterials = [], ShadedGeoms = [] };
+    solid.CreateChunk<CPlugSolid2Model.Chunk090BB000>().Version = 34;
+    return solid;
+}
+
+static List<(Vector3 Start, KC.EAxis Axis, float Delta)> BuildAxisRelaySegments(IReadOnlyList<Vector3> controlPoints)
+{
+    var segments = new List<(Vector3 Start, KC.EAxis Axis, float Delta)>();
+    const float epsilon = 0.0001f;
+    for (int i = 0; i < controlPoints.Count - 1; i++)
+    {
+        var cursor = controlPoints[i];
+        var next = controlPoints[i + 1];
+
+        var dx = next.X - cursor.X;
+        if (Math.Abs(dx) > epsilon)
+        {
+            segments.Add((cursor, KC.EAxis.X, dx));
+            cursor = new Vector3(next.X, cursor.Y, cursor.Z);
+        }
+
+        var dz = next.Z - cursor.Z;
+        if (Math.Abs(dz) > epsilon)
+        {
+            segments.Add((cursor, KC.EAxis.Z, dz));
+            cursor = new Vector3(cursor.X, cursor.Y, next.Z);
+        }
+
+        var dy = next.Y - cursor.Y;
+        if (Math.Abs(dy) > epsilon)
+            segments.Add((cursor, KC.EAxis.Y, dy));
+    }
+
+    return segments;
+}
+
+static bool HasGameRenderableMesh(CPlugSolid2Model solid)
+{
+    if ((solid.Visuals?.Length ?? 0) == 0) return false;
+    if ((solid.CustomMaterials?.Length ?? 0) == 0) return false;
+    if ((solid.ShadedGeoms?.Length ?? 0) == 0) return false;
+    return true;
+}
+
+static CPlugDynaObjectModel? FindRenderableDynaBody(CPlugPrefab prefab)
+{
+    foreach (var entry in prefab.Ents ?? [])
+    {
+        if (entry.Model is CPlugDynaObjectModel dyna && dyna.Mesh is CPlugSolid2Model solid && HasGameRenderableMesh(solid))
+            return dyna;
+        if (entry.Model is CPlugPrefab nested)
+        {
+            var fromNested = FindRenderableDynaBody(nested);
+            if (fromNested is not null)
+                return fromNested;
+        }
+    }
+
+    return null;
+}
+
+static string? TryGetInventoryRelativeFolder(string absoluteFolder)
+{
+    if (string.IsNullOrWhiteSpace(absoluteFolder))
+        return null;
+    var normalized = absoluteFolder.Replace('/', '\\');
+    var marker = "\\Items\\";
+    var markerIx = normalized.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+    if (markerIx < 0)
+        return null;
+    var relative = normalized[(markerIx + marker.Length)..].Trim('\\');
+    return string.IsNullOrWhiteSpace(relative) ? null : relative;
+}
+
 static void VerifyKinematic(CGameItemModel item, float translationMax = 1,
     (KC.AnimEase Ease, bool Reverse, int Milliseconds)[]? translationKeys = null)
 {
@@ -877,6 +1600,15 @@ static void DumpNode(CMwNod? node, string label, HashSet<CMwNod> seen, int depth
             DumpNode(common.StaticObject, "staticObject", seen, depth + 1);
             DumpNode(common.VisModel, "visModel", seen, depth + 1);
             DumpNode(common.PhyModel, "phyModel", seen, depth + 1);
+            return;
+        case NPlugItem_SVariantList variants:
+            Console.WriteLine($"{indent}{label}: NPlugItem_SVariantList version={variants.Version} variants={variants.Variants?.Length ?? -1}");
+            for (int i = 0; i < (variants.Variants?.Length ?? 0); i++)
+            {
+                var v = variants.Variants![i];
+                Console.WriteLine($"{indent}  variant[{i}]: hidden={v.HiddenInManualCycle} tags={v.Tags?.Count ?? 0} entityModel={TypeName(v.EntityModel)} entityFile={(v.EntityModelFile is null ? "null" : v.EntityModelFile.FilePath)}");
+                DumpNode(v.EntityModel, $"variant[{i}].entityModel", seen, depth + 2);
+            }
             return;
         case KC constraint:
             Console.WriteLine($"{indent}{label}: NPlugDyna_SKinematicConstraint version={constraint.Version} subversion={constraint.SubVersion}");

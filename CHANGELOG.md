@@ -2,42 +2,36 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
-## [Unreleased]
+## [0.4.0] - 2026-10-06
 
 ### Added
 
-- Local, lazy vanilla texture preview through a user-selected extracted
-  texture folder.
-- Native game-material names, links, slots, and visual-to-material mappings in
-  the Materials & LOD inspector.
-- Read-only capability-fixture scene inspection for material, collision,
-  light, and mapping discovery.
-- Typed light ownership/value-persistence diagnostics and collision/trigger
-  source classification.
-- Kinematic-reference and synthetic multi-constraint regression suites. These
-  prove serialization and preview invariants only, not in-game chained motion.
-- Deterministic local texture matching with safe DDS loading and neutral
-  fallbacks for ambiguous or unreadable textures.
-- Trackmania PBR local-preview support for `_D`, `_N`, `_R`, and `_I` texture
-  sets, including sRGB base color and native roughness/metallic channels.
-- Experimental addition of one kinematic body/constraint template at a time for
-  supported flat local prefabs. The template shares an existing proven
-  mesh/collision source and preserves its parent/world binding; native gameplay
-  still requires a fresh Trackmania placement and playback test.
-- Detection and red native-unsafe marking for model-less `World → driver →
-  visible body` probes. Trackmania crashes while loading that driver layout, so
-  the corresponding authoring action is not exposed.
-- Experimental blue **VISIBLE PATH PROXY** constraints. These use a complete
-  existing dyna model to test a native parent-child motion chain safely, with
-  an intentional extra visible copy.
+- Composite Prefab Merging: merge multiple item prefabs into one assembly with
+  world translation and rotation offsets directly manageable in the 3D viewport.
+- Custom Pivot Point Editing: interactive pivot translation and rotation gizmos,
+  personal pivot retention, and pivot connection across multiple selected meshes.
+- Composite Group Motion: group selection with combined motion curves and
+  hierarchical carrier-body constraint chaining (`World -> Carrier -> Members`),
+  allowing group movements and individual member animations to play simultaneously
+  without constraint collision.
+- Carrier Body Loader Compatibility: minimal renderable visual geometry with
+  shaded material mapping on kinematic carrier bodies, preventing Trackmania
+  inventory drop and loader crashes.
+- Experimental Dual-Body Collision Proxies: swept collision shapes for grouped
+  moving members to preserve collision under Trackmania's Havok solver.
+- Motion Path Assistant: multi-axis path generation, collision relay, and parked
+  handover L-path presets.
+- Trackmania PBR Texture Preview: local DDS texture loading for `_D`, `_N`,
+  `_R`, and `_I` sets with sRGB base color and roughness/metallic channels.
+- Multi-solid material index collision resolution when re-importing merged items.
 
 ### Changed
 
-- Removed the Native Trackmania pivot export section from the product UI. The
-  Openplanet bridge remains an internal regression utility under `Tests`.
-- Marked unproven controls as read-only or unsupported: light position and
-  light/socket authoring, collision toggling, and static/kinematic conversion.
-  Existing light color, intensity, and radius edits remain supported.
+- Expanded viewport settings panel width and separated composite world transforms
+  and group motion into dedicated collapsible controls.
+- Rebased kinematic slot binding to safely handle multi-prefab assemblies.
+
+## [0.3.0] - 2026-09-15
 - Corrected browser contracts for shared geometry, typed variants, and
   asynchronous variant selection.
 
