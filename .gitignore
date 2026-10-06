@@ -1,6 +1,7 @@
 bin/
 obj/
 *.Item.Gbx
+!Resources/MovingItemTemplate.Item.Gbx
 !Tests/Browser/Fixtures/animation-static-first.Item.Gbx
 !Tests/Browser/Fixtures/animation-static-last.Item.Gbx
 ParseProbe-output.Item.Gbx
