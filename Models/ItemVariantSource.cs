@@ -577,7 +577,7 @@ public sealed class ItemVariantSource
             new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
             new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, true, 1000)
         })
-        .Take(10)
+        .Take(4)
         .Select(key => new NPlugDyna_SKinematicConstraint.SubAnimFunc
         {
             Ease = key.Ease,
@@ -590,7 +590,7 @@ public sealed class ItemVariantSource
             new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
             new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.QuadInOut, true, 1000)
         })
-        .Take(10)
+        .Take(4)
         .Select(key => new NPlugDyna_SKinematicConstraint.SubAnimFunc
         {
             Ease = key.Ease,

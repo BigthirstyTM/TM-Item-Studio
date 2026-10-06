@@ -2,6 +2,16 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.4.3] - 2026-10-07
+
+### Fixed
+
+- Restored composite **group motion** to the last known stable 4-segment behavior.
+- Reverted group motion timelines from 10 back to 4 segments across:
+  - group motion UI controls,
+  - group motion viewer payload serialization,
+  - grouped merge/export motion keys (`GroupKinematicMotion` build path).
+
 ## [0.4.2] - 2026-10-07
 
 ### Added
