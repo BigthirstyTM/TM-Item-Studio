@@ -2,6 +2,21 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.4.2] - 2026-10-07
+
+### Added
+
+- Constraint-level anchor editing now includes a whole-constraint offset control,
+  allowing individual constraints to be translated by moving `Pos1` and `Pos2`
+  together per axis.
+
+### Changed
+
+- Localized the full in-app Studio UI text to English, including motion/path
+  assistant labels, tooltips, guidance text, and user-facing status/error messages.
+- Motion timeline segment support now allows up to 10 keys across editor UI,
+  preview validation, and grouped motion export payloads.
+
 ## [0.4.0] - 2026-10-06
 
 ### Added

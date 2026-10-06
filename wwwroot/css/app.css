@@ -37,7 +37,7 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 16px 0; }
 .studio-upload { position: relative; }
 .studio-upload:focus-within { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 5px; }
 .studio-upload label { cursor: pointer; }
-.studio-workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) clamp(520px, 36vw, 760px); gap: 12px; }
+.studio-workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) clamp(620px, 44vw, 980px); gap: 12px; }
 .studio-diagnostics { position: relative; flex-shrink: 0; }
 .studio-diagnostics > summary { list-style: none; cursor: pointer; }
 .studio-diagnostics > summary::-webkit-details-marker { display: none; }
@@ -65,6 +65,8 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 16px 0; }
 .studio-composite-details { border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; background: var(--subtle); }
 .studio-composite-details > summary { cursor: pointer; list-style: none; }
 .studio-composite-details > summary::-webkit-details-marker { display: none; }
+.studio-composite-selector-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.studio-composite-selector-grid .btn { max-width: 100%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 .studio-transform-input { min-width: 130px; width: 130px; }
 .studio-transform-row label { white-space: nowrap; }
 .studio-transform-row-selected { border: 1px solid color-mix(in srgb, #ff2ea6 40%, var(--border)); border-radius: 6px; padding: 6px; background: color-mix(in srgb, #ff2ea6 8%, var(--panel)); }
@@ -147,7 +149,7 @@ input[type="checkbox"] { accent-color: var(--accent); min-width: 16px; min-heigh
     .btn { min-height: 38px; }
 }
 /* Keep the document name once, with compact, keyboard-accessible variant choices. */
-.studio-variants { display: flex; flex-direction: column; gap: .5rem; min-width: 0; max-height: 112px; overflow-y: auto; }
+.studio-variants { display: flex; flex-direction: column; gap: .5rem; min-width: 0; max-height: min(34vh, 260px); overflow-y: auto; }
 .studio-variant-file { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; }
 .studio-variant-filename { max-width: 100%; overflow-wrap: anywhere; }
 .studio-variant-group-label { color: var(--muted); font-size: 11px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -168,12 +170,14 @@ input[type="checkbox"] { accent-color: var(--accent); min-width: 16px; min-heigh
 .motion-count { display: flex; gap: 6px; align-items: center; }
 .motion-count select { width: 56px; }
 
-/* Mesh configuration table: keep compact horizontal layout and prevent per-letter wrapping. */
-.mesh-config-table { min-width: 1080px; table-layout: auto; }
+/* Mesh configuration table: fit inside inspector without horizontal page scrolling. */
+.mesh-config-table { width: 100%; table-layout: fixed; }
 .mesh-config-table th,
-.mesh-config-table td { white-space: nowrap; overflow-wrap: normal; word-break: normal; vertical-align: middle; }
+.mesh-config-table td { white-space: normal; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
 .mesh-config-table .mesh-col-part,
-.mesh-config-table .mesh-col-materials { white-space: normal; min-width: 220px; }
+.mesh-config-table .mesh-col-materials { white-space: normal; }
+.mesh-config-table .mesh-col-part { width: 26%; }
+.mesh-config-table .mesh-col-materials { width: 14%; }
 .mesh-config-table .text-break { word-break: break-word; overflow-wrap: anywhere; white-space: normal; }
 .mesh-config-table tr.table-primary > td {
     background: color-mix(in srgb, var(--accent) 22%, var(--panel));

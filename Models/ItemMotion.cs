@@ -58,8 +58,8 @@ public static class ItemMotion
         if (source?.SubFuncs is not { } keys)
             return ItemMotionResult<bool>.Fail(ItemMotionStatus.Absent, "Timeline is absent; no default functions were created.");
         if (count == keys.Length) return ItemMotionResult<bool>.Ok(false);
-        if (count < 1 || count > 4)
-            return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "Choose between one and four segments.");
+        if (count < 1 || count > 10)
+            return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "Choose between one and ten segments.");
         if (keys.Any(k => k is null))
             return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "Timeline contains an absent segment; stored functions are unchanged.");
         var resized = new KC.SubAnimFunc[count];
@@ -144,7 +144,7 @@ public static class ItemMotion
     private static (ItemMotionStatus Status, string Reason)? ValidateTimeline(ItemMotionTimeline timeline)
     {
         if (timeline.Keys is null || timeline.Keys.Any(k => k is null)) return (ItemMotionStatus.Invalid, "Missing timeline keys.");
-        if (timeline.Keys.Count > 4) return (ItemMotionStatus.Unsupported, "The supported native layout has at most four keys.");
+        if (timeline.Keys.Count > 10) return (ItemMotionStatus.Unsupported, "The supported native layout has at most ten keys.");
         if (timeline.Keys.Any(k => k.DurationMilliseconds < 0)) return (ItemMotionStatus.Invalid, "Times must be nonnegative milliseconds.");
         if (TotalDuration(timeline) > int.MaxValue) return (ItemMotionStatus.Invalid, "Total duration exceeds the supported millisecond range.");
         if (timeline.Keys.Any(k => k.Ease < KC.AnimEase.Constant || k.Ease > KC.AnimEase.QuadInOut))

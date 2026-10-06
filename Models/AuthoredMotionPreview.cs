@@ -4,7 +4,7 @@ using GBX.NET.Engines.Meta;
 namespace TM_Item_Studio.Models;
 
 public sealed record ItemMotionPreviewTrack(string Path, string ChildPath, string? ParentPath,
-    float[] ChildRest, float[] ParentRest, ItemMotionEdit Fields);
+    float[] ChildRest, float[] ParentRest, ItemMotionEdit Fields, float[] Pos1, float[] Pos2);
 public sealed record ItemMotionPreviewResult(IReadOnlyList<ItemMotionPreviewTrack> Tracks,
     IReadOnlyList<string> Diagnostics);
 
@@ -51,7 +51,7 @@ public static class AuthoredMotionPreview
                 continue;
             }
             tracks.Add(new(entry.Path, binding.Child.Path!, binding.Parent.IsWorld ? null : binding.Parent.Path,
-                Pack(childRest), Pack(parent), ItemMotion.Read(source).Fields));
+                Pack(childRest), Pack(parent), ItemMotion.Read(source).Fields, Pack(binding.Parameters?.Pos1 ?? default), Pack(binding.Parameters?.Pos2 ?? default)));
         }
 
         // The viewer requires one writer per child and an acyclic, complete parent chain.
@@ -106,4 +106,6 @@ public static class AuthoredMotionPreview
 
     private static float[] Pack(Matrix4x4 m) => new[] { m.M11, m.M12, m.M13, m.M14,
         m.M21, m.M22, m.M23, m.M24, m.M31, m.M32, m.M33, m.M34, m.M41, m.M42, m.M43, m.M44 };
+
+    private static float[] Pack(GBX.NET.Vec3 v) => new[] { v.X, v.Y, v.Z };
 }

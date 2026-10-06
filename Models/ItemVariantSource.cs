@@ -18,13 +18,11 @@ public sealed class ItemVariantSource
         NPlugDyna_SKinematicConstraint.EAxis TransAxis,
         float TransMin,
         float TransMax,
-        GroupAnimKey TransKeyA,
-        GroupAnimKey TransKeyB,
+        IReadOnlyList<GroupAnimKey> TransKeys,
         NPlugDyna_SKinematicConstraint.EAxis RotAxis,
         float RotMinDeg,
         float RotMaxDeg,
-        GroupAnimKey RotKeyA,
-        GroupAnimKey RotKeyB);
+        IReadOnlyList<GroupAnimKey> RotKeys);
     public readonly record struct GroupMergeDefinition(
         int GroupId,
         IReadOnlyList<int> SourceIndices,
@@ -318,47 +316,8 @@ public sealed class ItemVariantSource
             }
         }
 
-        var groupCollisionProxySlots = new Dictionary<int, Dictionary<CPlugDynaObjectModel, int>>();
-        foreach (var (groupId, proxies) in groupCollisionProxyBodies)
-        {
-            var slots = new Dictionary<CPlugDynaObjectModel, int>(ReferenceEqualityComparer.Instance);
-            foreach (var proxyBody in proxies)
-            {
-                var globalMatch = mergedSlots.FirstOrDefault(s => ReferenceEquals(s.SourceEntry?.Model, proxyBody));
-                if (globalMatch is not null)
-                    slots[proxyBody] = globalMatch.Slot;
-            }
-            groupCollisionProxySlots[groupId] = slots;
-        }
-
         // 4. Wire constraints and rebase slots
         var rebased = new List<(NPlugDyna_SPrefabConstraintParams Constraint, int Ent1, int Ent2)>();
-
-        // Wire group motion constraints
-        foreach (var (groupId, (_, constraintParams)) in groupConstraintRefs)
-        {
-            if (groupCarrierSlots.TryGetValue(groupId, out var carrierSlot))
-            {
-                constraintParams.Ent1 = -1;
-                constraintParams.Ent2 = carrierSlot;
-            }
-        }
-
-        // Wire experimental root-bound collision proxy constraints (per member) so collision can survive group motion.
-        foreach (var (groupId, proxyParams) in groupCollisionProxyConstraintParams)
-        {
-            if (!groupCollisionProxyBodies.TryGetValue(groupId, out var proxyBodies)
-                || !groupCollisionProxySlots.TryGetValue(groupId, out var slotMap))
-                continue;
-            for (var i = 0; i < proxyParams.Count && i < proxyBodies.Count; i++)
-            {
-                if (slotMap.TryGetValue(proxyBodies[i], out var proxySlot))
-                {
-                    proxyParams[i].Ent1 = -1;
-                    proxyParams[i].Ent2 = proxySlot;
-                }
-            }
-        }
 
         // Rebase member constraints
         for (var sourceIndex = 0; sourceIndex < sources.Count; sourceIndex++)
@@ -375,6 +334,51 @@ public sealed class ItemVariantSource
 
             var carrierSlot = isGroupedWithMotion ? groupCarrierSlots[groupId] : -1;
             var drivenGlobalSlots = new HashSet<int>();
+            var proxiedGlobalSlots = new HashSet<int>();
+
+            void AddGroupCollisionProxy(CPlugDynaObjectModel proxyBody)
+            {
+                if (!isGroupedWithMotion || !groupPrefabEntriesMap.TryGetValue(groupId, out var groupEntries))
+                    return;
+                var proxyBodyEntry = new CPlugPrefab.EntRef
+                {
+                    Position = default,
+                    Rotation = new Quat(0, 0, 0, 1),
+                    U01 = "",
+                    Model = proxyBody,
+                    Params = new NPlugDynaObjectModel_SInstanceParams
+                    {
+                        Version = 2,
+                        PeriodSc = 1,
+                        PeriodScMax = -1,
+                        Phase01 = -1,
+                        Phase01Max = -1,
+                        TextureId = 0,
+                        IsKinematic = true,
+                        CastStaticShadow = false
+                    }
+                };
+                var proxyParams = new NPlugDyna_SPrefabConstraintParams
+                {
+                    Version = 0,
+                    Ent1 = -1,
+                    Ent2 = -1,
+                    Pos1 = default,
+                    Pos2 = default
+                };
+                var proxyConstraintEntry = new CPlugPrefab.EntRef
+                {
+                    Position = default,
+                    Rotation = new Quat(0, 0, 0, 1),
+                    U01 = "",
+                    Model = BuildGroupConstraint(groupMotion!.Value),
+                    Params = proxyParams
+                };
+                groupEntries.Add(proxyBodyEntry);
+                groupEntries.Add(proxyConstraintEntry);
+                groupCollisionProxyBodies[groupId].Add(proxyBody);
+                groupCollisionProxyConstraintParams[groupId].Add(proxyParams);
+            }
 
             void WalkConstraints(CPlugPrefab p)
             {
@@ -405,47 +409,11 @@ public sealed class ItemVariantSource
                         if (isGroupedWithMotion
                             && ent.Model is NPlugDyna_SKinematicConstraint constraintModel
                             && localSlotsBySource[sourceIndex].FirstOrDefault(slot => slot.Slot == origEnt2)?.SourceEntry?.Model is CPlugDynaObjectModel drivenBody
-                            && groupPrefabEntriesMap.TryGetValue(groupId, out var groupEntries))
+                            && localToGlobal.TryGetValue((sourceIndex, origEnt2), out var drivenGlobalSlot)
+                            && proxiedGlobalSlots.Add(drivenGlobalSlot))
                         {
                             var proxyBody = CreateCollisionProxyBody(drivenBody, constraintModel);
-                            var proxyBodyEntry = new CPlugPrefab.EntRef
-                            {
-                                Position = default,
-                                Rotation = new Quat(0, 0, 0, 1),
-                                U01 = "",
-                                Model = proxyBody,
-                                Params = new NPlugDynaObjectModel_SInstanceParams
-                                {
-                                    Version = 2,
-                                    PeriodSc = 1,
-                                    PeriodScMax = -1,
-                                    Phase01 = -1,
-                                    Phase01Max = -1,
-                                    TextureId = 0,
-                                    IsKinematic = true,
-                                    CastStaticShadow = false
-                                }
-                            };
-                            var proxyParams = new NPlugDyna_SPrefabConstraintParams
-                            {
-                                Version = 0,
-                                Ent1 = -1,
-                                Ent2 = -1,
-                                Pos1 = default,
-                                Pos2 = default
-                            };
-                            var proxyConstraintEntry = new CPlugPrefab.EntRef
-                            {
-                                Position = default,
-                                Rotation = new Quat(0, 0, 0, 1),
-                                U01 = "",
-                                Model = BuildGroupConstraint(groupMotion!.Value),
-                                Params = proxyParams
-                            };
-                            groupEntries.Add(proxyBodyEntry);
-                            groupEntries.Add(proxyConstraintEntry);
-                            groupCollisionProxyBodies[groupId].Add(proxyBody);
-                            groupCollisionProxyConstraintParams[groupId].Add(proxyParams);
+                            AddGroupCollisionProxy(proxyBody);
                         }
                     }
 
@@ -482,6 +450,20 @@ public sealed class ItemVariantSource
                         });
                         drivenGlobalSlots.Add(globalSlot);
                     }
+
+                    if (localToGlobal.TryGetValue((sourceIndex, localSlot.Slot), out var proxyGlobalSlot)
+                        && proxiedGlobalSlots.Add(proxyGlobalSlot)
+                        && localSlot.SourceEntry?.Model is CPlugDynaObjectModel slotBody)
+                    {
+                        var proxyBody = ItemKinematicEntityTemplate.CreateCarrierBody(slotBody);
+                        var proxyShape = slotBody.StaticShape ?? slotBody.DynaShape;
+                        if (proxyShape is not null)
+                        {
+                            proxyBody.StaticShape = proxyShape;
+                            proxyBody.DynaShape = proxyShape;
+                        }
+                        AddGroupCollisionProxy(proxyBody);
+                    }
                 }
             }
         }
@@ -492,6 +474,40 @@ public sealed class ItemVariantSource
             if (groupPrefabsMap.TryGetValue(groupId, out var groupPrefab))
             {
                 groupPrefab.Ents = groupEntries.ToArray();
+            }
+        }
+
+        // Re-resolve each group prefab after all injected proxy/lock entries exist.
+        // Group-internal constraints must use group-local slot indices; global flattened
+        // slots can point outside the nested table and detach collision in-game.
+        foreach (var (groupId, groupPrefab) in groupPrefabsMap)
+        {
+            var (groupSlots, _, _) = ItemMotionBindings.CollectSlots(groupPrefab, $"merge/group:{groupId}");
+            var groupSlotByBody = new Dictionary<CPlugDynaObjectModel, int>(ReferenceEqualityComparer.Instance);
+            foreach (var slot in groupSlots)
+            {
+                if (slot.SourceEntry?.Model is CPlugDynaObjectModel body && !groupSlotByBody.ContainsKey(body))
+                    groupSlotByBody[body] = slot.Slot;
+            }
+
+            if (groupConstraintRefs.TryGetValue(groupId, out var rootConstraint)
+                && groupCarrierBodies.TryGetValue(groupId, out var carrierBody)
+                && groupSlotByBody.TryGetValue(carrierBody, out var localCarrierSlot))
+            {
+                rootConstraint.Params.Ent1 = -1;
+                rootConstraint.Params.Ent2 = localCarrierSlot;
+            }
+
+            if (groupCollisionProxyConstraintParams.TryGetValue(groupId, out var proxyParams)
+                && groupCollisionProxyBodies.TryGetValue(groupId, out var proxyBodies))
+            {
+                for (var i = 0; i < proxyParams.Count && i < proxyBodies.Count; i++)
+                {
+                    if (!groupSlotByBody.TryGetValue(proxyBodies[i], out var localProxySlot))
+                        continue;
+                    proxyParams[i].Ent1 = -1;
+                    proxyParams[i].Ent2 = localProxySlot;
+                }
             }
         }
 
@@ -556,6 +572,33 @@ public sealed class ItemVariantSource
 
     private static NPlugDyna_SKinematicConstraint BuildGroupConstraint(GroupKinematicMotion motion)
     {
+        var transKeys = (motion.TransKeys?.Count > 0 ? motion.TransKeys : new[]
+        {
+            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
+            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, true, 1000)
+        })
+        .Take(10)
+        .Select(key => new NPlugDyna_SKinematicConstraint.SubAnimFunc
+        {
+            Ease = key.Ease,
+            Reverse = key.Reverse,
+            Duration = new TimeInt32(Math.Max(50, key.DurationMs))
+        })
+        .ToArray();
+        var rotKeys = (motion.RotKeys?.Count > 0 ? motion.RotKeys : new[]
+        {
+            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
+            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.QuadInOut, true, 1000)
+        })
+        .Take(10)
+        .Select(key => new NPlugDyna_SKinematicConstraint.SubAnimFunc
+        {
+            Ease = key.Ease,
+            Reverse = key.Reverse,
+            Duration = new TimeInt32(Math.Max(50, key.DurationMs))
+        })
+        .ToArray();
+
         return new NPlugDyna_SKinematicConstraint
         {
             Version = 0,
@@ -569,40 +612,12 @@ public sealed class ItemVariantSource
             TransAnimFunc = new NPlugDyna_SKinematicConstraint.AnimFunc
             {
                 IsDuration = true,
-                SubFuncs =
-                [
-                    new NPlugDyna_SKinematicConstraint.SubAnimFunc
-                    {
-                        Ease = motion.TransKeyA.Ease,
-                        Reverse = motion.TransKeyA.Reverse,
-                        Duration = new TimeInt32(Math.Max(50, motion.TransKeyA.DurationMs))
-                    },
-                    new NPlugDyna_SKinematicConstraint.SubAnimFunc
-                    {
-                        Ease = motion.TransKeyB.Ease,
-                        Reverse = motion.TransKeyB.Reverse,
-                        Duration = new TimeInt32(Math.Max(50, motion.TransKeyB.DurationMs))
-                    }
-                ]
+                SubFuncs = transKeys
             },
             RotAnimFunc = new NPlugDyna_SKinematicConstraint.AnimFunc
             {
                 IsDuration = true,
-                SubFuncs =
-                [
-                    new NPlugDyna_SKinematicConstraint.SubAnimFunc
-                    {
-                        Ease = motion.RotKeyA.Ease,
-                        Reverse = motion.RotKeyA.Reverse,
-                        Duration = new TimeInt32(Math.Max(50, motion.RotKeyA.DurationMs))
-                    },
-                    new NPlugDyna_SKinematicConstraint.SubAnimFunc
-                    {
-                        Ease = motion.RotKeyB.Ease,
-                        Reverse = motion.RotKeyB.Reverse,
-                        Duration = new TimeInt32(Math.Max(50, motion.RotKeyB.DurationMs))
-                    }
-                ]
+                SubFuncs = rotKeys
             }
         };
     }

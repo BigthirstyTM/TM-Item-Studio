@@ -1,4 +1,6 @@
 @using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
+@using GBX.NET.Engines.Meta
+@using GBX.NET.Engines.MetaNotPersistent
 
 <fieldset class="motion-constraint @(IsSelected ? "motion-constraint-selected" : "") @(IsInvisibleDriver ? "motion-invisible-driver" : IsVisualPathProxy ? "motion-path-proxy" : "")"
           @onclick="@(() => OnSelectConstraint.InvokeAsync(ConstraintIndex))">
@@ -23,18 +25,18 @@
         }
         else
         {
-            <span class="badge text-bg-warning text-dark ms-1" title="Chained to parent entity (Ent1 >= 0). Visually moves with parent, but Trackmania does not update Havok child collision.">🟡 Visueel (Geen child-collision in TM)</span>
+            <span class="badge text-bg-warning text-dark ms-1" title="Chained to parent entity (Ent1 >= 0). Visually moves with parent, but Trackmania does not update Havok child collision.">🟡 Visual only (no child collision in TM)</span>
         }
 
         <button type="button" class="btn btn-xs @(IsSelected ? "btn-primary" : "btn-outline-primary") ms-auto" style="font-size: 0.72rem; padding: 1px 6px;"
-                @onclick:stopPropagation="true" @onclick="@(() => OnSelectConstraint.InvokeAsync(ConstraintIndex))" title="Selecteer & toon in 3D Viewport">
+                @onclick:stopPropagation="true" @onclick="@(() => OnSelectConstraint.InvokeAsync(ConstraintIndex))" title="Select and show in 3D viewport">
             🔍 Focus 3D
         </button>
         @if (CanRemove)
         {
             <button type="button" class="btn btn-xs btn-outline-danger ms-1" style="font-size: 0.72rem; padding: 1px 6px;"
-                    @onclick:stopPropagation="true" @onclick="@(() => OnRemoveConstraint.InvokeAsync(Source))" title="Verwijder deze constraint & bijbehorende body">
-                🗑️ Verwijder
+                    @onclick:stopPropagation="true" @onclick="@(() => OnRemoveConstraint.InvokeAsync(Source))" title="Remove this constraint and its linked body">
+                🗑️ Remove
             </button>
         }
     </legend>
@@ -53,18 +55,18 @@
         <div class="d-flex align-items-center justify-content-between mb-1">
             <h6 class="mb-0">Translation <span class="small text-muted">m</span></h6>
             <div class="d-flex align-items-center gap-1">
-                <span class="text-muted" style="font-size: 0.75rem;">3D Punten:</span>
+                <span class="text-muted" style="font-size: 0.75rem;">3D points:</span>
                 <button type="button" class="btn btn-xs @(IsSelected && SelectedWaypointIsPointB == false ? "btn-success" : "btn-outline-success")"
                         style="font-size: 0.72rem; padding: 1px 6px;"
                         @onclick:stopPropagation="true" @onclick="@(() => OnSelectWaypoint.InvokeAsync(false))"
-                        title="Selecteer Startpunt A (@(ConstraintIndex + 1)A) in de 3D viewport om te verslepen">
+                        title="Select start point A (@(ConstraintIndex + 1)A) in the 3D viewport to drag it">
                     📍 @(ConstraintIndex + 1)A (Start)
                 </button>
                 <button type="button" class="btn btn-xs @(IsSelected && SelectedWaypointIsPointB == true ? "btn-warning text-dark" : "btn-outline-warning")"
                         style="font-size: 0.72rem; padding: 1px 6px;"
                         @onclick:stopPropagation="true" @onclick="@(() => OnSelectWaypoint.InvokeAsync(true))"
-                        title="Selecteer Eindpunt B (@(ConstraintIndex + 1)B) in de 3D viewport om te verslepen">
-                    📍 @(ConstraintIndex + 1)B (Eind)
+                        title="Select end point B (@(ConstraintIndex + 1)B) in the 3D viewport to drag it">
+                    📍 @(ConstraintIndex + 1)B (End)
                 </button>
             </div>
         </div>
@@ -102,6 +104,46 @@
         </div>
         <MotionTimelineEditor Name="Rotation" Source="Source.RotAnimFunc" Changed="Changed" />
     </section>
+    @if (ConstraintParams is not null)
+    {
+        <section class="motion-channel" aria-label="Constraint anchor controls">
+            <h6>Constraint anchors <span class="small text-muted">m</span></h6>
+            <div class="motion-range">
+                <label class="small">Offset X (hele constraint)
+                    <input type="number" step="any" class="form-control form-control-sm" value="@WholeOffsetValue(0).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateWholeOffset(e, 0)" />
+                </label>
+                <label class="small">Offset Y (hele constraint)
+                    <input type="number" step="any" class="form-control form-control-sm" value="@WholeOffsetValue(1).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateWholeOffset(e, 1)" />
+                </label>
+                <label class="small">Offset Z (hele constraint)
+                    <input type="number" step="any" class="form-control form-control-sm" value="@WholeOffsetValue(2).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateWholeOffset(e, 2)" />
+                </label>
+            </div>
+            <div class="motion-range">
+                <label class="small">Pos1 X
+                    <input type="number" step="any" class="form-control form-control-sm" value="@AnchorValue(true, 0).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateAnchor(e, true, 0)" />
+                </label>
+                <label class="small">Pos1 Y
+                    <input type="number" step="any" class="form-control form-control-sm" value="@AnchorValue(true, 1).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateAnchor(e, true, 1)" />
+                </label>
+                <label class="small">Pos1 Z
+                    <input type="number" step="any" class="form-control form-control-sm" value="@AnchorValue(true, 2).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateAnchor(e, true, 2)" />
+                </label>
+            </div>
+            <div class="motion-range mt-1">
+                <label class="small">Pos2 X
+                    <input type="number" step="any" class="form-control form-control-sm" value="@AnchorValue(false, 0).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateAnchor(e, false, 0)" />
+                </label>
+                <label class="small">Pos2 Y
+                    <input type="number" step="any" class="form-control form-control-sm" value="@AnchorValue(false, 1).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateAnchor(e, false, 1)" />
+                </label>
+                <label class="small">Pos2 Z
+                    <input type="number" step="any" class="form-control form-control-sm" value="@AnchorValue(false, 2).ToString(System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => UpdateAnchor(e, false, 2)" />
+                </label>
+            </div>
+            <p class="small text-muted mb-0 mt-1">Offset moves the whole constraint (Pos1 + Pos2 together). Pos1/Pos2 below remain individually editable.</p>
+        </section>
+    }
 </fieldset>
 
 @code {
@@ -116,9 +158,87 @@
     [Parameter] public bool IsVisualPathProxy { get; set; }
     [Parameter] public bool IsRootConstraint { get; set; } = true;
     [Parameter] public string? BindingDescription { get; set; }
+    [Parameter] public NPlugDyna_SPrefabConstraintParams? ConstraintParams { get; set; }
     [Parameter] public bool CanRemove { get; set; } = false;
     [Parameter] public EventCallback<KC> OnRemoveConstraint { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
+
+    private async Task UpdateAnchor(ChangeEventArgs e, bool parentAnchor, int axisIndex)
+    {
+        if (ConstraintParams is null)
+            return;
+        if (!float.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var value)
+            || !float.IsFinite(value))
+        {
+            return;
+        }
+
+        var anchor = parentAnchor ? ConstraintParams.Pos1 : ConstraintParams.Pos2;
+        var x = axisIndex == 0 ? value : anchor.X;
+        var y = axisIndex == 1 ? value : anchor.Y;
+        var z = axisIndex == 2 ? value : anchor.Z;
+        var updated = new GBX.NET.Vec3(x, y, z);
+
+        if (parentAnchor)
+            ConstraintParams.Pos1 = updated;
+        else
+            ConstraintParams.Pos2 = updated;
+
+        await NotifyChanged();
+    }
+
+    private float AnchorValue(bool parentAnchor, int axisIndex)
+    {
+        var anchor = parentAnchor ? ConstraintParams?.Pos1 : ConstraintParams?.Pos2;
+        if (anchor is null)
+            return 0f;
+        return axisIndex switch
+        {
+            0 => anchor.Value.X,
+            1 => anchor.Value.Y,
+            _ => anchor.Value.Z
+        };
+    }
+
+    private async Task UpdateWholeOffset(ChangeEventArgs e, int axisIndex)
+    {
+        if (ConstraintParams is null)
+            return;
+        if (!float.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var value)
+            || !float.IsFinite(value))
+        {
+            return;
+        }
+
+        var current = WholeOffsetValue(axisIndex);
+        var delta = value - current;
+        if (Math.Abs(delta) < 1e-6f)
+            return;
+
+        var p1 = ConstraintParams.Pos1;
+        var p2 = ConstraintParams.Pos2;
+        var p1x = axisIndex == 0 ? p1.X + delta : p1.X;
+        var p1y = axisIndex == 1 ? p1.Y + delta : p1.Y;
+        var p1z = axisIndex == 2 ? p1.Z + delta : p1.Z;
+        var p2x = axisIndex == 0 ? p2.X + delta : p2.X;
+        var p2y = axisIndex == 1 ? p2.Y + delta : p2.Y;
+        var p2z = axisIndex == 2 ? p2.Z + delta : p2.Z;
+        ConstraintParams.Pos1 = new GBX.NET.Vec3(p1x, p1y, p1z);
+        ConstraintParams.Pos2 = new GBX.NET.Vec3(p2x, p2y, p2z);
+        await NotifyChanged();
+    }
+
+    private float WholeOffsetValue(int axisIndex)
+    {
+        var p1 = ConstraintParams?.Pos1 ?? new GBX.NET.Vec3(0, 0, 0);
+        var p2 = ConstraintParams?.Pos2 ?? new GBX.NET.Vec3(0, 0, 0);
+        return axisIndex switch
+        {
+            0 => (p1.X + p2.X) * 0.5f,
+            1 => (p1.Y + p2.Y) * 0.5f,
+            _ => (p1.Z + p2.Z) * 0.5f
+        };
+    }
 
     private Task NotifyChanged() => Changed.InvokeAsync();
 }

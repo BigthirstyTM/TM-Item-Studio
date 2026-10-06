@@ -16,6 +16,16 @@ namespace TM_Item_Studio.Models;
 /// </summary>
 public static class ItemKinematicEntityTemplate
 {
+    public const int MaxSafeDrawPathSegments = 4;
+
+    public readonly record struct DrawPathSegment(
+        KC.EAxis Axis,
+        float Distance,
+        int DurationMs,
+        KC.EAxis RotationAxis,
+        float RotationStartDeg,
+        float RotationEndDeg);
+
     /// <summary>
     /// Inserts a complete, visible dyna body before a supported constraint. It
     /// deliberately shares the proven mesh and collision source so Trackmania
@@ -633,6 +643,237 @@ public static class ItemKinematicEntityTemplate
     }
 
     /// <summary>
+    /// Best-effort conversion of a sampled draw-path to authored kinematic motion.
+    /// Each segment maps to one chain constraint (outer parent to inner child), so
+    /// the visible body follows one continuous sequence over the full timeline.
+    /// </summary>
+    public static ItemMotionResult<int> ConfigureDrawnPathBestEffort(
+        CPlugPrefab owner,
+        KC source,
+        string prefabInstancePath,
+        IReadOnlyList<DrawPathSegment> segments,
+        int? maxSegmentsOverride = null)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentException.ThrowIfNullOrWhiteSpace(prefabInstancePath);
+        ArgumentNullException.ThrowIfNull(segments);
+
+        var normalized = segments
+            .Where(static segment => MathF.Abs(segment.Distance) >= 0.01f && segment.DurationMs > 0)
+            .Select(static segment => new DrawPathSegment(
+                segment.Axis,
+                segment.Distance,
+                Math.Max(50, segment.DurationMs),
+                segment.RotationAxis,
+                segment.RotationStartDeg,
+                segment.RotationEndDeg))
+            .ToArray();
+        if (normalized.Length == 0)
+            return ItemMotionResult<int>.Fail(ItemMotionStatus.Unsupported,
+                "The drawn path does not contain enough movement to author a kinematic sequence.");
+        var maxSegments = Math.Max(1, maxSegmentsOverride ?? MaxSafeDrawPathSegments);
+        if (normalized.Length > maxSegments)
+            return ItemMotionResult<int>.Fail(ItemMotionStatus.Unsupported,
+                $"The drawn path generated {normalized.Length} segments. Trackmania placement is unstable for this path mode above {maxSegments} chained segments.");
+
+        var chain = new List<KC>(normalized.Length);
+        for (var i = 1; i < normalized.Length; i++)
+        {
+            var insert = InsertHiddenCarrierParent(owner, source, prefabInstancePath);
+            if (!insert.Success)
+                return ItemMotionResult<int>.Fail(insert.Status, insert.Reason!);
+            chain.Add(insert.Value!);
+        }
+        chain.Add(source);
+
+        var totalDuration = normalized.Sum(static segment => segment.DurationMs);
+        var elapsed = 0;
+        for (var i = 0; i < normalized.Length; i++)
+        {
+            var constraint = chain[i];
+            var segment = normalized[i];
+            var pre = elapsed;
+            var move = segment.DurationMs;
+            var post = Math.Max(0, totalDuration - pre - move);
+            elapsed += move;
+
+            constraint.TransAxis = segment.Axis;
+            constraint.TransMin = 0;
+            constraint.TransMax = segment.Distance;
+            constraint.RotAxis = segment.RotationAxis;
+            constraint.AngleMinDeg = segment.RotationStartDeg;
+            constraint.AngleMaxDeg = segment.RotationEndDeg;
+
+            var subFuncs = new List<KC.SubAnimFunc>(3);
+            if (pre > 0)
+            {
+                subFuncs.Add(new KC.SubAnimFunc
+                {
+                    Ease = KC.AnimEase.Constant,
+                    Reverse = false,
+                    Duration = new TimeInt32(pre)
+                });
+            }
+
+            subFuncs.Add(new KC.SubAnimFunc
+            {
+                Ease = KC.AnimEase.QuadInOut,
+                Reverse = false,
+                Duration = new TimeInt32(move)
+            });
+
+            if (post > 0)
+            {
+                subFuncs.Add(new KC.SubAnimFunc
+                {
+                    Ease = KC.AnimEase.Constant,
+                    Reverse = true,
+                    Duration = new TimeInt32(post)
+                });
+            }
+
+            constraint.TransAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = [.. subFuncs]
+            };
+            var rotSubFuncs = new List<KC.SubAnimFunc>(3);
+            if (pre > 0)
+            {
+                rotSubFuncs.Add(new KC.SubAnimFunc
+                {
+                    Ease = KC.AnimEase.Constant,
+                    Reverse = false,
+                    Duration = new TimeInt32(pre)
+                });
+            }
+
+            rotSubFuncs.Add(new KC.SubAnimFunc
+            {
+                Ease = KC.AnimEase.Linear,
+                Reverse = false,
+                Duration = new TimeInt32(move)
+            });
+
+            if (post > 0)
+            {
+                rotSubFuncs.Add(new KC.SubAnimFunc
+                {
+                    Ease = KC.AnimEase.Constant,
+                    Reverse = true,
+                    Duration = new TimeInt32(post)
+                });
+            }
+
+            constraint.RotAnimFunc = new KC.AnimFunc
+            {
+                IsDuration = true,
+                SubFuncs = [.. rotSubFuncs]
+            };
+        }
+
+        ReorderDrawPathChain(owner);
+
+        return ItemMotionResult<int>.Ok(normalized.Length);
+    }
+
+    private static void ReorderDrawPathChain(CPlugPrefab owner)
+    {
+        if (owner.Ents is not { Length: > 0 } entries)
+            return;
+
+        var bodies = entries
+            .Select((entry, index) => (entry, index))
+            .Where(static item => item.entry.Model is CPlugDynaObjectModel && item.entry.ModelFile is null)
+            .ToArray();
+        var constraints = entries
+            .Select((entry, index) => (entry, index))
+            .Where(static item => item.entry.Model is KC && item.entry.Params is NPlugDyna_SPrefabConstraintParams)
+            .ToArray();
+        if (bodies.Length == 0 || constraints.Length == 0 || constraints.Length != bodies.Length)
+            return;
+
+        var oldBodyIndexBySlot = new Dictionary<int, int>();
+        for (var slot = 0; slot < bodies.Length; slot++)
+            oldBodyIndexBySlot[slot] = bodies[slot].index;
+
+        var constraintsByParent = new Dictionary<int, (CPlugPrefab.EntRef entry, NPlugDyna_SPrefabConstraintParams parameters, int index)>();
+        foreach (var item in constraints)
+        {
+            var parameters = (NPlugDyna_SPrefabConstraintParams)item.entry.Params!;
+            if (constraintsByParent.ContainsKey(parameters.Ent1))
+                return;
+            constraintsByParent[parameters.Ent1] = (item.entry, parameters, item.index);
+        }
+
+        if (!constraintsByParent.TryGetValue(-1, out var root))
+            return;
+
+        var orderedConstraints = new List<(CPlugPrefab.EntRef entry, NPlugDyna_SPrefabConstraintParams parameters, int index)>(constraints.Length);
+        var orderedBodySlots = new List<int>(bodies.Length);
+        var visitedParents = new HashSet<int>();
+        var current = root;
+        while (true)
+        {
+            if (!visitedParents.Add(current.parameters.Ent1))
+                return;
+            orderedConstraints.Add(current);
+            orderedBodySlots.Add(current.parameters.Ent2);
+            if (!constraintsByParent.TryGetValue(current.parameters.Ent2, out current))
+                break;
+        }
+
+        if (orderedConstraints.Count != constraints.Length || orderedBodySlots.Count != bodies.Length)
+            return;
+        if (orderedBodySlots.Distinct().Count() != bodies.Length)
+            return;
+        if (orderedBodySlots.Any(slot => slot < 0 || slot >= bodies.Length))
+            return;
+
+        // Keep the most representative/visible body first so item inventory previews
+        // do not end up anchored to an invisible micro-carrier entry.
+        static int BodyVisualWeight(CPlugPrefab.EntRef entry)
+        {
+            if (entry.Model is not CPlugDynaObjectModel { Mesh: CPlugSolid2Model solid })
+                return 0;
+            var visuals = solid.Visuals?.Length ?? 0;
+            var vertices = solid.Visuals?.OfType<CPlugVisualIndexedTriangles>()
+                .Sum(static visual => visual.VertexStreams?.FirstOrDefault()?.Positions?.Length ?? 0) ?? 0;
+            return visuals * 1_000_000 + vertices;
+        }
+        var leadSlot = orderedBodySlots
+            .OrderByDescending(slot => BodyVisualWeight(entries[oldBodyIndexBySlot[slot]]))
+            .ThenBy(slot => orderedBodySlots.IndexOf(slot))
+            .FirstOrDefault();
+        if (leadSlot != orderedBodySlots[0])
+        {
+            orderedBodySlots.Remove(leadSlot);
+            orderedBodySlots.Insert(0, leadSlot);
+        }
+
+        var newSlotByOldSlot = new Dictionary<int, int>(bodies.Length);
+        for (var newSlot = 0; newSlot < orderedBodySlots.Count; newSlot++)
+            newSlotByOldSlot[orderedBodySlots[newSlot]] = newSlot;
+
+        var reordered = new List<CPlugPrefab.EntRef>(entries.Length);
+        foreach (var oldSlot in orderedBodySlots)
+        {
+            var bodyEntry = entries[oldBodyIndexBySlot[oldSlot]];
+            reordered.Add(bodyEntry);
+        }
+
+        foreach (var (entry, parameters, _) in orderedConstraints)
+        {
+            parameters.Ent1 = parameters.Ent1 == -1 ? -1 : newSlotByOldSlot[parameters.Ent1];
+            parameters.Ent2 = newSlotByOldSlot[parameters.Ent2];
+            reordered.Add(entry);
+        }
+
+        owner.Ents = [.. reordered];
+    }
+
+    /// <summary>
     /// Configures a 1-axis translation movement (linear or ping-pong) with 100% Havok collision.
     /// </summary>
     public static ItemMotionResult<bool> ConfigureSingleAxisMotion(
@@ -1066,7 +1307,7 @@ public static class ItemKinematicEntityTemplate
         // In the user's prompt:
         // "Body 1 gaat van punt A-B horizontaal. Body 2 voor de verticale as staat ergens onzichtbaar in de verte "geparkeerd" en schiet naar punt B (het eind punt van body 1), en gaat dan rustig door naar punt C op de verticale as, komt dan weer terug naar punt B (het eind punt van body 1) en schiet dan weer weg naar een ver punt "de parkeer stand" zodat body 1 het op de horizontale as weer over kan nemen."
         // AND:
-        // "**Het zichtbaarheids-probleem oplossen:** A schuift aan het einde ín een muur/terreinstuk bij de hoek (of zakt via een verticale C-as weg), B komt uit diezelfde occulder tevoorschijn. Op het handover-moment dekken ze elkaar — daarna is maar één zichtbaar."
+        // "**Fixing the visibility problem:** A slides into a wall/terrain occluder at the corner (or drops away on the vertical C axis), B appears from that same occluder. At handover they overlap, then only one remains visible."
         //
         // Let's examine: How can a body shoot away with Trackmania's constraint system?
         // If a body has its OWN constraint, can it have:

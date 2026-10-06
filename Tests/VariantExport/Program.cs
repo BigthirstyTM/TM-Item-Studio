@@ -335,11 +335,17 @@ var kSource2 = ItemVariantSource.FromFile("kin2", kDoc2)[0];
 
 var groupMotion = new ItemVariantSource.GroupKinematicMotion(
     NPlugDyna_SKinematicConstraint.EAxis.Y, 0, 5,
-    new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
-    new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, true, 1000),
+    new ItemVariantSource.GroupAnimKey[]
+    {
+        new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
+        new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, true, 1000)
+    },
     NPlugDyna_SKinematicConstraint.EAxis.Y, 0, 90,
-    new(NPlugDyna_SKinematicConstraint.AnimEase.Constant, false, 1000),
-    new(NPlugDyna_SKinematicConstraint.AnimEase.QuadInOut, false, 1000));
+    new ItemVariantSource.GroupAnimKey[]
+    {
+        new(NPlugDyna_SKinematicConstraint.AnimEase.Constant, false, 1000),
+        new(NPlugDyna_SKinematicConstraint.AnimEase.QuadInOut, false, 1000)
+    });
 var groupDef = new ItemVariantSource.GroupMergeDefinition(
     1,
     [0, 1],
@@ -380,10 +386,7 @@ var mergedPreview = AuthoredMotionPreview.Build(mergedScene);
 Console.WriteLine($"Tracks: {mergedPreview.Tracks.Count}");
 foreach (var diag in mergedPreview.Diagnostics) Console.WriteLine($"  DIAG: {diag}");
 foreach (var tr in mergedPreview.Tracks) Console.WriteLine($"  TRACK: child={tr.ChildPath}, parent={tr.ParentPath ?? "<world>"}");
-var unexpectedDiagnostics = mergedPreview.Diagnostics
-    .Where(diag => !diag.Contains("Child slot is outside the kinematic table; no fallback target.", StringComparison.Ordinal))
-    .ToArray();
-Check(unexpectedDiagnostics.Length == 0, $"Unexpected diagnostics: {string.Join("; ", unexpectedDiagnostics)}");
+Check(mergedPreview.Diagnostics.Count == 0, $"Unexpected diagnostics: {string.Join("; ", mergedPreview.Diagnostics)}");
 var rootTrack = mergedPreview.Tracks.FirstOrDefault(t => t.ParentPath is null && t.ChildPath.EndsWith("/ent:0/ent:0", StringComparison.Ordinal))
     ?? mergedPreview.Tracks.FirstOrDefault(t => t.ParentPath is null)
     ?? throw new Exception("Expected at least one world-root track.");
