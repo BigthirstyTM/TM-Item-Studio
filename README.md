@@ -122,6 +122,17 @@ dotnet run
 
 The development server uses the URL configured in `Properties/launchSettings.json`.
 
+## GitHub Pages deployment
+
+This repository includes `.github/workflows/deploy-pages.yml` to publish the
+Blazor build to GitHub Pages.
+
+- It deploys automatically on pushes to `main`.
+- It can also be run manually from **Actions** (`workflow_dispatch`).
+- The workflow rewrites `<base href="/">` to
+  `<base href="/TM-Item-Studio/">` during deployment so the app loads under:
+  `https://bigthirstytm.github.io/TM-Item-Studio/`.
+
 ## Viewer regression checks
 
 With the app running locally:
