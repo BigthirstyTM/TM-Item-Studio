@@ -13,8 +13,8 @@
         <div class="motion-timeline-heading">
             <label class="motion-count small">Segments
                 <select class="form-select form-select-sm" aria-label="@($"{Name} segment count")" @bind:get="keys.Length" @bind:set="SetCount">
-                    @if (keys.Length is < 1 or > 4) { <option value="@keys.Length">@keys.Length (stored)</option> }
-                    @for (var n = 1; n <= 4; n++) { <option value="@n">@n</option> }
+                    @if (keys.Length is < 1 or > 10) { <option value="@keys.Length">@keys.Length (stored)</option> }
+                    @for (var n = 1; n <= 10; n++) { <option value="@n">@n</option> }
                 </select>
             </label>
             <span class="small text-muted" title="@($"IsDuration={Source.IsDuration.ToString().ToLowerInvariant()} (preserved). Times are milliseconds.")">

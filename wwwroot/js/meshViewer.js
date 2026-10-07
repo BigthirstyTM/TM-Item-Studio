@@ -8,8 +8,12 @@ let showMeshes = true, showCollision = false, showPivots = true, showLights = tr
 let activeConstraintIndex = 0, activeMeshHelper = null;
 let selectedMeshPath = null, selectedMeshObject = null, selectedMeshHelper = null;
 let typedMotions = [], typedGroupMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
+let groupMotionContainers = new Map();
 let selectedCompositeSources = new Set(), compositeGroupBySource = new Map(), compositeLeaderSource = null;
+let hasAutoFramedScene = false;
 let compositeSelectionHelpers = [], compositeGroupHelpers = [];
+let drawPathEnabled = false, drawPathPlaneY = 0, drawPathPoints = [];
+let drawPathLine = null, drawPathPointMarkers = [];
 let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
 const pooledGeometry = new WeakSet();
@@ -272,9 +276,13 @@ function restMatrix(values, name) {
         throw new Error(`${name} must be invertible.`);
     return matrix;
 }
+function vec3(values, name) {
+    buffer(values, name, 3);
+    return new THREE.Vector3(values[0], values[1], values[2]);
+}
 function timeline(source) {
-    if (!source || typeof source.isDuration !== 'boolean' || !Array.isArray(source.keys) || source.keys.length > 4)
-        throw new Error('Unsupported or absent timeline: expected a timing mode and at most four keys.');
+    if (!source || typeof source.isDuration !== 'boolean' || !Array.isArray(source.keys) || source.keys.length > 10)
+        throw new Error('Unsupported or absent timeline: expected a timing mode and at most ten keys.');
     const keys = source.keys.map((key, index) => {
         if (!key || !Number.isInteger(key.ease) || key.ease < 0 || key.ease > 4 || typeof key.reverse !== 'boolean'
             || !Number.isInteger(key.durationMilliseconds) || key.durationMilliseconds < 0 || key.durationMilliseconds > 2147483647)
@@ -300,9 +308,12 @@ function compileMotions(sources) {
         if (!fields || ![0, 1, 2].includes(fields.translationAxis) || ![0, 1, 2].includes(fields.rotationAxis)) throw new Error('Unsupported motion axis.');
         for (const key of ['translationMin', 'translationMax', 'angleMinDegrees', 'angleMaxDegrees']) finite(fields[key], key);
         const childRest = restMatrix(source.childRest, 'Child rest'), parentRest = restMatrix(source.parentRest, 'Parent rest');
+        const pos1 = source.pos1 ? vec3(source.pos1, 'Constraint pos1') : new THREE.Vector3(0, 0, 0);
+        const pos2 = source.pos2 ? vec3(source.pos2, 'Constraint pos2') : new THREE.Vector3(0, 0, 0);
         if (source.parentPath == null && !parentRest.equals(new THREE.Matrix4())) throw new Error('World parent requires identity parent rest.');
         paths.add(source.path);
         byChild.set(source.childPath, { ...source, constraintIndex: source.constraintIndex, fields: { ...fields }, childRest, parentRest,
+            pos1, pos2,
             inverseChild: childRest.clone().invert(), inverseParent: parentRest.clone().invert(), live: childRest.clone(),
             translation: timeline(fields.translation), rotation: timeline(fields.rotation) });
     }
@@ -323,16 +334,22 @@ function compileMotions(sources) {
     for (const motion of byChild.values()) visit(motion);
     return ordered;
 }
-function compileGroupMotions(sources, owners) {
+function compileGroupMotions(sources) {
     if (!Array.isArray(sources)) throw new Error('Group motions must be an array.');
     const compiled = [];
     for (const source of sources) {
-        if (!source || typeof source.childPath !== 'string' || !source.childPath || !owners.has(source.childPath)) continue;
+        if (!source || !Number.isInteger(source.groupId) || source.groupId < 0) continue;
         const fields = source.fields;
         if (!fields || ![0, 1, 2].includes(fields.translationAxis) || ![0, 1, 2].includes(fields.rotationAxis)) continue;
         for (const key of ['translationMin', 'translationMax', 'angleMinDegrees', 'angleMaxDegrees']) finite(fields[key], key);
+        const pivotX = Number.isFinite(source.pivotX) ? Number(source.pivotX) : 0;
+        const pivotY = Number.isFinite(source.pivotY) ? Number(source.pivotY) : 0;
+        const pivotZ = Number.isFinite(source.pivotZ) ? Number(source.pivotZ) : 0;
         compiled.push({
-            childPath: source.childPath,
+            groupId: source.groupId,
+            pivotX,
+            pivotY,
+            pivotZ,
             fields: { ...fields },
             translation: timeline(fields.translation),
             rotation: timeline(fields.rotation)
@@ -375,12 +392,16 @@ function applyTypedMotion() {
         const axis = new THREE.Vector3().setComponent(f.rotationAxis, 1), translation = new THREE.Vector3().setComponent(f.translationAxis, distance);
         const signal = new THREE.Matrix4().makeTranslation(translation.x, translation.y, translation.z)
             .multiply(new THREE.Matrix4().makeRotationAxis(axis, THREE.MathUtils.degToRad(angle)));
+        const anchorSignal = new THREE.Matrix4()
+            .makeTranslation(motion.pos1.x, motion.pos1.y, motion.pos1.z)
+            .multiply(signal)
+            .multiply(new THREE.Matrix4().makeTranslation(-motion.pos2.x, -motion.pos2.y, -motion.pos2.z));
         motion.live.copy(motion.parentMotion ? motion.parentMotion.live : motion.parentRest)
-            .multiply(motion.inverseParent).multiply(motion.childRest).multiply(signal);
+            .multiply(motion.inverseParent).multiply(motion.childRest).multiply(anchorSignal);
         for (const group of motionGroups.get(motion.childPath) || []) { group.matrix.copy(motion.live); group.matrixWorldNeedsUpdate = true; }
     }
     for (const motion of typedGroupMotions) {
-        const groups = motionGroups.get(motion.childPath) || [];
+        const groups = groupMotionContainers.get(motion.groupId) || [];
         if (groups.length === 0) continue;
         const f = motion.fields;
         const distance = sampleTimeline(motion.translation, animTime / 1000, previewPhase01, f.translationMin, f.translationMax);
@@ -388,8 +409,13 @@ function applyTypedMotion() {
         const axis = new THREE.Vector3().setComponent(f.rotationAxis, 1), translation = new THREE.Vector3().setComponent(f.translationAxis, distance);
         const signal = new THREE.Matrix4().makeTranslation(translation.x, translation.y, translation.z)
             .multiply(new THREE.Matrix4().makeRotationAxis(axis, THREE.MathUtils.degToRad(angle)));
+        const pivot = new THREE.Vector3(motion.pivotX, motion.pivotY, motion.pivotZ);
+        const pivotSignal = new THREE.Matrix4()
+            .makeTranslation(pivot.x, pivot.y, pivot.z)
+            .multiply(signal)
+            .multiply(new THREE.Matrix4().makeTranslation(-pivot.x, -pivot.y, -pivot.z));
         for (const group of groups) {
-            group.matrix.multiply(signal);
+            group.matrix.copy(pivotSignal);
             group.matrixWorldNeedsUpdate = true;
         }
     }
@@ -498,8 +524,7 @@ function applyCompositeVisualState() {
         const box = new THREE.Box3();
         meshes.forEach(mesh => box.expandByObject(mesh));
         if (box.isEmpty()) continue;
-        const color = sourceIndex === compositeLeaderSource ? 0xffffff : 0xff2ea6;
-        const helper = new THREE.Box3Helper(box, color);
+        const helper = new THREE.Box3Helper(box, 0xff2ea6);
         compositeSelectionHelpers.push(helper);
         scene?.add(helper);
     }
@@ -552,6 +577,48 @@ function findMeshByPath(path) {
         if (found) return found;
     }
     return null;
+}
+function clearDrawPathVisual() {
+    if (drawPathLine) {
+        waypointsGroup?.remove(drawPathLine);
+        drawPathLine.geometry?.dispose?.();
+        drawPathLine.material?.dispose?.();
+        drawPathLine = null;
+    }
+    for (const marker of drawPathPointMarkers) {
+        waypointsGroup?.remove(marker);
+        marker.geometry?.dispose?.();
+        marker.material?.dispose?.();
+    }
+    drawPathPointMarkers = [];
+}
+function renderDrawPathVisual() {
+    clearDrawPathVisual();
+    if (!waypointsGroup || drawPathPoints.length === 0) return;
+    for (let i = 0; i < drawPathPoints.length; i++) {
+        const point = drawPathPoints[i];
+        const marker = new THREE.Mesh(
+            new THREE.SphereGeometry(i === 0 ? 0.18 : 0.12, 16, 16),
+            new THREE.MeshBasicMaterial({ color: i === 0 ? 0x16a34a : 0xf97316 }));
+        marker.position.copy(point);
+        drawPathPointMarkers.push(marker);
+        waypointsGroup.add(marker);
+    }
+    if (drawPathPoints.length > 1) {
+        drawPathLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(drawPathPoints),
+            new THREE.LineBasicMaterial({ color: 0xfb7185 }));
+        drawPathLine.name = 'drawPathPreview';
+        waypointsGroup.add(drawPathLine);
+    }
+}
+function pickDrawPoint(raycaster) {
+    const meshGroups = [staticGroup, movingGroup].filter(g => g && g.visible);
+    const meshHit = raycaster.intersectObjects(meshGroups.flatMap(g => g.children), true).find(hit => hit.object?.isMesh);
+    if (meshHit?.point) return meshHit.point.clone();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -drawPathPlaneY);
+    const point = new THREE.Vector3();
+    return raycaster.ray.intersectPlane(plane, point) ? point : null;
 }
 function selectMeshObject(mesh, notify = true, additive = false, range = false) {
     selectedMeshObject = mesh ?? null;
@@ -625,6 +692,14 @@ window.init3DViewer = function (containerId, dotNetRef) {
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
         raycaster.setFromCamera(mouse, camera);
+        if (drawPathEnabled) {
+            const point = pickDrawPoint(raycaster);
+            if (point) {
+                drawPathPoints.push(point);
+                renderDrawPathVisual();
+            }
+            return;
+        }
         const groups = [pivotsGroup, lightsGroup, waypointsGroup].filter(g => g && g.visible);
         const hits = raycaster.intersectObjects(groups.flatMap(g => g.children), true);
         if (hits.length) {
@@ -701,8 +776,9 @@ window.dispose3DViewer = function () {
     if (renderer) { renderer.dispose(); renderer.domElement.remove(); }
     renderer = scene = camera = controls = transformControls = null;
     staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = waypointsGroup = gridHelper = null;
-    typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
+    typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); groupMotionContainers = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
     selectedCompositeSources = new Set(); compositeGroupBySource = new Map(); compositeLeaderSource = null;
+    hasAutoFramedScene = false;
 };
 function selectGizmo(obj) {
     if (!transformControls) return;
@@ -1182,8 +1258,28 @@ function renderPayload(input, preserveCamera) {
             translation: data.hasTranslationMotion ? data.translationAxis : null, harmonic: data.harmonicEasing }
         : null;
     const motions = compileMotions(data.motions ?? []), offset = phase(data.previewPhase01 ?? 0), owners = new Map(motions.map(m => [m.childPath, m]));
-    const groupMotions = compileGroupMotions(data.groupMotions ?? [], owners);
+    const groupMotions = compileGroupMotions(data.groupMotions ?? []);
     const staged = Array.from({ length: 6 }, () => new THREE.Group()), groups = new Map(), bounds = new THREE.Box3();
+    const compositeSelection = data.compositeSelection ?? {};
+    const sourceGroups = new Map(
+        (compositeSelection.sourceGroups ?? [])
+            .filter(entry => Number.isInteger(entry?.sourceIndex) && Number.isInteger(entry?.groupId))
+            .map(entry => [entry.sourceIndex, entry.groupId]));
+    const stagedGroupLayers = [new Map(), new Map(), new Map()];
+    const localGroupMotionContainers = new Map();
+    function ensureGroupLayerContainer(groupId, layerIndex) {
+        const layerMap = stagedGroupLayers[layerIndex];
+        if (!layerMap.has(groupId)) {
+            const container = new THREE.Group();
+            container.matrixAutoUpdate = false;
+            container.matrix.identity();
+            layerMap.set(groupId, container);
+            staged[layerIndex].add(container);
+            if (!localGroupMotionContainers.has(groupId)) localGroupMotionContainers.set(groupId, []);
+            localGroupMotionContainers.get(groupId).push(container);
+        }
+        return layerMap.get(groupId);
+    }
     const epoch = data.geometryEpoch ?? null;
     if (epoch !== null && (!Number.isSafeInteger(epoch) || epoch < 0)) throw new Error('Invalid geometry epoch.');
     const pool = epoch === geometryEpoch ? new Map(sharedGeometry) : new Map();
@@ -1199,7 +1295,16 @@ function renderPayload(input, preserveCamera) {
         for (const motion of motions) {
             const pair = [new THREE.Group(), new THREE.Group()];
             pair.forEach(group => { group.matrixAutoUpdate = false; group.matrix.copy(motion.childRest); });
-            staged[1].add(pair[0]); staged[2].add(pair[1]); groups.set(motion.childPath, pair);
+            const sourceIndex = Number.isInteger(motion.sourceIndex) ? motion.sourceIndex : null;
+            const groupId = sourceIndex !== null && sourceGroups.has(sourceIndex) ? sourceGroups.get(sourceIndex) : null;
+            if (groupId != null) {
+                ensureGroupLayerContainer(groupId, 1).add(pair[0]);
+                ensureGroupLayerContainer(groupId, 2).add(pair[1]);
+            } else {
+                staged[1].add(pair[0]);
+                staged[2].add(pair[1]);
+            }
+            groups.set(motion.childPath, pair);
         }
         for (const part of data.parts ?? []) {
             const mode = (part.meshMode ?? 'auto').toLowerCase();
@@ -1207,7 +1312,11 @@ function renderPayload(input, preserveCamera) {
             const owner = owners.get(part.entityPath), mesh = makePart(part, owner, bounds, pool);
             const asMoving = mode === 'kinematic' || (mode === 'auto' && (Boolean(part.movable) || part.isMoving));
             if (owner && mode !== 'static') groups.get(owner.childPath)[part.isCollision ? 1 : 0].add(mesh);
-            else staged[part.isCollision ? 2 : (asMoving ? 1 : 0)].add(mesh);
+            else {
+                const layerIndex = part.isCollision ? 2 : (asMoving ? 1 : 0);
+                if (Number.isInteger(part.groupId)) ensureGroupLayerContainer(part.groupId, layerIndex).add(mesh);
+                else staged[layerIndex].add(mesh);
+            }
         }
         for (const [property, type, target] of [['pivots', 'pivot', 3], ['compositeOffsets', 'composite-offset', 3], ['compositeGroups', 'composite-group', 3], ['lights', 'light', 4]])
             (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type); staged[target].add(group); bounds.expandByPoint(group.position); });
@@ -1215,7 +1324,6 @@ function renderPayload(input, preserveCamera) {
             activeConstraintIndex = data.activeConstraintIndex;
         }
         selectedMeshPath = typeof data.selectedMeshPath === 'string' && data.selectedMeshPath.length > 0 ? data.selectedMeshPath : null;
-        const compositeSelection = data.compositeSelection ?? {};
         selectedCompositeSources = new Set((compositeSelection.selectedSourceIndices ?? []).filter(Number.isInteger));
         compositeLeaderSource = Number.isInteger(compositeSelection.leaderSourceIndex) && compositeSelection.leaderSourceIndex >= 0
             ? compositeSelection.leaderSourceIndex
@@ -1232,7 +1340,7 @@ function renderPayload(input, preserveCamera) {
     const destinations = [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup];
     staged.forEach((group, index) => { while (group.children.length) destinations[index].add(group.children[0]); });
     isPlaying = data.playing !== false; legacyMotion = nextLegacyMotion;
-    typedMotions = motions; typedGroupMotions = groupMotions; motionGroups = groups; previewPhase01 = offset;
+    typedMotions = motions; typedGroupMotions = groupMotions; motionGroups = groups; groupMotionContainers = localGroupMotionContainers; previewPhase01 = offset;
     currentPayload = { ...data, geometryDefinitions: [] };
     if (selectedMeshPath) {
         const mesh = findMeshByPath(selectedMeshPath);
@@ -1240,11 +1348,15 @@ function renderPayload(input, preserveCamera) {
     } else {
         selectMeshObject(null, false);
     }
+    renderDrawPathVisual();
     applyTypedMotion(); applySceneFilter(); applyCompositeVisualState(); applyLayerVisibility(); updateWaypointHighlights(); if (!preserveCamera) frameCamera(bounds);
     const renderVersion = ++textureRenderVersion;
     void applyLocalTextures(data, renderVersion);
 }
-window.renderStudioScene = payload => renderPayload(payload, false);
+window.renderStudioScene = payload => {
+    renderPayload(payload, hasAutoFramedScene);
+    hasAutoFramedScene = true;
+};
 window.setTransformMode = mode => {
     if (!transformControls) return;
     transformControls.setMode(mode === 'rotate' ? 'rotate' : 'translate');
@@ -1265,14 +1377,28 @@ window.clearViewerScene = function (keepGeometry = false) {
     if (activeMeshHelper) { scene?.remove(activeMeshHelper); activeMeshHelper.dispose?.(); activeMeshHelper = null; }
     clearSelectedMeshHighlight();
     clearCompositeHelpers();
+    clearDrawPathVisual();
     for (const group of [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup]) {
         if (!group) continue;
         while (group.children.length) { const child = group.children[0]; group.remove(child); disposeObjectResources(child); }
         group.position.set(0, 0, 0); group.rotation.set(0, 0, 0); group.scale.set(1, 1, 1);
     }
-    typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
+    typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); groupMotionContainers = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
     selectedCompositeSources = new Set(); compositeGroupBySource = new Map(); compositeLeaderSource = null;
+    hasAutoFramedScene = false;
     if (!keepGeometry) releaseGeometryPool();
+};
+window.setDrawPathMode = function (enabled, planeY) {
+    drawPathEnabled = Boolean(enabled);
+    if (typeof planeY === 'number' && Number.isFinite(planeY)) drawPathPlaneY = planeY;
+    return drawPathEnabled;
+};
+window.clearDrawnPath = function () {
+    drawPathPoints = [];
+    renderDrawPathVisual();
+};
+window.getDrawnPathPoints = function () {
+    return drawPathPoints.map(point => ({ x: point.x, y: point.y, z: point.z }));
 };
 // Older hosts may call these APIs, but generic/fallback motion is never inferred from them.
 window.setMotionPreview = value => { if (value?.motions) window.setTypedMotionPreview(value); };

@@ -97,9 +97,6 @@ public static class ItemMotionBindings
         { status = ItemMotionStatus.Invalid; reason = "Constraint anchor positions contain nonfinite values."; }
         if (status == ItemMotionStatus.Supported && !parent.IsWorld && parent.OriginalArrayIndex == child.OriginalArrayIndex)
         { status = ItemMotionStatus.Unsupported; reason = "Self-parented constraints are not supported in preview."; }
-        // These authored anchor vectors are retained. Their influence on native rest-pose creation is not verified.
-        if (status == ItemMotionStatus.Supported && (parameters.Pos1 != default || parameters.Pos2 != default))
-        { status = ItemMotionStatus.Unsupported; reason = "Nonzero constraint anchor positions are preserved but their preview semantics are unverified."; }
         return new(parent, child, slots.AsReadOnly(), status, reason) { Source = constraint, Parameters = parameters };
     }
 
@@ -225,8 +222,6 @@ public static class ItemMotionBindings
         { status = ItemMotionStatus.Invalid; reason = "Constraint anchor positions contain nonfinite values."; }
         if (status == ItemMotionStatus.Supported && !parent.IsWorld && (parent.Path == child.Path || parent.RawSlot == child.RawSlot))
         { status = ItemMotionStatus.Unsupported; reason = "Self-parented constraints are not supported in preview."; }
-        if (status == ItemMotionStatus.Supported && (parameters.Pos1 != default || parameters.Pos2 != default))
-        { status = ItemMotionStatus.Unsupported; reason = "Nonzero constraint anchor positions are preserved but their preview semantics are unverified."; }
         return new(parent, child, slots, status, reason) { Source = constraint, Parameters = parameters };
     }
 

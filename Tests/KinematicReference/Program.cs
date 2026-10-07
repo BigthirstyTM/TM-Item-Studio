@@ -40,6 +40,89 @@ if (args.Length > 1 && args[0] == "--verify-item")
     }
     return 0;
 }
+if (args.Length > 0 && args[0] == "--generate-chained-shapes")
+{
+    var folder = @"C:\Users\PC\Documents\Trackmania\Items\BF2_ASSETS\Test_Items";
+    if (args.Length > 1) folder = args[1];
+    Directory.CreateDirectory(folder);
+
+    static float HeadingDeg(Vector2 from, Vector2 to) => MathF.Atan2(to.Y - from.Y, to.X - from.X) * (180f / MathF.PI);
+
+    static List<ItemKinematicEntityTemplate.DrawPathSegment> BuildPolylineSegments(IReadOnlyList<Vector2> points, bool closedLoop, float metersPerSecond)
+    {
+        var speed = Math.Max(0.1f, metersPerSecond);
+        var list = new List<ItemKinematicEntityTemplate.DrawPathSegment>();
+        var count = closedLoop ? points.Count : points.Count - 1;
+        for (var i = 0; i < count; i++)
+        {
+            var a = points[i];
+            var b = points[(i + 1) % points.Count];
+            var delta = b - a;
+            var length = delta.Length();
+            if (length < 0.01f) continue;
+            var yaw = HeadingDeg(a, b);
+            var duration = Math.Max(80, (int)MathF.Round(length / speed * 1000f));
+            list.Add(new ItemKinematicEntityTemplate.DrawPathSegment(
+                KC.EAxis.X,
+                length,
+                duration,
+                KC.EAxis.Y,
+                yaw,
+                yaw));
+        }
+        return list;
+    }
+
+    static CGameItemModel BuildShapeItem(string name, IReadOnlyList<Vector2> points, bool closedLoop)
+    {
+        var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()
+            ?? throw new InvalidOperationException("Default moving template is unavailable.");
+        var prefab = (CPlugPrefab)template.EntityModel!;
+        var rootConstraint = (KC)prefab.Ents![1].Model!;
+        var segments = BuildPolylineSegments(points, closedLoop, metersPerSecond: 4f);
+        var result = ItemKinematicEntityTemplate.ConfigureDrawnPathBestEffort(
+            prefab,
+            rootConstraint,
+            "doc:0/variant:none/root",
+            segments,
+            maxSegmentsOverride: segments.Count);
+        if (!result.Success)
+            throw new InvalidOperationException($"Could not configure '{name}': {result.Reason}");
+
+        template.Name = name;
+        template.Ident = new Ident(name, "Stadium2020", template.Ident?.Author ?? "TM_Item_Studio");
+        return template;
+    }
+
+    var squarePoints = new[]
+    {
+        new Vector2(-4f, -4f),
+        new Vector2( 4f, -4f),
+        new Vector2( 4f,  4f),
+        new Vector2(-4f,  4f)
+    };
+    var square = BuildShapeItem("Chained_Square_Loop", squarePoints, closedLoop: true);
+    var squarePath = Path.Combine(folder, "Chained_Square_Loop.Item.Gbx");
+    File.WriteAllBytes(squarePath, Save(square));
+    Console.WriteLine($"Saved square chained loop to: {squarePath}");
+
+    var outerRadius = 6f;
+    var starOuter = Enumerable.Range(0, 5)
+        .Select(i =>
+        {
+            var angle = (-90f + i * 72f) * (MathF.PI / 180f);
+            return new Vector2(MathF.Cos(angle) * outerRadius, MathF.Sin(angle) * outerRadius);
+        })
+        .ToArray();
+    var starOrder = new[] { 0, 2, 4, 1, 3 };
+    var starPoints = starOrder.Select(index => starOuter[index]).ToArray();
+    var star = BuildShapeItem("Chained_Star_Loop", starPoints, closedLoop: true);
+    var starPath = Path.Combine(folder, "Chained_Star_Loop.Item.Gbx");
+    File.WriteAllBytes(starPath, Save(star));
+    Console.WriteLine($"Saved star chained loop to: {starPath}");
+
+    return 0;
+}
 if (args.Length > 1 && args[0] == "--fix-carrier")
 {
     var targetPath = Path.IsPathRooted(args[1]) ? args[1] : Path.Combine(repoRoot, args[1]);
