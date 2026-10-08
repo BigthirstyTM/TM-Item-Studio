@@ -62,6 +62,13 @@
     </div>
 }
 
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <div class="alert alert-info py-2" role="status">
+        <strong>Note:</strong> @statusMessage
+    </div>
+}
+
 @if (itemModel != null)
 {
     <div class="studio-workspace">
@@ -240,6 +247,11 @@
                 <div>
                     <button aria-label="Audio, CPlugFx & MediaTracker Triggers" aria-expanded="@((activeTab == "extras").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "extras" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("extras"))">
                         <span>Audio & effects</span><span>@(activeTab == "extras" ? "−" : "+")</span>
+                    </button>
+                </div>
+                <div>
+                    <button aria-label="Macroblock export and item instancing" aria-expanded="@((activeTab == "macroblock").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "macroblock" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("macroblock"))">
+                        <span>Macroblock & instances (@macroblockInstances.Count)</span><span>@(activeTab == "macroblock" ? "−" : "+")</span>
                     </button>
                 </div>
             </div>
@@ -1412,6 +1424,92 @@
                     <p class="small text-muted mt-2">Trigger functions require the corresponding collision or zone node in the GBX file.</p>
                 }
 
+                @if (activeTab == "macroblock")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">Macroblock & item instancing <span class="text-muted" title="A macroblock stores one spawn per copy. Each spawn references the item by its ident instead of embedding its mesh, so copies never duplicate geometry.">?</span></h6>
+                    <p class="small text-muted mb-2">
+                        Every copy below is exported as an <code>ObjectSpawn</code> that references
+                        <strong>@(itemModel is null ? "the loaded item" : string.IsNullOrWhiteSpace(itemModel.Ident?.Id) ? itemModel.Name : itemModel.Ident!.Id)</strong>
+                        and is drawn in the 3D viewport at its own position and rotation.
+                        Duplicating therefore costs about 15 bytes per copy instead of a second copy of the item.
+                    </p>
+
+                    <div class="mb-2">
+                        <label for="macroblock-name" class="form-label mb-1 small fw-bold">Macroblock name</label>
+                        <input id="macroblock-name" type="text" class="form-control form-control-sm" @bind="macroblockName" />
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 align-items-end mb-2">
+                        <label class="small mb-0">Copies
+                            <input type="number" min="1" step="1" class="form-control form-control-sm" style="width:4.5rem" @bind="macroblockGridCount" />
+                        </label>
+                        <label class="small mb-0">Columns
+                            <input type="number" min="1" step="1" class="form-control form-control-sm" style="width:4.5rem" @bind="macroblockGridColumns" />
+                        </label>
+                        <label class="small mb-0">Spacing m
+                            <input type="number" step="any" class="form-control form-control-sm" style="width:5rem" @bind="macroblockGridSpacing" />
+                        </label>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="FillMacroblockGrid">▦ Fill grid</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" @onclick="AddMacroblockInstance">➕ Add copy</button>
+                    </div>
+
+                    @if (macroblockInstances.Count == 0)
+                    {
+                        <p class="small text-muted">No instances yet. Add a copy or fill a grid to start placing the item.</p>
+                    }
+                    else
+                    {
+                        <div class="small mb-2">
+                            <div class="d-flex flex-wrap fw-bold text-muted mb-1 gap-1">
+                                <span style="width:1.6rem">#</span>
+                                <span style="width:4.6rem">X m</span><span style="width:4.6rem">Y m</span><span style="width:4.6rem">Z m</span>
+                                <span style="width:4.6rem">Pitch°</span><span style="width:4.6rem">Yaw°</span><span style="width:4.6rem">Roll°</span>
+                                <span style="width:4.6rem">Scale</span>
+                            </div>
+                            @for (var i = 0; i < macroblockInstances.Count; i++)
+                            {
+                                var index = i;
+                                var instance = macroblockInstances[index];
+                                <div class="d-flex flex-wrap align-items-center gap-1 mb-1" @key="instance">
+                                    <span style="width:1.6rem">@(index + 1)</span>
+                                    <input aria-label="@($"Instance {index + 1} X")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PosX" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} Y")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PosY" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} Z")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PosZ" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} pitch")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PitchDeg" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} yaw")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.YawDeg" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} roll")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.RollDeg" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} scale")" type="number" step="any" min="0.01" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.Scale" @bind:after="RefreshMacroblockViewport" />
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Remove this copy" @onclick="@(() => RemoveMacroblockInstance(index))">✕</button>
+                                </div>
+                            }
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="DuplicateLastMacroblockInstance">⧉ Duplicate last copy</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ClearMacroblockInstances">Clear all</button>
+                        </div>
+                    }
+
+                    <button type="button" class="btn btn-sm btn-primary" disabled="@(itemModel is null || macroblockInstances.Count == 0)" @onclick="ExportMacroblockGbx">
+                        💾 Export .Macroblock.Gbx (@macroblockInstances.Count @(macroblockInstances.Count == 1 ? "instance" : "instances"))
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" disabled="@(itemModel is null || macroblockInstances.Count == 0)" @onclick="ExportMultiInstanceItemGbx"
+                            title="Embeds the copies into one item: a root prefab with one entry per copy, all referencing the same mesh.">
+                        📦 Export multi-instance .Item.Gbx (mesh embedded once)
+                    </button>
+                    <p class="small text-muted mt-2">
+                        The macroblock export references the item by ident (Trackmania resolves it from
+                        your inventory), while the multi-instance item embeds the mesh once and repeats
+                        only a transform per copy — one file, no external item needed. Each copy keeps its
+                        own position and rotation relative to the root; prefab entries cannot carry a
+                        scale, so scaled copies are exported at scale 1 with a note in the status line.
+                    </p>
+                    <p class="small text-muted mt-2">
+                        The export reparses its own bytes with the parser used for import and refuses to download
+                        a file that cannot be reopened. Trackmania resolves the copies through the item ident, so
+                        the item has to exist under that ident in your inventory.
+                    </p>
+                }
+
             </div>
             
             <div class="p-2 border-top bg-light d-flex justify-content-between align-items-center">
@@ -1655,6 +1753,7 @@
     private Gbx<CGameItemModel>? gbxFile;
     private bool isLoading = false;
     private string? errorMessage;
+    private string? statusMessage;
     private bool hasMesh = false;
     private bool isMovingItem = false;
     private bool isPlaying = true;
@@ -1682,6 +1781,13 @@
     private string identId = "";
     private string identAuthor = "";
     private string identCollection = "";
+
+    // Macroblock instancing: copies of the loaded item exported as .Macroblock.Gbx spawns.
+    private readonly List<ItemMacroblockInstance> macroblockInstances = new();
+    private string macroblockName = "";
+    private int macroblockGridCount = 6;
+    private int macroblockGridColumns = 3;
+    private float macroblockGridSpacing = 8f;
 
     // Viewport layer status
     private bool showMeshes = true;
@@ -1936,6 +2042,7 @@
         compositePivotRelativeByFollower.Clear();
         nextCompositeGroupId = 0;
         compositeTransformMode = "translate";
+        statusMessage = null;
         geometryCache.Clear();
         uploadedGeometry.Clear();
         activeVariantIndex = 0;
@@ -1987,7 +2094,38 @@
                 using var memoryStream = new MemoryStream();
                 await file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(memoryStream);
                 var originalBytes = memoryStream.ToArray();
-                var parsedGbx = Gbx.Parse<CGameItemModel>(new MemoryStream(originalBytes));
+                if (ItemMacroblock.IsMacroblock(originalBytes))
+                {
+                    await LoadMacroblock(originalBytes, file.Name);
+                    continue;
+                }
+
+                Gbx<CGameItemModel> parsedGbx;
+                try
+                {
+                    parsedGbx = Gbx.Parse<CGameItemModel>(new MemoryStream(originalBytes));
+                }
+                catch (Exception itemError)
+                {
+                    // Every non-item GBX that slips past the class-id dispatch reaches the item
+                    // parser, which answers with an InvalidCastException ("Specified cast is not
+                    // valid."). Retry as a macroblock before reporting the failure.
+                    if (ItemMacroblock.TryRead(originalBytes, out var macroNode, out var macroError) && macroNode is not null)
+                    {
+                        ApplyMacroblock(macroNode, file.Name);
+                        await RefreshMacroblockViewport();
+                        continue;
+                    }
+
+                    var classId = ItemMacroblock.ClassIdOf(originalBytes);
+                    throw new InvalidOperationException(
+                        $"Could not read {file.Name} as an item (class id "
+                        + (classId is null ? "unknown" : $"0x{classId:X8}")
+                        + $", not a macroblock either): {itemError.Message}"
+                        + (macroError is null ? string.Empty : $" Macroblock read: {macroError}"),
+                        itemError);
+                }
+
                 var parsedModel = parsedGbx.Node;
                 if (parsedModel == null) continue;
 
@@ -2047,6 +2185,8 @@
         iconPreviewPending |= !ReferenceEquals(itemModel, source.Model);
         itemModel = source.Model;
         gbxFile = source.GbxFile;
+        if (string.IsNullOrWhiteSpace(macroblockName))
+            macroblockName = ItemMacroblock.DefaultName(itemModel);
         hasMesh = false;
         isMovingItem = false;
         modelParts.Clear();
@@ -2971,6 +3111,10 @@
                 .SelectMany(entry => entry.Scene.Preview.Geometry.Select(geometry => new { entry, geometry }))
                 .ToArray();
 
+            // Every macroblock copy is one more part that reuses the item's shared geometry and
+            // only carries a placement, so the viewport shows the instances where they are placed.
+            var instanceParts = BuildMacroblockInstanceParts(authoredScene, activeVariantIndex);
+
             await JS.InvokeVoidAsync("renderStudioScene", new
             {
                 geometryEpoch = epoch,
@@ -2981,7 +3125,7 @@
                     indicesBytes = ViewerBuffers.Pack(g.Indices),
                     normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals)
                 }),
-                parts = allParts.Select(part => new
+                parts = allParts.Select(part => (object)new
                 {
                     path = part.geometry.Path,
                     entityPath = part.geometry.EntityPath,
@@ -3003,7 +3147,7 @@
                     waypoint = GetMeshPartConfig(part.geometry.Path).Waypoint,
                     movable = GetMeshPartConfig(part.geometry.Path).Movable,
                     mappings = MappingsForVisual(part.entry.Scene.Preview, part.geometry.Path)
-                }),
+                }).Concat(instanceParts).ToArray(),
                 materials = authoredScene.Preview.Materials.Select(material => new
                 {
                     material.Path, material.GameMaterialName, material.GameMaterialLink
@@ -3068,7 +3212,7 @@
         var scenePayload = new
         {
             geometryEpoch = geometryCache.Epoch,
-            parts = modelParts.Select(p => new { path = p.Path, name = p.Name, p.IsMoving,
+            parts = modelParts.Select(p => (object)new { path = p.Path, name = p.Name, p.IsMoving,
                 positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices),
                 meshMode = GetMeshPartMode(p.Path),
                 enabled = GetMeshPartConfig(p.Path).Enabled,
@@ -3077,7 +3221,8 @@
                 effect = GetMeshPartConfig(p.Path).Effect,
                 waypoint = GetMeshPartConfig(p.Path).Waypoint,
                 movable = GetMeshPartConfig(p.Path).Movable,
-                mappings = authoredMotionScene is null ? [] : MappingsForVisual(authoredMotionScene.Preview, p.Path) }),
+                mappings = authoredMotionScene is null ? [] : MappingsForVisual(authoredMotionScene.Preview, p.Path) })
+                .Concat(BuildPlainInstanceParts()).ToArray(),
             materials = authoredMotionScene?.Preview.Materials.Select(material => new
             {
                 material.Path, material.GameMaterialName, material.GameMaterialLink
@@ -4451,6 +4596,266 @@
                 dyna.IsStatic = false;
                 instance.IsKinematic = true;
             }
+        }
+    }
+
+    private async Task AddMacroblockInstance()
+    {
+        var last = macroblockInstances.Count > 0 ? macroblockInstances[^1] : null;
+        macroblockInstances.Add(new ItemMacroblockInstance
+        {
+            Label = $"Copy {macroblockInstances.Count + 1}",
+            PosX = last is null ? 0f : last.PosX + macroblockGridSpacing,
+            PosY = last?.PosY ?? 0f,
+            PosZ = last?.PosZ ?? 0f,
+            YawDeg = last?.YawDeg ?? 0f,
+            Scale = last?.Scale ?? 1f
+        });
+        await RefreshMacroblockViewport();
+    }
+
+    private async Task DuplicateLastMacroblockInstance()
+    {
+        if (macroblockInstances.Count == 0)
+        {
+            await AddMacroblockInstance();
+            return;
+        }
+
+        var copy = macroblockInstances[^1].Copy();
+        copy.Label = $"Copy {macroblockInstances.Count + 1}";
+        copy.PosX += macroblockGridSpacing;
+        macroblockInstances.Add(copy);
+        await RefreshMacroblockViewport();
+    }
+
+    private async Task FillMacroblockGrid()
+    {
+        var count = Math.Max(1, macroblockGridCount);
+        var columns = Math.Max(1, macroblockGridColumns);
+        var spacing = macroblockGridSpacing <= 0f ? 8f : macroblockGridSpacing;
+        var start = macroblockInstances.Count;
+        // New rows continue below the copies that are already placed.
+        var offsetZ = (start + columns - 1) / columns * spacing;
+        foreach (var instance in ItemMacroblock.Grid(count, columns, spacing, spacing))
+        {
+            var copy = instance.Copy();
+            copy.PosZ += offsetZ;
+            macroblockInstances.Add(copy);
+        }
+
+        RelabelMacroblockInstances();
+        await RefreshMacroblockViewport();
+    }
+
+    private async Task RemoveMacroblockInstance(int index)
+    {
+        if (index < 0 || index >= macroblockInstances.Count) return;
+        macroblockInstances.RemoveAt(index);
+        RelabelMacroblockInstances();
+        await RefreshMacroblockViewport();
+    }
+
+    private async Task ClearMacroblockInstances()
+    {
+        macroblockInstances.Clear();
+        await RefreshMacroblockViewport();
+    }
+
+    private void RelabelMacroblockInstances()
+    {
+        for (var i = 0; i < macroblockInstances.Count; i++)
+        {
+            // Loaded spawns are labelled with their item ident; only editor copies get renumbered.
+            var label = macroblockInstances[i].Label;
+            if (string.IsNullOrWhiteSpace(label) || label.StartsWith("Copy ", StringComparison.Ordinal))
+                macroblockInstances[i].Label = $"Copy {i + 1}";
+        }
+    }
+
+    /// <summary>Instances are plain parts of the scene payload, so every edit redraws the copies.</summary>
+    private async Task RefreshMacroblockViewport()
+    {
+        if (authoredMotionScene is not null && isViewerInitialized)
+            await UpdateScenePayload(authoredMotionScene);
+        StateHasChanged();
+    }
+
+    /// <summary>One scene part per macroblock copy per item mesh: the same shared geometry the item
+    /// already uploaded, moved by the copy's placement. The viewport therefore shows the instances
+    /// where they are placed without duplicating a single vertex buffer. Copies are detached
+    /// references (no entity path), so they stay still instead of inheriting the item's motion.</summary>
+    private object[] BuildMacroblockInstanceParts(ItemSceneResult scene, int sourceIndex)
+    {
+        if (macroblockInstances.Count == 0) return Array.Empty<object>();
+
+        var geometry = scene.Preview.Geometry.Where(part => !part.IsCollision).ToArray();
+        if (geometry.Length == 0) geometry = scene.Preview.Geometry.ToArray();
+
+        var parts = new List<object>(geometry.Length * macroblockInstances.Count);
+        foreach (var instance in macroblockInstances)
+        {
+            var placed = ItemMacroblock.Placement(instance);
+            foreach (var part in geometry)
+            {
+                // Shared geometry is placed by worldTransform; without an id the buffers are
+                // rebuilt with the placement baked in, which is what the viewer then reads.
+                var world = part.WorldTransform is { Length: 16 } packed
+                    ? PackMatrix(MatrixFromPacked(packed) * placed)
+                    : PackMatrix(placed);
+                var shared = part.GeometryId.HasValue;
+                parts.Add(new
+                {
+                    path = part.Path,
+                    entityPath = (string?)null,
+                    sourceIndex,
+                    groupId = (int?)null,
+                    geometryId = part.GeometryId,
+                    worldTransform = shared ? world : null,
+                    positionsBytes = shared ? null : ViewerBuffers.Pack(TransformPositions(part.Positions, placed)),
+                    indicesBytes = shared ? null : ViewerBuffers.Pack(part.Indices),
+                    normalsBytes = (byte[]?)null,
+                    isCollision = part.IsCollision && !forcedRenderableGeometryPaths.Contains(part.Path),
+                    meshMode = GetMeshPartMode(part.Path),
+                    enabled = GetMeshPartConfig(part.Path).Enabled,
+                    visible = GetMeshPartConfig(part.Path).Visible,
+                    collidable = GetMeshPartConfig(part.Path).Collidable,
+                    effect = GetMeshPartConfig(part.Path).Effect,
+                    waypoint = GetMeshPartConfig(part.Path).Waypoint,
+                    movable = GetMeshPartConfig(part.Path).Movable,
+                    mappings = MappingsForVisual(scene.Preview, part.Path)
+                });
+            }
+        }
+
+        return parts.ToArray();
+    }
+
+    /// <summary>Copies for the plain payload branch, where parts carry their own buffers instead
+    /// of shared geometry: the placement is baked into the vertices.</summary>
+    private object[] BuildPlainInstanceParts()
+    {
+        if (macroblockInstances.Count == 0 || modelParts.Count == 0) return Array.Empty<object>();
+
+        var parts = new List<object>(modelParts.Count * macroblockInstances.Count);
+        foreach (var instance in macroblockInstances)
+        {
+            var placed = ItemMacroblock.Placement(instance);
+            foreach (var part in modelParts)
+            {
+                parts.Add(new
+                {
+                    path = part.Path,
+                    name = part.Name,
+                    isMoving = false,
+                    positionsBytes = ViewerBuffers.Pack(TransformPositions(part.Positions, placed)),
+                    indicesBytes = ViewerBuffers.Pack(part.Indices),
+                    meshMode = GetMeshPartMode(part.Path),
+                    enabled = GetMeshPartConfig(part.Path).Enabled,
+                    visible = GetMeshPartConfig(part.Path).Visible,
+                    collidable = GetMeshPartConfig(part.Path).Collidable,
+                    effect = GetMeshPartConfig(part.Path).Effect,
+                    waypoint = GetMeshPartConfig(part.Path).Waypoint,
+                    movable = GetMeshPartConfig(part.Path).Movable,
+                    mappings = authoredMotionScene is null
+                        ? Array.Empty<object>()
+                        : MappingsForVisual(authoredMotionScene.Preview, part.Path)
+                });
+            }
+        }
+
+        return parts.ToArray();
+    }
+
+    private static float[] TransformPositions(float[] positions, Matrix4x4 matrix)
+    {
+        var transformed = new float[positions.Length];
+        for (var i = 0; i + 2 < positions.Length; i += 3)
+        {
+            var vertex = Vector3.Transform(new Vector3(positions[i], positions[i + 1], positions[i + 2]), matrix);
+            transformed[i] = vertex.X;
+            transformed[i + 1] = vertex.Y;
+            transformed[i + 2] = vertex.Z;
+        }
+        return transformed;
+    }
+
+    /// <summary>Loads a .Macroblock.Gbx into the instance table instead of casting it to an item.</summary>
+    private async Task LoadMacroblock(byte[] bytes, string fileName)
+    {
+        try
+        {
+            var parsed = Gbx.Parse<CGameCtnMacroBlockInfo>(new MemoryStream(bytes));
+            var node = parsed.Node ?? throw new InvalidOperationException("The macroblock has no readable node.");
+            ApplyMacroblock(node, fileName);
+            await RefreshMacroblockViewport();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error while processing the file: " + ex.Message;
+        }
+    }
+
+    /// <summary>Fills the instance table from an already parsed macroblock node.</summary>
+    private void ApplyMacroblock(CGameCtnMacroBlockInfo node, string fileName)
+    {
+        var loaded = ItemMacroblock.ReadInstances(node);
+        macroblockInstances.Clear();
+        foreach (var instance in loaded)
+            macroblockInstances.Add(instance);
+        RelabelMacroblockInstances();
+        macroblockName = string.IsNullOrWhiteSpace(node.Name)
+            ? Path.GetFileNameWithoutExtension(fileName)
+            : node.Name;
+        statusMessage = $"Loaded macroblock \"{macroblockName}\" with {loaded.Count} instance(s)."
+            + (itemModel is null
+                ? " Open the referenced .Item.Gbx to see the copies in the viewport."
+                : " The copies are shown in the viewport.");
+    }
+
+    private async Task ExportMacroblockGbx()
+    {
+        if (itemModel is null || macroblockInstances.Count == 0) return;
+        try
+        {
+            UpdateIdent();
+            ItemExportValidator.EnsureGameReady(itemModel, identId);
+            var export = ItemMacroblock.Export(itemModel, macroblockInstances, macroblockName);
+            await JS.InvokeVoidAsync("downloadBinaryGbx", export.FileName, Convert.ToBase64String(export.Bytes));
+            errorMessage = null;
+            statusMessage = $"Exported {export.FileName} with {export.InstanceCount} instance(s) ({export.Bytes.Length} bytes).";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error while exporting .Macroblock.Gbx: " + ex.Message;
+        }
+    }
+
+    /// <summary>Exports the copies as one self-contained item: a root prefab with one entry per
+    /// copy, all pointing at the same embedded mesh instead of at the item ident.</summary>
+    private async Task ExportMultiInstanceItemGbx()
+    {
+        if (itemModel is null || macroblockInstances.Count == 0) return;
+        try
+        {
+            UpdateIdent();
+            ItemExportValidator.EnsureGameReady(itemModel, identId);
+            SyncPivotsToGbx();
+            for (var i = 0; i < detectedLights.Count; i++) SyncLightsToGbx(i);
+            ApplyMeshPartConfigurationToVariant();
+
+            var source = variantSources[activeVariantIndex];
+            // The export snapshots the document itself, so the item being edited stays untouched.
+            var export = ItemMultiInstance.Export(source.GbxFile, source.VariantNumber, macroblockInstances, identId);
+            await JS.InvokeVoidAsync("downloadBinaryGbx", export.FileName, Convert.ToBase64String(export.Bytes));
+            errorMessage = null;
+            statusMessage = $"Exported {export.FileName}: {export.InstanceCount} copies in "
+                + $"{export.EntryCount} prefab entries, mesh stored once ({export.Bytes.Length} bytes)."
+                + (export.Warnings.Count > 0 ? " " + string.Join(" ", export.Warnings) : string.Empty);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error while exporting the multi-instance item: " + ex.Message;
         }
     }
 

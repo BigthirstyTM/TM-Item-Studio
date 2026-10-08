@@ -2,6 +2,36 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- **Macroblock & instances** tab: duplicate the loaded item into placed copies (add,
+  duplicate, grid fill, per-copy position/rotation/scale) and export them as
+  `.Macroblock.Gbx` (`CGameCtnMacroBlockInfo`). Every copy is an `ObjectSpawn` that
+  references the item ident, so duplication costs about 15 bytes per instance instead of
+  copying geometry. The export reparses its own bytes before downloading.
+- Every copy is rendered in the 3D viewport: instance parts reuse the item's shared geometry
+  and carry only a placement transform (`ItemMacroblock.Placement`), and each table edit
+  redraws the scene.
+- **Multi-instance item export**: the same copies can be written into one self-contained
+  `.Item.Gbx` whose root prefab holds one entry per copy, all referencing the same embedded
+  model node. GBX.NET stores a repeated node once, so twenty copies cost about 7 bytes each
+  (35 076 B item -> 35 052 B with 20 copies) instead of a second copy of the mesh. The export
+  takes its own snapshot of the document, gets a distinct id (`<id>_x20`), keeps every copy's
+  position and rotation relative to the root, and reports skipped foreign copies and dropped
+  scales. A macroblock cannot do this: its spawn stores `ident ItemModel` only.
+- `Tests/MacroblockExport`, a round-trip suite covering spawn fidelity, macroblock class id
+  `0x0310D000`, per-instance size, ident/instance validation, re-save stability, the load
+  fallback, the viewport placement matrix and the multi-instance item export.
+
+### Fixed
+
+- Loading a `.Macroblock.Gbx` no longer fails with `Specified cast is not valid.`: macroblocks
+  are dispatched by class id before the item parser runs, and a file that still reaches the
+  item parser is retried as a macroblock (`ItemMacroblock.TryRead`) before the error reports
+  the class id that was actually found.
+
 ## [0.4.3] - 2026-10-07
 
 ### Fixed

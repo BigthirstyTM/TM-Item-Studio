@@ -12,6 +12,62 @@ kinematics, lights, sockets, physics and visual information.
 - Inspect and edit placement pivots, sockets, lights and kinematic settings.
 - Export edited items, including multi-variant items.
 - Export visible geometry as OBJ.
+- Duplicate the loaded item into macroblock instances and export them as `.Macroblock.Gbx`, or
+  embed the copies into a single multi-instance `.Item.Gbx` whose mesh is stored once.
+
+## Macroblock export (item instancing)
+
+The **Macroblock & instances** tab duplicates the loaded item instead of copying its data.
+Each copy stores a position (meters), a rotation (degrees) and a scale, and the export
+writes one `ObjectSpawn` per copy that references the item by its `Ident.Id`. No mesh,
+material, icon or physics node is duplicated: a macroblock with 24 copies stays under 1 KB
+while the item itself is tens of kilobytes, about 15 bytes per copy.
+
+Controls:
+
+- **Add copy** places a copy next to the previous one, **Duplicate last copy** repeats it
+  with the current spacing, and **Fill grid** lays out `Copies` over `Columns` on the ground
+  plane, continuing below the copies already placed.
+- The table edits each copy's X/Y/Z position, pitch/yaw/roll and scale inline. Every change is
+  drawn immediately in the 3D viewport: a copy is one more scene part that reuses the item's
+  already-uploaded geometry and only carries a placement transform, so copies are visible
+  without duplicating a single vertex buffer.
+- **Export .Macroblock.Gbx** saves through `ItemMacroblock.Export`, which reparses its own
+  bytes with the import parser and refuses to download anything that cannot be reopened.
+
+A `.Macroblock.Gbx` can also be **loaded**: it is detected by its class id `0x0310D000` and
+fills the instance table instead of being parsed as an item. When a non-item file still
+reaches the item parser (which answers with `Specified cast is not valid.`), the loader
+retries it as a macroblock before reporting the class id it actually found. The copies show
+up in the viewport as soon as the referenced item is open.
+
+### Multi-instance item export
+
+**Export multi-instance .Item.Gbx** writes the same copies into one self-contained item instead
+of into a macroblock. A macroblock cannot embed an item — its spawn stores an ident reference —
+but a `CPlugPrefab` entry stores a node reference plus a rotation and a position, and GBX.NET
+writes a repeated node only once. The export therefore builds a root prefab with one entry per
+copy, every entry pointing at the same embedded mesh: one mesh, N transforms.
+
+- Measured on the bundled fixture: the 35 076 byte item becomes 34 911 bytes with one copy and
+  35 052 bytes with twenty — about 7 bytes per extra copy instead of a second copy of the mesh.
+- Every copy keeps its own position and rotation relative to the root, so the copies are placed
+  individually inside the item.
+- The export gets its own id (`<id>_x20`) because inventory files are named after the item id;
+  the original item stays untouched and usable.
+- Prefab entries carry no scale: copies placed with a scale are exported at scale 1 and reported
+  in the status line. Copies that reference a different item are skipped and reported, because
+  one file can only embed one mesh.
+- The export runs on a snapshot of the document, re-reads its own bytes with the import parser,
+  and refuses to download anything that cannot be reopened.
+
+Format notes and their current assumptions (constants on `ItemMacroblock`, validated against
+GBX.NET rather than the game so far): object spawns are written at version 14 in chunk
+`0x0310D00E` at chunk version 2, positions are meters with `AbsolutePositionInMap` as the
+exact value plus a 32 m block-unit fallback in `BlockCoord`, degrees are stored as radians in
+`PitchYawRoll`, and `PivotPosition` mirrors the spawn origin. Trackmania resolves each copy
+through the item ident, so the item must exist under that ident in the inventory; the
+macroblock never embeds its mesh. `Tests/MacroblockExport` runs the round-trip suite.
 
 ## Local material preview
 
