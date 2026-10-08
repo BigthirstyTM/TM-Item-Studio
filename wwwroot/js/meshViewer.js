@@ -57,7 +57,8 @@ const pbrTextureRoles = {
     base: ['d', 'diffuse', 'albedo', 'color', ''],
     normal: ['n', 'normal'],
     surface: ['r', 'roughness', 'metallic'],
-    emissive: ['i', 'illum', 'emissive']
+    emissive: ['i', 'illum', 'emissive'],
+    lightmap: ['lm', 'lightmap']
 };
 function comparePaths(first, second) {
     // Codepoint ordering (not localeCompare) keeps matching identical across
@@ -170,6 +171,8 @@ function applyTrackmaniaPbr(material, textures) {
     material.roughnessMap = textures.surface ? configureTexture(textures.surface, false) : null;
     material.metalnessMap = textures.surface ? configureTexture(textures.surface, false) : null;
     material.emissiveMap = textures.emissive ? configureTexture(textures.emissive, true) : null;
+    material.lightMap = textures.lightmap ? configureTexture(textures.lightmap, false) : null;
+    material.lightMapIntensity = textures.lightmap ? 1 : 0;
     material.emissive.setHex(textures.emissive ? 0xffffff : 0x000000);
     // Trackmania's _R map uses red for roughness and green for metallic,
     // whereas Three.js MeshStandardMaterial normally reads green and blue.
@@ -708,7 +711,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
             selectGizmo(obj);
             return;
         }
-        const meshGroups = [staticGroup, movingGroup].filter(g => g && g.visible);
+        const meshGroups = [staticGroup, movingGroup, collisionGroup].filter(g => g && g.visible);
         const meshHits = raycaster.intersectObjects(meshGroups.flatMap(g => g.children), true)
             .find(hit => hit.object?.isMesh);
         const additive = event.ctrlKey || event.metaKey;
@@ -843,13 +846,17 @@ function buildGeometry(part) {
     const positions = buffer(part.positionsBytes == null ? part.positions ?? part.Positions : geometryWords(part.positionsBytes), 'Positions', 3);
     const indices = part.indicesBytes == null ? part.indices ?? part.Indices : geometryWords(part.indicesBytes, true);
     const normals = part.normalsBytes == null ? part.normals : geometryWords(part.normalsBytes);
+    const uvPrimary = part.uvsBytes == null ? part.uvs : geometryWords(part.uvsBytes);
+    const uvSecondary = part.uv2Bytes == null ? (part.uv2s ?? part.uv2) : geometryWords(part.uv2Bytes);
     if (!(Array.isArray(indices) || indices instanceof Int32Array) || indices.length % 3 || indices.some(x => !Number.isInteger(x) || x < 0 || x >= positions.length / 3)) throw new Error('Invalid triangle indices.');
-    for (const [value, key, stride] of [[normals, 'normals', 3], [part.uvs, 'uvs', 2]])
+    for (const [value, key, stride] of [[normals, 'normals', 3], [uvPrimary, 'uvs', 2], [uvSecondary, 'uv2s', 2]])
         if (value != null && buffer(value, key, stride).length / stride !== positions.length / 3) throw new Error(`${key} count does not match vertices.`);
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setIndex(indices instanceof Int32Array ? new THREE.BufferAttribute(new Uint32Array(indices), 1) : indices);
     if (normals != null) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); else geometry.computeVertexNormals();
-    if (part.uvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(part.uvs, 2));
+    const primaryUvs = uvPrimary ?? uvSecondary ?? null;
+    if (primaryUvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(primaryUvs, 2));
+    if (uvSecondary != null && uvPrimary != null) geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(uvSecondary, 2));
     if (geometry.attributes.normal.array.some(x => !Number.isFinite(x))) { geometry.dispose(); throw new Error('Normals overflow geometry.'); }
     geometry.computeBoundingBox();
     return geometry;
@@ -871,11 +878,12 @@ function makePart(part, owner, bounds, pool) {
     const visible = part.visible !== false;
     const movable = Boolean(part.movable);
     const collidable = Boolean(part.collidable);
+    const trigger = Boolean(part.trigger || part.isTrigger);
     const waypoint = Boolean(part.waypoint);
     const effect = Boolean(part.effect);
     // Mapping-tools-like part coloring in preview:
     // default=neutral, collidable=yellow, waypoint/trigger=pink, movable=green.
-    const color = waypoint ? 0xec4899 : collidable ? 0xeab308 : movable ? 0x34d399 : effect ? 0x22d3ee : (part.isCollision ? 0x38d9b3 : 0xb8bdc6);
+    const color = (trigger || waypoint) ? 0xec4899 : collidable ? 0xeab308 : movable ? 0x34d399 : effect ? 0x22d3ee : (part.isCollision ? 0x38d9b3 : 0xb8bdc6);
     const material = new THREE.MeshStandardMaterial({ color,
         metalness: 0, roughness: .75, side: THREE.DoubleSide, wireframe: part.isCollision || isWireframe, transparent: Boolean(part.isCollision), opacity: part.isCollision ? .35 : 1 });
     const mesh = new THREE.Mesh(geometry, material); mesh.name = part.name ?? part.path ?? '';
@@ -893,6 +901,7 @@ function makePart(part, owner, bounds, pool) {
         visible,
         collidable,
         effect,
+        trigger,
         waypoint,
         movable
     };
@@ -1425,7 +1434,7 @@ window.toggleLayer = function (name) {
     applyLayerVisibility(); return value;
 };
 function applySceneFilter() {
-    for (const group of [staticGroup, movingGroup]) group?.traverse(child => {
+    for (const group of [staticGroup, movingGroup, collisionGroup]) group?.traverse(child => {
         if (!child.isMesh) return;
         child.visible = sceneFilter.materialIndex === null && sceneFilter.materialPath === null && sceneFilter.lodMask === null || child.userData.mappings.some(map =>
             (sceneFilter.materialIndex === null || map.materialIndex === sceneFilter.materialIndex)

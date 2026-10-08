@@ -77,6 +77,9 @@
                         <button class="btn @(showMeshes ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("meshes"))">
                             Meshes
                         </button>
+                        <button class="btn @(showCollision ? "btn-success" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("collision"))" title="Show/hide collision and trigger geometry">
+                            Collision (@CollisionInventory.Count)
+                        </button>
                         <button class="btn @(showPivots ? "btn-warning text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("pivots"))">
                             Pivots (@detectedPivots.Count)
                         </button>
@@ -1079,7 +1082,7 @@
                                                     <div class="fw-semibold">@part.Name</div>
                                                     <div class="text-muted small text-break">@part.Path</div>
                                                 </td>
-                                                <td class="small">Mesh</td>
+                                                <td class="small">@(part.IsTrigger ? "Trigger" : part.IsCollision ? "Collision" : "Mesh")</td>
                                                 <td class="text-end">@part.VertexCount</td>
                                                 <td class="text-end">@part.TriangleCount</td>
                                                 <td class="text-center">
@@ -1685,6 +1688,7 @@
 
     // Viewport layer status
     private bool showMeshes = true;
+    private bool showCollision;
     private bool showPivots = true;
     private bool showLights = true;
     private bool showWaypoints = true;
@@ -1758,6 +1762,8 @@
         public string Path { get; set; } = "";
         public string Name { get; set; } = "";
         public string? EntityPath { get; set; }
+        public bool IsCollision { get; set; }
+        public bool IsTrigger { get; set; }
         public bool IsMoving { get; set; }
         public int MaterialSlotCount { get; set; }
         public string MaterialSummary { get; set; } = "";
@@ -1888,7 +1894,7 @@
     private List<LightDto> detectedLights = new();
     private List<string> debugLog = new();
     private readonly HashSet<string> detectedNodeTypes = new(StringComparer.OrdinalIgnoreCase);
-    // Collision capability is a read-only scene inventory; there is no toggle to persist.
+    // Collision capability is preview-only inventory; toggles never persist back into the GBX.
     private IReadOnlyList<ItemSceneCollision> CollisionInventory =>
         authoredMotionScene?.Preview.Collisions ?? Array.Empty<ItemSceneCollision>();
 
@@ -2082,7 +2088,8 @@
         authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
         ExtractParts(source.PreviewRoot, includeGeometry: authoredConstraints.Count == 0);
         ExtractPivots(itemModel);
-        if (authoredConstraints.Count > 0) UseAuthoredModelParts(authoredMotionScene);
+        var hasTriggerCollisions = authoredMotionScene.Preview.Collisions.Any(c => IsTriggerSource(c.Source));
+        if (authoredConstraints.Count > 0 || hasTriggerCollisions) UseAuthoredModelParts(authoredMotionScene);
         isMovingItem = isMovingItem || authoredConstraints.Count > 0;
         motionDiagnostics = AuthoredMotionPreview.Build(authoredMotionScene).Diagnostics;
 
@@ -2150,6 +2157,8 @@
             {
                 Enabled = true,
                 Visible = true,
+                Collidable = part?.IsCollision == true,
+                Waypoint = part?.IsTrigger == true,
                 Movable = part?.IsMoving == true
             };
             meshPartConfigs[path] = config;
@@ -2165,8 +2174,10 @@
 
     private static string DescribeMeshFunction(ModelPart part, MeshPartConfig cfg)
     {
-        if (!cfg.Enabled) return "Disabled (uitgeschakeld in preview).";
+        if (!cfg.Enabled) return "Disabled (preview only).";
         var roles = new List<string>();
+        if (part.IsTrigger) roles.Add("Trigger volume");
+        else if (part.IsCollision) roles.Add("Collision volume");
         if (cfg.Visible) roles.Add("Visible mesh");
         if (cfg.Collidable) roles.Add("Collidable");
         if (cfg.Waypoint) roles.Add("Waypoint / trigger");
@@ -2192,6 +2203,8 @@
                 {
                     Enabled = true,
                     Visible = true,
+                    Collidable = part.IsCollision,
+                    Waypoint = part.IsTrigger,
                     Movable = part.IsMoving
                 };
         }
@@ -2213,6 +2226,22 @@
         return markerIndex < 0 ? materialPath : materialPath[..markerIndex];
     }
 
+    private static bool IsTriggerSource(ItemSceneCollisionSource source)
+        => source is ItemSceneCollisionSource.CommonItemTrigger or ItemSceneCollisionSource.GameObjectTriggerShape;
+
+    private static bool IsTriggerCollisionPath(string geometryPath, ItemScenePreview scene)
+    {
+        foreach (var collision in scene.Collisions)
+        {
+            if (!IsTriggerSource(collision.Source) || collision.State is ItemSceneState.Absent or ItemSceneState.Unresolved)
+                continue;
+            if (geometryPath.Equals(collision.Path, StringComparison.Ordinal)
+                || geometryPath.StartsWith(collision.Path + "/", StringComparison.Ordinal))
+                return true;
+        }
+        return false;
+    }
+
     private void UseAuthoredModelParts(ItemSceneResult selectedScene)
     {
         var movingPaths = AuthoredMotionPreview.Build(selectedScene).Tracks.Select(t => t.ChildPath).ToHashSet();
@@ -2222,7 +2251,13 @@
         var fallbackMaterialByIndex = selectedScene.Preview.Materials
             .GroupBy(m => m.Index)
             .ToDictionary(g => g.Key, g => g.First());
-        var renderGeometry = selectedScene.Preview.Geometry.Where(g => !g.IsCollision).ToArray();
+        var triggerCollisionPaths = selectedScene.Preview.Geometry
+            .Where(g => g.IsCollision && IsTriggerCollisionPath(g.Path, selectedScene.Preview))
+            .Select(g => g.Path)
+            .ToHashSet(StringComparer.Ordinal);
+        var renderGeometry = selectedScene.Preview.Geometry
+            .Where(g => !g.IsCollision || triggerCollisionPaths.Contains(g.Path))
+            .ToArray();
         forcedRenderableGeometryPaths.Clear();
         if (renderGeometry.Length == 0)
         {
@@ -2239,6 +2274,8 @@
                 Path = g.Path,
                 Name = g.Path.Split('/').LastOrDefault() ?? g.Path,
                 EntityPath = g.EntityPath,
+                IsCollision = g.IsCollision,
+                IsTrigger = triggerCollisionPaths.Contains(g.Path),
                 IsMoving = g.EntityPath is not null && movingPaths.Contains(g.EntityPath),
                 MaterialSlotCount = selectedScene.Preview.Mappings.Where(mapping => mapping.SolidPath == solidPath)
                     .Select(mapping => mapping.MaterialIndex).Distinct().Count(),
@@ -2979,7 +3016,13 @@
                     geometryId = g.GeometryId,
                     positionsBytes = ViewerBuffers.Pack(g.LocalPositions),
                     indicesBytes = ViewerBuffers.Pack(g.Indices),
-                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals)
+                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals),
+                    uvsBytes = g.UVs.TryGetValue(0, out var uv0)
+                        ? ViewerBuffers.Pack(uv0)
+                        : g.UVs.TryGetValue(1, out var uv1AsPrimary) ? ViewerBuffers.Pack(uv1AsPrimary) : null,
+                    uv2Bytes = g.UVs.TryGetValue(1, out var uv1)
+                        ? ViewerBuffers.Pack(uv1)
+                        : g.UVs.TryGetValue(2, out var uv2) ? ViewerBuffers.Pack(uv2) : null
                 }),
                 parts = allParts.Select(part => new
                 {
@@ -2994,7 +3037,18 @@
                     positionsBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Positions),
                     indicesBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Indices),
                     normalsBytes = part.geometry.GeometryId.HasValue || part.geometry.Normals is null ? null : ViewerBuffers.Pack(part.geometry.Normals),
+                    uvsBytes = part.geometry.GeometryId.HasValue
+                        ? null
+                        : part.geometry.UVs.TryGetValue(0, out var uv0)
+                            ? ViewerBuffers.Pack(uv0)
+                            : part.geometry.UVs.TryGetValue(1, out var uv1AsPrimary) ? ViewerBuffers.Pack(uv1AsPrimary) : null,
+                    uv2Bytes = part.geometry.GeometryId.HasValue
+                        ? null
+                        : part.geometry.UVs.TryGetValue(1, out var uv1)
+                            ? ViewerBuffers.Pack(uv1)
+                            : part.geometry.UVs.TryGetValue(2, out var uv2) ? ViewerBuffers.Pack(uv2) : null,
                     isCollision = part.geometry.IsCollision && !forcedRenderableGeometryPaths.Contains(part.geometry.Path),
+                    isTrigger = part.geometry.IsCollision && IsTriggerCollisionPath(part.geometry.Path, part.entry.Scene.Preview),
                     meshMode = GetMeshPartMode(part.geometry.Path),
                     enabled = GetMeshPartConfig(part.geometry.Path).Enabled,
                     visible = GetMeshPartConfig(part.geometry.Path).Visible,
@@ -3167,7 +3221,7 @@
 
         if (e.File.Size > 2 * 1024 * 1024)
         {
-            iconStatus = "Het pictogram mag maximaal 2 MB groot zijn.";
+            iconStatus = "The icon can be at most 2 MB.";
             return;
         }
 
@@ -3190,7 +3244,7 @@
         {
             for (var x = 0; x < 64; x++)
             {
-                var color = itemModel.Icon[y, x];
+                var color = itemModel.Icon[63 - y, x];
                 var offset = (y * 64 + x) * 4;
                 pixels[offset] = (int)Math.Clamp(color.R, 0, 255);
                 pixels[offset + 1] = (int)Math.Clamp(color.G, 0, 255);
@@ -3209,7 +3263,7 @@
             for (var x = 0; x < width; x++)
             {
                 var offset = (y * width + x) * 4;
-                icon[y, x] = new GBX.NET.Color(
+                icon[height - 1 - y, x] = new GBX.NET.Color(
                     pixels[offset], pixels[offset + 1], pixels[offset + 2], pixels[offset + 3]);
             }
         }
@@ -4240,6 +4294,7 @@
     {
         bool visible = await JS.InvokeAsync<bool>("toggleLayer", layerName);
         if (layerName == "meshes") showMeshes = visible;
+        else if (layerName == "collision") showCollision = visible;
         else if (layerName == "pivots") showPivots = visible;
         else if (layerName == "lights") showLights = visible;
         else if (layerName == "waypoints") showWaypoints = visible;

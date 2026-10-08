@@ -146,10 +146,19 @@ public static partial class ItemScene
                         Visit(common.PhyModel, path + "/phyModel", path, Matrix4x4.Identity, world, entry, depth + 1);
                         if (common.TriggerShape is { } trigger)
                         {
-                            Node(path + "/triggerShape", path, trigger, ItemSceneKind.Collision, ItemSceneState.Unsupported, null, null);
-                            collisions.Add(new(path + "/triggerShape", entry?.Path, "Common-item trigger",
-                                trigger is CPlugSurface ? ItemSceneState.Present : ItemSceneState.Unsupported, ItemSceneCollisionSource.CommonItemTrigger));
-                            Issue(path + "/triggerShape", "trigger-transform", ItemSceneState.Unsupported, "Trigger source retained; its chunk-specific transform is not interpreted.");
+                            var triggerPath = path + "/triggerShape";
+                            var triggerState = trigger is CPlugSurface ? ItemSceneState.Present : ItemSceneState.Unsupported;
+                            Node(triggerPath, path, trigger, ItemSceneKind.Collision, triggerState, Matrix4x4.Identity, world);
+                            collisions.Add(new(triggerPath, entry?.Path, "Common-item trigger", triggerState, ItemSceneCollisionSource.CommonItemTrigger));
+                            if (trigger is CPlugSurface triggerSurface)
+                            {
+                                Surface(triggerSurface, triggerPath, world, entry, ItemSceneCollisionSource.CommonItemTrigger);
+                                Issue(triggerPath, "trigger-transform", ItemSceneState.Unsupported, "Trigger surface rendered from the current entity transform; chunk-specific trigger transform data is still not interpreted.");
+                            }
+                            else
+                            {
+                                Issue(triggerPath, "trigger-transform", ItemSceneState.Unsupported, "Trigger source retained; its chunk-specific transform is not interpreted.");
+                            }
                         }
                         else collisions.Add(new(path + "/triggerShape", entry?.Path, "No trigger shape", ItemSceneState.Absent, ItemSceneCollisionSource.CommonItemTrigger));
                         break;
