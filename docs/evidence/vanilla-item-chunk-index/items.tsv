@@ -1,0 +1,1355 @@
+status	file	name	itemType	waypoint	entity	icon	placement	chunks	unknownChunks	placementChunks
+FAIL	RedIsland/Items/Stadium/Podium.Item.Gbx	Unable to cast object of type 'GBX.NET.Engines.GameData.CGameItemModel' to type 'GBX.NET.Engines.Plug.CPlugMediaClipList'.						0	0	
+FAIL	ShootMania/Items/Characters/CharacterPilot.Item.gbx	Unknown class ID: 0x2E028000 (unknown class name)						0	0	
+FAIL	Stadium/Items/Podium.Item.Gbx	Unable to cast object of type 'GBX.NET.Engines.GameData.CGameItemModel' to type 'GBX.NET.Engines.Plug.CPlugMediaClipList'.						0	0	
+FAIL	Stadium/Items/Theme/DesertGateGameplay.Item.Gbx	Known unskippable chunk (CPlugGameSkinAndFolder 0x0915D000) cannot be processed.						0	0	
+FAIL	Stadium/Items/Theme/RallyGateGameplay.Item.Gbx	Known unskippable chunk (CPlugGameSkinAndFolder 0x0915D000) cannot be processed.						0	0	
+ok	BlueBay/Items/Vegetation/BushBigA.Item.Gbx	BushBigA	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushBigB.Item.Gbx	BushBigB	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushBigC.Item.Gbx	BushBigC	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushBigD.Item.Gbx	BushBigD	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushMediumA.Item.Gbx	BushMediumA	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushMediumB.Item.Gbx	BushMediumB	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushMediumC.Item.Gbx	BushMediumC	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushMediumD.Item.Gbx	BushMediumD	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushSmallA.Item.Gbx	BushSmallA	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushSmallB.Item.Gbx	BushSmallB	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/BushSmallC.Item.Gbx	BushSmallC	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmEcotone.Item.Gbx	PalmEcotone	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmForest.Item.Gbx	PalmForest	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmGrove.Item.Gbx	PalmGrove	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigA0.Item.Gbx	PalmTreeBigA0	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigA1.Item.Gbx	PalmTreeBigA1	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigA2.Item.Gbx	PalmTreeBigA2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigA3.Item.Gbx	PalmTreeBigA3	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigA4.Item.Gbx	PalmTreeBigA4	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigB0.Item.Gbx	PalmTreeBigB0	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigB1.Item.Gbx	PalmTreeBigB1	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigB2.Item.Gbx	PalmTreeBigB2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeBigB3.Item.Gbx	PalmTreeBigB3	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSmallA.Item.Gbx	PalmTreeSmallA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSmallB.Item.Gbx	PalmTreeSmallB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSmallC.Item.Gbx	PalmTreeSmallC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarBigA.Item.Gbx	PalmTreeSugarBigA	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarBigB.Item.Gbx	PalmTreeSugarBigB	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarMediumA.Item.Gbx	PalmTreeSugarMediumA	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarMediumB.Item.Gbx	PalmTreeSugarMediumB	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarMediumC.Item.Gbx	PalmTreeSugarMediumC	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarSmallA.Item.Gbx	PalmTreeSugarSmallA	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarSmallB.Item.Gbx	PalmTreeSugarSmallB	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PalmTreeSugarSmallC.Item.Gbx	PalmTreeSugarSmallC	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PlantSmallA.Item.Gbx	PlantSmallA	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PlantSmallB.Item.Gbx	PlantSmallB	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PlantSmallC.Item.Gbx	PlantSmallC	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/PlantSmallD.Item.Gbx	PlantSmallD	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	BlueBay/Items/Vegetation/TreeMediumA.Item.Gbx	TreeMediumA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/Flag16m.Item.Gbx	Flag16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Flag8m.Item.Gbx	Flag8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointCenter16m.Item.Gbx	GateCheckpointCenter16m	Ornament	Checkpoint	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/GateCheckpointCenter16mv2.Item.Gbx	GateCheckpointCenter16m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointCenter24m.Item.Gbx	GateCheckpointCenter24m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointCenter32m.Item.Gbx	GateCheckpointCenter32m	Ornament	Checkpoint	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/GateCheckpointCenter32mv2.Item.Gbx	GateCheckpointCenter32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointCenter8m.Item.Gbx	GateCheckpointCenter8m	Ornament	Checkpoint	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/GateCheckpointCenter8mv2.Item.Gbx	GateCheckpointCenter32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointLeft16m.Item.Gbx	GateCheckpointLeft16m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointLeft32m.Item.Gbx	GateCheckpointLeft32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointLeft8m.Item.Gbx	GateCheckpointLeft8m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointRight16m.Item.Gbx	GateCheckpointRight16m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointRight32m.Item.Gbx	GateCheckpointRight32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateCheckpointRight8m.Item.Gbx	GateCheckpointRight8m	Ornament	Checkpoint	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateFinish16m.Item.Gbx	GateFinish16m	Ornament	Finish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateFinish32m.Item.Gbx	GateFinish32m	Ornament	Finish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateFinish8m.Item.Gbx	GateFinish8m	Ornament	Finish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateFinishCenter16m.Item.Gbx	GateFinishCenter16m	Ornament	Finish	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/GateFinishCenter16mv2.Item.Gbx	GateFinishCenter16mv2	Ornament	Finish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateFinishCenter32m.Item.Gbx	GateFinishCenter32m	Ornament	Finish	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/GateFinishCenter32mv2.Item.Gbx	GateFinishCenter32mv2	Ornament	Finish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateFinishCenter8m.Item.Gbx	GateFinishCenter8m	Ornament	Finish	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/GateFinishCenter8mv2.Item.Gbx	GateFinishCenter8mv2	Ornament	Finish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateGameplayDesert16m.Item.Gbx	GateGameplayDesert16m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayDesert24m.Item.Gbx	GateGameplayDesert24m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayDesert32m.Item.Gbx	GateGameplayDesert32m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayDesert4m.Item.Gbx	GateGameplayDesert4m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayDesert8m.Item.Gbx	GateGameplayDesert8m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayRally16m.Item.Gbx	GateGameplayRally16m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayRally24m.Item.Gbx	GateGameplayRally24m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayRally32m.Item.Gbx	GateGameplayRally32m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayRally4m.Item.Gbx	GateGameplayRally4m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayRally8m.Item.Gbx	GateGameplayRally8m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplaySnow16m.Item.Gbx	GateGameplaySnow16m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplaySnow24m.Item.Gbx	GateGameplaySnow24m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplaySnow32m.Item.Gbx	GateGameplaySnow32m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplaySnow4m.Item.Gbx	GateGameplaySnow4m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplaySnow8m.Item.Gbx	GateGameplaySnow8m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayStadium16m.Item.Gbx	GateGameplayStadium16m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayStadium24m.Item.Gbx	GateGameplayStadium24m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayStadium32m.Item.Gbx	GateGameplayStadium32m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayStadium4m.Item.Gbx	GateGameplayStadium4m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateGameplayStadium8m.Item.Gbx	GateGameplayStadium8m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateMultilapCenter16m.Item.Gbx	GateMultilapCenter16m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapCenter32m.Item.Gbx	GateMultilapCenter32m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapCenter8m.Item.Gbx	GateMultilapCenter8m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapLeft16m.Item.Gbx	GateMultilapLeft16m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapLeft32m.Item.Gbx	GateMultilapLeft32m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapLeft8m.Item.Gbx	GateMultilapLeft8m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapRight16m.Item.Gbx	GateMultilapRight16m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapRight32m.Item.Gbx	GateMultilapRight32m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateMultilapRight8m.Item.Gbx	GateMultilapRight8m	Ornament	StartFinish	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mBoost.Item.Gbx	GateSpecial16mBoost	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mBoost2.Item.Gbx	GateSpecial16mBoost2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mCruise.Item.Gbx	GateSpecial16mCruise	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mFragile.Item.Gbx	GateSpecial16mFragile	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mNoBrake.Item.Gbx	GateSpecial16mNoBrake	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mNoEngine.Item.Gbx	GateSpecial16mNoEngine	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mNoSteering.Item.Gbx	GateSpecial16mNoSteering	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mReset.Item.Gbx	GateSpecial16mReset	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mSlowMotion.Item.Gbx	GateSpecial16mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mTurbo.Item.Gbx	GateSpecial16mTurbo	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mTurbo2.Item.Gbx	GateSpecial16mTurbo2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial16mTurboRoulette.Item.Gbx	GateSpecial16mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mBoost.Item.Gbx	GateSpecial24mBoost	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mBoost2.Item.Gbx	GateSpecial24mBoost2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mCruise.Item.Gbx	GateSpecial24mCruise	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mFragile.Item.Gbx	GateSpecial24mFragile	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mNoBrake.Item.Gbx	GateSpecial24mNoBrake	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mNoEngine.Item.Gbx	GateSpecial24mNoEngine	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mNoSteering.Item.Gbx	GateSpecial24mNoSteering	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mReset.Item.Gbx	GateSpecial24mReset	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mSlowMotion.Item.Gbx	GateSpecial24mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mTurbo.Item.Gbx	GateSpecial24mTurbo	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mTurbo2.Item.Gbx	GateSpecial24mTurbo2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial24mTurboRoulette.Item.Gbx	GateSpecial24mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mBoost.Item.Gbx	GateSpecial32mBoost	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mBoost2.Item.Gbx	GateSpecial32mBoost2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mCruise.Item.Gbx	GateSpecial32mCruise	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mFragile.Item.Gbx	GateSpecial32mFragile	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mNoBrake.Item.Gbx	GateSpecial32mNoBrake	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mNoEngine.Item.Gbx	GateSpecial32mNoEngine	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mNoSteering.Item.Gbx	GateSpecial32mNoSteering	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mReset.Item.Gbx	GateSpecial32mReset	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mSlowMotion.Item.Gbx	GateSpecial32mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mTurbo.Item.Gbx	GateSpecial32mTurbo	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mTurbo2.Item.Gbx	GateSpecial32mTurbo2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial32mTurboRoulette.Item.Gbx	GateSpecial32mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mBoost.Item.Gbx	GateSpecial4mBoost	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mBoost2.Item.Gbx	GateSpecial4mBoost2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mCruise.Item.Gbx	GateSpecial4mCruise	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mFragile.Item.Gbx	GateSpecial4mFragile	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mNoBrake.Item.Gbx	GateSpecial4mNoBrake	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mNoEngine.Item.Gbx	GateSpecial4mNoEngine	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mNoSteering.Item.Gbx	GateSpecial4mNoSteering	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mReset.Item.Gbx	GateSpecial4mReset	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mSlowMotion.Item.Gbx	GateSpecial4mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mTurbo.Item.Gbx	GateSpecial4mTurbo	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mTurbo2.Item.Gbx	GateSpecial4mTurbo2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial4mTurboRoulette.Item.Gbx	GateSpecial4mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mBoost.Item.Gbx	GateSpecial8mBoost	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mBoost2.Item.Gbx	GateSpecial8mBoost2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mCruise.Item.Gbx	GateSpecial8mCruise	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mFragile.Item.Gbx	GateSpecial8mFragile	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mNoBrake.Item.Gbx	GateSpecial8mNoBrake	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mNoEngine.Item.Gbx	GateSpecial8mNoEngine	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mNoSteering.Item.Gbx	GateSpecial8mNoSteering	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mReset.Item.Gbx	GateSpecial8mReset	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mSlowMotion.Item.Gbx	GateSpecial8mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mTurbo.Item.Gbx	GateSpecial8mTurbo	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mTurbo2.Item.Gbx	GateSpecial8mTurbo2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateSpecial8mTurboRoulette.Item.Gbx	GateSpecial8mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/GateStartCenter16m.Item.Gbx	GateStartCenter16m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartCenter32m.Item.Gbx	GateStartCenter32m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartCenter8m.Item.Gbx	GateStartCenter8m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartLeft16m.Item.Gbx	GateStartLeft16m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartLeft32m.Item.Gbx	GateStartLeft32m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartLeft8m.Item.Gbx	GateStartLeft8m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartRight16m.Item.Gbx	GateStartRight16m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartRight32m.Item.Gbx	GateStartRight32m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateStartRight8m.Item.Gbx	GateStartRight8m	Ornament	Start	none	no	no	27	0	
+ok	RedIsland/Items/Stadium/GateSupport.Item.Gbx	GateSupport	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableBorder1mCornerIn.Item.Gbx	InflatableBorder1mCornerIn	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCornerOut.Item.Gbx	InflatableBorder1mCornerOut	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve0Out.Item.Gbx	InflatableBorder1mCurve0Out	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve1In.Item.Gbx	InflatableBorder1mCurve1In	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve1Out.Item.Gbx	InflatableBorder1mCurve1Out	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve2In.Item.Gbx	InflatableBorder1mCurve2In	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve2Out.Item.Gbx	InflatableBorder1mCurve2Out	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve3In.Item.Gbx	InflatableBorder1mCurve3In	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve3Out.Item.Gbx	InflatableBorder1mCurve3Out	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve4In.Item.Gbx	InflatableBorder1mCurve4In	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve4Out.Item.Gbx	InflatableBorder1mCurve4Out	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mCurve5In.Item.Gbx	InflatableBorder1mCurve5In	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope1BaseLeft.Item.Gbx	InflatableBorder1mSlope1BaseLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope1BaseRight.Item.Gbx	InflatableBorder1mSlope1BaseRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope1StraightLeft.Item.Gbx	InflatableBorder1mSlope1StraightLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope1StraightRight.Item.Gbx	InflatableBorder1mSlope1StraightRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope2BaseLeft.Item.Gbx	InflatableBorder1mSlope2BaseLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope2BaseRight.Item.Gbx	InflatableBorder1mSlope2BaseRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope2StraightLeft.Item.Gbx	InflatableBorder1mSlope2StraightLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope2StraightRight.Item.Gbx	InflatableBorder1mSlope2StraightRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4BaseLeft.Item.Gbx	InflatableBorder1mSlope4BaseLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4BaseRight.Item.Gbx	InflatableBorder1mSlope4BaseRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4EndLeft.Item.Gbx	InflatableBorder1mSlope4EndLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4EndRight.Item.Gbx	InflatableBorder1mSlope4EndRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4StartLeft.Item.Gbx	InflatableBorder1mSlope4StartLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4StartRight.Item.Gbx	InflatableBorder1mSlope4StartRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4StraightLeft.Item.Gbx	InflatableBorder1mSlope4StraightLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope4StraightRight.Item.Gbx	InflatableBorder1mSlope4StraightRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope8EndLeft.Item.Gbx	InflatableBorder1mSlope8EndLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope8EndRight.Item.Gbx	InflatableBorder1mSlope8EndRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope8StartLeft.Item.Gbx	InflatableBorder1mSlope8StartLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope8StartRight.Item.Gbx	InflatableBorder1mSlope8StartRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope8StraightLeft.Item.Gbx	InflatableBorder1mSlope8StraightLeft	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mSlope8StraightRight.Item.Gbx	InflatableBorder1mSlope8StraightRight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mStraight16m.Item.Gbx	InflatableBorder1mStraight16m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mStraight1m.Item.Gbx	InflatableBorder1mStraight1m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mStraight2m.Item.Gbx	InflatableBorder1mStraight2m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableBorder1mStraight4m.Item.Gbx	InflatableBorder1mStraight4m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableBorder1mStraight8m.Item.Gbx	InflatableBorder1mStraight8m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To1mSlopeBase1x1.Item.Gbx	InflatableMat0To1mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To1mSlopeStraight1x1.Item.Gbx	InflatableMat0To1mSlopeStraight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To1mSlopeStraightDiagIn.Item.Gbx	InflatableMat0To1mSlopeStraightDiagIn	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To1mSlopeStraightDiagOut.Item.Gbx	InflatableMat0To1mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To1mSlopeStraightDiagOutv2.Item.Gbx	InflatableMat0To1mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To2mSlopeBase1x1.Item.Gbx	InflatableMat0To2mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To2mSlopeStraight1x1.Item.Gbx	InflatableMat0To2mSlopeStraight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To2mSlopeStraightDiagIn.Item.Gbx	InflatableMat0To2mSlopeStraightDiagIn	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To2mSlopeStraightDiagOut.Item.Gbx	InflatableMat0To2mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To2mSlopeStraightDiagOutv2.Item.Gbx	InflatableMat0To2mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To4mSlopeBase1x1.Item.Gbx	InflatableMat0To4mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To4mSlopeStraight1x1.Item.Gbx	InflatableMat0To4mSlopeStraight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To4mSlopeStraightDiagIn.Item.Gbx	InflatableMat0To4mSlopeStraightDiagIn	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To4mSlopeStraightDiagOut.Item.Gbx	InflatableMat0To4mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat0To4mSlopeStraightDiagOutv2.Item.Gbx	InflatableMat0To4mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mCurve1.Item.Gbx	InflatableMat1mCurve1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mCurve2.Item.Gbx	InflatableMat1mCurve2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mCurve3.Item.Gbx	InflatableMat1mCurve3	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mCurve4.Item.Gbx	InflatableMat1mCurve4	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mSlope4Straight1x1.Item.Gbx	InflatableMat1mSlope4Straight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mSlope8End1x1.Item.Gbx	InflatableMat1mSlope8End1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mSlope8Start1x1.Item.Gbx	InflatableMat1mSlope8Start1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mSlope8Straight1x1.Item.Gbx	InflatableMat1mSlope8Straight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mSlopeBase1x1.Item.Gbx	InflatableMat1mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mSlopeEnd1x1.Item.Gbx	InflatableMat1mSlopeEnd1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mSlopeStart1x1.Item.Gbx	InflatableMat1mSlopeStart1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat1mStraight1x1.Item.Gbx	InflatableMat1mStraight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat2mCurve1.Item.Gbx	InflatableMat2mCurve1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat2mCurve2.Item.Gbx	InflatableMat2mCurve2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat2mCurve3.Item.Gbx	InflatableMat2mCurve3	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat2mCurve4.Item.Gbx	InflatableMat2mCurve4	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat2mStraight1x1.Item.Gbx	InflatableMat2mStraight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat4mCurve1.Item.Gbx	InflatableMat4mCurve1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat4mCurve2.Item.Gbx	InflatableMat4mCurve2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat4mCurve3.Item.Gbx	InflatableMat4mCurve3	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat4mCurve4.Item.Gbx	InflatableMat4mCurve4	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat4mStraight1x1.Item.Gbx	InflatableMat4mStraight1x1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableMat4mToTube6mCenter.Item.Gbx	InflatableMat4mToTube6mCenter	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableMat4mToTube6mCenterX2.Item.Gbx	InflatableMat4mToTube6mCenterX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableMat4mToTube6mFlat.Item.Gbx	InflatableMat4mToTube6mFlat	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableMat4mToTube6mFlatX2.Item.Gbx	InflatableMat4mToTube6mFlatX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeCurve1.Item.Gbx	InflatableTubeCurve1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeCurve2.Item.Gbx	InflatableTubeCurve2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeCurve3.Item.Gbx	InflatableTubeCurve3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeCurve4.Item.Gbx	InflatableTubeCurve4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeSlope2Straight.Item.Gbx	InflatableTubeSlope2Straight	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeSlope4Straight.Item.Gbx	InflatableTubeSlope4Straight	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeSlopeBase.Item.Gbx	InflatableTubeSlopeBase	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeSlopeEnd.Item.Gbx	InflatableTubeSlopeEnd	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeSlopeEndX2.Item.Gbx	InflatableTubeSlopeEndX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeSlopeStart.Item.Gbx	InflatableTubeSlopeStart	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeSlopeStartX2.Item.Gbx	InflatableTubeSlopeStartX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeStraight.Item.Gbx	InflatableTubeStraight	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/InflatableTubeStraightX2.Item.Gbx	InflatableTubeStraightX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/InflatableTubeStraightX4.Item.Gbx	InflatableTubeStraightX4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/Lamp.Item.Gbx	Lamp	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/LampB.Item.Gbx	LampB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/LampC.Item.Gbx	LampC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/LampSmall.Item.Gbx	LampSmall	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/LampSmallB.Item.Gbx	LampSmallB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/LampSmallC.Item.Gbx	LampSmallC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/LightCone2mX2.Item.Gbx	LightCone2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCone4mX2.Item.Gbx	LightCone4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCone8mX2.Item.Gbx	LightCone8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCube2m.Item.Gbx	LightCube2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCube2mX2.Item.Gbx	LightCube2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCube4m.Item.Gbx	LightCube4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCube4mX2.Item.Gbx	LightCube4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCube8m.Item.Gbx	LightCube8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCube8mX2.Item.Gbx	LightCube8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeArch2m.Item.Gbx	LightCubeArch2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeArch4m.Item.Gbx	LightCubeArch4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeArch8m.Item.Gbx	LightCubeArch8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlope2m.Item.Gbx	LightCubeSlope2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlope2mX2.Item.Gbx	LightCubeSlope2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlope4m.Item.Gbx	LightCubeSlope4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlope4mX2.Item.Gbx	LightCubeSlope4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlope8m.Item.Gbx	LightCubeSlope8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlope8mX2.Item.Gbx	LightCubeSlope8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeCornerOut2m.Item.Gbx	LightCubeSlopeCornerOut2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeCornerOut2mX2.Item.Gbx	LightCubeSlopeCornerOut2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeCornerOut4m.Item.Gbx	LightCubeSlopeCornerOut4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeCornerOut4mX2.Item.Gbx	LightCubeSlopeCornerOut4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeCornerOut8m.Item.Gbx	LightCubeSlopeCornerOut8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeCornerOut8mX2.Item.Gbx	LightCubeSlopeCornerOut8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeDiag2m.Item.Gbx	LightCubeSlopeDiag2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeDiag2mX2.Item.Gbx	LightCubeSlopeDiag2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeDiag4m.Item.Gbx	LightCubeSlopeDiag4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeDiag4mX2.Item.Gbx	LightCubeSlopeDiag4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeDiag8m.Item.Gbx	LightCubeSlopeDiag8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCubeSlopeDiag8mX2.Item.Gbx	LightCubeSlopeDiag8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCylinder2m.Item.Gbx	LightCylinder2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCylinder4m.Item.Gbx	LightCylinder4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCylinder8m.Item.Gbx	LightCylinder8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCylinderQuarter2m.Item.Gbx	LightCylinderQuarter2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCylinderQuarter4m.Item.Gbx	LightCylinderQuarter4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightCylinderQuarter8m.Item.Gbx	LightCylinderQuarter8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphere2m.Item.Gbx	LightSphere2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphere4m.Item.Gbx	LightSphere4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphere8m.Item.Gbx	LightSphere8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphereDemi2m.Item.Gbx	LightSphereDemi2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphereDemi4m.Item.Gbx	LightSphereDemi4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphereDemi8m.Item.Gbx	LightSphereDemi8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphereQuarter2m.Item.Gbx	LightSphereQuarter2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphereQuarter4m.Item.Gbx	LightSphereQuarter4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightSphereQuarter8m.Item.Gbx	LightSphereQuarter8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig16m.Item.Gbx	LightTubeBig16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig16mCurve.Item.Gbx	LightTubeBig16mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig16mDiagCube.Item.Gbx	LightTubeBig16mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig16mDiagSquare.Item.Gbx	LightTubeBig16mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig32m.Item.Gbx	LightTubeBig32m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig32mCurve.Item.Gbx	LightTubeBig32mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig32mDiagCube.Item.Gbx	LightTubeBig32mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig32mDiagSquare.Item.Gbx	LightTubeBig32mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig4m.Item.Gbx	LightTubeBig4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig4mCurve.Item.Gbx	LightTubeBig4mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig4mDiagCube.Item.Gbx	LightTubeBig4mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig4mDiagSquare.Item.Gbx	LightTubeBig4mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig64mCurve.Item.Gbx	LightTubeBig64mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig8m.Item.Gbx	LightTubeBig8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig8mCurve.Item.Gbx	LightTubeBig8mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig8mDiagCube.Item.Gbx	LightTubeBig8mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig8mDiagSquare.Item.Gbx	LightTubeBig8mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeBig96mCurve.Item.Gbx	LightTubeBig96mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall16m.Item.Gbx	LightTubeSmall16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall16mCurve.Item.Gbx	LightTubeSmall16mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall16mDiagCube.Item.Gbx	LightTubeSmall16mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall16mDiagSquare.Item.Gbx	LightTubeSmall16mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall32m.Item.Gbx	LightTubeSmall32m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall32mCurve.Item.Gbx	LightTubeSmall32mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall32mDiagCube.Item.Gbx	LightTubeSmall32mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall32mDiagSquare.Item.Gbx	LightTubeSmall32mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall4m.Item.Gbx	LightTubeSmall4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall4mCurve.Item.Gbx	LightTubeSmall4mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall4mDiagCube.Item.Gbx	LightTubeSmall4mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall4mDiagSquare.Item.Gbx	LightTubeSmall4mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall64mCurve.Item.Gbx	LightTubeSmall64mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall8m.Item.Gbx	LightTubeSmall8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall8mCurve.Item.Gbx	LightTubeSmall8mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall8mDiagCube.Item.Gbx	LightTubeSmall8mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall8mDiagSquare.Item.Gbx	LightTubeSmall8mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/LightTubeSmall96mCurve.Item.Gbx	LightTubeSmall96mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillar16m.Item.Gbx	ObstaclePillar16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillar2m.Item.Gbx	ObstaclePillar2m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillar4m.Item.Gbx	ObstaclePillar4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillar8m.Item.Gbx	ObstaclePillar8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillarRectangular16m.Item.Gbx	ObstaclePillarRectangular16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillarRectangular2m.Item.Gbx	ObstaclePillarRectangular2m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillarRectangular4m.Item.Gbx	ObstaclePillarRectangular4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePillarRectangular8m.Item.Gbx	ObstaclePillarRectangular8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePusher16m.Item.Gbx	ObstaclePusher16m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher16mLevel0.Item.Gbx	ObstaclePusher16mLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher16mLevel1.Item.Gbx	ObstaclePusher16mLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher16mLevel2.Item.Gbx	ObstaclePusher16mLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher16mSharpLevel0.Item.Gbx	ObstaclePusher16mSharpLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher16mSharpLevel1.Item.Gbx	ObstaclePusher16mSharpLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher16mSharpLevel2.Item.Gbx	ObstaclePusher16mSharpLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher4m.Item.Gbx	ObstaclePusher4m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstaclePusher4mLevel0.Item.Gbx	ObstaclePusher4mLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher4mLevel1.Item.Gbx	ObstaclePusher4mLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher4mLevel2.Item.Gbx	ObstaclePusher4mLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher4mSharpLevel0.Item.Gbx	ObstaclePusher4mSharpLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher4mSharpLevel1.Item.Gbx	ObstaclePusher4mSharpLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher4mSharpLevel2.Item.Gbx	ObstaclePusher4mSharpLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher8m.Item.Gbx	ObstaclePusher8m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher8mLevel0.Item.Gbx	ObstaclePusher8mLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher8mLevel1.Item.Gbx	ObstaclePusher8mLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher8mLevel2.Item.Gbx	ObstaclePusher8mLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher8mSharpLevel0.Item.Gbx	ObstaclePusher8mSharpLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher8mSharpLevel1.Item.Gbx	ObstaclePusher8mSharpLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstaclePusher8mSharpLevel2.Item.Gbx	ObstaclePusher8mSharpLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mHolesX4.Item.Gbx	ObstacleRotor16mHolesX4	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mHolesX4Level0.Item.Gbx	ObstacleRotor16mHolesX4Level0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mHolesX4Level1.Item.Gbx	ObstacleRotor16mHolesX4Level1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mHolesX4Level2.Item.Gbx	ObstacleRotor16mHolesX4Level2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mHolesX4OscillateLevel0.Item.Gbx	ObstacleRotor16mHolesX4OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mHolesX4OscillateLevel1.Item.Gbx	ObstacleRotor16mHolesX4OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mHolesX4OscillateLevel2.Item.Gbx	ObstacleRotor16mHolesX4OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90.Item.Gbx	ObstacleRotor16mWing90	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90Level0.Item.Gbx	ObstacleRotor16mWing90Level0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90Level1.Item.Gbx	ObstacleRotor16mWing90Level1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90Level2.Item.Gbx	ObstacleRotor16mWing90Level2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90OscillateLevel0.Item.Gbx	ObstacleRotor16mWing90OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90OscillateLevel1.Item.Gbx	ObstacleRotor16mWing90OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90OscillateLevel2.Item.Gbx	ObstacleRotor16mWing90OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90X2.Item.Gbx	ObstacleRotor16mWing90X2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90X2Level0.Item.Gbx	ObstacleRotor16mWing90X2Level0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90X2Level1.Item.Gbx	ObstacleRotor16mWing90X2Level1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90X2Level2.Item.Gbx	ObstacleRotor16mWing90X2Level2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90X2OscillateLevel0.Item.Gbx	ObstacleRotor16mWing90X2OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90X2OscillateLevel1.Item.Gbx	ObstacleRotor16mWing90X2OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor16mWing90X2OscillateLevel2.Item.Gbx	ObstacleRotor16mWing90X2OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mHolesX4.Item.Gbx	ObstacleRotor24mHolesX4	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mHolesX4Level0.Item.Gbx	ObstacleRotor24mHolesX4Level0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mHolesX4Level1.Item.Gbx	ObstacleRotor24mHolesX4Level1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mHolesX4Level2.Item.Gbx	ObstacleRotor24mHolesX4Level2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mHolesX4OscillateLevel0.Item.Gbx	ObstacleRotor24mHolesX4OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mHolesX4OscillateLevel1.Item.Gbx	ObstacleRotor24mHolesX4OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mHolesX4OscillateLevel2.Item.Gbx	ObstacleRotor24mHolesX4OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90.Item.Gbx	ObstacleRotor24mWing90	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90Level0.Item.Gbx	ObstacleRotor24mWing90Level0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90Level1.Item.Gbx	ObstacleRotor24mWing90Level1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90Level2.Item.Gbx	ObstacleRotor24mWing90Level2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90OscillateLevel0.Item.Gbx	ObstacleRotor24mWing90OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90OscillateLevel1.Item.Gbx	ObstacleRotor24mWing90OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90OscillateLevel2.Item.Gbx	ObstacleRotor24mWing90OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90X2.Item.Gbx	ObstacleRotor24mWing90X2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90X2Level0.Item.Gbx	ObstacleRotor24mWing90X2Level0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90X2Level1.Item.Gbx	ObstacleRotor24mWing90X2Level1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90X2Level2.Item.Gbx	ObstacleRotor24mWing90X2Level2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90X2OscillateLevel0.Item.Gbx	ObstacleRotor24mWing90X2OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90X2OscillateLevel1.Item.Gbx	ObstacleRotor24mWing90X2OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotor24mWing90X2OscillateLevel2.Item.Gbx	ObstacleRotor24mWing90X2OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleRotorFrame16m.Item.Gbx	ObstacleRotorFrame16m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstacleRotorFrame24m.Item.Gbx	ObstacleRotorFrame24m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstacleTube6m.Item.Gbx	ObstacleTube6m	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mOscillateLevel0.Item.Gbx	ObstacleTube6mOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mOscillateLevel1.Item.Gbx	ObstacleTube6mOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mOscillateLevel2.Item.Gbx	ObstacleTube6mOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mRotateLevel0.Item.Gbx	ObstacleTube6mRotateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mRotateLevel1.Item.Gbx	ObstacleTube6mRotateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mRotateLevel2.Item.Gbx	ObstacleTube6mRotateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mX2.Item.Gbx	ObstacleTube6mX2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mX2OscillateLevel0.Item.Gbx	ObstacleTube6mX2OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mX2OscillateLevel1.Item.Gbx	ObstacleTube6mX2OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mX2OscillateLevel2.Item.Gbx	ObstacleTube6mX2OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mX2RotateLevel0.Item.Gbx	ObstacleTube6mX2RotateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mX2RotateLevel1.Item.Gbx	ObstacleTube6mX2RotateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTube6mX2RotateLevel2.Item.Gbx	ObstacleTube6mX2RotateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDouble.Item.Gbx	ObstacleTurnstile16mDouble	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleLeftLevel0.Item.Gbx	ObstacleTurnstile16mDoubleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleLeftLevel1.Item.Gbx	ObstacleTurnstile16mDoubleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleLeftLevel2.Item.Gbx	ObstacleTurnstile16mDoubleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleOscillateLevel0.Item.Gbx	ObstacleTurnstile16mDoubleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleOscillateLevel1.Item.Gbx	ObstacleTurnstile16mDoubleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleOscillateLevel2.Item.Gbx	ObstacleTurnstile16mDoubleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleRightLevel0.Item.Gbx	ObstacleTurnstile16mDoubleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleRightLevel1.Item.Gbx	ObstacleTurnstile16mDoubleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mDoubleRightLevel2.Item.Gbx	ObstacleTurnstile16mDoubleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimple.Item.Gbx	ObstacleTurnstile16mSimple	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleLeftLevel0.Item.Gbx	ObstacleTurnstile16mSimpleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleLeftLevel1.Item.Gbx	ObstacleTurnstile16mSimpleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleLeftLevel2.Item.Gbx	ObstacleTurnstile16mSimpleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleOscillateLevel0.Item.Gbx	ObstacleTurnstile16mSimpleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleOscillateLevel1.Item.Gbx	ObstacleTurnstile16mSimpleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleOscillateLevel2.Item.Gbx	ObstacleTurnstile16mSimpleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleRightLevel0.Item.Gbx	ObstacleTurnstile16mSimpleRightLevel0	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleRightLevel1.Item.Gbx	ObstacleTurnstile16mSimpleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mSimpleRightLevel2.Item.Gbx	ObstacleTurnstile16mSimpleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTriple.Item.Gbx	ObstacleTurnstile16mTriple	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleLeftLevel0.Item.Gbx	ObstacleTurnstile16mTripleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleLeftLevel1.Item.Gbx	ObstacleTurnstile16mTripleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleLeftLevel2.Item.Gbx	ObstacleTurnstile16mTripleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleOscillateLevel0.Item.Gbx	ObstacleTurnstile16mTripleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleOscillateLevel1.Item.Gbx	ObstacleTurnstile16mTripleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleOscillateLevel2.Item.Gbx	ObstacleTurnstile16mTripleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleRightLevel0.Item.Gbx	ObstacleTurnstile16mTripleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleRightLevel1.Item.Gbx	ObstacleTurnstile16mTripleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile16mTripleRightLevel2.Item.Gbx	ObstacleTurnstile16mTripleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDouble.Item.Gbx	ObstacleTurnstile4mDouble	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleLeftLevel0.Item.Gbx	ObstacleTurnstile4mDoubleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleLeftLevel1.Item.Gbx	ObstacleTurnstile4mDoubleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleLeftLevel2.Item.Gbx	ObstacleTurnstile4mDoubleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleOscillateLevel0.Item.Gbx	ObstacleTurnstile4mDoubleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleOscillateLevel1.Item.Gbx	ObstacleTurnstile4mDoubleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleOscillateLevel2.Item.Gbx	ObstacleTurnstile4mDoubleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleRightLevel0.Item.Gbx	ObstacleTurnstile4mDoubleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleRightLevel1.Item.Gbx	ObstacleTurnstile4mDoubleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mDoubleRightLevel2.Item.Gbx	ObstacleTurnstile4mDoubleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimple.Item.Gbx	ObstacleTurnstile4mSimple	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleLeftLevel0.Item.Gbx	ObstacleTurnstile4mSimpleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleLeftLevel1.Item.Gbx	ObstacleTurnstile4mSimpleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleLeftLevel2.Item.Gbx	ObstacleTurnstile4mSimpleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleOscillateLevel0.Item.Gbx	ObstacleTurnstile4mSimpleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleOscillateLevel1.Item.Gbx	ObstacleTurnstile4mSimpleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleOscillateLevel2.Item.Gbx	ObstacleTurnstile4mSimpleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleRightLevel0.Item.Gbx	ObstacleTurnstile4mSimpleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleRightLevel1.Item.Gbx	ObstacleTurnstile4mSimpleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mSimpleRightLevel2.Item.Gbx	ObstacleTurnstile4mSimpleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTriple.Item.Gbx	ObstacleTurnstile4mTriple	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleLeftLevel0.Item.Gbx	ObstacleTurnstile4mTripleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleLeftLevel1.Item.Gbx	ObstacleTurnstile4mTripleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleLeftLevel2.Item.Gbx	ObstacleTurnstile4mTripleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleOscillateLevel0.Item.Gbx	ObstacleTurnstile4mTripleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleOscillateLevel1.Item.Gbx	ObstacleTurnstile4mTripleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleOscillateLevel2.Item.Gbx	ObstacleTurnstile4mTripleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleRightLevel0.Item.Gbx	ObstacleTurnstile4mTripleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleRightLevel1.Item.Gbx	ObstacleTurnstile4mTripleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile4mTripleRightLevel2.Item.Gbx	ObstacleTurnstile4mTripleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDouble.Item.Gbx	ObstacleTurnstile8mDouble	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleLeftLevel0.Item.Gbx	ObstacleTurnstile8mDoubleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleLeftLevel1.Item.Gbx	ObstacleTurnstile8mDoubleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleLeftLevel2.Item.Gbx	ObstacleTurnstile8mDoubleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleOscillateLevel0.Item.Gbx	ObstacleTurnstile8mDoubleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleOscillateLevel1.Item.Gbx	ObstacleTurnstile8mDoubleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleOscillateLevel2.Item.Gbx	ObstacleTurnstile8mDoubleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleRightLevel0.Item.Gbx	ObstacleTurnstile8mDoubleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleRightLevel1.Item.Gbx	ObstacleTurnstile8mDoubleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mDoubleRightLevel2.Item.Gbx	ObstacleTurnstile8mDoubleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimple.Item.Gbx	ObstacleTurnstile8mSimple	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleLeftLevel0.Item.Gbx	ObstacleTurnstile8mSimpleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleLeftLevel1.Item.Gbx	ObstacleTurnstile8mSimpleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleLeftLevel2.Item.Gbx	ObstacleTurnstile8mSimpleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleOscillateLevel0.Item.Gbx	ObstacleTurnstile8mSimpleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleOscillateLevel1.Item.Gbx	ObstacleTurnstile8mSimpleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleOscillateLevel2.Item.Gbx	ObstacleTurnstile8mSimpleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleRightLevel0.Item.Gbx	ObstacleTurnstile8mSimpleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleRightLevel1.Item.Gbx	ObstacleTurnstile8mSimpleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mSimpleRightLevel2.Item.Gbx	ObstacleTurnstile8mSimpleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTriple.Item.Gbx	ObstacleTurnstile8mTriple	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleLeftLevel0.Item.Gbx	ObstacleTurnstile8mTripleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleLeftLevel1.Item.Gbx	ObstacleTurnstile8mTripleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleLeftLevel2.Item.Gbx	ObstacleTurnstile8mTripleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleOscillateLevel0.Item.Gbx	ObstacleTurnstile8mTripleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleOscillateLevel1.Item.Gbx	ObstacleTurnstile8mTripleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleOscillateLevel2.Item.Gbx	ObstacleTurnstile8mTripleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleRightLevel0.Item.Gbx	ObstacleTurnstile8mTripleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleRightLevel1.Item.Gbx	ObstacleTurnstile8mTripleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/ObstacleTurnstile8mTripleRightLevel2.Item.Gbx	ObstacleTurnstile8mTripleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	RedIsland/Items/Stadium/PodiumBase.Item.Gbx	PodiumBase	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/PodiumDisk.Item.Gbx	PodiumDisk	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/RaceScreen6x1.Item.Gbx	RaceScreen6x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/RaceScreen6x1Small.Item.Gbx	RaceScreen6x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/RampHigh.Item.Gbx	RampHigh	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/RampHighv2.Item.Gbx	RampHighv2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/RampLow.Item.Gbx	RampLow	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/RampLowv2.Item.Gbx	RampLowv2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/RampMed.Item.Gbx	RampMed	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/RampMedv2.Item.Gbx	RampMedv2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/RoadSign.Item.Gbx	RoadSign	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/RoadSignB.Item.Gbx	RoadSignB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/RoadSignC.Item.Gbx	RoadSignC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/RoadSignWrongWay.Item.Gbx	RoadSignWrongWay	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/Screen155.Item.Gbx	Screen155	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen155Small.Item.Gbx	Screen155Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen16x9.Item.Gbx	Screen16x9	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen16x9Small.Item.Gbx	Screen16x9Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen16x9VeryBig.Item.Gbx	Screen16x9VeryBig	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/Screen1x1.Item.Gbx	Screen1x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen1x1Small.Item.Gbx	Screen1x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen2x1.Item.Gbx	Screen2x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen2x1Small.Item.Gbx	Screen2x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen2x3.Item.Gbx	Screen2x3	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen2x3Big.Item.Gbx	Screen2x3Big	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen2x3Small.Item.Gbx	Screen2x3Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen2x3VeryBig.Item.Gbx	Screen2x3VeryBig	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/Screen4x1.Item.Gbx	Screen4x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Screen4x1Small.Item.Gbx	Screen4x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Show.Item.Gbx	Show	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowFogger16m.Item.Gbx	ShowFogger16m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowFogger8m.Item.Gbx	ShowFogger8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowFoggerWithLight16m.Item.Gbx	ShowFoggerWithLight16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/ShowFoggerWithLight8m.Item.Gbx	ShowFoggerWithLight8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/ShowLight4Spots.Item.Gbx	ShowLight4Spots	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/ShowLightRamp4m.Item.Gbx	ShowLightRamp4m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/ShowLightRamp8m.Item.Gbx	ShowLightRamp8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/ShowLights.Item.Gbx	ShowLights	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRace.Item.Gbx	ShowRace	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigStraight16m.Item.Gbx	ShowRigStraight16m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigStraight2m.Item.Gbx	ShowRigStraight2m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigStraight32m.Item.Gbx	ShowRigStraight32m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigStraight8m.Item.Gbx	ShowRigStraight8m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve1In.Item.Gbx	ShowRigSupportCurve1In	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve1InBack.Item.Gbx	ShowRigSupportCurve1InBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve1InFront.Item.Gbx	ShowRigSupportCurve1InFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve1Out.Item.Gbx	ShowRigSupportCurve1Out	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve1OutBack.Item.Gbx	ShowRigSupportCurve1OutBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve1OutFront.Item.Gbx	ShowRigSupportCurve1OutFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve2In.Item.Gbx	ShowRigSupportCurve2In	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve2InBack.Item.Gbx	ShowRigSupportCurve2InBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve2InFront.Item.Gbx	ShowRigSupportCurve2InFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve2Out.Item.Gbx	ShowRigSupportCurve2Out	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve2OutBack.Item.Gbx	ShowRigSupportCurve2OutBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve2OutFront.Item.Gbx	ShowRigSupportCurve2OutFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve3In.Item.Gbx	ShowRigSupportCurve3In	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve3InBack.Item.Gbx	ShowRigSupportCurve3InBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve3InFront.Item.Gbx	ShowRigSupportCurve3InFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve3Out.Item.Gbx	ShowRigSupportCurve3Out	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve3OutBack.Item.Gbx	ShowRigSupportCurve3OutBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigSupportCurve3OutFront.Item.Gbx	ShowRigSupportCurve3OutFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowRigVertical8m.Item.Gbx	ShowRigVertical8m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowScreen.Item.Gbx	ShowScreen	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowSpeaker.Item.Gbx	ShowSpeaker	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowSpeaker1X4.Item.Gbx	ShowSpeaker1X4	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowSpeakerB.Item.Gbx	ShowSpeakerB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowSpeakerRamp8m.Item.Gbx	ShowSpeakerRamp8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowSpeakerRamp8mB.Item.Gbx	ShowSpeakerRamp8mB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowSpeakers.Item.Gbx	ShowSpeakers	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/ShowTorch.Item.Gbx	ShowTorch	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/ShowTorchSmall.Item.Gbx	ShowTorchSmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/Sparkler16m.Item.Gbx	Sparkler16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/Sparkler8m.Item.Gbx	Sparkler8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/SupportConnectorX1.Item.Gbx	SupportConnectorX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX2.Item.Gbx	SupportConnectorX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX2Corner.Item.Gbx	SupportConnectorX2Corner	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX3.Item.Gbx	SupportConnectorX3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX3Corner.Item.Gbx	SupportConnectorX3Corner	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX4.Item.Gbx	SupportConnectorX4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX4Corner.Item.Gbx	SupportConnectorX4Corner	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX5.Item.Gbx	SupportConnectorX5	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportConnectorX6.Item.Gbx	SupportConnectorX6	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTruss16m.Item.Gbx	SupportTruss16m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTruss32m.Item.Gbx	SupportTruss32m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTruss64m.Item.Gbx	SupportTruss64m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTruss8m.Item.Gbx	SupportTruss8m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTrussBase.Item.Gbx	SupportTrussBase	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTrussBaseSimple.Item.Gbx	SupportTrussBaseSimple	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTrussConnector.Item.Gbx	SupportTrussConnector	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubeCornerX1.Item.Gbx	SupportTubeCornerX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubeDiagX1.Item.Gbx	SupportTubeDiagX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubePrefabClosed1D.Item.Gbx	SupportTubePrefabClosed1D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubePrefabClosed2D.Item.Gbx	SupportTubePrefabClosed2D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubePrefabClosed3D.Item.Gbx	SupportTubePrefabClosed3D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubePrefabOpen1D.Item.Gbx	SupportTubePrefabOpen1D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubePrefabOpen2D.Item.Gbx	SupportTubePrefabOpen2D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubePrefabOpen3D.Item.Gbx	SupportTubePrefabOpen3D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubeStraightX1.Item.Gbx	SupportTubeStraightX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubeStraightX2.Item.Gbx	SupportTubeStraightX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubeStraightX3.Item.Gbx	SupportTubeStraightX3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/SupportTubeStraightX4.Item.Gbx	SupportTubeStraightX4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/TrackBarrier4m.Item.Gbx	TrackBarrier4m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/TrackBarrier4mB.Item.Gbx	TrackBarrier4mB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/TrackBarrier4mC.Item.Gbx	TrackBarrier4mC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/TunnelSupportArch16m.Item.Gbx	TunnelSupportArch16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/TunnelSupportArch8m.Item.Gbx	TunnelSupportArch8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/TunnelSupportArchCenter.Item.Gbx	TunnelSupportArchCenter	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Stadium/TunnelSupportHalfArch16m.Item.Gbx	TunnelSupportHalfArch16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/TunnelSupportHalfArch8m.Item.Gbx	TunnelSupportHalfArch8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	RedIsland/Items/Stadium/TunnelSupportPillar16m.Item.Gbx	TunnelSupportPillar16m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/TunnelSupportPillar8m.Item.Gbx	TunnelSupportPillar8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/TunnelSupportPillarLarge16m.Item.Gbx	TunnelSupportPillarLarge16m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Stadium/TunnelSupportPillarLarge8m.Item.Gbx	TunnelSupportPillarLarge8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	RedIsland/Items/Vegetation/Bush.Item.Gbx	Bush	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushBig.Item.Gbx	BushBig	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushBigA.Item.Gbx	BushBigA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushBigB.Item.Gbx	BushBigB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushBigC.Item.Gbx	BushBigC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushBigD.Item.Gbx	BushBigD	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushMedium.Item.Gbx	BushMedium	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushMediumA.Item.Gbx	BushMediumA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushMediumB.Item.Gbx	BushMediumB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushMediumC.Item.Gbx	BushMediumC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushMediumD.Item.Gbx	BushMediumD	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushMediumE.Item.Gbx	BushMediumE	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushSmall.Item.Gbx	BushSmall	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushSmallA.Item.Gbx	BushSmallA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushSmallB.Item.Gbx	BushSmallB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/BushSmallC.Item.Gbx	BushSmallC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/Cactus.Item.Gbx	Cactus	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusBig.Item.Gbx	CactusBig	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusBigA.Item.Gbx	CactusBigA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusBigB.Item.Gbx	CactusBigB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusBigC.Item.Gbx	CactusBigC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusBigD.Item.Gbx	CactusBigD	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusBigE.Item.Gbx	CactusBigE	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusMedium.Item.Gbx	CactusMedium	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusMediumA.Item.Gbx	CactusMediumA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusMediumB.Item.Gbx	CactusMediumB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusMediumC.Item.Gbx	CactusMediumC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusMediumD.Item.Gbx	CactusMediumD	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusSmall.Item.Gbx	CactusSmall	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusSmallA.Item.Gbx	CactusSmallA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusSmallB.Item.Gbx	CactusSmallB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusSmallC.Item.Gbx	CactusSmallC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusSmallD.Item.Gbx	CactusSmallD	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/CactusSmallE.Item.Gbx	CactusSmallE	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/FlowerSmallA.Item.Gbx	FlowerSmallA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/FlowerSmallB.Item.Gbx	FlowerSmallB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/GrassA.Item.Gbx	GrassA	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/GrassB.Item.Gbx	GrassB	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/GrassC.Item.Gbx	GrassC	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/GrassD.Item.Gbx	GrassD	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePine.Item.Gbx	TreePine	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineBig.Item.Gbx	TreePineBig	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineBigA1.Item.Gbx	TreePineBigA1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineBigA2.Item.Gbx	TreePineBigA2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineBigA3.Item.Gbx	TreePineBigA3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineMedium.Item.Gbx	TreePineMedium	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineMediumA1.Item.Gbx	TreePineMediumA1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineMediumA2.Item.Gbx	TreePineMediumA2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineMediumA3.Item.Gbx	TreePineMediumA3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineSmall.Item.Gbx	TreePineSmall	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineSmallA1.Item.Gbx	TreePineSmallA1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineSmallA2.Item.Gbx	TreePineSmallA2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	RedIsland/Items/Vegetation/TreePineSmallA3.Item.Gbx	TreePineSmallA3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/CactusMedium.Item.Gbx	CactusMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/CactusVerySmall.Item.Gbx	CactusVerySmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/CherryTreeMedium.Item.Gbx	CherryTreeMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/CypressDirtTall.Item.Gbx	CypressDirtTall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/CypressTall.Item.Gbx	CypressTall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Fall.Item.Gbx	Fall	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/FallTreeBig.Item.Gbx	FallTreeBig	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FallTreeMedium.Item.Gbx	FallTreeMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FallTreeSmall.Item.Gbx	FallTreeSmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FallTreeTall.Item.Gbx	FallTreeTall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FallTreeVerySmall.Item.Gbx	FallTreeVerySmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FirMedium.Item.Gbx	FirMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FirSnowMedium.Item.Gbx	FirSnowMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FirSnowTall.Item.Gbx	FirSnowTall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FirTall.Item.Gbx	FirTall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Flag16m.Item.Gbx	Flag16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Flag8m.Item.Gbx	Flag8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/FrozenTreeBig.Item.Gbx	FrozenTreeBig	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FrozenTreeMedium.Item.Gbx	FrozenTreeMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FrozenTreeSmall.Item.Gbx	FrozenTreeSmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FrozenTreeTall.Item.Gbx	FrozenTreeTall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/FrozenTreeVerySmall.Item.Gbx	FrozenTreeVerySmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/GateCheckpointCenter16m.Item.Gbx	GateCheckpointCenter16m	Ornament	Checkpoint	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/GateCheckpointCenter16mv2.Item.Gbx	GateCheckpointCenter16m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointCenter24m.Item.Gbx	GateCheckpointCenter24m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointCenter32m.Item.Gbx	GateCheckpointCenter32m	Ornament	Checkpoint	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/GateCheckpointCenter32mv2.Item.Gbx	GateCheckpointCenter32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointCenter8m.Item.Gbx	GateCheckpointCenter8m	Ornament	Checkpoint	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/GateCheckpointCenter8mv2.Item.Gbx	GateCheckpointCenter32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointLeft16m.Item.Gbx	GateCheckpointLeft16m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointLeft32m.Item.Gbx	GateCheckpointLeft32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointLeft8m.Item.Gbx	GateCheckpointLeft8m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointRight16m.Item.Gbx	GateCheckpointRight16m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointRight32m.Item.Gbx	GateCheckpointRight32m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateCheckpointRight8m.Item.Gbx	GateCheckpointRight8m	Ornament	Checkpoint	none	no	no	27	0	
+ok	Stadium/Items/GateFinish16m.Item.Gbx	GateFinish16m	Ornament	Finish	none	no	no	27	0	
+ok	Stadium/Items/GateFinish32m.Item.Gbx	GateFinish32m	Ornament	Finish	none	no	no	27	0	
+ok	Stadium/Items/GateFinish8m.Item.Gbx	GateFinish8m	Ornament	Finish	none	no	no	27	0	
+ok	Stadium/Items/GateFinishCenter16m.Item.Gbx	GateFinishCenter16m	Ornament	Finish	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/GateFinishCenter16mv2.Item.Gbx	GateFinishCenter16mv2	Ornament	Finish	none	no	no	27	0	
+ok	Stadium/Items/GateFinishCenter32m.Item.Gbx	GateFinishCenter32m	Ornament	Finish	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/GateFinishCenter32mv2.Item.Gbx	GateFinishCenter32mv2	Ornament	Finish	none	no	no	27	0	
+ok	Stadium/Items/GateFinishCenter8m.Item.Gbx	GateFinishCenter8m	Ornament	Finish	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/GateFinishCenter8mv2.Item.Gbx	GateFinishCenter8mv2	Ornament	Finish	none	no	no	27	0	
+ok	Stadium/Items/GateGameplayDesert16m.Item.Gbx	GateGameplayDesert16m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayDesert24m.Item.Gbx	GateGameplayDesert24m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayDesert32m.Item.Gbx	GateGameplayDesert32m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayDesert4m.Item.Gbx	GateGameplayDesert4m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayDesert8m.Item.Gbx	GateGameplayDesert8m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayRally16m.Item.Gbx	GateGameplayRally16m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayRally24m.Item.Gbx	GateGameplayRally24m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayRally32m.Item.Gbx	GateGameplayRally32m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayRally4m.Item.Gbx	GateGameplayRally4m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayRally8m.Item.Gbx	GateGameplayRally8m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplaySnow16m.Item.Gbx	GateGameplaySnow16m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplaySnow24m.Item.Gbx	GateGameplaySnow24m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplaySnow32m.Item.Gbx	GateGameplaySnow32m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplaySnow4m.Item.Gbx	GateGameplaySnow4m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplaySnow8m.Item.Gbx	GateGameplaySnow8m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayStadium16m.Item.Gbx	GateGameplayStadium16m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayStadium24m.Item.Gbx	GateGameplayStadium24m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayStadium32m.Item.Gbx	GateGameplayStadium32m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayStadium4m.Item.Gbx	GateGameplayStadium4m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateGameplayStadium8m.Item.Gbx	GateGameplayStadium8m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateMultilapCenter16m.Item.Gbx	GateMultilapCenter16m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapCenter32m.Item.Gbx	GateMultilapCenter32m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapCenter8m.Item.Gbx	GateMultilapCenter8m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapLeft16m.Item.Gbx	GateMultilapLeft16m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapLeft32m.Item.Gbx	GateMultilapLeft32m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapLeft8m.Item.Gbx	GateMultilapLeft8m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapRight16m.Item.Gbx	GateMultilapRight16m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapRight32m.Item.Gbx	GateMultilapRight32m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateMultilapRight8m.Item.Gbx	GateMultilapRight8m	Ornament	StartFinish	none	no	no	27	0	
+ok	Stadium/Items/GateSpecial16mBoost.Item.Gbx	GateSpecial16mBoost	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mBoost2.Item.Gbx	GateSpecial16mBoost2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mCruise.Item.Gbx	GateSpecial16mCruise	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mFragile.Item.Gbx	GateSpecial16mFragile	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mNoBrake.Item.Gbx	GateSpecial16mNoBrake	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mNoEngine.Item.Gbx	GateSpecial16mNoEngine	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mNoSteering.Item.Gbx	GateSpecial16mNoSteering	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mReset.Item.Gbx	GateSpecial16mReset	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mSlowMotion.Item.Gbx	GateSpecial16mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mTurbo.Item.Gbx	GateSpecial16mTurbo	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mTurbo2.Item.Gbx	GateSpecial16mTurbo2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial16mTurboRoulette.Item.Gbx	GateSpecial16mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mBoost.Item.Gbx	GateSpecial24mBoost	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mBoost2.Item.Gbx	GateSpecial24mBoost2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mCruise.Item.Gbx	GateSpecial24mCruise	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mFragile.Item.Gbx	GateSpecial24mFragile	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mNoBrake.Item.Gbx	GateSpecial24mNoBrake	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mNoEngine.Item.Gbx	GateSpecial24mNoEngine	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mNoSteering.Item.Gbx	GateSpecial24mNoSteering	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mReset.Item.Gbx	GateSpecial24mReset	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mSlowMotion.Item.Gbx	GateSpecial24mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mTurbo.Item.Gbx	GateSpecial24mTurbo	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mTurbo2.Item.Gbx	GateSpecial24mTurbo2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial24mTurboRoulette.Item.Gbx	GateSpecial24mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mBoost.Item.Gbx	GateSpecial32mBoost	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mBoost2.Item.Gbx	GateSpecial32mBoost2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mCruise.Item.Gbx	GateSpecial32mCruise	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mFragile.Item.Gbx	GateSpecial32mFragile	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mNoBrake.Item.Gbx	GateSpecial32mNoBrake	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mNoEngine.Item.Gbx	GateSpecial32mNoEngine	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mNoSteering.Item.Gbx	GateSpecial32mNoSteering	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mReset.Item.Gbx	GateSpecial32mReset	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mSlowMotion.Item.Gbx	GateSpecial32mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mTurbo.Item.Gbx	GateSpecial32mTurbo	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mTurbo2.Item.Gbx	GateSpecial32mTurbo2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial32mTurboRoulette.Item.Gbx	GateSpecial32mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mBoost.Item.Gbx	GateSpecial4mBoost	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mBoost2.Item.Gbx	GateSpecial4mBoost2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mCruise.Item.Gbx	GateSpecial4mCruise	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mFragile.Item.Gbx	GateSpecial4mFragile	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mNoBrake.Item.Gbx	GateSpecial4mNoBrake	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mNoEngine.Item.Gbx	GateSpecial4mNoEngine	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mNoSteering.Item.Gbx	GateSpecial4mNoSteering	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mReset.Item.Gbx	GateSpecial4mReset	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mSlowMotion.Item.Gbx	GateSpecial4mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mTurbo.Item.Gbx	GateSpecial4mTurbo	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mTurbo2.Item.Gbx	GateSpecial4mTurbo2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial4mTurboRoulette.Item.Gbx	GateSpecial4mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mBoost.Item.Gbx	GateSpecial8mBoost	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mBoost2.Item.Gbx	GateSpecial8mBoost2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mCruise.Item.Gbx	GateSpecial8mCruise	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mFragile.Item.Gbx	GateSpecial8mFragile	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mNoBrake.Item.Gbx	GateSpecial8mNoBrake	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mNoEngine.Item.Gbx	GateSpecial8mNoEngine	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mNoSteering.Item.Gbx	GateSpecial8mNoSteering	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mReset.Item.Gbx	GateSpecial8mReset	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mSlowMotion.Item.Gbx	GateSpecial8mSlowMotion	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mTurbo.Item.Gbx	GateSpecial8mTurbo	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mTurbo2.Item.Gbx	GateSpecial8mTurbo2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateSpecial8mTurboRoulette.Item.Gbx	GateSpecial8mTurboRoulette	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/GateStartCenter16m.Item.Gbx	GateStartCenter16m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartCenter32m.Item.Gbx	GateStartCenter32m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartCenter8m.Item.Gbx	GateStartCenter8m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartLeft16m.Item.Gbx	GateStartLeft16m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartLeft32m.Item.Gbx	GateStartLeft32m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartLeft8m.Item.Gbx	GateStartLeft8m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartRight16m.Item.Gbx	GateStartRight16m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartRight32m.Item.Gbx	GateStartRight32m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateStartRight8m.Item.Gbx	GateStartRight8m	Ornament	Start	none	no	no	27	0	
+ok	Stadium/Items/GateSupport.Item.Gbx	GateSupport	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableBorder1mCornerIn.Item.Gbx	InflatableBorder1mCornerIn	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCornerOut.Item.Gbx	InflatableBorder1mCornerOut	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve0Out.Item.Gbx	InflatableBorder1mCurve0Out	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve1In.Item.Gbx	InflatableBorder1mCurve1In	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve1Out.Item.Gbx	InflatableBorder1mCurve1Out	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve2In.Item.Gbx	InflatableBorder1mCurve2In	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve2Out.Item.Gbx	InflatableBorder1mCurve2Out	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve3In.Item.Gbx	InflatableBorder1mCurve3In	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve3Out.Item.Gbx	InflatableBorder1mCurve3Out	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve4In.Item.Gbx	InflatableBorder1mCurve4In	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve4Out.Item.Gbx	InflatableBorder1mCurve4Out	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mCurve5In.Item.Gbx	InflatableBorder1mCurve5In	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope1BaseLeft.Item.Gbx	InflatableBorder1mSlope1BaseLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope1BaseRight.Item.Gbx	InflatableBorder1mSlope1BaseRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope1StraightLeft.Item.Gbx	InflatableBorder1mSlope1StraightLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope1StraightRight.Item.Gbx	InflatableBorder1mSlope1StraightRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope2BaseLeft.Item.Gbx	InflatableBorder1mSlope2BaseLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope2BaseRight.Item.Gbx	InflatableBorder1mSlope2BaseRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope2StraightLeft.Item.Gbx	InflatableBorder1mSlope2StraightLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope2StraightRight.Item.Gbx	InflatableBorder1mSlope2StraightRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4BaseLeft.Item.Gbx	InflatableBorder1mSlope4BaseLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4BaseRight.Item.Gbx	InflatableBorder1mSlope4BaseRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4EndLeft.Item.Gbx	InflatableBorder1mSlope4EndLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4EndRight.Item.Gbx	InflatableBorder1mSlope4EndRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4StartLeft.Item.Gbx	InflatableBorder1mSlope4StartLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4StartRight.Item.Gbx	InflatableBorder1mSlope4StartRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4StraightLeft.Item.Gbx	InflatableBorder1mSlope4StraightLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope4StraightRight.Item.Gbx	InflatableBorder1mSlope4StraightRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope8EndLeft.Item.Gbx	InflatableBorder1mSlope8EndLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope8EndRight.Item.Gbx	InflatableBorder1mSlope8EndRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope8StartLeft.Item.Gbx	InflatableBorder1mSlope8StartLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope8StartRight.Item.Gbx	InflatableBorder1mSlope8StartRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope8StraightLeft.Item.Gbx	InflatableBorder1mSlope8StraightLeft	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mSlope8StraightRight.Item.Gbx	InflatableBorder1mSlope8StraightRight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mStraight16m.Item.Gbx	InflatableBorder1mStraight16m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mStraight1m.Item.Gbx	InflatableBorder1mStraight1m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mStraight2m.Item.Gbx	InflatableBorder1mStraight2m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableBorder1mStraight4m.Item.Gbx	InflatableBorder1mStraight4m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableBorder1mStraight8m.Item.Gbx	InflatableBorder1mStraight8m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To1mSlopeBase1x1.Item.Gbx	InflatableMat0To1mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To1mSlopeStraight1x1.Item.Gbx	InflatableMat0To1mSlopeStraight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To1mSlopeStraightDiagIn.Item.Gbx	InflatableMat0To1mSlopeStraightDiagIn	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To1mSlopeStraightDiagOut.Item.Gbx	InflatableMat0To1mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To1mSlopeStraightDiagOutv2.Item.Gbx	InflatableMat0To1mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To2mSlopeBase1x1.Item.Gbx	InflatableMat0To2mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To2mSlopeStraight1x1.Item.Gbx	InflatableMat0To2mSlopeStraight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To2mSlopeStraightDiagIn.Item.Gbx	InflatableMat0To2mSlopeStraightDiagIn	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To2mSlopeStraightDiagOut.Item.Gbx	InflatableMat0To2mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To2mSlopeStraightDiagOutv2.Item.Gbx	InflatableMat0To2mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To4mSlopeBase1x1.Item.Gbx	InflatableMat0To4mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To4mSlopeStraight1x1.Item.Gbx	InflatableMat0To4mSlopeStraight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To4mSlopeStraightDiagIn.Item.Gbx	InflatableMat0To4mSlopeStraightDiagIn	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To4mSlopeStraightDiagOut.Item.Gbx	InflatableMat0To4mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat0To4mSlopeStraightDiagOutv2.Item.Gbx	InflatableMat0To4mSlopeStraightDiagOut	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mCurve1.Item.Gbx	InflatableMat1mCurve1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mCurve2.Item.Gbx	InflatableMat1mCurve2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mCurve3.Item.Gbx	InflatableMat1mCurve3	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mCurve4.Item.Gbx	InflatableMat1mCurve4	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mSlope4Straight1x1.Item.Gbx	InflatableMat1mSlope4Straight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mSlope8End1x1.Item.Gbx	InflatableMat1mSlope8End1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mSlope8Start1x1.Item.Gbx	InflatableMat1mSlope8Start1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mSlope8Straight1x1.Item.Gbx	InflatableMat1mSlope8Straight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mSlopeBase1x1.Item.Gbx	InflatableMat1mSlopeBase1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mSlopeEnd1x1.Item.Gbx	InflatableMat1mSlopeEnd1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mSlopeStart1x1.Item.Gbx	InflatableMat1mSlopeStart1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat1mStraight1x1.Item.Gbx	InflatableMat1mStraight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat2mCurve1.Item.Gbx	InflatableMat2mCurve1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat2mCurve2.Item.Gbx	InflatableMat2mCurve2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat2mCurve3.Item.Gbx	InflatableMat2mCurve3	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat2mCurve4.Item.Gbx	InflatableMat2mCurve4	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat2mStraight1x1.Item.Gbx	InflatableMat2mStraight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat4mCurve1.Item.Gbx	InflatableMat4mCurve1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat4mCurve2.Item.Gbx	InflatableMat4mCurve2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat4mCurve3.Item.Gbx	InflatableMat4mCurve3	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat4mCurve4.Item.Gbx	InflatableMat4mCurve4	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat4mStraight1x1.Item.Gbx	InflatableMat4mStraight1x1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableMat4mToTube6mCenter.Item.Gbx	InflatableMat4mToTube6mCenter	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableMat4mToTube6mCenterX2.Item.Gbx	InflatableMat4mToTube6mCenterX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableMat4mToTube6mFlat.Item.Gbx	InflatableMat4mToTube6mFlat	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableMat4mToTube6mFlatX2.Item.Gbx	InflatableMat4mToTube6mFlatX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeCurve1.Item.Gbx	InflatableTubeCurve1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeCurve2.Item.Gbx	InflatableTubeCurve2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeCurve3.Item.Gbx	InflatableTubeCurve3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeCurve4.Item.Gbx	InflatableTubeCurve4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeSlope2Straight.Item.Gbx	InflatableTubeSlope2Straight	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeSlope4Straight.Item.Gbx	InflatableTubeSlope4Straight	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeSlopeBase.Item.Gbx	InflatableTubeSlopeBase	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeSlopeEnd.Item.Gbx	InflatableTubeSlopeEnd	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeSlopeEndX2.Item.Gbx	InflatableTubeSlopeEndX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeSlopeStart.Item.Gbx	InflatableTubeSlopeStart	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeSlopeStartX2.Item.Gbx	InflatableTubeSlopeStartX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeStraight.Item.Gbx	InflatableTubeStraight	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/InflatableTubeStraightX2.Item.Gbx	InflatableTubeStraightX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/InflatableTubeStraightX4.Item.Gbx	InflatableTubeStraightX4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Lamp.Item.Gbx	Lamp	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/LampB.Item.Gbx	LampB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/LampC.Item.Gbx	LampC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/LampSmall.Item.Gbx	LampSmall	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/LampSmallB.Item.Gbx	LampSmallB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/LampSmallC.Item.Gbx	LampSmallC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/LightCone2mX2.Item.Gbx	LightCone2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCone4mX2.Item.Gbx	LightCone4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCone8mX2.Item.Gbx	LightCone8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCube2m.Item.Gbx	LightCube2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCube2mX2.Item.Gbx	LightCube2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCube4m.Item.Gbx	LightCube4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCube4mX2.Item.Gbx	LightCube4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCube8m.Item.Gbx	LightCube8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCube8mX2.Item.Gbx	LightCube8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeArch2m.Item.Gbx	LightCubeArch2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeArch4m.Item.Gbx	LightCubeArch4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeArch8m.Item.Gbx	LightCubeArch8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlope2m.Item.Gbx	LightCubeSlope2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlope2mX2.Item.Gbx	LightCubeSlope2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlope4m.Item.Gbx	LightCubeSlope4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlope4mX2.Item.Gbx	LightCubeSlope4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlope8m.Item.Gbx	LightCubeSlope8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlope8mX2.Item.Gbx	LightCubeSlope8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeCornerOut2m.Item.Gbx	LightCubeSlopeCornerOut2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeCornerOut2mX2.Item.Gbx	LightCubeSlopeCornerOut2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeCornerOut4m.Item.Gbx	LightCubeSlopeCornerOut4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeCornerOut4mX2.Item.Gbx	LightCubeSlopeCornerOut4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeCornerOut8m.Item.Gbx	LightCubeSlopeCornerOut8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeCornerOut8mX2.Item.Gbx	LightCubeSlopeCornerOut8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeDiag2m.Item.Gbx	LightCubeSlopeDiag2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeDiag2mX2.Item.Gbx	LightCubeSlopeDiag2mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeDiag4m.Item.Gbx	LightCubeSlopeDiag4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeDiag4mX2.Item.Gbx	LightCubeSlopeDiag4mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeDiag8m.Item.Gbx	LightCubeSlopeDiag8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCubeSlopeDiag8mX2.Item.Gbx	LightCubeSlopeDiag8mX2	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCylinder2m.Item.Gbx	LightCylinder2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCylinder4m.Item.Gbx	LightCylinder4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCylinder8m.Item.Gbx	LightCylinder8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCylinderQuarter2m.Item.Gbx	LightCylinderQuarter2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCylinderQuarter4m.Item.Gbx	LightCylinderQuarter4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightCylinderQuarter8m.Item.Gbx	LightCylinderQuarter8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphere2m.Item.Gbx	LightSphere2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphere4m.Item.Gbx	LightSphere4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphere8m.Item.Gbx	LightSphere8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphereDemi2m.Item.Gbx	LightSphereDemi2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphereDemi4m.Item.Gbx	LightSphereDemi4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphereDemi8m.Item.Gbx	LightSphereDemi8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphereQuarter2m.Item.Gbx	LightSphereQuarter2m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphereQuarter4m.Item.Gbx	LightSphereQuarter4m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightSphereQuarter8m.Item.Gbx	LightSphereQuarter8m	Ornament	None	none	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig16m.Item.Gbx	LightTubeBig16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig16mCurve.Item.Gbx	LightTubeBig16mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig16mDiagCube.Item.Gbx	LightTubeBig16mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig16mDiagSquare.Item.Gbx	LightTubeBig16mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig32m.Item.Gbx	LightTubeBig32m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig32mCurve.Item.Gbx	LightTubeBig32mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig32mDiagCube.Item.Gbx	LightTubeBig32mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig32mDiagSquare.Item.Gbx	LightTubeBig32mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig4m.Item.Gbx	LightTubeBig4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig4mCurve.Item.Gbx	LightTubeBig4mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig4mDiagCube.Item.Gbx	LightTubeBig4mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig4mDiagSquare.Item.Gbx	LightTubeBig4mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig64mCurve.Item.Gbx	LightTubeBig64mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig8m.Item.Gbx	LightTubeBig8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig8mCurve.Item.Gbx	LightTubeBig8mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig8mDiagCube.Item.Gbx	LightTubeBig8mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig8mDiagSquare.Item.Gbx	LightTubeBig8mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeBig96mCurve.Item.Gbx	LightTubeBig96mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall16m.Item.Gbx	LightTubeSmall16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall16mCurve.Item.Gbx	LightTubeSmall16mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall16mDiagCube.Item.Gbx	LightTubeSmall16mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall16mDiagSquare.Item.Gbx	LightTubeSmall16mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall32m.Item.Gbx	LightTubeSmall32m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall32mCurve.Item.Gbx	LightTubeSmall32mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall32mDiagCube.Item.Gbx	LightTubeSmall32mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall32mDiagSquare.Item.Gbx	LightTubeSmall32mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall4m.Item.Gbx	LightTubeSmall4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall4mCurve.Item.Gbx	LightTubeSmall4mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall4mDiagCube.Item.Gbx	LightTubeSmall4mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall4mDiagSquare.Item.Gbx	LightTubeSmall4mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall64mCurve.Item.Gbx	LightTubeSmall64mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall8m.Item.Gbx	LightTubeSmall8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall8mCurve.Item.Gbx	LightTubeSmall8mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall8mDiagCube.Item.Gbx	LightTubeSmall8mDiagCube	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall8mDiagSquare.Item.Gbx	LightTubeSmall8mDiagSquare	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/LightTubeSmall96mCurve.Item.Gbx	LightTubeSmall96mCurve	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillar16m.Item.Gbx	ObstaclePillar16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillar2m.Item.Gbx	ObstaclePillar2m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillar4m.Item.Gbx	ObstaclePillar4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillar8m.Item.Gbx	ObstaclePillar8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillarRectangular16m.Item.Gbx	ObstaclePillarRectangular16m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillarRectangular2m.Item.Gbx	ObstaclePillarRectangular2m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillarRectangular4m.Item.Gbx	ObstaclePillarRectangular4m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePillarRectangular8m.Item.Gbx	ObstaclePillarRectangular8m	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePusher16m.Item.Gbx	ObstaclePusher16m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher16mLevel0.Item.Gbx	ObstaclePusher16mLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher16mLevel1.Item.Gbx	ObstaclePusher16mLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher16mLevel2.Item.Gbx	ObstaclePusher16mLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher16mSharpLevel0.Item.Gbx	ObstaclePusher16mSharpLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher16mSharpLevel1.Item.Gbx	ObstaclePusher16mSharpLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher16mSharpLevel2.Item.Gbx	ObstaclePusher16mSharpLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher4m.Item.Gbx	ObstaclePusher4m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstaclePusher4mLevel0.Item.Gbx	ObstaclePusher4mLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher4mLevel1.Item.Gbx	ObstaclePusher4mLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher4mLevel2.Item.Gbx	ObstaclePusher4mLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher4mSharpLevel0.Item.Gbx	ObstaclePusher4mSharpLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher4mSharpLevel1.Item.Gbx	ObstaclePusher4mSharpLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher4mSharpLevel2.Item.Gbx	ObstaclePusher4mSharpLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher8m.Item.Gbx	ObstaclePusher8m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher8mLevel0.Item.Gbx	ObstaclePusher8mLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher8mLevel1.Item.Gbx	ObstaclePusher8mLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher8mLevel2.Item.Gbx	ObstaclePusher8mLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher8mSharpLevel0.Item.Gbx	ObstaclePusher8mSharpLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher8mSharpLevel1.Item.Gbx	ObstaclePusher8mSharpLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstaclePusher8mSharpLevel2.Item.Gbx	ObstaclePusher8mSharpLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mHolesX4.Item.Gbx	ObstacleRotor16mHolesX4	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mHolesX4Level0.Item.Gbx	ObstacleRotor16mHolesX4Level0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mHolesX4Level1.Item.Gbx	ObstacleRotor16mHolesX4Level1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mHolesX4Level2.Item.Gbx	ObstacleRotor16mHolesX4Level2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mHolesX4OscillateLevel0.Item.Gbx	ObstacleRotor16mHolesX4OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mHolesX4OscillateLevel1.Item.Gbx	ObstacleRotor16mHolesX4OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mHolesX4OscillateLevel2.Item.Gbx	ObstacleRotor16mHolesX4OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90.Item.Gbx	ObstacleRotor16mWing90	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90Level0.Item.Gbx	ObstacleRotor16mWing90Level0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90Level1.Item.Gbx	ObstacleRotor16mWing90Level1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90Level2.Item.Gbx	ObstacleRotor16mWing90Level2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90OscillateLevel0.Item.Gbx	ObstacleRotor16mWing90OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90OscillateLevel1.Item.Gbx	ObstacleRotor16mWing90OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90OscillateLevel2.Item.Gbx	ObstacleRotor16mWing90OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90X2.Item.Gbx	ObstacleRotor16mWing90X2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90X2Level0.Item.Gbx	ObstacleRotor16mWing90X2Level0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90X2Level1.Item.Gbx	ObstacleRotor16mWing90X2Level1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90X2Level2.Item.Gbx	ObstacleRotor16mWing90X2Level2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90X2OscillateLevel0.Item.Gbx	ObstacleRotor16mWing90X2OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90X2OscillateLevel1.Item.Gbx	ObstacleRotor16mWing90X2OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor16mWing90X2OscillateLevel2.Item.Gbx	ObstacleRotor16mWing90X2OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mHolesX4.Item.Gbx	ObstacleRotor24mHolesX4	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mHolesX4Level0.Item.Gbx	ObstacleRotor24mHolesX4Level0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mHolesX4Level1.Item.Gbx	ObstacleRotor24mHolesX4Level1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mHolesX4Level2.Item.Gbx	ObstacleRotor24mHolesX4Level2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mHolesX4OscillateLevel0.Item.Gbx	ObstacleRotor24mHolesX4OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mHolesX4OscillateLevel1.Item.Gbx	ObstacleRotor24mHolesX4OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mHolesX4OscillateLevel2.Item.Gbx	ObstacleRotor24mHolesX4OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90.Item.Gbx	ObstacleRotor24mWing90	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90Level0.Item.Gbx	ObstacleRotor24mWing90Level0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90Level1.Item.Gbx	ObstacleRotor24mWing90Level1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90Level2.Item.Gbx	ObstacleRotor24mWing90Level2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90OscillateLevel0.Item.Gbx	ObstacleRotor24mWing90OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90OscillateLevel1.Item.Gbx	ObstacleRotor24mWing90OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90OscillateLevel2.Item.Gbx	ObstacleRotor24mWing90OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90X2.Item.Gbx	ObstacleRotor24mWing90X2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90X2Level0.Item.Gbx	ObstacleRotor24mWing90X2Level0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90X2Level1.Item.Gbx	ObstacleRotor24mWing90X2Level1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90X2Level2.Item.Gbx	ObstacleRotor24mWing90X2Level2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90X2OscillateLevel0.Item.Gbx	ObstacleRotor24mWing90X2OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90X2OscillateLevel1.Item.Gbx	ObstacleRotor24mWing90X2OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotor24mWing90X2OscillateLevel2.Item.Gbx	ObstacleRotor24mWing90X2OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleRotorFrame16m.Item.Gbx	ObstacleRotorFrame16m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstacleRotorFrame24m.Item.Gbx	ObstacleRotorFrame24m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstacleTube6m.Item.Gbx	ObstacleTube6m	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mOscillateLevel0.Item.Gbx	ObstacleTube6mOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mOscillateLevel1.Item.Gbx	ObstacleTube6mOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mOscillateLevel2.Item.Gbx	ObstacleTube6mOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mRotateLevel0.Item.Gbx	ObstacleTube6mRotateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mRotateLevel1.Item.Gbx	ObstacleTube6mRotateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mRotateLevel2.Item.Gbx	ObstacleTube6mRotateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mX2.Item.Gbx	ObstacleTube6mX2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mX2OscillateLevel0.Item.Gbx	ObstacleTube6mX2OscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mX2OscillateLevel1.Item.Gbx	ObstacleTube6mX2OscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mX2OscillateLevel2.Item.Gbx	ObstacleTube6mX2OscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mX2RotateLevel0.Item.Gbx	ObstacleTube6mX2RotateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mX2RotateLevel1.Item.Gbx	ObstacleTube6mX2RotateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTube6mX2RotateLevel2.Item.Gbx	ObstacleTube6mX2RotateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDouble.Item.Gbx	ObstacleTurnstile16mDouble	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleLeftLevel0.Item.Gbx	ObstacleTurnstile16mDoubleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleLeftLevel1.Item.Gbx	ObstacleTurnstile16mDoubleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleLeftLevel2.Item.Gbx	ObstacleTurnstile16mDoubleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleOscillateLevel0.Item.Gbx	ObstacleTurnstile16mDoubleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleOscillateLevel1.Item.Gbx	ObstacleTurnstile16mDoubleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleOscillateLevel2.Item.Gbx	ObstacleTurnstile16mDoubleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleRightLevel0.Item.Gbx	ObstacleTurnstile16mDoubleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleRightLevel1.Item.Gbx	ObstacleTurnstile16mDoubleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mDoubleRightLevel2.Item.Gbx	ObstacleTurnstile16mDoubleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimple.Item.Gbx	ObstacleTurnstile16mSimple	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleLeftLevel0.Item.Gbx	ObstacleTurnstile16mSimpleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleLeftLevel1.Item.Gbx	ObstacleTurnstile16mSimpleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleLeftLevel2.Item.Gbx	ObstacleTurnstile16mSimpleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleOscillateLevel0.Item.Gbx	ObstacleTurnstile16mSimpleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleOscillateLevel1.Item.Gbx	ObstacleTurnstile16mSimpleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleOscillateLevel2.Item.Gbx	ObstacleTurnstile16mSimpleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleRightLevel0.Item.Gbx	ObstacleTurnstile16mSimpleRightLevel0	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ObstacleTurnstile16mSimpleRightLevel1.Item.Gbx	ObstacleTurnstile16mSimpleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mSimpleRightLevel2.Item.Gbx	ObstacleTurnstile16mSimpleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTriple.Item.Gbx	ObstacleTurnstile16mTriple	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleLeftLevel0.Item.Gbx	ObstacleTurnstile16mTripleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleLeftLevel1.Item.Gbx	ObstacleTurnstile16mTripleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleLeftLevel2.Item.Gbx	ObstacleTurnstile16mTripleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleOscillateLevel0.Item.Gbx	ObstacleTurnstile16mTripleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleOscillateLevel1.Item.Gbx	ObstacleTurnstile16mTripleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleOscillateLevel2.Item.Gbx	ObstacleTurnstile16mTripleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleRightLevel0.Item.Gbx	ObstacleTurnstile16mTripleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleRightLevel1.Item.Gbx	ObstacleTurnstile16mTripleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile16mTripleRightLevel2.Item.Gbx	ObstacleTurnstile16mTripleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDouble.Item.Gbx	ObstacleTurnstile4mDouble	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleLeftLevel0.Item.Gbx	ObstacleTurnstile4mDoubleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleLeftLevel1.Item.Gbx	ObstacleTurnstile4mDoubleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleLeftLevel2.Item.Gbx	ObstacleTurnstile4mDoubleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleOscillateLevel0.Item.Gbx	ObstacleTurnstile4mDoubleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleOscillateLevel1.Item.Gbx	ObstacleTurnstile4mDoubleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleOscillateLevel2.Item.Gbx	ObstacleTurnstile4mDoubleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleRightLevel0.Item.Gbx	ObstacleTurnstile4mDoubleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleRightLevel1.Item.Gbx	ObstacleTurnstile4mDoubleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mDoubleRightLevel2.Item.Gbx	ObstacleTurnstile4mDoubleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimple.Item.Gbx	ObstacleTurnstile4mSimple	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleLeftLevel0.Item.Gbx	ObstacleTurnstile4mSimpleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleLeftLevel1.Item.Gbx	ObstacleTurnstile4mSimpleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleLeftLevel2.Item.Gbx	ObstacleTurnstile4mSimpleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleOscillateLevel0.Item.Gbx	ObstacleTurnstile4mSimpleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleOscillateLevel1.Item.Gbx	ObstacleTurnstile4mSimpleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleOscillateLevel2.Item.Gbx	ObstacleTurnstile4mSimpleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleRightLevel0.Item.Gbx	ObstacleTurnstile4mSimpleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleRightLevel1.Item.Gbx	ObstacleTurnstile4mSimpleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mSimpleRightLevel2.Item.Gbx	ObstacleTurnstile4mSimpleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTriple.Item.Gbx	ObstacleTurnstile4mTriple	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleLeftLevel0.Item.Gbx	ObstacleTurnstile4mTripleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleLeftLevel1.Item.Gbx	ObstacleTurnstile4mTripleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleLeftLevel2.Item.Gbx	ObstacleTurnstile4mTripleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleOscillateLevel0.Item.Gbx	ObstacleTurnstile4mTripleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleOscillateLevel1.Item.Gbx	ObstacleTurnstile4mTripleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleOscillateLevel2.Item.Gbx	ObstacleTurnstile4mTripleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleRightLevel0.Item.Gbx	ObstacleTurnstile4mTripleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleRightLevel1.Item.Gbx	ObstacleTurnstile4mTripleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile4mTripleRightLevel2.Item.Gbx	ObstacleTurnstile4mTripleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDouble.Item.Gbx	ObstacleTurnstile8mDouble	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleLeftLevel0.Item.Gbx	ObstacleTurnstile8mDoubleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleLeftLevel1.Item.Gbx	ObstacleTurnstile8mDoubleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleLeftLevel2.Item.Gbx	ObstacleTurnstile8mDoubleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleOscillateLevel0.Item.Gbx	ObstacleTurnstile8mDoubleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleOscillateLevel1.Item.Gbx	ObstacleTurnstile8mDoubleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleOscillateLevel2.Item.Gbx	ObstacleTurnstile8mDoubleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleRightLevel0.Item.Gbx	ObstacleTurnstile8mDoubleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleRightLevel1.Item.Gbx	ObstacleTurnstile8mDoubleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mDoubleRightLevel2.Item.Gbx	ObstacleTurnstile8mDoubleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimple.Item.Gbx	ObstacleTurnstile8mSimple	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleLeftLevel0.Item.Gbx	ObstacleTurnstile8mSimpleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleLeftLevel1.Item.Gbx	ObstacleTurnstile8mSimpleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleLeftLevel2.Item.Gbx	ObstacleTurnstile8mSimpleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleOscillateLevel0.Item.Gbx	ObstacleTurnstile8mSimpleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleOscillateLevel1.Item.Gbx	ObstacleTurnstile8mSimpleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleOscillateLevel2.Item.Gbx	ObstacleTurnstile8mSimpleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleRightLevel0.Item.Gbx	ObstacleTurnstile8mSimpleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleRightLevel1.Item.Gbx	ObstacleTurnstile8mSimpleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mSimpleRightLevel2.Item.Gbx	ObstacleTurnstile8mSimpleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTriple.Item.Gbx	ObstacleTurnstile8mTriple	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleLeftLevel0.Item.Gbx	ObstacleTurnstile8mTripleLeftLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleLeftLevel1.Item.Gbx	ObstacleTurnstile8mTripleLeftLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleLeftLevel2.Item.Gbx	ObstacleTurnstile8mTripleLeftLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleOscillateLevel0.Item.Gbx	ObstacleTurnstile8mTripleOscillateLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleOscillateLevel1.Item.Gbx	ObstacleTurnstile8mTripleOscillateLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleOscillateLevel2.Item.Gbx	ObstacleTurnstile8mTripleOscillateLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleRightLevel0.Item.Gbx	ObstacleTurnstile8mTripleRightLevel0	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleRightLevel1.Item.Gbx	ObstacleTurnstile8mTripleRightLevel1	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/ObstacleTurnstile8mTripleRightLevel2.Item.Gbx	ObstacleTurnstile8mTripleRightLevel2	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/PalmTreeDirtMedium.Item.Gbx	PalmTreeDirtMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/PalmTreeDirtSmall.Item.Gbx	PalmTreeDirtSmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/PalmTreeMedium.Item.Gbx	PalmTreeMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/PalmTreeSmall.Item.Gbx	PalmTreeSmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/PodiumBase.Item.Gbx	PodiumBase	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/PodiumDisk.Item.Gbx	PodiumDisk	Ornament	None	NPlugItem_SVariantList	no	yes	29	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/RaceScreen6x1.Item.Gbx	RaceScreen6x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/RaceScreen6x1Small.Item.Gbx	RaceScreen6x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/RampHigh.Item.Gbx	RampHigh	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/RampHighv2.Item.Gbx	RampHighv2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/RampLow.Item.Gbx	RampLow	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/RampLowv2.Item.Gbx	RampLowv2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/RampMed.Item.Gbx	RampMed	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/RampMedv2.Item.Gbx	RampMedv2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/RoadSign.Item.Gbx	RoadSign	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/RoadSignB.Item.Gbx	RoadSignB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/RoadSignC.Item.Gbx	RoadSignC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/RoadSignWrongWay.Item.Gbx	RoadSignWrongWay	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Screen155.Item.Gbx	Screen155	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen155Small.Item.Gbx	Screen155Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen16x9.Item.Gbx	Screen16x9	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen16x9Small.Item.Gbx	Screen16x9Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen16x9VeryBig.Item.Gbx	Screen16x9VeryBig	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Screen1x1.Item.Gbx	Screen1x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen1x1Small.Item.Gbx	Screen1x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen2x1.Item.Gbx	Screen2x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen2x1Small.Item.Gbx	Screen2x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen2x3.Item.Gbx	Screen2x3	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen2x3Big.Item.Gbx	Screen2x3Big	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen2x3Small.Item.Gbx	Screen2x3Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen2x3VeryBig.Item.Gbx	Screen2x3VeryBig	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Screen4x1.Item.Gbx	Screen4x1	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Screen4x1Small.Item.Gbx	Screen4x1Small	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Show.Item.Gbx	Show	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowFogger16M.Item.Gbx	ShowFogger16m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowFogger8M.Item.Gbx	ShowFogger8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowFoggerWithLight16m.Item.Gbx	ShowFoggerWithLight16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/ShowFoggerWithLight8m.Item.Gbx	ShowFoggerWithLight8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/ShowLight4Spots.Item.Gbx	ShowLight4Spots	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/ShowLightRamp4m.Item.Gbx	ShowLightRamp4m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/ShowLightRamp8m.Item.Gbx	ShowLightRamp8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/ShowLights.Item.Gbx	ShowLights	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRace.Item.Gbx	ShowRace	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigStraight16m.Item.Gbx	ShowRigStraight16m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigStraight2m.Item.Gbx	ShowRigStraight2m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigStraight32m.Item.Gbx	ShowRigStraight32m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigStraight8m.Item.Gbx	ShowRigStraight8m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve1In.Item.Gbx	ShowRigSupportCurve1In	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve1InBack.Item.Gbx	ShowRigSupportCurve1InBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve1InFront.Item.Gbx	ShowRigSupportCurve1InFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve1Out.Item.Gbx	ShowRigSupportCurve1Out	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve1OutBack.Item.Gbx	ShowRigSupportCurve1OutBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve1OutFront.Item.Gbx	ShowRigSupportCurve1OutFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve2In.Item.Gbx	ShowRigSupportCurve2In	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve2InBack.Item.Gbx	ShowRigSupportCurve2InBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve2InFront.Item.Gbx	ShowRigSupportCurve2InFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve2Out.Item.Gbx	ShowRigSupportCurve2Out	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve2OutBack.Item.Gbx	ShowRigSupportCurve2OutBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve2OutFront.Item.Gbx	ShowRigSupportCurve2OutFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve3In.Item.Gbx	ShowRigSupportCurve3In	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve3InBack.Item.Gbx	ShowRigSupportCurve3InBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve3InFront.Item.Gbx	ShowRigSupportCurve3InFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve3Out.Item.Gbx	ShowRigSupportCurve3Out	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve3OutBack.Item.Gbx	ShowRigSupportCurve3OutBack	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigSupportCurve3OutFront.Item.Gbx	ShowRigSupportCurve3OutFront	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowRigVertical8m.Item.Gbx	ShowRigVertical8m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowScreen.Item.Gbx	ShowScreen	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowSpeaker.Item.Gbx	ShowSpeaker	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowSpeaker1X4.Item.Gbx	ShowSpeaker1X4	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowSpeakerB.Item.Gbx	ShowSpeakerB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowSpeakerRamp8m.Item.Gbx	ShowSpeakerRamp8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowSpeakerRamp8mB.Item.Gbx	ShowSpeakerRamp8mB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowSpeakers.Item.Gbx	ShowSpeakers	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/ShowTorch.Item.Gbx	ShowTorch	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/ShowTorchSmall.Item.Gbx	ShowTorchSmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/SnowTempleRoadTShaped.Item.Gbx	SnowTempleRoadTShaped	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Sparkler16m.Item.Gbx	Sparkler16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Sparkler8m.Item.Gbx	Sparkler8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/Spring.Item.Gbx	Spring	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SpringCherryTree.Item.Gbx	SpringCherryTree	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SpringPalmTree.Item.Gbx	SpringPalmTree	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SpringTreeBig.Item.Gbx	SpringTreeBig	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/SpringTreeMedium.Item.Gbx	SpringTreeMedium	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/SpringTreeSmall.Item.Gbx	SpringTreeSmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/SpringTreeTall.Item.Gbx	SpringTreeTall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/SpringTreeVerySmall.Item.Gbx	SpringTreeVerySmall	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Summer.Item.Gbx	Summer	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SummerPalmTree.Item.Gbx	SummerPalmTree	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX1.Item.Gbx	SupportConnectorX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX2.Item.Gbx	SupportConnectorX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX2Corner.Item.Gbx	SupportConnectorX2Corner	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX3.Item.Gbx	SupportConnectorX3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX3Corner.Item.Gbx	SupportConnectorX3Corner	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX4.Item.Gbx	SupportConnectorX4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX4Corner.Item.Gbx	SupportConnectorX4Corner	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX5.Item.Gbx	SupportConnectorX5	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportConnectorX6.Item.Gbx	SupportConnectorX6	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTruss16m.Item.Gbx	SupportTruss16m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTruss32m.Item.Gbx	SupportTruss32m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTruss64m.Item.Gbx	SupportTruss64m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTruss8m.Item.Gbx	SupportTruss8m	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTrussBase.Item.Gbx	SupportTrussBase	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTrussBaseSimple.Item.Gbx	SupportTrussBaseSimple	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTrussConnector.Item.Gbx	SupportTrussConnector	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubeCornerX1.Item.Gbx	SupportTubeCornerX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubeDiagX1.Item.Gbx	SupportTubeDiagX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubePrefabClosed1D.Item.Gbx	SupportTubePrefabClosed1D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubePrefabClosed2D.Item.Gbx	SupportTubePrefabClosed2D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubePrefabClosed3D.Item.Gbx	SupportTubePrefabClosed3D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubePrefabOpen1D.Item.Gbx	SupportTubePrefabOpen1D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubePrefabOpen2D.Item.Gbx	SupportTubePrefabOpen2D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubePrefabOpen3D.Item.Gbx	SupportTubePrefabOpen3D	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubeStraightX1.Item.Gbx	SupportTubeStraightX1	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubeStraightX2.Item.Gbx	SupportTubeStraightX2	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubeStraightX3.Item.Gbx	SupportTubeStraightX3	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/SupportTubeStraightX4.Item.Gbx	SupportTubeStraightX4	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/DesertBarrier.Item.Gbx	DesertBarrier	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Theme/RallyBarrier.Item.Gbx	RallyBarrier	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Theme/RallyBarrierHigh.Item.Gbx	RallyBarrierHigh	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Theme/RallyBarrierStone.Item.Gbx	RallyBarrierStone	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Theme/RallyCastleTower12mBattlements.Item.Gbx	RallyCastleTower12mBattlements	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/RallyCastleTower12mRoof.Item.Gbx	RallyCastleTower12mRoof	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/RallyCastleTower12mX1.Item.Gbx	RallyCastleTower12mX1	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/RallyCastleTower12mX2.Item.Gbx	RallyCastleTower12mX2	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/RallyCastleTower12mX4.Item.Gbx	RallyCastleTower12mX4	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowBarrier.Item.Gbx	SnowBarrier	Ornament	None	none	no	no	26	0	
+ok	Stadium/Items/Theme/SnowBridgeSlope2Base.Item.Gbx	SnowBridgeSlope2Base	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowBridgeSlopeEnd.Item.Gbx	SnowBridgeSlopeEnd	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowBridgeSlopeStart.Item.Gbx	SnowBridgeSlopeStart	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowBridgeStraight.Item.Gbx	SnowBridgeStraight	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowBridgeUBottom.Item.Gbx	SnowBridgeUBottom	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowBridgeUtop.Item.Gbx	SnowBridgeUtop	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowGateGameplay.Item.Gbx	ThemeSnowGateGameplay	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowLampSupportLamp1.Item.Gbx	SnowLampSupportLamp1	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Theme/SnowLampSupportLamp2.Item.Gbx	SnowLampSupportLamp2	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Theme/SnowLampSupportLampion.Item.Gbx	SnowLampSupportLampion	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Theme/SnowTemple16m.Item.Gbx	SnowTemple16m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowTemple24m.Item.Gbx	SnowTemple24m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowTemple32m.Item.Gbx	SnowTemple32m	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowTempleCross.Item.Gbx	SnowTempleCross	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowTempleDeadEnd.Item.Gbx	SnowTempleDeadEnd	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowTempleRoadCorner.Item.Gbx	SnowTempleRoadCorner	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/Theme/SnowTempleRoadStraight.Item.Gbx	SnowTempleRoadStraight	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/TrackBarrier4m.Item.Gbx	TrackBarrier4m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/TrackBarrier4mB.Item.Gbx	TrackBarrier4mB	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/TrackBarrier4mC.Item.Gbx	TrackBarrier4mC	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/TunnelSupportArch16m.Item.Gbx	TunnelSupportArch16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/TunnelSupportArch8m.Item.Gbx	TunnelSupportArch8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/TunnelSupportArchCenter.Item.Gbx	TunnelSupportArchCenter	Ornament	None	NPlugItem_SVariantList	no	yes	31	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/TunnelSupportHalfArch16m.Item.Gbx	TunnelSupportHalfArch16m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/TunnelSupportHalfArch8m.Item.Gbx	TunnelSupportHalfArch8m	Ornament	None	NPlugItem_SVariantList	no	no	27	0	
+ok	Stadium/Items/TunnelSupportPillar16m.Item.Gbx	TunnelSupportPillar16m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/TunnelSupportPillar8m.Item.Gbx	TunnelSupportPillar8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/TunnelSupportPillarLarge16m.Item.Gbx	TunnelSupportPillarLarge16m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/TunnelSupportPillarLarge8m.Item.Gbx	TunnelSupportPillarLarge8m	Ornament	None	NPlugItem_SVariantList	no	no	26	0	
+ok	Stadium/Items/Winter.Item.Gbx	Winter	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium/Items/WinterFrozenTree.Item.Gbx	WinterFrozenTree	Ornament	None	NPlugItem_SVariantList	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Stadium256/Media/Solid/DynaObjects/SupportTrussBaseSimple.Item.Gbx	SupportTrussBaseSimple	Ornament	None	none	no	yes	30	0	2E020000,2E020001,2E020004,2E020005
+ok	Vehicles/Items/Cars/CarDesert.Item.Gbx	CarDesert	Vehicle	None	CGameVehicleModel	no	yes	33	0	2E020000,2E020001,2E020004,2E020005
+ok	Vehicles/Items/Cars/CarRally.Item.Gbx	CarRally	Vehicle	None	CGameVehicleModel	no	yes	33	0	2E020000,2E020001,2E020004,2E020005
+ok	Vehicles/Items/Cars/CarSnow.Item.Gbx	CarSnow	Vehicle	None	CGameVehicleModel	no	yes	33	0	2E020000,2E020001,2E020004,2E020005
+ok	Vehicles/Items/Cars/CarSport.Item.Gbx	CarSport	Vehicle	None	CGameVehicleModel	no	yes	33	0	2E020000,2E020001,2E020004,2E020005

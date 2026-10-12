@@ -1,0 +1,5 @@
+RedIsland/Items/Stadium/Podium.Item.Gbx	Unable to cast object of type 'GBX.NET.Engines.GameData.CGameItemModel' to type 'GBX.NET.Engines.Plug.CPlugMediaClipList'.
+ShootMania/Items/Characters/CharacterPilot.Item.gbx	Unknown class ID: 0x2E028000 (unknown class name)
+Stadium/Items/Podium.Item.Gbx	Unable to cast object of type 'GBX.NET.Engines.GameData.CGameItemModel' to type 'GBX.NET.Engines.Plug.CPlugMediaClipList'.
+Stadium/Items/Theme/DesertGateGameplay.Item.Gbx	Known unskippable chunk (CPlugGameSkinAndFolder 0x0915D000) cannot be processed.
+Stadium/Items/Theme/RallyGateGameplay.Item.Gbx	Known unskippable chunk (CPlugGameSkinAndFolder 0x0915D000) cannot be processed.

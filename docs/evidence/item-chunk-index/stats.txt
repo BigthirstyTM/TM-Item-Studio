@@ -1,0 +1,7 @@
+files=7454
+parsed=7301
+failures=153
+distinctChunkIds=86
+totalChunkOccurrences=339646
+unknownChunkIds=0
+elapsed=00:00:09.0627655
