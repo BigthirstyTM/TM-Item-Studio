@@ -7,7 +7,7 @@ using GBX.NET.Engines.Plug;
 using TM_Item_Studio.Models;
 using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 
-// Writes the in-game test items for the placement editor and the ten-segment group motion
+// Writes the in-game test items for the placement editor and the group motion at the engine's
 // straight through the studio's own export path, so Trackmania loads exactly what the app
 // would hand it. Files land in the "02. Freebuff RE Items" Items subfolder, which the game
 // shows in its own item browser without an import step.
@@ -158,10 +158,25 @@ foreach (var segments in new[] { 4, 5, 8, 10 })
             if (timeline is null)
                 continue;
             var before = timeline.SubFuncs?.Length ?? 0;
-            var result = ItemMotion.ResizeTimeline(timeline, segments);
-            // A timeline that refuses the count would make the game test compare the wrong thing.
-            if (result.Status != ItemMotionStatus.Supported)
-                throw new InvalidOperationException($"Could not set {segments} segments: {result.Reason}");
+            if (segments > EngineSegmentLimit)
+            {
+                // The studio refuses this on purpose, so the probe writes the keys itself: this is a
+                // measurement of the engine, not a path the app is allowed to take.
+                timeline.SubFuncs = Enumerable.Range(0, segments).Select(_ => new KC.SubAnimFunc
+                {
+                    Ease = KC.AnimEase.Linear,
+                    Reverse = false,
+                    Duration = new TmEssentials.TimeInt32(1000)
+                }).ToArray();
+            }
+            else
+            {
+                var result = ItemMotion.ResizeTimeline(timeline, segments);
+                // A timeline that refuses the count would make the game test compare the wrong thing.
+                if (result.Status != ItemMotionStatus.Supported)
+                    throw new InvalidOperationException($"Could not set {segments} segments: {result.Reason}");
+            }
+
             writtenTimelines += timeline.SubFuncs?.Length ?? 0;
             Console.WriteLine($"  {segments} segments: isDuration={timeline.IsDuration} keys {before} -> {timeline.SubFuncs?.Length ?? 0}");
         }
@@ -194,6 +209,6 @@ foreach (var segments in new[] { 4, 5, 8, 10 })
     }, target);
 }
 
-Console.WriteLine($"PASS: {written.Count} test items written to {Path.GetFullPath(outputDirectory)}");
+Console.WriteLine($"PASS: {written.Count} test items written");
 foreach (var path in written)
     Console.WriteLine("  " + path);
