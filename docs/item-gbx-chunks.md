@@ -326,4 +326,62 @@ So the layout is `i32 version (always 0) + i32 count + count × (Vec3 position, 
 - Corpus = what is in `Documents\Trackmania` (mostly Ornament items, 7,285/7,301) plus the vanilla GameData extract (§12). Vehicle/character items stay thinly represented (4 cars, 1 character).
 - The semantics of `U01…` fields are inferred from read code + correlations, not from Nadeo documentation; interpretations marked "presumably" are flagged as such.
 - The 153 failed files could not be walked completely; their analysis is based on raw dumps (§7).
-- Not verified in-game in Trackmania (file analysis only).
+- File analysis and unit-level round trips only. In-game verification is done separately with hand-made test items (§14.4); findings in this document are still not confirmed by the game engine itself.
+
+---
+
+## 14. Modification surface: what the studio writes
+
+This section is the contract the chunk reference turns into: which bytes the studio is allowed to change, which API performs the change, and what it refuses to do. Every entry here is covered by a console suite in `Tests/` (see §11 for how to run them).
+
+### 14.1 Editable records
+
+| Target | Chunk / field | API | Rule |
+|---|---|---|---|
+| Collector name | `2E00100C` `name` | page edit | Free text; no struct change. |
+| Item flags, cube size, pivot snap | `2E020000` `Flags`, `CubeSize`, `PivotSnapDistance` | [`ItemEdits`](../Models/ItemEdits.cs) | Field-by-field; unknown flag bits are preserved. |
+| Placement pivots | `2E020000` pivot positions/rotations | `ItemEdits.ReadPivots` / `AddPivot` / `EditPivot` / `EditPivotPosition` / `RemovePivot` | Never invents an origin pivot and never repairs absent or mismatched rotation arrays; a coordinate-only edit keeps every rotation byte. |
+| Placement alternatives | `2E020004` | [`ItemPlacementAlternatives`](../Models/ItemPlacementAlternatives.cs) | Whole-list or per-entry edit; refuses a payload whose version, count or length does not match the documented layout (§12.3). |
+| Waypoint type | `2E00201F` `waypointType` | page edit | Enum only. |
+| Group motion | motion chunks, up to 10 segments | [`ItemMotion`](../Models/ItemMotion.cs) | Segment count is capped at the authored maximum, not at the editor's dropdown. |
+| Light, prefab and variant records | `090F9000`, `CPlugPrefab` entries, `NPlugItem_SVariantList` | `ItemEdits.EditLight` / `EditOwnerPosition` / `EditLightTransform` / `EditVariant` | Explicitly selected records only — no graph discovery, no cloning. Tag patches treat `null` as "remove" and preserve every unmentioned key. |
+| Material UV0 transform | `090FD000` / visual chunks | [`ItemMaterialEdits`](../Models/ItemMaterialEdits.cs) | Scoped to one visual path in one document ordinal. |
+
+### 14.2 Refusal over guessing
+
+The single rule behind every row above: **an edit that cannot be expressed in the documented layout is rejected, and the bytes stay untouched.** In practice that means unreadable or unexpected payloads (wrong version, wrong count, wrong length, non-finite floats, out-of-range index) raise an exception and produce no write. `Tests/ItemEdits` and `Tests/PlacementEdits` assert both halves of this: the successful byte-for-byte round trip *and* the refusal.
+
+### 14.3 Read-only by design
+
+Collision (`CPlugCrystal`, `CPlugSurface`), geometry and index buffers, icons (`2E001004`, including the undecoded WebP path of §10.3) and the undecoded chunks of §10.6 and §12.2 are **never rewritten**. They are round-tripped verbatim: a file that is loaded and saved with no edit must come back byte-identical, which is what `Tests/ParserSentinels`, `Tests/ParserSurfaces` and `Tests/VariantExport` check.
+
+One consequence worth stating explicitly, because it is easy to get wrong: opaque payloads survive a load/save without any special flag. GBX.NET always stores the raw bytes for `Ignore`-marked chunks and for unknown ids; `GbxReadSettings.SafeSkippableChunks` only changes the *fallback* when a *known* chunk fails to parse. `Tests/PlacementEdits` pins this with an item-level round trip through both settings, so the `2E020004` list cannot silently disappear from an export.
+
+### 14.4 In-game test items
+
+Hand-made items used to check behaviour in Trackmania are dropped into `C:\Users\PC\Documents\Trackmania\Items\02. Freebuff RE Items`. The folder is a plain Items subfolder: anything written there shows up in the in-game item browser without an import step, which makes it the shortest possible loop from a byte-level edit to engine feedback. Items there are test artefacts, not evidence for §1–§12.
+
+---
+
+## 15. Roadmap
+
+Ordered by the ratio of confirmed knowledge to remaining work. "Confirmed" means a console suite exists and passes; "engine" means the game itself has been checked.
+
+### 15.1 Correctness first (no new format knowledge needed)
+
+1. **Crystal layer desync** — 100 items with exact offsets and layer counts (§10.7) are ready to be turned into a parser fix plus a regression list. This is the largest group of currently unparsable files.
+2. **Known name, missing parser** — `CPlugFxSystem` (`0915C000`), `CGameCharacterModel` (`2E028000`), `CPlugMediaClipList` (`09189000`) and `CPlugGameSkinAndFolder` (`0915D000`) are named in `ClassManager` but have no reader, so the affected files fail as "unknown". A tooling-side fix (report the known name, treat the class as opaque) would turn 5 vanilla plus 21 custom failures into pass-throughs.
+3. **`2E00201F` v13** — a current version in game-authored items with no GBX.NET branch (§12.4). Needs a read path before waypoint editing can be trusted on those files.
+
+### 15.2 Capability
+
+4. **Icon pipeline** — ~7.4% of items appear to use the WebP path of `2E001004` (§10.3), which nothing in the studio decodes or writes today. Requires samples first, then a reader.
+5. **Placement alternatives as a full editor** — `2E020004` is written and tested, but the UI still treats entries as numbers rather than as pickable candidate placements. The 584-byte/24-entry maximum (§12.3) is the practical ceiling on what the game itself authors.
+6. **Motion beyond ten segments** — the current cap matches the authored dropdown. Whether the engine accepts more is an open question (`Tests/ItemMotion`, `Tests/KinematicReference`).
+7. **Undecoded remainder** — `2E001012`, `2E00201A`, `2E002023/24/25/26/27` (§10.6) are present in every item and give the studio the least to work with.
+
+### 15.3 Verification
+
+8. **Engine checks** — the items in §14.4 exist to convert "round-trips in the console suite" into "loads and behaves in the game". Until that is done for a given feature, this document keeps calling it unverified.
+9. **Test CI** — every console suite now runs on push (`.github/workflows/tests.yml` via [`Tests/run-all.sh`](../Tests/run-all.sh)). `Tests/Browser` and `Tests/Openplanet` are excluded: they need a browser and the game respectively.
+10. **Corpus refresh** — the reference is a snapshot (2026-10-08) of what is in `Documents\Trackmania` plus one GameData extract. New Nadeo content or a fresh workshop download can change the id list; re-running §11 restores it.

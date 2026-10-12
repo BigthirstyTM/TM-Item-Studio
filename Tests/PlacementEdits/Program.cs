@@ -125,6 +125,45 @@ var gateAlternatives = ItemPlacementAlternatives.Read(gate);
 Check(gateAlternatives.Length == 2 && gateAlternatives[0].Position == new Vec3(8, 8, 0),
     "a captured gate payload did not decode");
 
+// ---- an item-level round trip must survive the parser settings the app uses ----
+// The list lives in a chunk GBX.NET ignores, so it only survives a save when the payload was
+// retained on read. This is the regression guard for the export path.
+var itemPlacement = new CGameItemPlacementParam();
+itemPlacement.CreateChunk<CGameItemPlacementParam.Chunk2E020000>();
+ItemPlacementAlternatives.Write(itemPlacement,
+    [new(new Vec3(8, 8, 0), new Vec3(90, 0, 0)), new(new Vec3(-8, 8, 0), new Vec3(-90, 0, 0))]);
+var item = new CGameItemModel { Name = "alternatives", DefaultPlacement = itemPlacement };
+item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
+item.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
+item.CreateChunk<CGameItemModel.Chunk2E00201C>().Version = 5;
+using var itemBytes = new MemoryStream();
+new Gbx<CGameItemModel>(item).Save(itemBytes);
+
+foreach (var (safeChunks, label) in new (bool, string)[] { (false, "default parse settings"), (true, "SafeSkippableChunks") })
+{
+    itemBytes.Position = 0;
+    if (!safeChunks)
+    {
+        // This mirrors what a plain Gbx.Parse does when SafeSkippableChunks is left at its default.
+        var parsed = Gbx.Parse<CGameItemModel>(itemBytes, new GbxReadSettings()).Node;
+        using var resaved = new MemoryStream();
+        new Gbx<CGameItemModel>(parsed).Save(resaved);
+        resaved.Position = 0;
+        var reread = Gbx.Parse<CGameItemModel>(resaved, new GbxReadSettings { SafeSkippableChunks = true }).Node;
+        Check(reread.DefaultPlacement is not null && ItemPlacementAlternatives.Read(reread.DefaultPlacement).Length == 2,
+            $"a two-entry alternative list did not survive an item round trip through {label}");
+        continue;
+    }
+
+    var kept = Gbx.Parse<CGameItemModel>(itemBytes, new GbxReadSettings { SafeSkippableChunks = true }).Node;
+    using var rekept = new MemoryStream();
+    new Gbx<CGameItemModel>(kept).Save(rekept);
+    rekept.Position = 0;
+    var rekeptRead = Gbx.Parse<CGameItemModel>(rekept, new GbxReadSettings { SafeSkippableChunks = true }).Node;
+    Check(rekeptRead.DefaultPlacement is not null && ItemPlacementAlternatives.Read(rekeptRead.DefaultPlacement).Length == 2,
+        $"a two-entry alternative list did not survive an item round trip through {label}");
+}
+
 Console.WriteLine($"PASS: {checks} placement-alternative checks, including save/reparse and refused edits.");
 
 static byte[] EncodeRaw(int version, int count, Vec3[] entries)
