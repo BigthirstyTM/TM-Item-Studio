@@ -1,0 +1,153 @@
+Items/BigthirstyTests/CharacterPilot.Item.gbx	Unknown class ID: 0x2E028000 (unknown class name)
+Items/City Scenery Set 4/amNatureStuff01/aTerrains/GrassHill1.Item.Gbx	LightmapCoord count mismatch
+Items/City Scenery Set 4/amNatureStuff01/aTerrains/GrassHill1Smol.Item.Gbx	LightmapCoord count mismatch
+Items/City Scenery Set 4/Amusementpark/AbstractArt/FHeckYeah02.Item.Gbx	Layer type -1082130436 is not supported
+Items/City Scenery Set 4/Amusementpark/Fences/FenceChickenWire0Curve01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/Fences/GuardRailingBend101.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/Fences/GuardRailingBend202.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/qFerrisWheel/FerrisWheelWHEEL1.Item.Gbx	Unknown unskippable chunk (??? 0xC1B80000) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/qFerrisWheel/FerrisWheelWHEEL2.Item.Gbx	Unknown unskippable chunk (??? 0xC1B80004) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/qFerrisWheel/ObligateDraaimolen2.Item.Gbx	Length exceeded allowed maximum (1065353214).
+Items/City Scenery Set 4/Amusementpark/xRollercCoaster3/AchtbaantwCurveTilt01.Item.Gbx	Unknown unskippable chunk (??? 0x413C8310) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollercCoaster3/AchtbaantwNormLoop01.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/Amusementpark/xRollercCoaster3/AchtbaantwStraighLvel2up01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollercCoaster3/AchtbaantwStraighTilt02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollercCoaster3/AchtbaantwStraighToTilt01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollercCoaster3/AchtbaantwStraigtCurve01.Item.Gbx	Unknown unskippable chunk (??? 0xBF7FFFFC) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackLevelToPlatform01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackLevelup01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackLevelup02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackLoop01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackLoopBig1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackLoopside01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackSUp01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackSuperslope3k.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackWokkel01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster1/RollerCoasTrackyLoopOut01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrack180toStr.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackStraiTo90Propa.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackTiltBend1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackTiltBend2.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackTiltTo90deg.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackToTilt01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackToTilt02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackwBend02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Amusementpark/xRollerCoaster2/RollerCoasTrackxBend01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/H-beams/HbeamBend01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/H-beams/HbeamTriBend01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/H-beams/HbeamTriBend02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/H-beams/HbeamTriBend03.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/UnradPreq/UnRadExtendSupportSeg03.Item.Gbx	Layer type -1082130436 is not supported
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBase02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBase03.Item.Gbx	Unknown unskippable chunk (??? 0xBF7FFFFC) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBase04.Item.Gbx	Layer type -1082130436 is not supported
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBase05.Item.Gbx	Layer type -1082130436 is not supported
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBase33.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBaseIns02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBaseIns43.Item.Gbx	Layer type -1082130436 is not supported
+Items/City Scenery Set 4/aSupportStructures/uYezert/YzerStructBaseIns44.Item.Gbx	Layer type -1082130436 is not supported
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructr1Curv01.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructr1NwBend11.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructr1NwBend22.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructr1SideArch01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructr1Slopey01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructr1Slopey02.Item.Gbx	Length exceeded allowed maximum (1065353214).
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructR3Curv03.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructR3Curv03Broke1.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructR3CurvBend03.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructR3CurvBend04.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructR3CurvBend07no.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/xTrident2/TriStructra1loop06.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/yTrident1/TriStructr1AnglesM3.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/yTrident1/TriStructr1Base04.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/aSupportStructures/yTrident1/yTriStructr1Angle22Crooked.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/aSupportStructures/ztReinforcebCubesEtc/ReinforcedThinRed2x2Curva01.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/BrickWall1/xbrickwallCurve101.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/BrickWall1/xbrickwallCurve201.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/Parking1/ParkInzSpiral01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/TempleBass/SjateauWallBasCurv01.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/TempleBig/RopeBridgePrefabfresh02.Item.Gbx	Length exceeded allowed maximum (687865856).
+Items/City Scenery Set 4/TempleBig/SjateauWallBasCurv02.Item.Gbx	Length exceeded allowed maximum (1065353215).
+Items/City Scenery Set 4/TempleBig/SjateauWallSmolCurve01.Item.Gbx	Length exceeded allowed maximum (1065353215).
+Items/City Scenery Set 4/TempleBig/SjaTooMuurCurve01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/TempleBig/SjaTooMuurCurve02.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/TempleBig/SjaTooMuurCurve03.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/TempleBoom/brickwRoofCurve1.Item.Gbx	Unknown unskippable chunk (??? 0xBF7FFFF8) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/TempleBricks/SjateauWallCurve02.Item.Gbx	Length exceeded allowed maximum (1065353215).
+Items/City Scenery Set 4/TempleBricks/SjateauWallCuve01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/TempleBricks/SjateauWallVestibulCurv01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/xSjam/JemyBuildingrBigCurve1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/yAbletonLive/LevendGebouwCurve0101.Item.Gbx	Length exceeded allowed maximum (801357780).
+Items/City Scenery Set 4/yAbletonLive/z94OfflineDissonant1.Item.Gbx	Unknown unskippable chunk (??? 0x00000000) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/yAbletonLive/z94OfflineDissonant2.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/City Scenery Set 4/zOverig/EssentialBuildingWobble04.Item.Gbx	Length exceeded allowed maximum (1065353215).
+Items/City Scenery Set 4/zOverig/y94OfflineOctaverPrefab2.Item.Gbx	Unknown unskippable chunk (??? 0x00000002) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/City Scenery Set 4/zOverig/y94OfflineOctaverWobble1.Item.Gbx	Length exceeded allowed maximum (886502880).
+Items/GOIitemset/Light Post Extensions/Beams/aLightPostResCurv1Down1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/aLightPostResCurv1Up01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostBend2Up02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostBendUp01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostCurve1Dwn1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostCurve1Up1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostCurve2Up1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostCurve2Up2.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostResBend1up2.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostResBend2Up1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/LightPostResBend2Up22.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/yLightPostCurve201.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/GOIitemset/Light Post Extensions/Beams/zLightPostCurve101.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/Modified_Items/CharacterPilot.Item.gbx	Unknown class ID: 0x2E028000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_0.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_100.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_1000.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_150.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_200.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_250.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_300.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_350.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_400.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_450.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_50.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_500.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_550.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_600.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_650.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_700.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_750.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_800.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_850.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_900.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/ShadocAlex Items/FogVolumetric2/FogVolumetric1_FogEmissionRate_950.Item.Gbx	Unknown class ID: 0x0915C000 (unknown class name)
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen1/KantoorGebouwShinyBendy01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen1/KantoorGebouwShinyBendy02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen1/KantoorGebouwShinyBendy03.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KantoorGebouwArecords1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KantoorGebouwArecords3.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KantoorGebouwDraai1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KantoorGebouwDraai14.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KantoorGebouwDraai2.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KantoorGebouwDraai3.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KantoorGebouwHeelGewobbled1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Kantoorgebouwen2/KanztoorGebouw06Bend1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Towers/aWeirdBendyBendyOffice1.Item.Gbx	Length cannot be negative. (Parameter 'length')
+Items/TEMP/Buildings/City Scenery Set 3/Towers/aWeirdBendyOffice1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Towers/EifelTorenlol01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Towers/PowerPlantCoolingTower01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Buildings/City Scenery Set 3/Towers/PowerPlantCoolingTower2Full.Item.Gbx	Layer type -1082130436 is not supported
+Items/TEMP/Full Basemaps/Full Basemaps/TornadoValley/BridgeDeform.Item.Gbx	Unknown unskippable chunk (??? 0x00000004) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Full Basemaps/Full Basemaps/TornadoValley/StartBridge_v2.Item.gbx	Unknown unskippable chunk (??? 0x40C40BF7) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Full Basemaps/Full Basemaps/TornadoValley/StartBridge_v3.Item.gbx	Unknown unskippable chunk (??? 0x00000002) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/aLightPostResCurv1Down1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/aLightPostResCurv1Up01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostBend2Up02.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostBendUp01.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostCurve1Dwn1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostCurve1Up1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostCurve2Up1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostCurve2Up2.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostResBend1up2.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostResBend2Up1.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/LightPostResBend2Up22.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/yLightPostCurve201.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/Pipes And pillars/BeamsLuminous/Beams/zLightPostCurve101.Item.Gbx	Unknown unskippable chunk (??? 0x00000001) cannot be processed. Previous chunk: CPlugCrystal 0x09003005
+Items/TEMP/zzz_ImportedItems/SmoothBankedCurfs/PLTFTechBankedCurf4x4.Item.Gbx	Length cannot be negative. (Parameter 'length')
