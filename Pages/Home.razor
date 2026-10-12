@@ -503,6 +503,54 @@
                                 </div>
                             </div>
                         }
+
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2 mt-3">
+                            <h6 class="mb-0 text-primary">Placement alternatives (@detectedPlacementAlternatives.Count)</h6>
+                            <button class="btn btn-xs btn-outline-primary" style="font-size:0.75em; padding: 2px 6px;" @onclick="AddPlacementAlternative">
+                                + Alternative
+                            </button>
+                        </div>
+                        <p class="small text-muted mb-1">
+                            Extra placement slots from chunk <code>2E020004</code>: position in metres, rotation in degrees.
+                            Game-authored gate items carry two.
+                        </p>
+                        @if (!string.IsNullOrWhiteSpace(placementAlternativeStatus))
+                        {
+                            <small class="d-block text-info mb-1">@placementAlternativeStatus</small>
+                        }
+                        @for (int i = 0; i < detectedPlacementAlternatives.Count; i++)
+                        {
+                            var alternative = detectedPlacementAlternatives[i];
+                            int aIdx = i;
+                            <div class="card p-2 bg-light mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="small">Alternative @(aIdx + 1)</strong>
+                                    <button class="btn btn-xs btn-outline-danger" style="font-size:0.7em;" @onclick="@(() => RemovePlacementAlternative(aIdx))">✕</button>
+                                </div>
+                                <div class="row g-1 mb-1">
+                                    <div class="col-4">
+                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="alternative.X" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="alternative.Y" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="alternative.Z" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                    </div>
+                                </div>
+                                <div class="row g-1">
+                                    <div class="col-4">
+                                        <input type="number" step="1" class="form-control form-control-sm" @bind="alternative.RotX" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="1" class="form-control form-control-sm" @bind="alternative.RotY" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" step="1" class="form-control form-control-sm" @bind="alternative.RotZ" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
                 }
 
@@ -1977,6 +2025,17 @@
         public float Z { get; set; }
     }
 
+    public class PlacementAlternativeDto
+    {
+        public int Index { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+        public float RotX { get; set; }
+        public float RotY { get; set; }
+        public float RotZ { get; set; }
+    }
+
     public class LightDto
     {
         public string Type { get; set; } = "PointLight";
@@ -2123,6 +2182,8 @@
     private string compositeTransformMode = "translate";
     private string? selectedMeshPartPath;
     private List<PivotDto> detectedPivots = new();
+    private List<PlacementAlternativeDto> detectedPlacementAlternatives = new();
+    private string placementAlternativeStatus = string.Empty;
     private List<LightDto> detectedLights = new();
     private List<string> debugLog = new();
     private readonly HashSet<string> detectedNodeTypes = new(StringComparer.OrdinalIgnoreCase);
@@ -2354,6 +2415,7 @@
         authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
         ExtractParts(source.PreviewRoot, includeGeometry: authoredConstraints.Count == 0);
         ExtractPivots(itemModel);
+        ExtractPlacementAlternatives(itemModel);
         if (authoredConstraints.Count > 0) UseAuthoredModelParts(authoredMotionScene);
         isMovingItem = isMovingItem || authoredConstraints.Count > 0;
         motionDiagnostics = AuthoredMotionPreview.Build(authoredMotionScene).Diagnostics;
@@ -4007,6 +4069,49 @@
         }
     }
 
+    private void AddPlacementAlternative()
+    {
+        detectedPlacementAlternatives.Add(new PlacementAlternativeDto { Index = detectedPlacementAlternatives.Count });
+        SyncPlacementAlternativesToGbx();
+    }
+
+    private void RemovePlacementAlternative(int idx)
+    {
+        if (idx < 0 || idx >= detectedPlacementAlternatives.Count) return;
+        detectedPlacementAlternatives.RemoveAt(idx);
+        for (var i = 0; i < detectedPlacementAlternatives.Count; i++)
+            detectedPlacementAlternatives[i].Index = i;
+        SyncPlacementAlternativesToGbx();
+    }
+
+    private void OnPlacementAlternativeChanged(int idx) => SyncPlacementAlternativesToGbx();
+
+    // Chunk 2E020004 is skippable and opaque to the bundled parser, so the list is encoded and
+    // decoded by ItemPlacementAlternatives. Refusals are surfaced instead of written. 
+    private void SyncPlacementAlternativesToGbx()
+    {
+        var placement = itemModel?.DefaultPlacement;
+        if (placement == null)
+        {
+            placementAlternativeStatus = "No placement parameters are loaded.";
+            return;
+        }
+
+        var alternatives = detectedPlacementAlternatives
+            .Select(a => new ItemPlacementAlternatives.Alternative(new Vec3(a.X, a.Y, a.Z), new Vec3(a.RotX, a.RotY, a.RotZ)))
+            .ToArray();
+
+        try
+        {
+            ItemPlacementAlternatives.Write(placement, alternatives);
+            placementAlternativeStatus = alternatives.Length == 0
+                ? "Stored as an empty list (version 0, count 0)."
+                : $"Stored {alternatives.Length} placement alternative(s).";
+        }
+        catch (ArgumentException ex) { placementAlternativeStatus = ex.Message; }
+        catch (NotSupportedException ex) { placementAlternativeStatus = ex.Message; }
+    }
+
     private void UpdateGroundPoint(int axis, object? value)
     {
         if (itemModel == null || !float.TryParse(value?.ToString(), CultureInfo.InvariantCulture, out var number))
@@ -4055,6 +4160,34 @@
         else
         {
             detectedPivots.Add(new PivotDto { Index = 0, X = 0, Y = 0, Z = 0 });
+        }
+    }
+
+    private void ExtractPlacementAlternatives(CGameItemModel item)
+    {
+        detectedPlacementAlternatives.Clear();
+        placementAlternativeStatus = string.Empty;
+        if (item.DefaultPlacement == null) return;
+
+        try
+        {
+            foreach (var alternative in ItemPlacementAlternatives.Read(item.DefaultPlacement))
+            {
+                detectedPlacementAlternatives.Add(new PlacementAlternativeDto
+                {
+                    Index = detectedPlacementAlternatives.Count,
+                    X = alternative.Position.X,
+                    Y = alternative.Position.Y,
+                    Z = alternative.Position.Z,
+                    RotX = alternative.RotationDegrees.X,
+                    RotY = alternative.RotationDegrees.Y,
+                    RotZ = alternative.RotationDegrees.Z
+                });
+            }
+        }
+        catch (NotSupportedException ex)
+        {
+            placementAlternativeStatus = ex.Message;
         }
     }
 

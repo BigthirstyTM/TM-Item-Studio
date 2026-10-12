@@ -22,6 +22,7 @@ suites=(
     MacroblockExport
     ParserSentinels
     ParserSurfaces
+    PlacementEdits
     VariantExport
 )
 
