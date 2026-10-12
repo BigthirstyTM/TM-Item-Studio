@@ -122,7 +122,7 @@ Export("FBRE_Placement10", placement, node =>
 });
 
 // ---- 3. and 4. group motion at four and at ten segments ----
-foreach (var segments in new[] { 4, 10 })
+foreach (var segments in new[] { 4, 5, 8, 10 })
 {
     var kinematic = Load(kinematicSourcePath);
     var constraints = FindConstraints(kinematic.Node.EntityModel);
@@ -136,11 +136,13 @@ foreach (var segments in new[] { 4, 10 })
         {
             if (timeline is null)
                 continue;
+            var before = timeline.SubFuncs?.Length ?? 0;
             var result = ItemMotion.ResizeTimeline(timeline, segments);
             // A timeline that refuses the count would make the game test compare the wrong thing.
             if (result.Status != ItemMotionStatus.Supported)
                 throw new InvalidOperationException($"Could not set {segments} segments: {result.Reason}");
             writtenTimelines += timeline.SubFuncs?.Length ?? 0;
+            Console.WriteLine($"  {segments} segments: isDuration={timeline.IsDuration} keys {before} -> {timeline.SubFuncs?.Length ?? 0}");
         }
     }
 

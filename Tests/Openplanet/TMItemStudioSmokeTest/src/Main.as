@@ -18,24 +18,30 @@ void Info(const string &in message) { trace("[TMIS-SMOKE] INFO " + message); }
 
 CGameItemModel@ LoadItem(const string &in fileName)
 {
-    auto fid = Fids::GetUser(TestItemsRoot + fileName);
+    return LoadItemFrom(TestItemsRoot + fileName, fileName);
+}
+
+CGameItemModel@ LoadItemFrom(const string &in fullPath, const string &in label)
+{
+    auto fid = Fids::GetUser(fullPath);
     if (fid is null) {
-        Fail(fileName + " fid-not-found");
+        Fail(label + " fid-not-found");
         return null;
     }
 
+    trace("[TMIS-SMOKE] INFO " + label + " preloading");
     auto item = cast<CGameItemModel>(Fids::Preload(fid));
     if (item is null) {
-        Fail(fileName + " native-preload-failed");
+        Fail(label + " native-preload-failed");
         return null;
     }
 
     if (item.EntityModel is null) {
-        Fail(fileName + " missing-entity-model");
+        Fail(label + " missing-entity-model");
         return null;
     }
 
-    Pass(fileName + " native-preload name=" + item.Name);
+    Pass(label + " native-preload name=" + item.Name);
     return item;
 }
 
@@ -176,12 +182,24 @@ void CheckKinematic(const string &in fileName, int expectedSegments)
         + " segments=" + expectedSegments);
 }
 
+void CheckSourceControl()
+{
+    // The pristine source, untouched. If this one fails, the source item is the problem and not our edit.
+    LoadItemFrom("Items/BF2_ASSETS/Test_Items/Chained_Square_Loop.Item.Gbx",
+        "source-control/Chained_Square_Loop.Item.Gbx");
+}
+
 void Main()
 {
     trace("[TMIS-SMOKE] ---- start native export verification ----");
     CheckControl();
+    CheckSourceControl();
     CheckPlacement();
+    // Ascending segment counts. A hard stop in this list is the engine's limit for this source;
+    // everything before it already passed in the same run.
     CheckKinematic("FBRE_Kinematic04.Item.Gbx", 4);
+    CheckKinematic("FBRE_Kinematic05.Item.Gbx", 5);
+    CheckKinematic("FBRE_Kinematic08.Item.Gbx", 8);
     CheckKinematic("FBRE_Kinematic10.Item.Gbx", 10);
     trace("[TMIS-SMOKE] ---- done pass=" + g_pass + " fail=" + g_fail + " ----");
 }
