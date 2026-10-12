@@ -289,11 +289,14 @@ Check("invalid edits are atomic across fields and both timelines", () =>
         fields with { RotationAxis = (KC.EAxis)255 }, fields with { Translation = new(false, [new(KC.AnimEase.Linear, false, -1)]) },
         fields with { Rotation = new(true, [new(KC.AnimEase.Linear, false, int.MaxValue), new(KC.AnimEase.Linear, false, 1)]) },
         fields with { TranslationMin = 9, Rotation = new(false, [new(KC.AnimEase.CubicIn, false, 500)]) },
-        fields with { Translation = new(false, Enumerable.Repeat(new ItemMotionKey(KC.AnimEase.Linear, false, 1), 5).ToArray()) } })
+        fields with { Translation = new(false, Enumerable.Repeat(new ItemMotionKey(KC.AnimEase.Linear, false, 1), 11).ToArray()) } })
     {
         Require(!ItemMotion.Apply(model, invalid).Success, "invalid edit accepted");
         Require(before.SequenceEqual(Bytes(model)), "invalid edit partially mutated source");
     }
+    Require(ItemMotion.Apply(model, fields with { Translation = new(false, Enumerable.Repeat(new ItemMotionKey(KC.AnimEase.Linear, false, 1), 10).ToArray()) }).Success,
+        "ten-segment timeline refused");
+    Require(ItemMotion.Read(model).Fields.Translation!.Keys.Count == 10, "ten segments not stored");
     foreach (double time in new[] { -1, double.NaN, double.PositiveInfinity })
         Require(ItemMotion.Evaluate(model, time).Status == ItemMotionStatus.Invalid, "invalid time accepted");
     Require(!ItemMotion.Evaluate(model, 0, double.NaN).Success, "invalid phase accepted");

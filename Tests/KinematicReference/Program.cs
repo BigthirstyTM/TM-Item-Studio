@@ -1209,7 +1209,10 @@ Check("experiment graph keeps every binding-resolver guard active", () =>
     parameters.Version = 1;
     Require(ItemMotionBindings.Resolve(chained, prefab, parameters, root).Status == ItemMotionStatus.Unsupported, "params version guard inactive");
     parameters.Version = 0; parameters.Pos1 = new(1, 0, 0);
-    Require(ItemMotionBindings.Resolve(chained, prefab, parameters, root).Status == ItemMotionStatus.Unsupported, "anchor guard inactive");
+    var anchored = ItemMotionBindings.Resolve(chained, prefab, parameters, root);
+    Require(anchored.Status == ItemMotionStatus.Supported, "nonzero constraint anchor offset no longer resolves");
+    Require(anchored.Parameters is not null && anchored.Parameters.Pos1.X == 1 && anchored.Parameters.Pos1.Y == 0 && anchored.Parameters.Pos1.Z == 0
+        && anchored.Parameters.Pos2.X == 0 && anchored.Parameters.Pos2.Y == 0 && anchored.Parameters.Pos2.Z == 0, "nonzero constraint anchor offset was dropped");
     parameters.Pos1 = default; parameters.Ent1 = 1;
     Require(ItemMotionBindings.Resolve(chained, prefab, parameters, root).Status == ItemMotionStatus.Unsupported, "self-parent guard inactive");
     parameters.Ent1 = 0;
