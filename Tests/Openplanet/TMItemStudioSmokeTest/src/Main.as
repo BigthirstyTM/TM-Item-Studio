@@ -9,6 +9,13 @@
 
 const string TestItemsRoot = "Items/02. Freebuff RE Items/";
 
+// The engine loads kinematic timelines of up to four segments only: five segments fail the
+// native load and eight or more terminate the process (see docs/item-gbx-chunks.md, section 16).
+// The probe files therefore live outside Items/, so the game's item browser never loads them.
+// Turn this on only to re-measure that boundary; it will end the process.
+const bool RunSegmentLimitProbe = false;
+const string ProbeRoot = "TMItemStudioProbe/";
+
 int g_pass = 0;
 int g_fail = 0;
 
@@ -137,7 +144,12 @@ void CheckPlacement()
 
 void CheckKinematic(const string &in fileName, int expectedSegments)
 {
-    auto item = LoadItem(fileName);
+    CheckKinematicFrom(TestItemsRoot + fileName, fileName, expectedSegments);
+}
+
+void CheckKinematicFrom(const string &in fullPath, const string &in fileName, int expectedSegments)
+{
+    auto item = LoadItemFrom(fullPath, fileName);
     if (item is null)
         return;
 
@@ -195,11 +207,16 @@ void Main()
     CheckControl();
     CheckSourceControl();
     CheckPlacement();
-    // Ascending segment counts. A hard stop in this list is the engine's limit for this source;
-    // everything before it already passed in the same run.
     CheckKinematic("FBRE_Kinematic04.Item.Gbx", 4);
-    CheckKinematic("FBRE_Kinematic05.Item.Gbx", 5);
-    CheckKinematic("FBRE_Kinematic08.Item.Gbx", 8);
-    CheckKinematic("FBRE_Kinematic10.Item.Gbx", 10);
+
+    if (RunSegmentLimitProbe) {
+        // Ascending, so the first stop in this list is the engine's limit; the writes above
+        // already passed in the same run.
+        trace("[TMIS-SMOKE] ---- segment limit probe: expect the process to end ----");
+        CheckKinematicFrom(ProbeRoot + "FBRE_Kinematic05.Item.Gbx", "probe/FBRE_Kinematic05.Item.Gbx", 5);
+        CheckKinematicFrom(ProbeRoot + "FBRE_Kinematic08.Item.Gbx", "probe/FBRE_Kinematic08.Item.Gbx", 8);
+        CheckKinematicFrom(ProbeRoot + "FBRE_Kinematic10.Item.Gbx", "probe/FBRE_Kinematic10.Item.Gbx", 10);
+    }
+
     trace("[TMIS-SMOKE] ---- done pass=" + g_pass + " fail=" + g_fail + " ----");
 }

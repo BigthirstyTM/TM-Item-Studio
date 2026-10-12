@@ -16,8 +16,8 @@ values the engine reports back:
   used as the control.
 - `FBRE_Placement10.Item.Gbx` — ten placement pivots, four placement flags and
   two magnet locations (`m_MagnetLocs_Degrees`, chunk `2E020004`).
-- `FBRE_Kinematic04.Item.Gbx` / `FBRE_Kinematic10.Item.Gbx` — the same kinematic
-  source with every constraint timeline at four and at ten segments.
+- `FBRE_Kinematic04.Item.Gbx` — the same kinematic source with every constraint
+  timeline at the engine's four-segment maximum.
 
 Generate the items with [Tests/GameTestItems](../GameTestItems/Program.cs):
 
@@ -27,6 +27,16 @@ dotnet run -c Release --project Tests/GameTestItems -- `
   "$env:USERPROFILE\Documents\Trackmania\Items\BF2_ASSETS\Test_Items\Locked_In.Item.Gbx" `
   "$env:USERPROFILE\Documents\Trackmania\Items\BF2_ASSETS\Test_Items\Chained_Square_Loop.Item.Gbx"
 ```
+
+## The four-segment limit
+
+Kinematic timelines hold at most four segments in the engine; `docs/item-gbx-chunks.md`
+§16 has the measurements. Nothing above four segments is written into `Items/`: five is
+refused by the native loader, and eight or more end the process when the file is loaded
+through the item pipeline. Passing an optional fourth argument to `GameTestItems` writes
+those counts to a probe folder outside `Items/` instead, and `RunSegmentLimitProbe` in
+this plugin reloads them to re-measure the boundary. That switch is off by default and is
+expected to end the process when it is on.
 
 The tool writes each file through `ItemExportValidator` and then reloads it to
 check the edit survived, so a bad export fails before the game ever sees it.

@@ -377,7 +377,7 @@ Ordered by the ratio of confirmed knowledge to remaining work. "Confirmed" means
 
 4. **Icon pipeline** — ~7.4% of items appear to use the WebP path of `2E001004` (§10.3), which nothing in the studio decodes or writes today. Requires samples first, then a reader.
 5. **Placement alternatives as a full editor** — `2E020004` is written and tested, but the UI still treats entries as numbers rather than as pickable candidate placements. The 584-byte/24-entry maximum (§12.3) is the practical ceiling on what the game itself authors.
-6. **Motion beyond ten segments** — the current cap matches the authored dropdown. Whether the engine accepts more is an open question (`Tests/ItemMotion`, `Tests/KinematicReference`).
+6. **Motion beyond four segments** — answered: the engine does not load it (§16). The editor must not offer more than four; `Tests/ItemMotion` and `Tests/KinematicReference` own the boundary, and the probe items reproduce the failure in the game.
 7. **Undecoded remainder** — `2E001012`, `2E00201A`, `2E002023/24/25/26/27` (§10.6) are present in every item and give the studio the least to work with.
 
 ### 15.3 Verification
@@ -385,3 +385,55 @@ Ordered by the ratio of confirmed knowledge to remaining work. "Confirmed" means
 8. **Engine checks** — the items in §14.4 exist to convert "round-trips in the console suite" into "loads and behaves in the game". Until that is done for a given feature, this document keeps calling it unverified.
 9. **Test CI** — every console suite now runs on push (`.github/workflows/tests.yml` via [`Tests/run-all.sh`](../Tests/run-all.sh)). `Tests/Browser` and `Tests/Openplanet` are excluded: they need a browser and the game respectively.
 10. **Corpus refresh** — the reference is a snapshot (2026-10-08) of what is in `Documents\Trackmania` plus one GameData extract. New Nadeo content or a fresh workshop download can change the id list; re-running §11 restores it.
+
+---
+
+## 16. Kinematic timelines hold four segments
+
+**Measured in game on 2026-10-13**, Trackmania build 2026-02-02, Openplanet 1.29.15. A kinematic constraint's timeline (`TransAnimFunc.subFuncs` / `RotAnimFunc.subFuncs`, one `NPlugDyna_SAnimFunc01Base` per segment) is **limited to four entries by the engine, not by the editor.**
+
+### 16.1 Authored content never exceeds four
+
+Histogram of timeline lengths over the whole corpus of §13 (7,454 files, 7,305 parsed):
+
+| Segments | Timelines | Source |
+|---:|---:|---|
+| 1 | 228 | corpus |
+| 2 | 239 | corpus |
+| 3 | 91 | corpus |
+| 4 | 595 | corpus |
+| 5, 8, 10 | 8 each | **only our own probe writes** |
+
+Tool: [Tests/MotionSegmentScan](../Tests/MotionSegmentScan/Program.cs) — `dotnet run -c Release --project Tests/MotionSegmentScan -- "C:\Users\PC\Documents\Trackmania"`. No authored item in the corpus, custom or vanilla, carries more than four segments. That is the practical ceiling of §12.3's "24 entries" and of the game's own constraint UI.
+
+### 16.2 What the native loader does with the same source at each count
+
+Items written through the studio's export path and loaded by the game's own FID loader (`Tests/Openplanet`, results in `Openplanet.log`). The two columns differ in *where the file lives*, which decides which loader path `Fids::Preload` takes:
+
+| Segments | Inside the `Items/` tree (item pipeline) | In a plain user folder |
+|---:|---|---|
+| 4 | PASS — `constraints=4 timelines=8 segments=4` | not tested (a 4-segment sibling of the same source passes in the `Items/` tree) |
+| 5 | not tested | FAIL `native-preload-failed`; the script continues |
+| 8 | **the process ends during `Preload`**; the log stops mid-run | FAIL `native-preload-failed`; the process survives |
+| 10 | **the process ends during `Preload`**; the log stops mid-run | FAIL `native-preload-failed`; the process survives (three refusals in one run) |
+
+The control items in the same runs prove it is the segment count and not the export path: the pristine source (`Chained_Square_Loop.Item.Gbx`), the studio's untouched control export and its ten-pivot item all load natively, and the 4-segment sibling of the same source, produced by the same code in the same run, loads.
+
+Two further measurements bound the risk:
+
+- **Presence is not fatal.** With a ten-segment file sitting in `02. Freebuff RE Items` but never preloaded, the game boots, the smoke test completes `pass=6 fail=0`, and the process survives.
+- **The `Items/`-tree preload is the fatal one.** For the 8- and 10-segment runs there is no Windows Application Error or Windows Error Reporting record, so this is a silent process termination rather than a reported crash.
+
+Whether the game's own item browser hits the same fatal path when it loads such a file from `Items/` is **not verified** here — the browser uses the same item pipeline that faults above, so it is the expected risk, but that is an inference and not a measurement.
+
+### 16.3 Mechanism
+
+- The engine class `NPlugDyna_SAnimFunc01` is **40 bytes** = 8-byte header + **4** × 8-byte `NPlugDyna_SAnimFunc01Base`. The array is an `MwArrayInPlaceDyn`, so four elements fit inline and nothing else does.
+- GBX.NET serializes the same array as a plain length-prefixed list (`rw.ArrayReadableWritable(ref subFuncs)` in `NPlugDyna_SKinematicConstraint.AnimFunc.ReadWrite`). Its source has no mention of `MwArrayInPlaceDyn` at all, so a count above the inline capacity is written in a shape the engine cannot decode — refused at five, and fatal at eight and above (where the engine reads beyond the inline buffer).
+
+### 16.4 Consequence for the studio
+
+- Edits stop at four segments and refuse more; the probe above is what a "more" button would produce.
+- Probe items are written to `Documents\Trackmania\TMItemStudioProbe` — **outside** `Items/`. A file the engine cannot decode has no business in a folder whose contents the game loads.
+- The boundary is re-measurable on demand: set `RunSegmentLimitProbe = true` in the smoke test before a run. It is off by default, and turning it on is expected to end the process.
+- Encoding more than four segments correctly would mean reproducing the dynamic form of `MwArrayInPlaceDyn` (and, given §16.1, the engine would still have to accept it). Not attempted.

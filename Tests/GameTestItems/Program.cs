@@ -12,16 +12,26 @@ using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 // would hand it. Files land in the "02. Freebuff RE Items" Items subfolder, which the game
 // shows in its own item browser without an import step.
 //
-// Usage: GameTestItems <outputDir> <placementSource.Item.Gbx> <kinematicSource.Item.Gbx>
+// Usage: GameTestItems <outputDir> <placementSource.Item.Gbx> <kinematicSource.Item.Gbx> [probeDir]
+//
+// The engine only loads kinematic timelines of up to four segments (see docs/item-gbx-chunks.md,
+// section 16): five segments are refused by the native loader and eight or more terminate the
+// process. Nothing above four segments is ever written into the Items folder, because the game's
+// own item browser would load it. The optional probe directory exists outside Items/ for the
+// deliberate limit probe.
 
-if (args.Length != 3)
-    throw new ArgumentException("Usage: GameTestItems <outputDir> <placementSource.Item.Gbx> <kinematicSource.Item.Gbx>");
+if (args.Length is < 3 or > 4)
+    throw new ArgumentException(
+        "Usage: GameTestItems <outputDir> <placementSource.Item.Gbx> <kinematicSource.Item.Gbx> [probeDir]");
+
+const int EngineSegmentLimit = 4;
 
 Gbx.LZO = new GBX.NET.LZO.MiniLZO();
 
 var outputDirectory = args[0];
 var placementSourcePath = args[1];
 var kinematicSourcePath = args[2];
+var probeDirectory = args.Length == 4 ? args[3] : null;
 Directory.CreateDirectory(outputDirectory);
 
 var written = new List<string>();
@@ -29,11 +39,11 @@ var written = new List<string>();
 Gbx<CGameItemModel> Load(string path) => Gbx.Parse<CGameItemModel>(path);
 
 /// <summary>Save through the same path the app uses, then prove the file reloads with the edit intact.</summary>
-void Export(string name, Gbx<CGameItemModel> document, Action<CGameItemModel> verify)
+void Export(string name, Gbx<CGameItemModel> document, Action<CGameItemModel> verify, string? directory = null)
 {
     ItemExportValidator.EnsureGameReady(document.Node, name);
     var source = ItemVariantSource.FromFile(name, document)[0];
-    var destination = Path.Combine(outputDirectory, name + ".Item.Gbx");
+    var destination = Path.Combine(directory ?? outputDirectory, name + ".Item.Gbx");
     using (var stream = File.Create(destination))
         source.Save(stream);
 
@@ -124,6 +134,17 @@ Export("FBRE_Placement10", placement, node =>
 // ---- 3. and 4. group motion at four and at ten segments ----
 foreach (var segments in new[] { 4, 5, 8, 10 })
 {
+    if (segments > EngineSegmentLimit && probeDirectory is null)
+    {
+        Console.WriteLine($"SKIP {segments} segments: above the engine's {EngineSegmentLimit}-segment limit " +
+            "and no probe directory was given.");
+        continue;
+    }
+
+    var target = segments > EngineSegmentLimit ? probeDirectory! : outputDirectory;
+    if (segments > EngineSegmentLimit)
+        Directory.CreateDirectory(target);
+
     var kinematic = Load(kinematicSourcePath);
     var constraints = FindConstraints(kinematic.Node.EntityModel);
     if (constraints.Count == 0)
@@ -170,7 +191,7 @@ foreach (var segments in new[] { 4, 5, 8, 10 })
 
         if (total != writtenTimelines)
             throw new InvalidOperationException($"Reloaded {total} segments in total, expected {writtenTimelines}.");
-    });
+    }, target);
 }
 
 Console.WriteLine($"PASS: {written.Count} test items written to {Path.GetFullPath(outputDirectory)}");
