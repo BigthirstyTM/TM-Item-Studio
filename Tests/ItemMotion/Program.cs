@@ -88,6 +88,34 @@ Check("segment count edits retain existing keys and timing mode, append in the r
     Require(ItemMotion.ResizeTimeline(empty, 1).Success && empty.SubFuncs[0].Duration.TotalMilliseconds == 1000, "Explicit creation from empty timeline failed.");
 });
 
+Check("the engine's four-segment limit is enforced before any write", () =>
+{
+    // Measured in game: four segments load, five are refused by the native loader, and eight or more
+    // end the process. See docs/item-gbx-chunks.md §16.
+    Require(ItemMotion.MaxSegments == 4, "segment limit is no longer the engine's four");
+
+    var four = Enumerable.Range(0, 4).Select(_ => Key(KC.AnimEase.Linear, 1000)).ToArray();
+    var timeline = new KC.AnimFunc { IsDuration = true, SubFuncs = four };
+    var refused = ItemMotion.ResizeTimeline(timeline, 5);
+    Require(refused.Status == ItemMotionStatus.Invalid && ReferenceEquals(timeline.SubFuncs, four),
+        "a fifth segment was accepted or written");
+    Require(ItemMotion.ReadTimeline(timeline).Success, "four segments are no longer readable");
+
+    timeline.SubFuncs = [.. four, Key(KC.AnimEase.Linear, 1000)];
+    Require(ItemMotion.ReadTimeline(timeline).Status == ItemMotionStatus.Unsupported,
+        "a five-segment timeline is not reported as unsupported");
+
+    var model = Model();
+    var before = Bytes(model);
+    var fiveKeys = new ItemMotionTimeline(true, Enumerable.Range(0, 5)
+        .Select(_ => new ItemMotionKey(KC.AnimEase.Linear, false, 1000)).ToArray());
+    var fields = ItemMotion.Read(model).Fields;
+    Require(!ItemMotion.Apply(model, fields with { Translation = fiveKeys }).Success, "a five-segment edit was accepted");
+    Require(before.SequenceEqual(Bytes(model)), "a refused five-segment edit mutated the source");
+    Require(ItemMotion.Apply(model, fields with { Translation = new(true, [.. four.Select(k => new ItemMotionKey(k.Ease, k.Reverse, 1000))]) }).Success,
+        "a four-segment edit was refused");
+});
+
 Check("duration and endpoint archives sample equally without rewriting authored data", () =>
 {
     foreach (var isDuration in new[] { true, false })

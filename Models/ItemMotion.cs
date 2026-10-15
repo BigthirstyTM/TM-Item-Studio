@@ -29,6 +29,15 @@ public sealed record ItemMotionSample(float TranslationMetres, float AngleDegree
 /// <summary>Typed source adapter. Edits affect every occurrence sharing this authored source node.</summary>
 public static class ItemMotion
 {
+    /// <summary>
+    /// The engine's native limit. <c>NPlugDyna_SAnimFunc01</c> is 40 bytes: an 8-byte header plus
+    /// four 8-byte entries, and GBX.NET writes the array as a plain length-prefixed list. Measured
+    /// in game: four segments load, five are refused by the native loader, and eight or more end
+    /// the process when the item is loaded through the item pipeline.
+    /// See docs/item-gbx-chunks.md §16.
+    /// </summary>
+    public const int MaxSegments = 4;
+
     public static ItemMotionSnapshot Read(KC source)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -58,8 +67,9 @@ public static class ItemMotion
         if (source?.SubFuncs is not { } keys)
             return ItemMotionResult<bool>.Fail(ItemMotionStatus.Absent, "Timeline is absent; no default functions were created.");
         if (count == keys.Length) return ItemMotionResult<bool>.Ok(false);
-        if (count < 1 || count > 10)
-            return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "Choose between one and ten segments.");
+        if (count < 1 || count > MaxSegments)
+            return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid,
+                $"Choose between one and {MaxSegments} segments; the engine loads no more.");
         if (keys.Any(k => k is null))
             return ItemMotionResult<bool>.Fail(ItemMotionStatus.Invalid, "Timeline contains an absent segment; stored functions are unchanged.");
         var resized = new KC.SubAnimFunc[count];
@@ -144,7 +154,8 @@ public static class ItemMotion
     private static (ItemMotionStatus Status, string Reason)? ValidateTimeline(ItemMotionTimeline timeline)
     {
         if (timeline.Keys is null || timeline.Keys.Any(k => k is null)) return (ItemMotionStatus.Invalid, "Missing timeline keys.");
-        if (timeline.Keys.Count > 10) return (ItemMotionStatus.Unsupported, "The supported native layout has at most ten keys.");
+        if (timeline.Keys.Count > MaxSegments)
+            return (ItemMotionStatus.Unsupported, $"The engine's native layout holds at most {MaxSegments} keys.");
         if (timeline.Keys.Any(k => k.DurationMilliseconds < 0)) return (ItemMotionStatus.Invalid, "Times must be nonnegative milliseconds.");
         if (TotalDuration(timeline) > int.MaxValue) return (ItemMotionStatus.Invalid, "Total duration exceeds the supported millisecond range.");
         if (timeline.Keys.Any(k => k.Ease < KC.AnimEase.Constant || k.Ease > KC.AnimEase.QuadInOut))

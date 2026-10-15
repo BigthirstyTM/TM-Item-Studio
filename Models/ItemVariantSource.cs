@@ -570,14 +570,38 @@ public sealed class ItemVariantSource
         };
     }
 
+    private static readonly GroupAnimKey[] DefaultTransKeys =
+    [
+        new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
+        new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, true, 1000)
+    ];
+
+    private static readonly GroupAnimKey[] DefaultRotKeys =
+    [
+        new(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
+        new(NPlugDyna_SKinematicConstraint.AnimEase.QuadInOut, true, 1000)
+    ];
+
+    /// <summary>
+    /// Refuses more than the engine's segment limit instead of truncating: a longer timeline is a
+    /// real edit that the game cannot load (docs/item-gbx-chunks.md §16), so it must not be written.
+    /// </summary>
+    private static void EnsureSegmentLimit(IReadOnlyList<GroupAnimKey> keys, string channel)
+    {
+        if (keys.Count > ItemMotion.MaxSegments)
+            throw new InvalidOperationException(
+                $"The engine loads at most {ItemMotion.MaxSegments} kinematic segments; the {channel} timeline has {keys.Count}. " +
+                "Reduce the segment count before exporting.");
+    }
+
     private static NPlugDyna_SKinematicConstraint BuildGroupConstraint(GroupKinematicMotion motion)
     {
-        var transKeys = (motion.TransKeys?.Count > 0 ? motion.TransKeys : new[]
-        {
-            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
-            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, true, 1000)
-        })
-        .Take(4)
+        var transSource = motion.TransKeys?.Count > 0 ? motion.TransKeys : DefaultTransKeys;
+        var rotSource = motion.RotKeys?.Count > 0 ? motion.RotKeys : DefaultRotKeys;
+        EnsureSegmentLimit(transSource, "translation");
+        EnsureSegmentLimit(rotSource, "rotation");
+
+        var transKeys = transSource
         .Select(key => new NPlugDyna_SKinematicConstraint.SubAnimFunc
         {
             Ease = key.Ease,
@@ -585,12 +609,7 @@ public sealed class ItemVariantSource
             Duration = new TimeInt32(Math.Max(50, key.DurationMs))
         })
         .ToArray();
-        var rotKeys = (motion.RotKeys?.Count > 0 ? motion.RotKeys : new[]
-        {
-            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.Linear, false, 1000),
-            new GroupAnimKey(NPlugDyna_SKinematicConstraint.AnimEase.QuadInOut, true, 1000)
-        })
-        .Take(4)
+        var rotKeys = rotSource
         .Select(key => new NPlugDyna_SKinematicConstraint.SubAnimFunc
         {
             Ease = key.Ease,

@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suites:
+    # The suites read captured .Item.Gbx fixtures and the app targets a Windows-only
+    # game, so they run on the same platform the project is developed on.
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build app
+        run: dotnet build TM-Item-Studio.csproj -c Release --nologo
+
+      - name: Run test suites
+        shell: bash
+        run: ./Tests/run-all.sh
