@@ -14,6 +14,9 @@ kinematics, lights, sockets, physics and visual information.
 - Export visible geometry as OBJ.
 - Duplicate the loaded item into macroblock instances and export them as `.Macroblock.Gbx`, or
   embed the copies into a single multi-instance `.Item.Gbx` whose mesh is stored once.
+- Measure an item against the game's own flag items and convert it into a flag
+  (`Type=Flag` variant, upright world-aligned placement with the flag's eight patch layouts) as a
+  separate `.Item.Gbx`, leaving the original usable.
 
 ## Macroblock export (item instancing)
 
@@ -40,6 +43,35 @@ fills the instance table instead of being parsed as an item. When a non-item fil
 reaches the item parser (which answers with `Specified cast is not valid.`), the loader
 retries it as a macroblock before reporting the class id it actually found. The copies show
 up in the viewport as soon as the referenced item is open.
+
+## Flag items
+
+The **Flag** tab measures the open item against the settings read out of the game's own flag
+(`Flag16m.Item.Gbx`, its prefab, its place-param and its cloth mesh) and can convert the item into
+a flag. The conversion changes classification and placement only — pivots, geometry, materials and
+metadata stay as authored — and it refuses rather than guesses: an external placement file, an
+opaque placement-class chunk, a newer variant-list version or an item without an entity model is
+rejected *before* anything is written, so a refused conversion leaves the bytes untouched.
+
+- The measured signature: a variant tagged `Type=Flag` in a variant list of version 1, plus a
+  placement class that is the only one in 8 802 items with `AlwaysUp=true` **and**
+  `AlignToWorldDir=true`. Its eight patch layouts place the flag on the border, water, open and
+  curve groups at the item's two sizes.
+- **Inspect** reports every measured deviation (`PlacementClass.AlwaysUp: False instead of true.`),
+  which is exactly how the older hand-made custom flag was diagnosed: it carried the flag tag but an
+  ordinary aligned placement class, so it never stood upright.
+- **Convert to flag** writes a new item whose id ends in `_Flag`, so both stay in the inventory.
+  The export runs on its own snapshot of the document and reparses its own bytes before
+  downloading.
+- The waving cloth is the author's mesh and material: the conversion copies the flag's
+  classification and placement, never a mesh. The cloth is out of scope of the conversion; see
+  [docs/item-flag-conversion.md](docs/item-flag-conversion.md) for the measured mesh, material and
+  LOD settings and for the open question about the cloth at long range.
+
+`Tests/FlagConversion` covers the measured shape, the save/reparse round trip, the export snapshot
+isolation and the refused-write byte equality; `Tests/FlagProbe` is the evidence tool that reads
+the game's assets (`--tags`, `--placement`, `--profile`, `--describe`, `--lod`, `--lodstats`,
+`--entries`, `--convert`).
 
 ### Multi-instance item export
 
@@ -173,10 +205,14 @@ coverage.
 
 ```bash
 dotnet restore
-dotnet run
+dotnet watch run
 ```
 
-The development server uses the URL configured in `Properties/launchSettings.json`.
+`dotnet watch` enables .NET Hot Reload while developing: supported C# and Razor
+changes are applied without restarting the app, and changes that cannot be
+hot-reloaded trigger an automatic rebuild/restart. The development server uses
+the URL configured in `Properties/launchSettings.json`. Use `dotnet run` when a
+one-shot server without file watching is preferred.
 
 ## GitHub Pages deployment
 

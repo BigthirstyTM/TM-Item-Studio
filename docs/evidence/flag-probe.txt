@@ -1,0 +1,2734 @@
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Items\Flag16m.Item.Gbx
+     1940 bytes, class 0x2E002000 CGameItemModel, node CGameItemModel
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.GameData.CGameItemModel, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 771760128
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 4
+     ref table: 2 external file(s)
+        Media\Prefab\Items\Flag\Flag16m.Prefab.Gbx
+        Media\PlaceParam\Flag.PlaceParam.Gbx
+  CGameItemModel  0x2E002000  CGameItemModel  [root]
+    chunk 0x2E001003-v8  HeaderChunk2E001003  [parsed]
+    chunk   U01 = null
+    chunk   Id = 771756035
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Version = 8
+    chunk   U01 = null
+    chunk   Id = 771756035
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Version = 8
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk 0x2E001004  HeaderChunk2E001004  [parsed]
+    chunk   U01 = 1
+    chunk   Id = 771756036
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   U01 = 1
+    chunk   Id = 771756036
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   IsHeavy = true
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk 0x090F4000-v8  HeaderChunk090F4000  [parsed]
+    chunk   U01 = false
+    chunk   U02 = ""
+    chunk   U03 = 1
+    chunk   U04 = 0
+    chunk   Id = 151994368
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4
+    chunk   Version = 8
+    chunk   U01 = false
+    chunk   U02 = ""
+    chunk   U03 = 1
+    chunk   U04 = 0
+    chunk   Id = 151994368
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4
+    chunk   Version = 8
+    chunk   IsHeavy = false
+    chunk   Node = <CPlugGameSkin>
+    chunk   Ignore = false
+    chunk 0x2E001006  HeaderChunk2E001006  [parsed]
+    chunk   Id = 771756038
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Id = 771756038
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk 0x2E002000  HeaderChunk2E002000  [parsed]
+    chunk   Id = 771760128
+    chunk   Id = 771760128
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002001-v0  HeaderChunk2E002001  [parsed]
+    chunk   Id = 771760129
+    chunk   Version = 0
+    chunk   Id = 771760129
+    chunk   Version = 0
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E001009  Chunk2E001009  [parsed]
+    chunk   Id = 771756041
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Id = 771756041
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E00100B  Chunk2E00100B  [parsed]
+    chunk   Id = 771756043
+    chunk   GameVersion = TMF, MP3, TMT, MP4, TM2020
+    chunk   Id = 771756043
+    chunk   GameVersion = TMF, MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E00100C  Chunk2E00100C  [parsed]
+    chunk   Id = 771756044
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Id = 771756044
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E00100D  Chunk2E00100D  [parsed]
+    chunk   Id = 771756045
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Id = 771756045
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E001010-v4  Chunk2E001010  [parsed]
+    chunk   U01 = null
+    chunk   Id = 771756048
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 4
+    chunk   U01 = null
+    chunk   Id = 771756048
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 4
+    chunk   Ignore = false
+    chunk 0x2E001011-v1  Chunk2E001011  [parsed]
+    chunk   Id = 771756049
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 1
+    chunk   Id = 771756049
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 1
+    chunk   Ignore = false
+    chunk 0x2E001012  Chunk2E001012  [parsed]
+    chunk   U01 = 0
+    chunk   U02 = 1
+    chunk   U03 = 2
+    chunk   U04 = 0
+    chunk   Id = 771756050
+    chunk   GameVersion = TM2020
+    chunk   U01 = 0
+    chunk   U02 = 1
+    chunk   U03 = 2
+    chunk   U04 = 0
+    chunk   Id = 771756050
+    chunk   GameVersion = TM2020
+    chunk   Ignore = false
+    chunk 0x2E002008  Chunk2E002008  [parsed]
+    chunk   Id = 771760136
+    chunk   Id = 771760136
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002009  Chunk2E002009  [parsed]
+    chunk   Id = 771760137
+    chunk   Id = 771760137
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00200C  Chunk2E00200C  [parsed]
+    chunk   Id = 771760140
+    chunk   Id = 771760140
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002012  Chunk2E002012  [parsed]
+    chunk   Id = 771760146
+    chunk   Id = 771760146
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002015  Chunk2E002015  [parsed]
+    chunk   Id = 771760149
+    chunk   Id = 771760149
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002019-v15  Chunk2E002019  [parsed]
+    chunk   Version = 15
+    chunk   Id = 771760153
+    chunk   Version = 15
+    chunk   Id = 771760153
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201A  Chunk2E00201A  [parsed]
+    chunk   U01 = null
+    chunk   Id = 771760154
+    chunk   U01 = null
+    chunk   Id = 771760154
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201C-v5  Chunk2E00201C  [parsed]
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = 0
+    chunk   U04 = 0
+    chunk   U05 = 0
+    chunk   U06 = 0
+    chunk   U07 = 0
+    chunk   U08 = 0
+    chunk   U09 = 0
+    chunk   U10 = 0
+    chunk   U11 = 0
+    chunk   U12 = 0
+    chunk   U13 = 0
+    chunk   U14 = 0
+    chunk   U15 = 0
+    chunk   Id = 771760156
+    chunk   Version = 5
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = 0
+    chunk   U04 = 0
+    chunk   U05 = 0
+    chunk   U06 = 0
+    chunk   U07 = 0
+    chunk   U08 = 0
+    chunk   U09 = 0
+    chunk   U10 = 0
+    chunk   U11 = 0
+    chunk   U12 = 0
+    chunk   U13 = 0
+    chunk   U14 = 0
+    chunk   U15 = 0
+    chunk   Id = 771760156
+    chunk   Version = 5
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201E-v7  Chunk2E00201E  [parsed]
+    chunk   U01 = ""
+    chunk   U02 = -1
+    chunk   Id = 771760158
+    chunk   Version = 7
+    chunk   U01 = ""
+    chunk   U02 = -1
+    chunk   Id = 771760158
+    chunk   Version = 7
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201F-v12  Chunk2E00201F  [parsed]
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = null
+    chunk   U04 = null
+    chunk   U05 = null
+    chunk   U06 = Iso4 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0, TX = 0, TY = 0, TZ = 0, Rotation = Mat3 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0 }, Translation = <0, 0, 0> }
+    chunk   U07 = null
+    chunk   U08 = 0
+    chunk   U09 = -1
+    chunk   U10 = -1
+    chunk   Id = 771760159
+    chunk   Version = 12
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = null
+    chunk   U04 = null
+    chunk   U05 = null
+    chunk   U06 = Iso4 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0, TX = 0, TY = 0, TZ = 0, Rotation = Mat3 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0 }, Translation = <0, 0, 0> }
+    chunk   U07 = null
+    chunk   U08 = 0
+    chunk   U09 = -1
+    chunk   U10 = -1
+    chunk   Id = 771760159
+    chunk   Version = 12
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002020-v3  Chunk2E002020  [parsed]
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = true
+    chunk   Id = 771760160
+    chunk   Version = 3
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = true
+    chunk   Id = 771760160
+    chunk   Version = 3
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002025-v0  Chunk2E002025  [parsed]
+    chunk   U01 = false
+    chunk   Id = 771760165
+    chunk   Version = 0
+    chunk   U01 = false
+    chunk   Id = 771760165
+    chunk   Version = 0
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002026-v0  Chunk2E002026  [parsed]
+    chunk   U01 = Vec3[0]
+    chunk   Id = 771760166
+    chunk   Version = 0
+    chunk   U01 = Vec3[0]
+    chunk   Id = 771760166
+    chunk   Version = 0
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002027-v0  Chunk2E002027  [parsed]
+    chunk   U01 = 0
+    chunk   Id = 771760167
+    chunk   Version = 0
+    chunk   U01 = 0
+    chunk   Id = 771760167
+    chunk   Version = 0
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    PhyModelCustom = null
+    PhyModelCustomFile = null
+    VisModelCustom = null
+    VisModelCustomFile = null
+    DefaultWeaponName = ""
+    DefaultCam = None
+    EntityModelEdition = null
+    EntityModelEditionFile = null
+    NPlugItem_SVariantList  0x2F0BC000  NPlugItem_SVariantList  [EntityModel]
+      Version = 1
+        NPlugItem_SVariant  0x301AD000  NPlugItem_SVariant  [Variants[0] NPlugItem_SVariant]
+          EntityModel = null
+          EntityModelFile = external reference "Media\Prefab\Items\Flag\Flag16m.Prefab.Gbx"
+          HiddenInManualCycle = false
+          GameVersion = Unspecified
+      GameVersion = Unspecified
+    VFX = null
+    MaterialModifier = null
+    MaterialModifierFile = null
+    ItemType = Ornament
+    Vehicle = null
+    VehicleFile = null
+    GameSkin = null
+    RaceInterfaceFid = null
+    LowQualitySolid = null
+    LowQualitySolidFile = null
+    DefaultCamIndex = 0
+    MaterialSkin = null
+    MaterialSkinFile = null
+    MaterialGlass = null
+    MaterialGlassFile = null
+    MaterialDetails = null
+    MaterialDetailsFile = null
+      NadeoSkinFids[0] External`1 = External`1
+      NadeoSkinFids[1] External`1 = External`1
+      NadeoSkinFids[2] External`1 = External`1
+      NadeoSkinFids[3] External`1 = External`1
+      NadeoSkinFids[4] External`1 = External`1
+      NadeoSkinFids[5] External`1 = External`1
+      NadeoSkinFids[6] External`1 = External`1
+    DecoratorSolid = null
+    DecoratorSolidFile = null
+    StemMaterial = null
+    StemMaterialFile = null
+    StemBumpMaterial = null
+    StemBumpMaterialFile = null
+    ForcedSkinsFids = null
+    MaterialPilot = null
+    MaterialPilotFile = null
+    BannerProfileFid = null
+    BannerProfileFidFile = null
+    FrontLight = null
+    FrontLightFile = null
+    FrontLightSmall = null
+    FrontLightSmallFile = null
+    RearLight = null
+    RearLightFile = null
+    ProjShadow = null
+    ProjShadowFile = null
+    ProjFront = null
+    ProjFrontFile = null
+    GroundPoint = <0, 0, 0>
+    PainterGroundMargin = 0
+    OrbitalCenterHeightFromGround = 0
+    OrbitalRadiusBase = -1
+    OrbitalPreviewAngle = 0.15
+    AudioEnvironmentInCar = null
+    AudioEnvironmentInCarFile = null
+    ItemTypeE = Ornament
+    DefaultPlacement = null
+    DefaultPlacementFile = external reference "Media\PlaceParam\Flag.PlaceParam.Gbx"
+    ArchetypeRef = ""
+    ArchetypeFid = null
+    WaypointType = None
+    DisableLightmap = false
+    IconFid = ""
+    ItemGroupElements = null
+    CatalogPosition = 101
+    NbAvailableMin = 0
+    NbAvailableMax = 0
+    Icon = null
+    IconFid = null
+    Ident = Ident
+    PageName = "Items"
+    ParentCollectorId = ""
+    Flags = 16
+    CopperPrice = 0
+    Name = "Flag16m"
+    ProdState = Release
+    LightmapComputeTime = 26-1-2023 22:08:52
+    DefaultSkinName = null
+    SkinKind = None
+    IsInternal = false
+    NeedUnlock = false
+    Description = "Flag16m"
+    IconUseAutoRender = false
+    IconQuarterRotationY = 0
+    DefaultSkin = null
+    DefaultSkinFile = null
+    SkinDirectory = ""
+    IsAdvanced = false
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Items\Flag8m.Item.Gbx
+     2068 bytes, class 0x2E002000 CGameItemModel, node CGameItemModel
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.GameData.CGameItemModel, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 771760128
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 4
+     ref table: 2 external file(s)
+        Media\Prefab\Items\Flag\Flag8m.Prefab.Gbx
+        Media\PlaceParam\Flag.PlaceParam.Gbx
+  CGameItemModel  0x2E002000  CGameItemModel  [root]
+    chunk 0x2E001003-v8  HeaderChunk2E001003  [parsed]
+    chunk   U01 = null
+    chunk   Id = 771756035
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Version = 8
+    chunk   U01 = null
+    chunk   Id = 771756035
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Version = 8
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk 0x2E001004  HeaderChunk2E001004  [parsed]
+    chunk   U01 = 1
+    chunk   Id = 771756036
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   U01 = 1
+    chunk   Id = 771756036
+    chunk   GameVersion = TM10, TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   IsHeavy = true
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk 0x090F4000-v8  HeaderChunk090F4000  [parsed]
+    chunk   U01 = false
+    chunk   U02 = ""
+    chunk   U03 = 1
+    chunk   U04 = 0
+    chunk   Id = 151994368
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4
+    chunk   Version = 8
+    chunk   U01 = false
+    chunk   U02 = ""
+    chunk   U03 = 1
+    chunk   U04 = 0
+    chunk   Id = 151994368
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4
+    chunk   Version = 8
+    chunk   IsHeavy = false
+    chunk   Node = <CPlugGameSkin>
+    chunk   Ignore = false
+    chunk 0x2E001006  HeaderChunk2E001006  [parsed]
+    chunk   Id = 771756038
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Id = 771756038
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk 0x2E002000  HeaderChunk2E002000  [parsed]
+    chunk   Id = 771760128
+    chunk   Id = 771760128
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002001-v0  HeaderChunk2E002001  [parsed]
+    chunk   Id = 771760129
+    chunk   Version = 0
+    chunk   Id = 771760129
+    chunk   Version = 0
+    chunk   IsHeavy = false
+    chunk   Node = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E001009  Chunk2E001009  [parsed]
+    chunk   Id = 771756041
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Id = 771756041
+    chunk   GameVersion = TMSX, TMF, MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E00100B  Chunk2E00100B  [parsed]
+    chunk   Id = 771756043
+    chunk   GameVersion = TMF, MP3, TMT, MP4, TM2020
+    chunk   Id = 771756043
+    chunk   GameVersion = TMF, MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E00100C  Chunk2E00100C  [parsed]
+    chunk   Id = 771756044
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Id = 771756044
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E00100D  Chunk2E00100D  [parsed]
+    chunk   Id = 771756045
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Id = 771756045
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Ignore = false
+    chunk 0x2E001010-v4  Chunk2E001010  [parsed]
+    chunk   U01 = null
+    chunk   Id = 771756048
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 4
+    chunk   U01 = null
+    chunk   Id = 771756048
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 4
+    chunk   Ignore = false
+    chunk 0x2E001011-v1  Chunk2E001011  [parsed]
+    chunk   Id = 771756049
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 1
+    chunk   Id = 771756049
+    chunk   GameVersion = MP3, TMT, MP4, TM2020
+    chunk   Version = 1
+    chunk   Ignore = false
+    chunk 0x2E001012  Chunk2E001012  [parsed]
+    chunk   U01 = 0
+    chunk   U02 = 1
+    chunk   U03 = 2
+    chunk   U04 = 0
+    chunk   Id = 771756050
+    chunk   GameVersion = TM2020
+    chunk   U01 = 0
+    chunk   U02 = 1
+    chunk   U03 = 2
+    chunk   U04 = 0
+    chunk   Id = 771756050
+    chunk   GameVersion = TM2020
+    chunk   Ignore = false
+    chunk 0x2E002008  Chunk2E002008  [parsed]
+    chunk   Id = 771760136
+    chunk   Id = 771760136
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002009  Chunk2E002009  [parsed]
+    chunk   Id = 771760137
+    chunk   Id = 771760137
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00200C  Chunk2E00200C  [parsed]
+    chunk   Id = 771760140
+    chunk   Id = 771760140
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002012  Chunk2E002012  [parsed]
+    chunk   Id = 771760146
+    chunk   Id = 771760146
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002015  Chunk2E002015  [parsed]
+    chunk   Id = 771760149
+    chunk   Id = 771760149
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002019-v15  Chunk2E002019  [parsed]
+    chunk   Version = 15
+    chunk   Id = 771760153
+    chunk   Version = 15
+    chunk   Id = 771760153
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201A  Chunk2E00201A  [parsed]
+    chunk   U01 = null
+    chunk   Id = 771760154
+    chunk   U01 = null
+    chunk   Id = 771760154
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201C-v5  Chunk2E00201C  [parsed]
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = 0
+    chunk   U04 = 0
+    chunk   U05 = 0
+    chunk   U06 = 0
+    chunk   U07 = 0
+    chunk   U08 = 0
+    chunk   U09 = 0
+    chunk   U10 = 0
+    chunk   U11 = 0
+    chunk   U12 = 0
+    chunk   U13 = 0
+    chunk   U14 = 0
+    chunk   U15 = 0
+    chunk   Id = 771760156
+    chunk   Version = 5
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = 0
+    chunk   U04 = 0
+    chunk   U05 = 0
+    chunk   U06 = 0
+    chunk   U07 = 0
+    chunk   U08 = 0
+    chunk   U09 = 0
+    chunk   U10 = 0
+    chunk   U11 = 0
+    chunk   U12 = 0
+    chunk   U13 = 0
+    chunk   U14 = 0
+    chunk   U15 = 0
+    chunk   Id = 771760156
+    chunk   Version = 5
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201E-v7  Chunk2E00201E  [parsed]
+    chunk   U01 = ""
+    chunk   U02 = -1
+    chunk   Id = 771760158
+    chunk   Version = 7
+    chunk   U01 = ""
+    chunk   U02 = -1
+    chunk   Id = 771760158
+    chunk   Version = 7
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E00201F-v12  Chunk2E00201F  [parsed]
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = null
+    chunk   U04 = null
+    chunk   U05 = null
+    chunk   U06 = Iso4 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0, TX = 0, TY = 0, TZ = 0, Rotation = Mat3 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0 }, Translation = <0, 0, 0> }
+    chunk   U07 = null
+    chunk   U08 = 0
+    chunk   U09 = -1
+    chunk   U10 = -1
+    chunk   Id = 771760159
+    chunk   Version = 12
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = null
+    chunk   U04 = null
+    chunk   U05 = null
+    chunk   U06 = Iso4 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0, TX = 0, TY = 0, TZ = 0, Rotation = Mat3 { XX = 0, XY = 0, XZ = 0, YX = 0, YY = 0, YZ = 0, ZX = 0, ZY = 0, ZZ = 0 }, Translation = <0, 0, 0> }
+    chunk   U07 = null
+    chunk   U08 = 0
+    chunk   U09 = -1
+    chunk   U10 = -1
+    chunk   Id = 771760159
+    chunk   Version = 12
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002020-v3  Chunk2E002020  [parsed]
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = true
+    chunk   Id = 771760160
+    chunk   Version = 3
+    chunk   U01 = null
+    chunk   U02 = null
+    chunk   U03 = true
+    chunk   Id = 771760160
+    chunk   Version = 3
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002025-v0  Chunk2E002025  [parsed]
+    chunk   U01 = false
+    chunk   Id = 771760165
+    chunk   Version = 0
+    chunk   U01 = false
+    chunk   Id = 771760165
+    chunk   Version = 0
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002026-v0  Chunk2E002026  [parsed]
+    chunk   U01 = Vec3[0]
+    chunk   Id = 771760166
+    chunk   Version = 0
+    chunk   U01 = Vec3[0]
+    chunk   Id = 771760166
+    chunk   Version = 0
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E002027-v0  Chunk2E002027  [parsed]
+    chunk   U01 = 0
+    chunk   Id = 771760167
+    chunk   Version = 0
+    chunk   U01 = 0
+    chunk   Id = 771760167
+    chunk   Version = 0
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    PhyModelCustom = null
+    PhyModelCustomFile = null
+    VisModelCustom = null
+    VisModelCustomFile = null
+    DefaultWeaponName = ""
+    DefaultCam = None
+    EntityModelEdition = null
+    EntityModelEditionFile = null
+    NPlugItem_SVariantList  0x2F0BC000  NPlugItem_SVariantList  [EntityModel]
+      Version = 1
+        NPlugItem_SVariant  0x301AD000  NPlugItem_SVariant  [Variants[0] NPlugItem_SVariant]
+          EntityModel = null
+          EntityModelFile = external reference "Media\Prefab\Items\Flag\Flag8m.Prefab.Gbx"
+          HiddenInManualCycle = false
+          GameVersion = Unspecified
+      GameVersion = Unspecified
+    VFX = null
+    MaterialModifier = null
+    MaterialModifierFile = null
+    ItemType = Ornament
+    Vehicle = null
+    VehicleFile = null
+    GameSkin = null
+    RaceInterfaceFid = null
+    LowQualitySolid = null
+    LowQualitySolidFile = null
+    DefaultCamIndex = 0
+    MaterialSkin = null
+    MaterialSkinFile = null
+    MaterialGlass = null
+    MaterialGlassFile = null
+    MaterialDetails = null
+    MaterialDetailsFile = null
+      NadeoSkinFids[0] External`1 = External`1
+      NadeoSkinFids[1] External`1 = External`1
+      NadeoSkinFids[2] External`1 = External`1
+      NadeoSkinFids[3] External`1 = External`1
+      NadeoSkinFids[4] External`1 = External`1
+      NadeoSkinFids[5] External`1 = External`1
+      NadeoSkinFids[6] External`1 = External`1
+    DecoratorSolid = null
+    DecoratorSolidFile = null
+    StemMaterial = null
+    StemMaterialFile = null
+    StemBumpMaterial = null
+    StemBumpMaterialFile = null
+    ForcedSkinsFids = null
+    MaterialPilot = null
+    MaterialPilotFile = null
+    BannerProfileFid = null
+    BannerProfileFidFile = null
+    FrontLight = null
+    FrontLightFile = null
+    FrontLightSmall = null
+    FrontLightSmallFile = null
+    RearLight = null
+    RearLightFile = null
+    ProjShadow = null
+    ProjShadowFile = null
+    ProjFront = null
+    ProjFrontFile = null
+    GroundPoint = <0, 0, 0>
+    PainterGroundMargin = 0
+    OrbitalCenterHeightFromGround = 0
+    OrbitalRadiusBase = -1
+    OrbitalPreviewAngle = 0.15
+    AudioEnvironmentInCar = null
+    AudioEnvironmentInCarFile = null
+    ItemTypeE = Ornament
+    DefaultPlacement = null
+    DefaultPlacementFile = external reference "Media\PlaceParam\Flag.PlaceParam.Gbx"
+    ArchetypeRef = ""
+    ArchetypeFid = null
+    WaypointType = None
+    DisableLightmap = false
+    IconFid = ""
+    ItemGroupElements = null
+    CatalogPosition = 101
+    NbAvailableMin = 0
+    NbAvailableMax = 0
+    Icon = null
+    IconFid = null
+    Ident = Ident
+    PageName = "Items"
+    ParentCollectorId = ""
+    Flags = 16
+    CopperPrice = 0
+    Name = "Flag8m"
+    ProdState = Release
+    LightmapComputeTime = 26-1-2023 22:08:52
+    DefaultSkinName = null
+    SkinKind = None
+    IsInternal = false
+    NeedUnlock = false
+    Description = "Flag8m"
+    IconUseAutoRender = false
+    IconQuarterRotationY = 0
+    DefaultSkin = null
+    DefaultSkinFile = null
+    SkinDirectory = ""
+    IsAdvanced = false
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Prefab\Items\Flag\Flag16m.Prefab.Gbx
+     15427 bytes, class 0x09145000 CPlugPrefab, node CPlugPrefab
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.Plug.CPlugPrefab, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 152326144
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 17
+     ref table: 3 external file(s)
+        Material\Technics.Material.Gbx
+        Material\TechnicsTrims.Material.Gbx
+        Dyna\Flag\Flag.DynaObject.Gbx
+  CPlugPrefab  0x09145000  CPlugPrefab  [root]
+    Version = 11
+    FileWriteTime = 30-1-2023 10:06:56
+    Url = "\\storage.nadeo.org\graphical_data\Stadium\3D\Items\Deco.max:Flag16m-------------------------------EXPORT-LodOK"
+    U01 = -2147365059
+    U02 = 0
+      Ents[0] EntRef = EntRef
+        CPlugStaticObjectModel  0x09159000  CPlugStaticObjectModel  [Model]
+          Version = 3
+          CPlugSolid2Model  0x090BB000  CPlugSolid2Model  [Mesh]
+            chunk 0x090BB000-v34  Chunk090BB000  [parsed]
+            chunk   U01 = ""
+            chunk   U02 = null
+            chunk   U03 = ""
+            chunk   U04 = ""
+            chunk   U05 = 1
+            chunk   U06 = ""
+            chunk   U07 = -1
+            chunk   U08 = null
+            chunk   U09 = null
+            chunk   U10 = Int32[0]
+            chunk   U11 = 0
+            chunk   U12 = Int32[0]
+            chunk   U13 = 0
+            chunk   U14 = null
+            chunk   U15 = 1
+            chunk   U16 = 1
+            chunk   U17 = ""
+            chunk   U18 = 0
+            chunk   U19 = ValueTuple`5[0]
+            chunk   Version = 34
+            chunk   Id = 151760896
+            chunk   U01 = ""
+            chunk   U02 = null
+            chunk   U03 = ""
+            chunk   U04 = ""
+            chunk   U05 = 1
+            chunk   U06 = ""
+            chunk   U07 = -1
+            chunk   U08 = null
+            chunk   U09 = null
+            chunk   U10 = Int32[0]
+            chunk   U11 = 0
+            chunk   U12 = Int32[0]
+            chunk   U13 = 0
+            chunk   U14 = null
+            chunk   U15 = 1
+            chunk   U16 = 1
+            chunk   U17 = ""
+            chunk   U18 = 0
+            chunk   U19 = ValueTuple`5[0]
+            chunk   Version = 34
+            chunk   Id = 151760896
+            chunk   Ignore = false
+            chunk   GameVersion = Unspecified
+            chunk 0x090BB002  Chunk090BB002  [parsed]
+            chunk   Id = 151760898
+            chunk   Id = 151760898
+            chunk   Data = null
+            chunk   Ignore = false
+            chunk   GameVersion = Unspecified
+              ShadedGeoms[0] ShadedGeom = ShadedGeom
+              ShadedGeoms[1] ShadedGeom = ShadedGeom
+              ShadedGeoms[2] ShadedGeom = ShadedGeom
+              ShadedGeoms[3] ShadedGeom = ShadedGeom
+              ShadedGeoms[4] ShadedGeom = ShadedGeom
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[0] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 5,2154064E-08, Y = 6,000004, Z = 8,940697E-08, X2 = 0,13515165, Y2 = 7,000004, Z2 = 0,13515234 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[1] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 5,2154064E-08, Y = 13,007521, Z = 5,1409006E-07, X2 = 0,13515165, Y2 = 0,007516861, Z2 = 0,13515192 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[2] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 5,2154064E-08, Y = 6,000004, Z = 8,940697E-08, X2 = 0,13515165, Y2 = 7,000004, Z2 = 0,13515234 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[3] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 5,2154064E-08, Y = 13,00752, Z = 5,1409006E-07, X2 = 0,13515165, Y2 = 0,0075159073, Z2 = 0,13515192 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[4] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = -0,03378786, Y = 6,000002, Z = 0,033788063, X2 = 0,10136373, Y2 = 7,000002, Z2 = 0,10136437 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+            Skel = null
+            VisCstType = 1
+            PreLightGenerator = PreLightGen
+            FileWriteTime = 30-1-2023 10:06:53
+            MaterialsFolderName = ""
+            DamageZone = 0
+            Flags = 0
+              Materials[0] External`1 = External`1
+                File = external reference "Material\Technics.Material.Gbx"
+              Materials[1] External`1 = External`1
+                File = external reference "Material\TechnicsTrims.Material.Gbx"
+            MaterialInsts = null
+            Boxes = null
+            FileVersion = 0
+            GameVersion = Unspecified
+          MeshFile = null
+          IsMeshCollidable = false
+          CPlugSurface  0x0900C000  CPlugSurface  [Shape]
+            chunk 0x0900C003-v4  Chunk0900C003  [parsed]
+            chunk   U01 = null
+            chunk   U02 = UInt16[2]
+            chunk   U03 = null
+            chunk   U04 = UInt16[0]
+            chunk   U05 = null
+            chunk   U06 = null
+            chunk   Version = 4
+            chunk   Id = 151044099
+            chunk   GameVersion = TMT, MP4
+            chunk   U01 = null
+            chunk   U02 = UInt16[2]
+            chunk   U03 = null
+            chunk   U04 = UInt16[0]
+            chunk   U05 = null
+            chunk   U06 = null
+            chunk   Version = 4
+            chunk   Id = 151044099
+            chunk   GameVersion = TMT, MP4
+            chunk   Ignore = false
+            Surf = Mesh
+            SurfVersion = 2
+            Skel = null
+              Materials[0] SurfMaterial = SurfMaterial
+                MaterialFile = external reference "Material\Technics.Material.Gbx"
+              Materials[1] SurfMaterial = SurfMaterial
+                MaterialFile = external reference "Material\TechnicsTrims.Material.Gbx"
+            Geom = null
+            GameVersion = TMT, MP4
+          ShapeFile = null
+          GameVersion = Unspecified
+      Ents[1] EntRef = EntRef
+        ModelFile = external reference "Dyna\Flag\Flag.DynaObject.Gbx"
+        NPlugDynaObjectModel_SInstanceParams  0x2F0B6000  NPlugDynaObjectModel_SInstanceParams  [Params]
+          Version = 2
+          PeriodSc = 8
+          TextureId = 0
+          IsKinematic = false
+          PeriodScMax = 16
+          Phase01 = 0
+          Phase01Max = 1
+          CastStaticShadow = false
+          GameVersion = Unspecified
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Prefab\Items\Flag\Flag8m.Prefab.Gbx
+     15431 bytes, class 0x09145000 CPlugPrefab, node CPlugPrefab
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.Plug.CPlugPrefab, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 152326144
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 17
+     ref table: 3 external file(s)
+        Material\Technics.Material.Gbx
+        Material\TechnicsTrims.Material.Gbx
+        Dyna\Flag\FlagSmall.DynaObject.Gbx
+  CPlugPrefab  0x09145000  CPlugPrefab  [root]
+    Version = 11
+    FileWriteTime = 30-1-2023 10:06:59
+    Url = "\\storage.nadeo.org\graphical_data\Stadium\3D\Items\Deco.max:Flag8m-------------------------------EXPORT-LodOK"
+    U01 = -2147365059
+    U02 = 0
+      Ents[0] EntRef = EntRef
+        CPlugStaticObjectModel  0x09159000  CPlugStaticObjectModel  [Model]
+          Version = 3
+          CPlugSolid2Model  0x090BB000  CPlugSolid2Model  [Mesh]
+            chunk 0x090BB000-v34  Chunk090BB000  [parsed]
+            chunk   U01 = ""
+            chunk   U02 = null
+            chunk   U03 = ""
+            chunk   U04 = ""
+            chunk   U05 = 1
+            chunk   U06 = ""
+            chunk   U07 = -1
+            chunk   U08 = null
+            chunk   U09 = null
+            chunk   U10 = Int32[0]
+            chunk   U11 = 0
+            chunk   U12 = Int32[0]
+            chunk   U13 = 0
+            chunk   U14 = null
+            chunk   U15 = 1
+            chunk   U16 = 1
+            chunk   U17 = ""
+            chunk   U18 = 0
+            chunk   U19 = ValueTuple`5[0]
+            chunk   Version = 34
+            chunk   Id = 151760896
+            chunk   U01 = ""
+            chunk   U02 = null
+            chunk   U03 = ""
+            chunk   U04 = ""
+            chunk   U05 = 1
+            chunk   U06 = ""
+            chunk   U07 = -1
+            chunk   U08 = null
+            chunk   U09 = null
+            chunk   U10 = Int32[0]
+            chunk   U11 = 0
+            chunk   U12 = Int32[0]
+            chunk   U13 = 0
+            chunk   U14 = null
+            chunk   U15 = 1
+            chunk   U16 = 1
+            chunk   U17 = ""
+            chunk   U18 = 0
+            chunk   U19 = ValueTuple`5[0]
+            chunk   Version = 34
+            chunk   Id = 151760896
+            chunk   Ignore = false
+            chunk   GameVersion = Unspecified
+            chunk 0x090BB002  Chunk090BB002  [parsed]
+            chunk   Id = 151760898
+            chunk   Id = 151760898
+            chunk   Data = null
+            chunk   Ignore = false
+            chunk   GameVersion = Unspecified
+              ShadedGeoms[0] ShadedGeom = ShadedGeom
+              ShadedGeoms[1] ShadedGeom = ShadedGeom
+              ShadedGeoms[2] ShadedGeom = ShadedGeom
+              ShadedGeoms[3] ShadedGeom = ShadedGeom
+              ShadedGeoms[4] ShadedGeom = ShadedGeom
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[0] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 2,6077032E-08, Y = 2,000001, Z = -1,6391277E-07, X2 = 0,066476345, Y2 = 3,000001, Z2 = 0,06647648 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[1] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 3,7252903E-09, Y = 5,005001, Z = -1,899898E-07, X2 = 0,06647633, Y2 = 0,005002022, Z2 = 0,06647645 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[2] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 2,6077032E-08, Y = 1,9949989, Z = -1,7136335E-07, X2 = 0,066476345, Y2 = 2,994999, Z2 = 0,06647649 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[3] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = 1,4901161E-08, Y = 4,9949965, Z = -1,8626451E-08, X2 = 0,06647633, Y2 = 0,0050024986, Z2 = 0,0664763 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+              CPlugVisualIndexedTriangles  0x0901E000  CPlugVisualIndexedTriangles  [Visuals[4] CPlugVisualIndexedTriangles]
+                chunk 0x09006001  Chunk09006001  [parsed]
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = ""
+                chunk   Id = 151019521
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006005  Chunk09006005  [parsed]
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019525
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006009  Chunk09006009  [parsed]
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = 0
+                chunk   Id = 151019529
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600B  Chunk0900600B  [parsed]
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151019531
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0900600F-v6  Chunk0900600F  [parsed]
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   U02 = 0
+                chunk   U03 = 0
+                chunk   U04 = null
+                chunk   Version = 6
+                chunk   Id = 151019535
+                chunk   GameVersion = TMT, MP4
+                chunk   Ignore = false
+                chunk 0x09006010-v0  Chunk09006010  [parsed]
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Id = 151019536
+                chunk   GameVersion = TMT, MP4
+                chunk   Version = 0
+                chunk   Ignore = false
+                chunk 0x0902C002  Chunk0902C002  [parsed]
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   U01 = null
+                chunk   Id = 151175170
+                chunk   GameVersion = TM10, TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0902C004  Chunk0902C004  [parsed]
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Tangents1Count = 0
+                chunk   Tangents1 = byte[0] 
+                chunk   Tangents2Count = 0
+                chunk   Tangents2 = byte[0] 
+                chunk   Id = 151175172
+                chunk   GameVersion = TMF, TMT, MP4
+                chunk   Ignore = false
+                chunk 0x0906A001  Chunk0906A001  [parsed]
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Id = 151429121
+                chunk   GameVersion = TMSX, TMNESWC, TMF, TMT, MP4
+                chunk   Ignore = false
+                CPlugIndexBuffer  0x09057000  CPlugIndexBuffer  [IndexBuffer]
+                  chunk 0x09057001  Chunk09057001  [parsed]
+                  chunk   Id = 151351297
+                  chunk   Id = 151351297
+                  chunk   Ignore = false
+                  chunk   GameVersion = Unspecified
+                  Flags = 2
+                  GameVersion = Unspecified
+                Tangents = null
+                BiTangents = null
+                Flags = 168
+                  CPlugVertexStream  0x09056000  CPlugVertexStream  [VertexStreams[0] CPlugVertexStream]
+                    chunk 0x09056000-v1  Chunk09056000  [parsed]
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   U01 = true
+                    chunk   Version = 1
+                    chunk   Id = 151347200
+                    chunk   Ignore = false
+                    chunk   GameVersion = Unspecified
+                    GameVersion = Unspecified
+                BoundingBox = BoxAligned { X = -0,016619053, Y = 1,9949985, Z = -0,016619297, X2 = 0,04985727, Y2 = 2,9949985, Z2 = 0,049857363 }
+                SkinData = null
+                IsGeometryStatic = true
+                IsIndexationStatic = true
+                HasVertexNormals = true
+                MorphCount = 0
+                GameVersion = TMT, MP4
+            Skel = null
+            VisCstType = 1
+            PreLightGenerator = PreLightGen
+            FileWriteTime = 30-1-2023 10:06:58
+            MaterialsFolderName = ""
+            DamageZone = 0
+            Flags = 0
+              Materials[0] External`1 = External`1
+                File = external reference "Material\Technics.Material.Gbx"
+              Materials[1] External`1 = External`1
+                File = external reference "Material\TechnicsTrims.Material.Gbx"
+            MaterialInsts = null
+            Boxes = null
+            FileVersion = 0
+            GameVersion = Unspecified
+          MeshFile = null
+          IsMeshCollidable = false
+          CPlugSurface  0x0900C000  CPlugSurface  [Shape]
+            chunk 0x0900C003-v4  Chunk0900C003  [parsed]
+            chunk   U01 = null
+            chunk   U02 = UInt16[2]
+            chunk   U03 = null
+            chunk   U04 = UInt16[0]
+            chunk   U05 = null
+            chunk   U06 = null
+            chunk   Version = 4
+            chunk   Id = 151044099
+            chunk   GameVersion = TMT, MP4
+            chunk   U01 = null
+            chunk   U02 = UInt16[2]
+            chunk   U03 = null
+            chunk   U04 = UInt16[0]
+            chunk   U05 = null
+            chunk   U06 = null
+            chunk   Version = 4
+            chunk   Id = 151044099
+            chunk   GameVersion = TMT, MP4
+            chunk   Ignore = false
+            Surf = Mesh
+            SurfVersion = 2
+            Skel = null
+              Materials[0] SurfMaterial = SurfMaterial
+                MaterialFile = external reference "Material\Technics.Material.Gbx"
+              Materials[1] SurfMaterial = SurfMaterial
+                MaterialFile = external reference "Material\TechnicsTrims.Material.Gbx"
+            Geom = null
+            GameVersion = TMT, MP4
+          ShapeFile = null
+          GameVersion = Unspecified
+      Ents[1] EntRef = EntRef
+        ModelFile = external reference "Dyna\Flag\FlagSmall.DynaObject.Gbx"
+        NPlugDynaObjectModel_SInstanceParams  0x2F0B6000  NPlugDynaObjectModel_SInstanceParams  [Params]
+          Version = 2
+          PeriodSc = 8
+          TextureId = 0
+          IsKinematic = false
+          PeriodScMax = 16
+          Phase01 = 0
+          Phase01Max = 1
+          CastStaticShadow = false
+          GameVersion = Unspecified
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Dyna\Flag\Flag.DynaObject.Gbx
+     149 bytes, class 0x09144000 CPlugDynaObjectModel, node CPlugDynaObjectModel
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.Plug.CPlugDynaObjectModel, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 152322048
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 2
+     ref table: 1 external file(s)
+        Flag.Mesh.Gbx
+  CPlugDynaObjectModel  0x09144000  CPlugDynaObjectModel  [root]
+    Version = 13
+    IsStatic = false
+    DynamizeOnSpawn = false
+    Mesh = null
+    MeshFile = external reference "Flag.Mesh.Gbx"
+    DynaShape = null
+    DynaShapeFile = null
+    StaticShape = null
+    StaticShapeFile = null
+    BreakSpeedKmh = 100
+    Mass = 10
+    LightAliveDurationScMin = 5
+    LightAliveDurationScMax = 7
+    U01 = 1
+    U02 = 1
+    U03 = 4
+    U04 = 0
+    U05 = 1
+    U06 = 10
+    U07 = 0
+    U08 = 0
+    U09 = 0
+    LocAnim = null
+    LocAnimFile = null
+    U10 = 0
+    LocAnimIsPhysical = false
+    WaterModel = null
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Dyna\Flag\FlagSmall.DynaObject.Gbx
+     154 bytes, class 0x09144000 CPlugDynaObjectModel, node CPlugDynaObjectModel
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.Plug.CPlugDynaObjectModel, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 152322048
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 2
+     ref table: 1 external file(s)
+        FlagSmall.Mesh.Gbx
+  CPlugDynaObjectModel  0x09144000  CPlugDynaObjectModel  [root]
+    Version = 13
+    IsStatic = false
+    DynamizeOnSpawn = false
+    Mesh = null
+    MeshFile = external reference "FlagSmall.Mesh.Gbx"
+    DynaShape = null
+    DynaShapeFile = null
+    StaticShape = null
+    StaticShapeFile = null
+    BreakSpeedKmh = 100
+    Mass = 10
+    LightAliveDurationScMin = 5
+    LightAliveDurationScMax = 7
+    U01 = 1
+    U02 = 1
+    U03 = 4
+    U04 = 0
+    U05 = 1
+    U06 = 10
+    U07 = 0
+    U08 = 0
+    U09 = 0
+    LocAnim = null
+    LocAnimFile = null
+    U10 = 0
+    LocAnimIsPhysical = false
+    WaterModel = null
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\PlaceParam\Flag.PlaceParam.Gbx
+     899 bytes, class 0x2E020000 CGameItemPlacementParam, node CGameItemPlacementParam
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.GameData.CGameItemPlacementParam, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 771883008
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 2
+  CGameItemPlacementParam  0x2E020000  CGameItemPlacementParam  [root]
+    chunk 0x2E020000-v0  Chunk2E020000  [parsed]
+    chunk   Id = 771883008
+    chunk   Version = 0
+    chunk   Id = 771883008
+    chunk   Version = 0
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E020001  Chunk2E020001  [parsed]
+    chunk   Id = 771883009
+    chunk   Id = 771883009
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x2E020004  Chunk2E020004  [ignored]
+    chunk   payload 8 bytes: 0000000000000000
+    chunk   Id = 771883012
+    chunk   Ignore = true
+    chunk   Id = 771883012
+    chunk   Ignore = true
+    chunk   Data = byte[8] 0000000000000000
+    chunk   GameVersion = Unspecified
+    chunk 0x2E020005  Chunk2E020005  [parsed]
+    chunk   Id = 771883013
+    chunk   Id = 771883013
+    chunk   Data = null
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    YawOnly = false
+    NotOnObject = false
+    AutoRotation = false
+    SwitchPivotManually = false
+    Flags = 1
+    CubeCenter = <0, 0, 0>
+    CubeSize = 0
+    GridSnapHStep = 0
+    GridSnapVStep = 0
+    GridSnapHOffset = 0
+    GridSnapVOffset = 0
+    FlyVStep = 0
+    FlyVOffset = 0
+    PivotSnapDistance = -1
+    NPlugItemPlacement_SClass  0x09187000  NPlugItemPlacement_SClass  [PlacementClass]
+      Version = 10
+      SizeGroup = "0x0"
+      AlwaysUp = true
+      AlignToInterior = false
+      AlignToWorldDir = true
+      WorldDir = <0, 0, 1>
+        PatchLayouts[0] PatchLayout = PatchLayout
+        PatchLayouts[1] PatchLayout = PatchLayout
+        PatchLayouts[2] PatchLayout = PatchLayout
+        PatchLayouts[3] PatchLayout = PatchLayout
+        PatchLayouts[4] PatchLayout = PatchLayout
+        PatchLayouts[5] PatchLayout = PatchLayout
+        PatchLayouts[6] PatchLayout = PatchLayout
+        PatchLayouts[7] PatchLayout = PatchLayout
+      GameVersion = Unspecified
+    PlacementClassFile = null
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Material\ItemFlag.Material.Gbx
+     973 bytes, class 0x09079000 CPlugMaterial, node CPlugMaterial
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.Plug.CPlugMaterial, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 151490560
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 6
+     ref table: 4 external file(s)
+        Stadium\Media\Texture\ItemFlag_D.Texture.gbx
+        Stadium\Media\Texture\ItemFlag_D_HueMask.Texture.gbx
+        Stadium\Media\Texture\ItemFlag_R.Texture.gbx
+        Techno3\Media\Material\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx
+  CPlugMaterial  0x09079000  CPlugMaterial  [root]
+    chunk 0x09079001  Chunk09079001  [parsed]
+    chunk   U01 = null
+    chunk   Id = 151490561
+    chunk   U01 = null
+    chunk   Id = 151490561
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079007  Chunk09079007  [parsed]
+    chunk   Id = 151490567
+    chunk   Id = 151490567
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079010  Chunk09079010  [parsed]
+    chunk   U01 = 1
+    chunk   Id = 151490576
+    chunk   U01 = 1
+    chunk   Id = 151490576
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079011  Chunk09079011  [parsed]
+    chunk   U01 = String[0]
+    chunk   Id = 151490577
+    chunk   U01 = String[0]
+    chunk   Id = 151490577
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079012  Chunk09079012  [ignored]
+    chunk   payload 136 bytes: 02000000540000003A646174613A5C50726F6A656374735C546563686E6F335C4D656469615C4D6174657269616C5C54656368335F576172705F5444696666537065635F566572746578547765656E2E4D6174657269616C2E676278AC5EA1EF
+    chunk   string: ":data:\Projects\Techno3\Media\Material\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx"
+    chunk   Id = 151490578
+    chunk   Ignore = true
+    chunk   Id = 151490578
+    chunk   Ignore = true
+    chunk   Data = byte[136] 02000000540000003A646174613A5C50726F6A656374735C546563686E6F335C
+    chunk   GameVersion = Unspecified
+    chunk 0x09079013  Chunk09079013  [ignored]
+    chunk   payload 4 bytes: 00000000
+    chunk   Id = 151490579
+    chunk   Ignore = true
+    chunk   Id = 151490579
+    chunk   Ignore = true
+    chunk   Data = byte[4] 00000000
+    chunk   GameVersion = Unspecified
+    chunk 0x09079015-v7  Chunk09079015  [parsed]
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = External`1[1]
+    chunk   U03File = null
+    chunk   U04 = null
+    chunk   Id = 151490581
+    chunk   Version = 7
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = External`1[1]
+    chunk   U03File = null
+    chunk   U04 = null
+    chunk   Id = 151490581
+    chunk   Version = 7
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079016-v0  Chunk09079016  [parsed]
+    chunk   U01 = 8768
+    chunk   Id = 151490582
+    chunk   Version = 0
+    chunk   U01 = 8768
+    chunk   Id = 151490582
+    chunk   Version = 0
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079017-v1  Chunk09079017  [parsed]
+    chunk   U01 = 2148466716
+    chunk   U02 = -1082130432
+    chunk   U03 = 0
+    chunk   U04 = ""
+    chunk   Id = 151490583
+    chunk   Version = 1
+    chunk   U01 = 2148466716
+    chunk   U02 = -1082130432
+    chunk   U03 = 0
+    chunk   U04 = ""
+    chunk   Id = 151490583
+    chunk   Version = 1
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079019  Chunk09079019  [ignored]
+    chunk   payload 8 bytes: 0000000000000000
+    chunk   Id = 151490585
+    chunk   Ignore = true
+    chunk   Id = 151490585
+    chunk   Ignore = true
+    chunk   Data = byte[8] 0000000000000000
+    chunk   GameVersion = Unspecified
+    DeviceMaterials = null
+    SurfaceId = Concrete
+    CPlugMaterialCustom  0x0903A000  CPlugMaterialCustom  [CustomMaterial]
+      chunk 0x0903A004  Chunk0903A004  [parsed]
+      chunk   U01 = Int32[0]
+      chunk   Id = 151232516
+      chunk   U01 = Int32[0]
+      chunk   Id = 151232516
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A00A  Chunk0903A00A  [parsed]
+      chunk   Id = 151232522
+      chunk   Id = 151232522
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A00C  Chunk0903A00C  [parsed]
+      chunk   Id = 151232524
+      chunk   Id = 151232524
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A00F-v2  Chunk0903A00F  [parsed]
+      chunk   U01 = -1
+      chunk   U02 = -1
+      chunk   U03 = 0
+      chunk   U04 = DefineNat[0]
+      chunk   Id = 151232527
+      chunk   Version = 2
+      chunk   U01 = -1
+      chunk   U02 = -1
+      chunk   U03 = 0
+      chunk   U04 = DefineNat[0]
+      chunk   Id = 151232527
+      chunk   Version = 2
+      chunk   Data = null
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A011  Chunk0903A011  [parsed]
+      chunk   U01 = -1
+      chunk   Id = 151232529
+      chunk   U01 = -1
+      chunk   Id = 151232529
+      chunk   Data = null
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A012  Chunk0903A012  [parsed]
+      chunk   U01 = null
+      chunk   Id = 151232530
+      chunk   U01 = null
+      chunk   Id = 151232530
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A013-v0  Chunk0903A013  [parsed]
+      chunk   Id = 151232531
+      chunk   Version = 0
+      chunk   Id = 151232531
+      chunk   Version = 0
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A014-v1  Chunk0903A014  [parsed]
+      chunk   U01 = CBuffer[0]
+      chunk   Id = 151232532
+      chunk   Version = 1
+      chunk   U01 = CBuffer[0]
+      chunk   Id = 151232532
+      chunk   Version = 1
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A015-v2  Chunk0903A015  [parsed]
+      chunk   U01 = 0
+      chunk   U02 = ""
+      chunk   U03 = ""
+      chunk   U04 = ""
+      chunk   U05 = ""
+      chunk   Id = 151232533
+      chunk   Version = 2
+      chunk   U01 = 0
+      chunk   U02 = ""
+      chunk   U03 = ""
+      chunk   U04 = ""
+      chunk   U05 = ""
+      chunk   Id = 151232533
+      chunk   Version = 2
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A016-v2  Chunk0903A016  [parsed]
+      chunk   U01 = 140187732541444
+      chunk   U02 = 2533210567244800
+      chunk   U03 = 0
+      chunk   U04 = 0
+      chunk   U05 = 0
+      chunk   Id = 151232534
+      chunk   Version = 2
+      chunk   U01 = 140187732541444
+      chunk   U02 = 2533210567244800
+      chunk   U03 = 0
+      chunk   U04 = 0
+      chunk   U05 = 0
+      chunk   Id = 151232534
+      chunk   Version = 2
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+        Textures[0] Bitmap = Bitmap
+          TextureFile = external reference "Stadium\Media\Texture\ItemFlag_D.Texture.gbx"
+        Textures[1] Bitmap = Bitmap
+          TextureFile = external reference "Stadium\Media\Texture\ItemFlag_D_HueMask.Texture.gbx"
+        Textures[2] Bitmap = Bitmap
+          TextureFile = external reference "Stadium\Media\Texture\ItemFlag_R.Texture.gbx"
+        GpuFxs1[0] GpuFx = GpuFx
+        GpuFxs2[0] GpuFx = GpuFx
+        SkipSamplers[0] BitmapSkip = BitmapSkip
+      GameVersion = Unspecified
+    Shader = null
+    ShaderFile = external reference "Techno3\Media\Material\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx"
+    GameVersion = Unspecified
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Material\ItemFlagNoAnim.Material.Gbx
+     1075 bytes, class 0x09079000 CPlugMaterial, node CPlugMaterial
+     header type GBX.NET.Components.GbxHeader`1[[GBX.NET.Engines.Plug.CPlugMaterial, GBX.NET, Version=2.4.4.0, Culture=neutral, PublicKeyToken=null]]
+        header.ClassId = 151490560
+        header.Basic = GbxHeaderBasic { Version = 6, Format = Binary, CompressionOfRefTable = Uncompressed, CompressionOfBody = Uncompressed, UnknownByte = R }
+        header.NumNodes = 7
+     ref table: 5 external file(s)
+        Stadium\Media\Texture\ItemFlag_D.Texture.gbx
+        Stadium\Media\Texture\ItemFlag_R.Texture.gbx
+        Stadium\Media\Texture\DecalPaint_N.Texture.gbx
+        Stadium\Media\Texture\ItemFlag_D_HueMask.Texture.gbx
+        Techno3\Media\Material\Tech3_Block_TDSN_CubeOut.Material.gbx
+  CPlugMaterial  0x09079000  CPlugMaterial  [root]
+    chunk 0x09079001  Chunk09079001  [parsed]
+    chunk   U01 = null
+    chunk   Id = 151490561
+    chunk   U01 = null
+    chunk   Id = 151490561
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079007  Chunk09079007  [parsed]
+    chunk   Id = 151490567
+    chunk   Id = 151490567
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079010  Chunk09079010  [parsed]
+    chunk   U01 = 1
+    chunk   Id = 151490576
+    chunk   U01 = 1
+    chunk   Id = 151490576
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079011  Chunk09079011  [parsed]
+    chunk   U01 = String[0]
+    chunk   Id = 151490577
+    chunk   U01 = String[0]
+    chunk   Id = 151490577
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079012  Chunk09079012  [ignored]
+    chunk   payload 128 bytes: 020000004C0000003A646174613A5C50726F6A656374735C546563686E6F335C4D656469615C4D6174657269616C5C54656368335F426C6F636B5F5444534E5F437562654F75742E4D6174657269616C2E676278954BA02309F7333000000000
+    chunk   string: ":data:\Projects\Techno3\Media\Material\Tech3_Block_TDSN_CubeOut.Material.gbx"
+    chunk   Id = 151490578
+    chunk   Ignore = true
+    chunk   Id = 151490578
+    chunk   Ignore = true
+    chunk   Data = byte[128] 020000004C0000003A646174613A5C50726F6A656374735C546563686E6F335C
+    chunk   GameVersion = Unspecified
+    chunk 0x09079013  Chunk09079013  [ignored]
+    chunk   payload 4 bytes: 00000000
+    chunk   Id = 151490579
+    chunk   Ignore = true
+    chunk   Id = 151490579
+    chunk   Ignore = true
+    chunk   Data = byte[4] 00000000
+    chunk   GameVersion = Unspecified
+    chunk 0x09079015-v7  Chunk09079015  [parsed]
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = External`1[1]
+    chunk   U03File = null
+    chunk   U04 = null
+    chunk   Id = 151490581
+    chunk   Version = 7
+    chunk   U01 = null
+    chunk   U02 = 0
+    chunk   U03 = External`1[1]
+    chunk   U03File = null
+    chunk   U04 = null
+    chunk   Id = 151490581
+    chunk   Version = 7
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079016-v0  Chunk09079016  [parsed]
+    chunk   U01 = 576
+    chunk   Id = 151490582
+    chunk   Version = 0
+    chunk   U01 = 576
+    chunk   Id = 151490582
+    chunk   Version = 0
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079017-v1  Chunk09079017  [parsed]
+    chunk   U01 = 2148466765
+    chunk   U02 = -1082130432
+    chunk   U03 = 0
+    chunk   U04 = ""
+    chunk   Id = 151490583
+    chunk   Version = 1
+    chunk   U01 = 2148466765
+    chunk   U02 = -1082130432
+    chunk   U03 = 0
+    chunk   U04 = ""
+    chunk   Id = 151490583
+    chunk   Version = 1
+    chunk   Ignore = false
+    chunk   GameVersion = Unspecified
+    chunk 0x09079019  Chunk09079019  [ignored]
+    chunk   payload 8 bytes: 0000000000000000
+    chunk   Id = 151490585
+    chunk   Ignore = true
+    chunk   Id = 151490585
+    chunk   Ignore = true
+    chunk   Data = byte[8] 0000000000000000
+    chunk   GameVersion = Unspecified
+    DeviceMaterials = null
+    SurfaceId = Concrete
+    CPlugMaterialCustom  0x0903A000  CPlugMaterialCustom  [CustomMaterial]
+      chunk 0x0903A004  Chunk0903A004  [parsed]
+      chunk   U01 = Int32[0]
+      chunk   Id = 151232516
+      chunk   U01 = Int32[0]
+      chunk   Id = 151232516
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A00A  Chunk0903A00A  [parsed]
+      chunk   Id = 151232522
+      chunk   Id = 151232522
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A00C  Chunk0903A00C  [parsed]
+      chunk   Id = 151232524
+      chunk   Id = 151232524
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A00F-v2  Chunk0903A00F  [parsed]
+      chunk   U01 = -1
+      chunk   U02 = -1
+      chunk   U03 = 0
+      chunk   U04 = DefineNat[0]
+      chunk   Id = 151232527
+      chunk   Version = 2
+      chunk   U01 = -1
+      chunk   U02 = -1
+      chunk   U03 = 0
+      chunk   U04 = DefineNat[0]
+      chunk   Id = 151232527
+      chunk   Version = 2
+      chunk   Data = null
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A011  Chunk0903A011  [parsed]
+      chunk   U01 = -1
+      chunk   Id = 151232529
+      chunk   U01 = -1
+      chunk   Id = 151232529
+      chunk   Data = null
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A012  Chunk0903A012  [parsed]
+      chunk   U01 = null
+      chunk   Id = 151232530
+      chunk   U01 = null
+      chunk   Id = 151232530
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A013-v0  Chunk0903A013  [parsed]
+      chunk   Id = 151232531
+      chunk   Version = 0
+      chunk   Id = 151232531
+      chunk   Version = 0
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A014-v1  Chunk0903A014  [parsed]
+      chunk   U01 = CBuffer[0]
+      chunk   Id = 151232532
+      chunk   Version = 1
+      chunk   U01 = CBuffer[0]
+      chunk   Id = 151232532
+      chunk   Version = 1
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A015-v2  Chunk0903A015  [parsed]
+      chunk   U01 = 0
+      chunk   U02 = ""
+      chunk   U03 = ""
+      chunk   U04 = ""
+      chunk   U05 = ""
+      chunk   Id = 151232533
+      chunk   Version = 2
+      chunk   U01 = 0
+      chunk   U02 = ""
+      chunk   U03 = ""
+      chunk   U04 = ""
+      chunk   U05 = ""
+      chunk   Id = 151232533
+      chunk   Version = 2
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+      chunk 0x0903A016-v2  Chunk0903A016  [parsed]
+      chunk   U01 = 140187732541444
+      chunk   U02 = 2533210567244800
+      chunk   U03 = 0
+      chunk   U04 = 0
+      chunk   U05 = 0
+      chunk   Id = 151232534
+      chunk   Version = 2
+      chunk   U01 = 140187732541444
+      chunk   U02 = 2533210567244800
+      chunk   U03 = 0
+      chunk   U04 = 0
+      chunk   U05 = 0
+      chunk   Id = 151232534
+      chunk   Version = 2
+      chunk   Ignore = false
+      chunk   GameVersion = Unspecified
+        Textures[0] Bitmap = Bitmap
+          TextureFile = external reference "Stadium\Media\Texture\ItemFlag_D.Texture.gbx"
+        Textures[1] Bitmap = Bitmap
+          TextureFile = external reference "Stadium\Media\Texture\ItemFlag_R.Texture.gbx"
+        Textures[2] Bitmap = Bitmap
+          TextureFile = external reference "Stadium\Media\Texture\DecalPaint_N.Texture.gbx"
+        Textures[3] Bitmap = Bitmap
+          TextureFile = external reference "Stadium\Media\Texture\ItemFlag_D_HueMask.Texture.gbx"
+        GpuFxs1[0] GpuFx = GpuFx
+        SkipSamplers[0] BitmapSkip = BitmapSkip
+        SkipSamplers[1] BitmapSkip = BitmapSkip
+        SkipSamplers[2] BitmapSkip = BitmapSkip
+        SkipSamplers[3] BitmapSkip = BitmapSkip
+      GameVersion = Unspecified
+    Shader = null
+    ShaderFile = external reference "Techno3\Media\Material\Tech3_Block_TDSN_CubeOut.Material.gbx"
+    GameVersion = Unspecified
+

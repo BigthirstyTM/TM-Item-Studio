@@ -37,6 +37,42 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 16px 0; }
 .studio-upload { position: relative; }
 .studio-upload:focus-within { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 5px; }
 .studio-upload label { cursor: pointer; }
+.studio-empty-state { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: 32px 16px 48px; border: 1px solid var(--border); border-radius: 12px; background: radial-gradient(circle at 15% 5%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 34%), radial-gradient(circle at 88% 95%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 32%), var(--canvas); }
+.studio-empty-state::before, .studio-empty-state::after { content: ""; position: absolute; width: 220px; height: 220px; border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 50%; pointer-events: none; }
+.studio-empty-state::before { top: -110px; left: -70px; }
+.studio-empty-state::after { right: -80px; bottom: -130px; width: 300px; height: 300px; }
+.studio-empty-card { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, .9fr) minmax(340px, 1.1fr); width: min(100%, 900px); padding: 38px; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border)); border-radius: 18px; background: color-mix(in srgb, var(--panel) 96%, var(--accent)); box-shadow: 0 22px 55px color-mix(in srgb, #000 15%, transparent); }
+.studio-empty-intro { display: flex; flex-direction: column; justify-content: center; padding: 4px 40px 4px 4px; border-right: 1px solid color-mix(in srgb, var(--border) 72%, transparent); }
+.studio-empty-eyebrow { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 22px; color: var(--accent); font-size: 10px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.studio-empty-eyebrow-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 17%, transparent); }
+.studio-empty-eyebrow-divider { color: var(--border); }
+.studio-empty-icon { display: grid; place-items: center; width: 70px; height: 70px; margin: 0 0 20px; border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); border-radius: 20px; background: color-mix(in srgb, var(--accent) 11%, var(--panel)); }
+.studio-empty-icon svg { width: 54px; height: 54px; }
+.studio-empty-folder { fill: color-mix(in srgb, var(--accent) 14%, var(--panel)); stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
+.studio-empty-arrow { fill: none; stroke: var(--accent); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.studio-empty-card h1 { margin: 0 0 12px; color: var(--text); font-size: clamp(26px, 3vw, 38px); line-height: 1.08; letter-spacing: -.035em; outline: none; }
+.studio-empty-description { max-width: 350px; margin: 0 0 24px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.studio-empty-points { display: flex; flex-direction: column; gap: 9px; color: var(--muted); font-size: 12px; }
+.studio-point-icon { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 6px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent); font-size: 11px; }
+.studio-empty-action { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding-left: 38px; }
+.studio-action-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 13px; }
+.studio-action-heading > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.studio-action-heading strong { color: var(--text); font-size: 14px; }
+.studio-action-heading span:not(.studio-file-pill) { color: var(--muted); font-size: 12px; }
+.studio-file-pill { flex: 0 0 auto; padding: 5px 8px; border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border)); border-radius: 5px; color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); font: 700 10px/1 ui-monospace, monospace; letter-spacing: .05em; }
+.studio-dropzone { position: relative; display: grid; place-items: center; min-height: 190px; overflow: hidden; border: 1px dashed color-mix(in srgb, var(--accent) 58%, var(--border)); border-radius: 12px; background: color-mix(in srgb, var(--accent) 5%, var(--subtle)); transition: border-color .16s ease, background .16s ease, box-shadow .16s ease, transform .16s ease; }
+.studio-dropzone::before { content: ""; position: absolute; inset: 10px; border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 8px; pointer-events: none; }
+.studio-dropzone:hover, .studio-dropzone-active, .studio-dropzone:focus-within { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--subtle)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent); }
+.studio-dropzone-active { transform: translateY(-2px); }
+.studio-dropzone-input { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; opacity: 0; }
+.studio-dropzone-content { display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; }
+.studio-dropzone-upload-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 6px; border-radius: 12px; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.studio-dropzone-upload-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.studio-dropzone-title { color: var(--text); font-size: 16px; font-weight: 700; }
+.studio-dropzone-subtitle { color: var(--muted); font-size: 12px; }
+.studio-dropzone-browse { color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.studio-empty-meta { display: flex; justify-content: flex-start; flex-wrap: wrap; gap: 8px 16px; margin-top: 13px; color: var(--muted); font-size: 11px; }
+.studio-meta-check { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-right: 3px; border-radius: 50%; background: color-mix(in srgb, var(--success) 17%, transparent); color: var(--success); font-weight: 700; }
 .studio-workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) clamp(620px, 44vw, 980px); gap: 12px; }
 .studio-diagnostics { position: relative; flex-shrink: 0; }
 .studio-diagnostics > summary { list-style: none; cursor: pointer; }
@@ -147,6 +183,28 @@ input[type="checkbox"] { accent-color: var(--accent); min-width: 16px; min-heigh
     #threeContainer { height: 360px; }
     .studio-inspector > .p-3 { padding: 12px; }
     .btn { min-height: 38px; }
+}
+@media (max-width: 760px) {
+    .studio-empty-state { place-items: start center; padding: 24px 8px 32px; }
+    .studio-empty-card { grid-template-columns: minmax(0, 1fr); width: min(100%, 560px); padding: 26px; }
+    .studio-empty-intro { align-items: center; padding: 0 0 25px; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent); text-align: center; }
+    .studio-empty-icon { margin-left: auto; margin-right: auto; }
+    .studio-empty-description { max-width: 450px; }
+    .studio-empty-points { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 8px 14px; }
+    .studio-empty-action { padding: 25px 0 0; }
+    .studio-empty-meta { justify-content: center; }
+}
+@media (max-width: 500px) {
+    .studio-empty-state { padding-inline: 0; border-radius: 9px; }
+    .studio-empty-card { padding: 22px 18px; border-radius: 14px; }
+    .studio-empty-intro { padding-bottom: 22px; }
+    .studio-empty-eyebrow { margin-bottom: 17px; font-size: 9px; }
+    .studio-empty-card h1 { font-size: 29px; }
+    .studio-empty-description { font-size: 13px; }
+    .studio-empty-action { padding-top: 22px; }
+    .studio-action-heading { align-items: flex-start; }
+    .studio-action-heading span:not(.studio-file-pill) { max-width: 220px; }
+    .studio-dropzone { min-height: 170px; }
 }
 /* Keep the document name once, with compact, keyboard-accessible variant choices. */
 .studio-variants { display: flex; flex-direction: column; gap: .5rem; min-width: 0; max-height: min(34vh, 260px); overflow-y: auto; }

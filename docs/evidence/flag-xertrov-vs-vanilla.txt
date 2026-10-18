@@ -1,0 +1,58 @@
+====================================================================================================
+ITEM C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Items\Flag16m.Item.Gbx  (1940 bytes)
+  ident        : Flag16m / collection Stadium2020 / author Nadeo
+  name        : Flag16m
+  itemType    : Ornament / Ornament
+  waypoint    : None
+  archetypeRef: 
+  pageName    : Items
+  entityModel : NPlugItem_SVariantList
+  icon        : (none)
+  variant list: version 1, 1 variant(s)
+    [0] tags: MatModifier=Ice, Type=Flag
+        inline model : CPlugPrefab
+        model file   : Media\Prefab\Items\Flag\Flag16m.Prefab.Gbx
+        hidden in manual cycle: False
+  placement class: version 10, SizeGroup 0x0, AlwaysUp True, AlignToInterior False, AlignToWorldDir True, WorldDir <0, 0, 1>, patch layouts 8
+    patch layout type GBX.NET.Engines.Plug.NPlugItemPlacement_SClass+PatchLayout
+      [0] ItemCount=0 ItemSpacing=12 FillAlign=0 FillDir=1 NormedPos=0.5 U01=0 OnlyOnGroups=[Border|StructureSupport|BorderInGround|BorderWaterSmall|BorderPlatform|BorderPlatformWater|BorderDecoWall|BorderTrackWall|BorderMultiSize] Altitude=0 U02=0
+      [1] ItemCount=0 ItemSpacing=16 FillAlign=0 FillDir=1 NormedPos=0.5 U01=0 OnlyOnGroups=[Border|StructureSupport|BorderInGround|BorderWaterSmall|BorderPlatform|BorderPlatformWater|BorderDecoWall|BorderTrackWall|BorderMultiSize] Altitude=0 U02=0
+      [2] ItemCount=0 ItemSpacing=12 FillAlign=0 FillDir=1 NormedPos=0.9 U01=0 OnlyOnGroups=[BorderOpen] Altitude=0 U02=0
+      [3] ItemCount=0 ItemSpacing=16 FillAlign=0 FillDir=1 NormedPos=0.9 U01=0 OnlyOnGroups=[BorderOpen] Altitude=0 U02=0
+      [4] ItemCount=0 ItemSpacing=12 FillAlign=0 FillDir=1 NormedPos=0.915 U01=0 OnlyOnGroups=[BorderWater] Altitude=0 U02=0
+      [5] ItemCount=0 ItemSpacing=16 FillAlign=0 FillDir=1 NormedPos=0.915 U01=0 OnlyOnGroups=[BorderWater] Altitude=0 U02=0
+      [6] ItemCount=0 ItemSpacing=12 FillAlign=0 FillDir=1 NormedPos=0.875 U01=0 OnlyOnGroups=[BorderOpenCurve1] Altitude=0 U02=0
+      [7] ItemCount=0 ItemSpacing=16 FillAlign=0 FillDir=1 NormedPos=0.875 U01=0 OnlyOnGroups=[BorderOpenCurve1] Altitude=0 U02=0
+  default placement inline: CGameItemPlacementParam
+  default placement file  : Media\PlaceParam\Flag.PlaceParam.Gbx
+  game skin               : (none)
+  DefaultPlacementFile: Media\PlaceParam\Flag.PlaceParam.Gbx
+====================================================================================================
+ITEM C:\Users\PC\Documents\Trackmania\Items\XertrovItems\ztest-flag3.Item.Gbx  (511606 bytes)
+  ident        :  / collection Stadium2020 / author -oTBhm4_S1-UxnlnBizUDA
+  name        : CustomFlag
+  itemType    : Ornament / Ornament
+  waypoint    : None
+  archetypeRef: 
+  pageName    : Items
+  entityModel : NPlugItem_SVariantList
+  icon        : (none)
+  variant list: version 0, 1 variant(s)
+    [0] tags: MatModifier=Ice, Type=Flag
+        inline model : CPlugPrefab
+        model file   : (none)
+        hidden in manual cycle: False
+  placement class: version 10, SizeGroup 0x0, AlwaysUp False, AlignToInterior True, AlignToWorldDir False, WorldDir <0, 0, 1>, patch layouts 9
+    patch layout type GBX.NET.Engines.Plug.NPlugItemPlacement_SClass+PatchLayout
+      [0] ItemCount=1 ItemSpacing=0 FillAlign=0 FillDir=1 NormedPos=0.5 U01=0 OnlyOnGroups=[Border|BorderInGround|BorderWaterSmall|BorderPlatform|StructureSupport|BorderPlatformWater|BorderDecoWall|BorderTrackWall] Altitude=0 U02=0
+      [1] ItemCount=0 ItemSpacing=12 FillAlign=0 FillDir=1 NormedPos=0.5 U01=0 OnlyOnGroups=[Border|BorderInGround|BorderWaterSmall|BorderPlatform|StructureSupport|BorderPlatformWater|BorderDecoWall|BorderTrackWall] Altitude=0 U02=0
+      [2] ItemCount=0 ItemSpacing=16 FillAlign=0 FillDir=1 NormedPos=0.5 U01=0 OnlyOnGroups=[Border|BorderInGround|BorderWaterSmall|BorderPlatform|StructureSupport|BorderPlatformWater|BorderDecoWall|BorderTrackWall] Altitude=0 U02=0
+      [3] ItemCount=1 ItemSpacing=0 FillAlign=0 FillDir=1 NormedPos=0.9 U01=0 OnlyOnGroups=[BorderOpen] Altitude=0 U02=0
+      [4] ItemCount=0 ItemSpacing=12 FillAlign=0 FillDir=1 NormedPos=0.9 U01=0 OnlyOnGroups=[BorderOpen] Altitude=0 U02=0
+      [5] ItemCount=0 ItemSpacing=16 FillAlign=0 FillDir=1 NormedPos=0.9 U01=0 OnlyOnGroups=[BorderOpen] Altitude=0 U02=0
+      [6] ItemCount=1 ItemSpacing=0 FillAlign=0 FillDir=1 NormedPos=0.875 U01=0 OnlyOnGroups=[BorderOpenCurve1] Altitude=0 U02=0
+      [7] ItemCount=0 ItemSpacing=12 FillAlign=0 FillDir=1 NormedPos=0.875 U01=0 OnlyOnGroups=[BorderOpenCurve1] Altitude=0 U02=0
+      [8] ItemCount=0 ItemSpacing=16 FillAlign=0 FillDir=1 NormedPos=0.875 U01=0 OnlyOnGroups=[BorderOpenCurve1] Altitude=0 U02=0
+  default placement inline: CGameItemPlacementParam
+  default placement file  : (none)
+  game skin               : (none)

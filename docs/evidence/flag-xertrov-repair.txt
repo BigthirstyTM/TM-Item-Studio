@@ -1,0 +1,13 @@
+IN  C:\Users\PC\Documents\Trackmania\Items\XertrovItems\ztest-flag3.Item.Gbx  (511606 bytes)
+  before: isFlag=False deviations=6
+    VariantList.Version: 0 instead of 1
+    Placement.FlyVStep: 1 instead of 0
+    PlacementClass.AlwaysUp: False instead of true
+    PlacementClass.AlignToWorldDir: False instead of true
+    PlacementClass.AlignToInterior: True instead of false
+    PlacementClass.PatchLayouts: 9 entries instead of 8 entries
+    applied: tagged Type=Flag on every variant with a model
+    applied: placement flags, cube, snapping and fly steps set to the measured flag values
+    applied: placement class set to AlwaysUp + AlignToWorldDir with 8 patch layouts
+OUT C:\Users\PC\Documents\Trackmania\Items\02. Freebuff RE Items\XertrovFlagRepair.Item.Gbx  (554751 bytes)
+  after : isFlag=True deviations=0

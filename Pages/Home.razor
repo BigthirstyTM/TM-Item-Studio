@@ -254,6 +254,11 @@
                         <span>Macroblock & instances (@macroblockInstances.Count)</span><span>@(activeTab == "macroblock" ? "−" : "+")</span>
                     </button>
                 </div>
+                <div>
+                    <button aria-label="Flag item conversion" aria-expanded="@((activeTab == "flag").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "flag" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("flag"))">
+                        <span>Flag item</span><span>@(activeTab == "flag" ? "−" : "+")</span>
+                    </button>
+                </div>
             </div>
 
             <div class="studio-inspector-content p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
@@ -551,6 +556,63 @@
                                 </div>
                             </div>
                         }
+                    }
+                }
+
+                @if (activeTab == "flag")
+                {
+                    <h6 class="border-bottom pb-1 text-primary">Flag item (measured from the vanilla flags) <span class="text-muted" title="A flag is an item whose model variant carries the tag Type=Flag and whose placement class keeps it upright and aligned to the world direction.">?</span></h6>
+                    <small class="d-block text-muted mb-2">
+                        Measured on <code>Stadium/Items/Flag16m.Item.Gbx</code>, <code>Flag8m.Item.Gbx</code> and
+                        <code>Stadium/Media/PlaceParam/Flag.PlaceParam.Gbx</code>. Conversion writes the variant tag
+                        and the placement class only: it cannot create the flag's cloth, pole or textures.
+                    </small>
+
+                    @if (CurrentFlagReport is { } flagReport)
+                    {
+                        @if (flagReport.IsFlag)
+                        {
+                            <div class="alert alert-success py-1 px-2 mb-2"><small>This item carries the measured flag signature.</small></div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary py-1 px-2 mb-2">
+                                <small class="d-block fw-bold">@flagReport.Deviations.Count deviation(s) from the flag signature</small>
+                                @foreach (var deviation in flagReport.Deviations)
+                                {
+                                    <small class="d-block">• <code>@deviation.Field</code>: @deviation.Actual instead of @deviation.Expected</small>
+                                }
+                            </div>
+                        }
+
+                        @foreach (var note in flagReport.Notes)
+                        {
+                            <small class="d-block text-info mb-1">@note</small>
+                        }
+
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="flagNormalizePlacement" @bind="normalizeFlagPlacement" />
+                            <label class="form-check-label small" for="flagNormalizePlacement">
+                                Also write the measured placement values (flags, cube, snapping, fly steps)
+                            </label>
+                        </div>
+
+                        <button class="btn btn-sm btn-primary" @onclick="ExportFlagItem" disabled="@isExportingFlag">
+                            @(isExportingFlag ? "Converting…" : "Convert to flag item (.Item.Gbx)")
+                        </button>
+                    }
+                    else
+                    {
+                        <small class="d-block text-muted">No item is loaded.</small>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(flagExportStatus))
+                    {
+                        <small class="d-block text-info mt-2">@flagExportStatus</small>
+                    }
+                    @foreach (var warning in flagExportWarnings)
+                    {
+                        <small class="d-block text-warning mt-1">@warning</small>
                     }
                 }
 
@@ -1580,6 +1642,67 @@
     </div>
 }
 
+else if (itemModel is null)
+{
+    <section class="studio-empty-state @(isLoading ? "studio-empty-loading" : "")" aria-labelledby="empty-state-title" aria-busy="@isLoading.ToString().ToLowerInvariant()">
+        <div class="studio-empty-card">
+            <div class="studio-empty-intro">
+                <div class="studio-empty-eyebrow">
+                    <span class="studio-empty-eyebrow-dot" aria-hidden="true"></span>
+                    Item Studio <span class="studio-empty-eyebrow-divider">/</span> Offline-first
+                </div>
+                <div class="studio-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 96 96" role="presentation">
+                        <path d="M17 28.5A8.5 8.5 0 0 1 25.5 20h20.2l7.1 7.5H70.5A8.5 8.5 0 0 1 79 36v31.5a8.5 8.5 0 0 1-8.5 8.5h-45a8.5 8.5 0 0 1-8.5-8.5Z" class="studio-empty-folder" />
+                        <path d="M48 60V38m0 0-8.5 8.5M48 38l8.5 8.5" class="studio-empty-arrow" />
+                    </svg>
+                </div>
+                <h1 id="empty-state-title">Bring an item to life.</h1>
+                <p class="studio-empty-description">
+                    Open a Trackmania item to inspect its geometry, placement, materials and motion — all inside your browser.
+                </p>
+                <div class="studio-empty-points" aria-label="Studio capabilities">
+                    <span><span class="studio-point-icon" aria-hidden="true">✦</span> Inspect geometry</span>
+                    <span><span class="studio-point-icon" aria-hidden="true">✦</span> Edit metadata</span>
+                    <span><span class="studio-point-icon" aria-hidden="true">✦</span> Export safely</span>
+                </div>
+            </div>
+            <div class="studio-empty-action">
+                <div class="studio-action-heading">
+                    <div>
+                        <strong>Start with an item file</strong>
+                        <span>Drop it here or choose one from your computer</span>
+                    </div>
+                    <span class="studio-file-pill">.ITEM.GBX</span>
+                </div>
+                <div class="studio-dropzone @(isDropZoneActive ? "studio-dropzone-active" : "")"
+                     @ondragenter="OnDropZoneDragEnter"
+                     @ondragenter:preventDefault="true"
+                     @ondragleave="OnDropZoneDragLeave"
+                     @ondragover="OnDropZoneDragOver"
+                     @ondragover:preventDefault="true"
+                     @ondrop:preventDefault="true"
+                     @ondrop="OnDropZoneDrop">
+                    <InputFile id="empty-item-upload" OnChange="LoadFiles" multiple accept=".Item.Gbx,.gbx" class="studio-dropzone-input" />
+                    <div class="studio-dropzone-content" aria-hidden="true">
+                        <span class="studio-dropzone-upload-icon">
+                            <svg viewBox="0 0 24 24" role="presentation">
+                                <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3" />
+                            </svg>
+                        </span>
+                        <span class="studio-dropzone-title">Drop your item here</span>
+                        <span class="studio-dropzone-subtitle">or <span class="studio-dropzone-browse">browse files</span></span>
+                    </div>
+                </div>
+                <div class="studio-empty-meta">
+                    <span><span class="studio-meta-check" aria-hidden="true">✓</span> Stays in your browser</span>
+                    <span><span class="studio-meta-check" aria-hidden="true">✓</span> Supports .Item.Gbx</span>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
 @code {
     private IEnumerable<(string Label, (ItemVariantSource Source, int Index)[] Entries)> LoadedFiles()
     {
@@ -1800,6 +1923,7 @@
     private CGameItemModel? itemModel;
     private Gbx<CGameItemModel>? gbxFile;
     private bool isLoading = false;
+    private bool isDropZoneActive;
     private string? errorMessage;
     private string? statusMessage;
     private bool hasMesh = false;
@@ -2052,6 +2176,18 @@
     private List<PivotDto> detectedPivots = new();
     private List<PlacementAlternativeDto> detectedPlacementAlternatives = new();
     private string placementAlternativeStatus = string.Empty;
+    private bool normalizeFlagPlacement = true;
+    private bool isExportingFlag;
+    private string? flagExportStatus;
+    private readonly List<string> flagExportWarnings = new();
+
+    /// <summary>
+    /// Read-only measurement of the open item against the signature the vanilla flag items carry
+    /// (the Type=Flag variant tag and the flag's upright, world-aligned placement class). Nothing
+    /// here edits the item: the conversion is an explicit export on its own snapshot.
+    /// </summary>
+    private ItemFlagConversion.FlagReport? CurrentFlagReport =>
+        itemModel is null ? null : ItemFlagConversion.Inspect(itemModel);
     private List<LightDto> detectedLights = new();
     private List<string> debugLog = new();
     private readonly HashSet<string> detectedNodeTypes = new(StringComparer.OrdinalIgnoreCase);
@@ -2087,8 +2223,17 @@
         }
     }
 
+    private void OnDropZoneDragEnter(DragEventArgs _) => isDropZoneActive = true;
+
+    private void OnDropZoneDragOver(DragEventArgs _) => isDropZoneActive = true;
+
+    private void OnDropZoneDragLeave(DragEventArgs _) => isDropZoneActive = false;
+
+    private void OnDropZoneDrop(DragEventArgs _) => isDropZoneActive = false;
+
     private async Task LoadFiles(InputFileChangeEventArgs e)
     {
+        isDropZoneActive = false;
         isLoading = true;
         errorMessage = null;
         variantSources.Clear();
@@ -2140,8 +2285,6 @@
         originalConstraintType = "Not found";
         originalMotionSettings.Clear();
         originalMotionAvailable = false;
-        StateHasChanged();
-
         try
         {
             if (isViewerInitialized)
@@ -4989,6 +5132,47 @@
         catch (Exception ex)
         {
             errorMessage = "Error while exporting the multi-instance item: " + ex.Message;
+        }
+    }
+
+    /// <summary>
+    /// Exports the open item as a flag item. The conversion runs on the export's own snapshot, so
+    /// the item being edited (and every view and variant derived from it) is never restructured.
+    /// </summary>
+    private async Task ExportFlagItem()
+    {
+        if (itemModel is null || gbxFile is null) return;
+        isExportingFlag = true;
+        flagExportStatus = null;
+        flagExportWarnings.Clear();
+        try
+        {
+            // Flush the inspector's pending edits into the model first, exactly like the other
+            // exports, so the flag file contains what the viewport shows.
+            UpdateIdent();
+            ItemExportValidator.EnsureGameReady(itemModel, identId);
+            SyncPivotsToGbx();
+            for (var i = 0; i < detectedLights.Count; i++) SyncLightsToGbx(i);
+            ApplyMeshPartConfigurationToVariant();
+
+            var source = variantSources[activeVariantIndex];
+            var export = ItemFlagExport.Export(source.GbxFile, normalizeFlagPlacement, identId);
+            await JS.InvokeVoidAsync("downloadBinaryGbx", export.FileName, Convert.ToBase64String(export.Bytes));
+            errorMessage = null;
+            flagExportStatus = $"Exported {export.FileName} ({export.Bytes.Length} bytes). "
+                + string.Join(" ", export.Report.Applied)
+                + " Verify it in a fresh Trackmania session: the shape is measured from the vanilla flag, "
+                + "not confirmed by the engine.";
+            flagExportWarnings.AddRange(export.Warnings);
+        }
+        catch (Exception ex)
+        {
+            flagExportStatus = null;
+            errorMessage = "Error while converting to a flag item: " + ex.Message;
+        }
+        finally
+        {
+            isExportingFlag = false;
         }
     }
 
