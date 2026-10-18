@@ -1680,12 +1680,7 @@ else if (itemModel is null)
                     </div>
                     <span class="studio-file-pill">.ITEM.GBX</span>
                 </div>
-                <div class="studio-dropzone @(isDropZoneActive ? "studio-dropzone-active" : "")"
-                     @ondragenter="OnDropZoneDragEnter"
-                     @ondragenter:preventDefault="true"
-                     @ondragleave="OnDropZoneDragLeave"
-                     @ondragover="OnDropZoneDragOver"
-                     @ondragover:preventDefault="true">
+                <div id="item-dropzone" class="studio-dropzone">
                     <InputFile id="empty-item-upload" OnChange="LoadFiles" multiple accept=".Item.Gbx,.gbx" class="studio-dropzone-input" />
                     <div class="studio-dropzone-content" aria-hidden="true">
                         <span class="studio-dropzone-upload-icon">
@@ -1926,7 +1921,6 @@ else if (itemModel is null)
     private CGameItemModel? itemModel;
     private Gbx<CGameItemModel>? gbxFile;
     private bool isLoading = false;
-    private bool isDropZoneActive;
     private string? errorMessage;
     private string? statusMessage;
     private bool hasMesh = false;
@@ -2206,6 +2200,11 @@ else if (itemModel is null)
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender) await JS.InvokeVoidAsync("registerStudioDebug", dotNetHelper);
+        if (itemModel == null)
+        {
+            await JS.InvokeVoidAsync("enableItemDropZone", "item-dropzone", "empty-item-upload");
+        }
+
         if (itemModel == null || isViewerInitialized)
         {
             if (iconPreviewPending && itemModel != null)
@@ -2226,17 +2225,10 @@ else if (itemModel is null)
         }
     }
 
-    private void OnDropZoneDragEnter(DragEventArgs _) => isDropZoneActive = true;
-
-    private void OnDropZoneDragOver(DragEventArgs _) => isDropZoneActive = true;
-
-    private void OnDropZoneDragLeave(DragEventArgs _) => isDropZoneActive = false;
-
     private void ReturnToHome() => Navigation.NavigateTo("/", forceLoad: true);
 
     private async Task LoadFiles(InputFileChangeEventArgs e)
     {
-        isDropZoneActive = false;
         isLoading = true;
         errorMessage = null;
         variantSources.Clear();
