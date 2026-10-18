@@ -15,6 +15,7 @@
 @using TM_Item_Studio.Models
 @using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <PageTitle>Trackmania 2020 Item Studio</PageTitle>
 
@@ -27,6 +28,10 @@
         }
     </div>
     <div class="studio-header-tools">
+        @if (itemModel is not null)
+        {
+            <button class="btn btn-sm btn-outline-secondary" type="button" @onclick="ReturnToHome" aria-label="Return to home screen">Home</button>
+        }
         <details class="studio-diagnostics">
             <summary class="btn btn-sm btn-outline-secondary">Diagnostics (@modelDiagnostics.Count)</summary>
             <div class="studio-diagnostics-panel">
@@ -2230,6 +2235,8 @@ else if (itemModel is null)
     private void OnDropZoneDragLeave(DragEventArgs _) => isDropZoneActive = false;
 
     private void OnDropZoneDrop(DragEventArgs _) => isDropZoneActive = false;
+
+    private void ReturnToHome() => Navigation.NavigateTo("/", forceLoad: true);
 
     private async Task LoadFiles(InputFileChangeEventArgs e)
     {
