@@ -1685,9 +1685,7 @@ else if (itemModel is null)
                      @ondragenter:preventDefault="true"
                      @ondragleave="OnDropZoneDragLeave"
                      @ondragover="OnDropZoneDragOver"
-                     @ondragover:preventDefault="true"
-                     @ondrop:preventDefault="true"
-                     @ondrop="OnDropZoneDrop">
+                     @ondragover:preventDefault="true">
                     <InputFile id="empty-item-upload" OnChange="LoadFiles" multiple accept=".Item.Gbx,.gbx" class="studio-dropzone-input" />
                     <div class="studio-dropzone-content" aria-hidden="true">
                         <span class="studio-dropzone-upload-icon">
@@ -2233,8 +2231,6 @@ else if (itemModel is null)
     private void OnDropZoneDragOver(DragEventArgs _) => isDropZoneActive = true;
 
     private void OnDropZoneDragLeave(DragEventArgs _) => isDropZoneActive = false;
-
-    private void OnDropZoneDrop(DragEventArgs _) => isDropZoneActive = false;
 
     private void ReturnToHome() => Navigation.NavigateTo("/", forceLoad: true);
 
