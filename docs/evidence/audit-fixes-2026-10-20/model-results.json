@@ -1,0 +1,62 @@
+[
+  {
+    "suite": "FlagConversion",
+    "exit": 0,
+    "seconds": 1.42
+  },
+  {
+    "suite": "ItemEdits",
+    "exit": 0,
+    "seconds": 2.01
+  },
+  {
+    "suite": "ItemMaterials",
+    "exit": 0,
+    "seconds": 1.69
+  },
+  {
+    "suite": "ItemMotion",
+    "exit": 0,
+    "seconds": 2.14
+  },
+  {
+    "suite": "ItemScene",
+    "exit": 0,
+    "seconds": 1.75
+  },
+  {
+    "suite": "MacroblockExport",
+    "exit": 0,
+    "seconds": 2.17
+  },
+  {
+    "suite": "ParserSentinels",
+    "exit": 0,
+    "seconds": 1.56
+  },
+  {
+    "suite": "ParserSurfaces",
+    "exit": 0,
+    "seconds": 1.84
+  },
+  {
+    "suite": "PlacementEdits",
+    "exit": 0,
+    "seconds": 1.86
+  },
+  {
+    "suite": "VariantExport",
+    "exit": 0,
+    "seconds": 5.67
+  },
+  {
+    "suite": "ItemIcons",
+    "exit": 0,
+    "seconds": 1.44
+  },
+  {
+    "suite": "KinematicReference",
+    "exit": 0,
+    "seconds": 5.1
+  }
+]

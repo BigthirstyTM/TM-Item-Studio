@@ -1,0 +1,34 @@
+C:\Program Files\dotnet\sdk-manifests\10.0.100\microsoft.net.workload.mono.toolchain.current\10.0.112\WorkloadManifest.targets(124,5): warning : @(NativeFileReference) is not empty, but the native references won't be linked in, because neither $(WasmBuildNative), nor $(RunAOTCompilation) are 'true'. NativeFileReference=C:\Users\PC\.nuget\packages\nativesharplzo\0.3.5\buildTransitive\../runtimes/browser-wasm/native/liblzo2.a [C:\Users\PC\.copilot\repos\TM-Item-Studio\TM-Item-Studio.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\VariantExport\Program.cs(365,50): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\VariantExport\VariantExport.csproj]
+ENTRY: doc:0/variant:none/root/entityModel/ent:0/ent:1
+  childPath: doc:0/variant:none/root/entityModel/ent:0/ent:0, found: True, childRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  parentPath: doc:0/variant:none/root/entityModel, isWorld: True, found: True, parentRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  child rigid: True
+  parent rigid: True
+ENTRY: doc:0/variant:none/root/entityModel/ent:0/ent:2/ent:1
+  childPath: doc:0/variant:none/root/entityModel/ent:0/ent:2/ent:0, found: True, childRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  parentPath: doc:0/variant:none/root/entityModel/ent:0/ent:0, isWorld: False, found: True, parentRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  child rigid: True
+  parent rigid: True
+ENTRY: doc:0/variant:none/root/entityModel/ent:0/ent:3/ent:1
+  childPath: doc:0/variant:none/root/entityModel/ent:0/ent:3/ent:0, found: True, childRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  parentPath: doc:0/variant:none/root/entityModel/ent:0/ent:0, isWorld: False, found: True, parentRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  child rigid: True
+  parent rigid: True
+ENTRY: doc:0/variant:none/root/entityModel/ent:0/ent:5
+  childPath: doc:0/variant:none/root/entityModel/ent:0/ent:4, found: True, childRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  parentPath: doc:0/variant:none/root/entityModel, isWorld: True, found: True, parentRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  child rigid: True
+  parent rigid: True
+ENTRY: doc:0/variant:none/root/entityModel/ent:0/ent:7
+  childPath: doc:0/variant:none/root/entityModel/ent:0/ent:6, found: True, childRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  parentPath: doc:0/variant:none/root/entityModel, isWorld: True, found: True, parentRest: { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
+  child rigid: True
+  parent rigid: True
+Tracks: 5
+  TRACK: child=doc:0/variant:none/root/entityModel/ent:0/ent:0, parent=<world>
+  TRACK: child=doc:0/variant:none/root/entityModel/ent:0/ent:2/ent:0, parent=doc:0/variant:none/root/entityModel/ent:0/ent:0
+  TRACK: child=doc:0/variant:none/root/entityModel/ent:0/ent:3/ent:0, parent=doc:0/variant:none/root/entityModel/ent:0/ent:0
+  TRACK: child=doc:0/variant:none/root/entityModel/ent:0/ent:4, parent=<world>
+  TRACK: child=doc:0/variant:none/root/entityModel/ent:0/ent:6, parent=<world>
+PASS: 38 variant preservation checks (parse/save/reparse and failed output).

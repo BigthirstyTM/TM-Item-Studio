@@ -258,11 +258,23 @@ public static class ItemFlagConversion
         var placement = item.DefaultPlacement;
         if (placement is null)
         {
-            // Not fatal: the item is still classified as a flag, but it will not get the flag's
-            // upright, world-aligned placement. Say so instead of inventing a placement parameter.
-            notes.Add("The item has no placement parameters, so the flag's upright, world-aligned placement "
-                + "could not be applied. Add a placement parameter and convert again.");
-            return;
+            // There are no authored placement values to preserve. Start from the measured flag
+            // values, including when normalization of existing values was not requested.
+            placement = new CGameItemPlacementParam
+            {
+                Flags = PlacementFlags,
+                CubeSize = PlacementCubeSize,
+                PivotSnapDistance = PlacementPivotSnapDistance,
+            };
+            placement.CreateChunk<CGameItemPlacementParam.Chunk2E020000>();
+            placement.CreateChunk<CGameItemPlacementParam.Chunk2E020001>();
+            ItemMacroblock.EnsureChunk(item, nameof(CGameItemModel.DefaultPlacement));
+            // DefaultPlacement is stored by the versioned item-placement reference chunk.
+            // A newly reflected chunk defaults to version 0, before this field was introduced.
+            var referenceChunk = item.CreateChunk<CGameItemModel.Chunk2E00201C>();
+            if (referenceChunk.Version < 5) referenceChunk.Version = 5;
+            item.DefaultPlacement = placement;
+            applied.Add("created embedded placement parameters from the measured flag values");
         }
 
         if (normalizePlacement)

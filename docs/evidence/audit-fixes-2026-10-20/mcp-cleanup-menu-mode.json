@@ -1,0 +1,18 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "calculatingShadows": false,
+        "mode": "Menu",
+        "curGameModeStr": "",
+        "loading": false
+      },
+      "success": true
+    },
+    "tool": "GetMode"
+  }
+}

@@ -1,0 +1,25 @@
+Parser SHA256: 1a9edc022a1730c17b118a2d417e3d6affff3f0712f159dd56486c587428ebeb
+PASS: GmSurfFixture-1.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture0.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture1.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture6.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture7.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture8.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture9.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture10.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture11.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture12.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture13.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture14.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture15.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture16.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture17.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture18.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture19.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture10Procedural.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture8Version0.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture14Version0.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture16Version0.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture9Primary.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+PASS: GmSurfFixture9Fallback.Shape.Gbx parse/save/reparse, unchanged decompressed archive
+23 shape fixtures passed.

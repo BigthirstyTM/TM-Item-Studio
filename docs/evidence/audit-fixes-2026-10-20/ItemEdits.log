@@ -1,0 +1,2 @@
+PASS: 91 edit checks, including binary save/reparse and rejected-write byte equality.
+Bundled GBX.NET SHA256: 1a9edc022a1730c17b118a2d417e3d6affff3f0712f159dd56486c587428ebeb

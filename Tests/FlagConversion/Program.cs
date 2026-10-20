@@ -188,22 +188,37 @@ var noModel = new CGameItemModel { Name = "no model" };
 noModel.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
 Reject(() => ItemFlagConversion.Convert(noModel), "an item without an entity model was converted");
 
-// ---- an item without placement parameters is still classified, and says what was skipped ----
+// ---- an item without placement parameters gets a complete serialized flag placement ----
 
 var noPlacement = new CGameItemModel { Name = "no placement", EntityModel = new CPlugPrefab { Version = 11, Ents = [] } };
 noPlacement.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
 noPlacement.CreateChunk<CGameItemModel.Chunk2E002019>().Version = 15;
 noPlacement.CreateChunk<CGameItemModel.Chunk2E00100C>();
 var noPlacementReport = ItemFlagConversion.Convert(noPlacement);
-Check(!noPlacementReport.IsFlag, "an item without placement parameters was reported as a complete flag");
-Check(noPlacementReport.Deviations.Any(d => d.Field == "DefaultPlacement"),
-    "the missing placement parameter was not reported as a deviation");
-Check(noPlacementReport.Deviations.All(d => d.Field != "EntityModel"),
-    "the entity model was not classified even though only the placement parameter is missing");
-Check(noPlacementReport.Notes.Count > 0, "the skipped placement class was not reported in the notes");
+Check(noPlacementReport.IsFlag, "an item without placement parameters did not get a complete flag placement");
+Check(noPlacementReport.Applied.Any(d => d.Contains("created embedded placement")),
+    "the newly created placement parameter was not reported");
 var noPlacementReopened = Reopen(Save(noPlacement));
 Check(((NPlugItem_SVariantList)noPlacementReopened.EntityModel!).Variants![0].Tags!["Type"] == "Flag",
     "the tag did not round-trip without a placement parameter");
+Check(ItemFlagConversion.IsFlagItem(noPlacementReopened), "the newly created placement did not round-trip: " + ItemFlagConversion.Inspect(noPlacementReopened).Summary);
+
+// Reproduce the browser's real absent-placement source; export must isolate the open document.
+var fixturePath = Path.Combine(AppContext.BaseDirectory, "../../../../../Tests/Browser/Fixtures/animation-static-first.Item.Gbx");
+var absentSource = Gbx.Parse<CGameItemModel>(fixturePath);
+Check(absentSource.Node.DefaultPlacement is null, "the browser regression fixture unexpectedly has placement");
+var absentBefore = Save(absentSource.Node);
+foreach (var normalize in new[] { true, false })
+{
+    var absentExport = ItemFlagExport.Export(absentSource, normalize, "AbsentPlacement");
+    Check(ItemFlagConversion.IsFlagItem(Reopen(absentExport.Bytes)), "absent-placement export is not a complete flag");
+    Check(Save(absentSource.Node).SequenceEqual(absentBefore), "flag export mutated the absent-placement source");
+}
+var preservePlacement = CustomItem();
+var preserveBytes = Save(preservePlacement);
+Reject(() => ItemFlagExport.Export(new Gbx<CGameItemModel>(preservePlacement), normalizePlacement: false),
+    "an incompatible placement was silently exported without normalization");
+Check(Save(preservePlacement).SequenceEqual(preserveBytes), "refused flag export mutated its source");
 
 // ---- the measured shape is the one the vanilla files use (guards against a silent format drift) ----
 

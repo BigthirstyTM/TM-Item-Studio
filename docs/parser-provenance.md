@@ -1,41 +1,29 @@
 # Bundled GBX.NET parser
 
-## Current development build: GmSurf support
+## Current build: GBX.NET 2.4.5
 
-`lib/GBX.NET.dll` is built from
-[`15dba8bf7dae04e9654953418437e34957f84859`](https://github.com/XertroV/gbx-net/commit/15dba8bf7dae04e9654953418437e34957f84859),
-the locally authored [GBX.NET PR #215](https://github.com/BigBang1112/gbx-net/pull/215),
-plus Studio's existing [null-class-ID patch](../patches/gbx-net-null-class-id.patch).
-This is a pinned development build, **not an official NuGet release**.
+`lib/GBX.NET.dll` is built from upstream tag
+[`v2.4.5`](https://github.com/BigBang1112/gbx-net/releases/tag/v2.4.5),
+commit `edbcf1b7ae394900075791bfb6b16511e98d46c4`, plus Studio's
+[null-class-ID patch](../patches/gbx-net-null-class-id.patch). The exact source
+tag, target framework, and patch hash are recorded in
+[`lib/GBX.NET.version.json`](../lib/GBX.NET.version.json).
 
-- Target: net8.0, Release, .NET SDK 10.0.111.
-- SHA-256: `707d8c727bd8c037f0b67ba27b256d2ff4588b166cbd043b02d3ae97767e73be`.
+- Target: net8.0, Release.
+- The binary hash is intentionally not part of the version contract: compiler
+  metadata can vary with the temporary checkout path. The source tag and
+  applied patch in the manifest are the reproducible identity.
 - Upstream MIT terms are retained in [GBX.NET.LICENSE](../lib/GBX.NET.LICENSE).
-- Our GmSurf changes and bespoke shape fixtures are public domain and may be relicensed by the maintainer. This does not relicense GBX.NET or game-derived item assets.
 
-The source adds TM2020 GmSurf archive support and corrects the C003 material-ID
-vectors. It does not add texture loading or promise support for legacy surface
-IDs 2–5. The pusher's convex surface (type 10) previously stopped browser import.
+The source includes the modern `CPlugSurface`/GmSurf support used by the
+browser geometry importer. The local patch remains necessary for valid Editor++
+indexed null node references. Rebuild or update it with
+`eng/Update-GbxNet.ps1`; that script selects the newest stable NuGet version,
+checks out its matching upstream tag, applies the patch, and rebuilds the DLL.
+The scheduled workflow validates the parser and Studio build before opening an
+update pull request. See [gbx-net-updates.md](gbx-net-updates.md).
 
-Rebuild in a separate checkout (does not overwrite the bundled DLL):
-
-```bash
-studio="$PWD"
-scratch="$(mktemp -d)"
-git clone https://github.com/XertroV/gbx-net.git "$scratch/gbx-net"
-git -C "$scratch/gbx-net" checkout --detach 15dba8bf7dae04e9654953418437e34957f84859
-git -C "$scratch/gbx-net" apply --check "$studio/patches/gbx-net-null-class-id.patch"
-git -C "$scratch/gbx-net" apply "$studio/patches/gbx-net-null-class-id.patch"
-dotnet build "$scratch/gbx-net/Src/GBX.NET/GBX.NET.csproj" \
-  -c Release -f net8.0 --nologo -m:2 -p:GeneratePackageOnBuild=false
-```
-
-Build metadata/environment can change the resulting binary hash. The source
-revision and applied patch, not a matching assembly version string, identify
-this build. Existing upstream generator warnings and the NU1902 advisory for
-the build-only `Microsoft.Build.Tasks.Git` dependency remain.
-
-Verification on 2026-09-14:
+Verification on 2026-10-19:
 
 ```bash
 DOTNET_ROLL_FORWARD=Major dotnet run --project Tests/ParserSentinels
@@ -158,6 +146,15 @@ for build dependency `Microsoft.Build.Tasks.Git` 10.0.102
 This is not evidence of a shipped Studio runtime vulnerability. Any dependency
 upgrade should be separately reviewed from this compatibility reconstruction.
 
-Replacing the bundled DLL is deliberately not automated. Before proposing a
-replacement, also validate Studio build/publish, browser workflows and relevant
-real-item/game compatibility; retain the original DLL until that decision.
+The updater deliberately stops if the compatibility patch no longer applies.
+The additional `patches/gbx-net-skin-weights.patch` preserves Float3 skin blend
+weights when reading/writing a vertex stream. The bundled v2.4.5 assembly includes
+both patches; their hashes are recorded in `lib/GBX.NET.version.json` and the
+updater applies both. This enables geometry extraction from the original pilot
+skin. Its archive still has an undecoded trailing record: the UI marks the
+character preview as a partial, read-only static rest pose. It does not claim
+native character animation or editable vehicle/character serialization.
+
+Every generated update must still pass the parser sentinel suite, shape suite,
+Studio build, browser workflows, and relevant real-item/game compatibility
+checks before it is merged.

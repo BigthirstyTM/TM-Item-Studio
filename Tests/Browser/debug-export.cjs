@@ -7,9 +7,9 @@ module.exports = async (url, work) => {
     const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
     try {
         const page = await browser.newPage({ viewport: { width: 1600, height: 1100 } });
-        const errors = [], warnings = [];
+        const errors = [], consoleMessages = [];
         page.on('pageerror', e => errors.push(e.message));
-        page.on('console', m => { if (m.type() === 'warning') warnings.push(m.text()); });
+        page.on('console', m => consoleMessages.push({ type: m.type(), text: m.text() }));
         await page.goto(url, { waitUntil: 'networkidle' });
         await page.locator('.studio-diagnostics summary').waitFor();
         assert.equal(await page.getByRole('button', { name: 'Download debug report', exact: true }).isVisible(), false, 'Debug tools stay collapsed initially');
@@ -39,8 +39,9 @@ module.exports = async (url, work) => {
         assert.ok(loaded.viewer.runtime.meshes > 0);
         assert.deepEqual(loaded.viewer.runtime.materialColors, ['b8bdc6']);
         assert.ok(loaded.diagnostics.some(d => d.code === 'textures-not-loaded'));
-        await page.getByText('Neutral preview — textures are not loaded.', { exact: true }).waitFor();
-        assert.ok(warnings.some(w => w.includes('[TMIS] textures-not-loaded')));
+        assert.ok(await page.getByText(/Neutral preview — .*textures/).count(), 'The collapsed diagnostics contain the neutral-texture explanation');
+        assert.ok(consoleMessages.some(m => m.text.includes('textures-not-loaded')));
+        assert.ok(!consoleMessages.some(m => m.type === 'warning' && m.text.includes('textures-not-loaded')));
         await page.getByLabel('Ident.Author', { exact: true }).fill('DebugReportEditedAuthor');
         await page.getByLabel('Ident.Author', { exact: true }).press('Tab');
         const beforeDebug = await exported('before-debug.Item.Gbx');

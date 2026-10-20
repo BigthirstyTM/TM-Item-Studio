@@ -18,7 +18,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync('dotnet',
         page.on('pageerror', e => errors.push(e.message));
         await page.goto(process.env.STUDIO_BASE_URL || 'http://127.0.0.1:5184/', { waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(fixture);
-        await page.getByRole('button', { name: /^2\. SnowCarTraffic/ }).click();
+        await page.getByRole('button', { name: /SnowCarTraffic.*variant 2$/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
         assert.equal(await page.getByLabel('Translation segment count', { exact: true }).count(), 1, 'Translation must expose its actual segment count');
         const original = inspect(fixture);
@@ -45,7 +45,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync('dotnet',
         }
         const exported = await download();
         await page.getByLabel('Open item files').setInputFiles(exported);
-        await page.getByRole('button', { name: /^2\./ }).click();
+        await page.getByRole('button', { name: /variant 2$/ }).click();
         assert.equal(await page.getByLabel('Translation segment count', { exact: true }).inputValue(), '2');
         assert.equal(await page.getByLabel('Rotation segment count', { exact: true }).inputValue(), '4');
         assert.equal(await page.getByLabel('Translation key 2 duration (ms)', { exact: true }).inputValue(), '1000');

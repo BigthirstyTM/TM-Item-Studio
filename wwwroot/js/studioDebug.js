@@ -1,5 +1,15 @@
 (() => {
     let bridge = null;
+    const informationalCodes = new Set([
+        'dependencies-not-loaded',
+        'external-reference',
+        'legacy-light',
+        'light-socket-transform',
+        'no-mesh-geometry',
+        'stream-layout-opaque',
+        'textures-not-loaded',
+        'unmapped-visual'
+    ]);
     window.registerStudioDebug = reference => { bridge = reference; };
     window.unregisterStudioDebug = () => { bridge = null; };
     window.studioDebug = Object.freeze({
@@ -19,8 +29,16 @@
             finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
         },
         logDiagnostics(codes) {
-            // No source names/paths in automatic logs; details require an explicit report.
-            for (const code of codes) console.warn(`[TMIS] ${code}; use studioDebug.getReport() for details.`);
+            // Known viewer coverage limits remain available in the Diagnostics panel and report,
+            // but should not look like browser/runtime failures in the console. Keep unexpected
+            // inspection problems as warnings so they are still visible during development.
+            const unique = [...new Set(codes)].filter(Boolean);
+            const informational = unique.filter(code => informationalCodes.has(code));
+            const actionable = unique.filter(code => !informationalCodes.has(code));
+            if (informational.length)
+                console.info(`[TMIS] ${informational.join(', ')}; use studioDebug.getReport() for details.`);
+            for (const code of actionable)
+                console.warn(`[TMIS] ${code}; use studioDebug.getReport() for details.`);
         }
     });
 })();

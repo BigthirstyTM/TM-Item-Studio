@@ -1,0 +1,20 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "calculatingShadows": false,
+        "mapUid": "CtWGmpyeoyNb72lX2YilcqwvXba",
+        "mode": "ItemEditor",
+        "mapName": "TMIS_Final",
+        "curGameModeStr": "",
+        "loading": false
+      },
+      "success": true
+    },
+    "tool": "GetMode"
+  }
+}

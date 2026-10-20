@@ -1,0 +1,4 @@
+{"layout":{"labels":["1","2","3","4","5","6","7","8","9"],"rows":1},"switchMilliseconds":[347.40000000596046,121.59999999403954,217.5,150.30000001192093,112.5]}
+{"geometryTransfers":[{"definitions":7,"definitionIds":[0,1,2,3,4,5,6],"shared":7,"parts":7},{"definitions":1,"definitionIds":[7],"shared":8,"parts":8},{"definitions":0,"definitionIds":[],"shared":8,"parts":8},{"definitions":0,"definitionIds":[],"shared":8,"parts":8},{"definitions":0,"definitionIds":[],"shared":7,"parts":7},{"definitions":0,"definitionIds":[],"shared":8,"parts":8}]}
+{"focusRetained":true,"duplicateFileHeadings":["same.Item (file 1)","same.Item (file 2)"]}
+PASS: compact responsive variants, bounded switching, and on-demand OBJ export.

@@ -45,6 +45,9 @@ public static class ItemFlagExport
         // The conversion refuses rather than guesses, so this may throw; nothing has been written
         // at that point and the caller keeps its document untouched.
         var report = ItemFlagConversion.Convert(item, normalizePlacement);
+        if (!report.IsFlag)
+            throw new NotSupportedException("The placement values do not match the flag signature. Enable "
+                + $"'Also write the measured placement values' and convert again. {report.Summary}");
 
         // An item without a stored ident has no ident chunk yet, so the new id would not persist.
         ItemMacroblock.EnsureChunk(item, nameof(CGameItemModel.Ident));

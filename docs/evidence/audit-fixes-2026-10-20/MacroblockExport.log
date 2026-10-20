@@ -1,0 +1,28 @@
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\Program.cs(72,13): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\MacroblockExport.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\Program.cs(126,13): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\MacroblockExport.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\Program.cs(149,26): warning CS8625: Cannot convert null literal to non-nullable reference type. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\MacroblockExport.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\Program.cs(181,13): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\MacroblockExport.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\Program.cs(244,17): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\MacroblockExport\MacroblockExport.csproj]
+Item: StudioFixtureItem (35076 bytes)
+PASS macroblock exports with one instance and reparses
+PASS twelve instances keep every placement and the shared item reference
+  item=35076B macroblock(1)=267B macroblock(24)=613B perInstanceâ‰ˆ15,0B
+PASS duplicating instances does not duplicate item data (instancing stays cheap)
+PASS macroblock is written as class id 0x0310D000
+PASS a macroblock loads back into editable instances and re-exports
+PASS export refuses an instance that references a different item
+PASS export refuses an item without an Ident.Id
+PASS export refuses an empty instance list
+PASS a reparsed macroblock can be saved again without losing spawns
+  macroblock -> item parser: InvalidCastException: Unable to cast object of type 'GBX.NET.Gbx`1[GBX.NET.Engines.Game.CGameCtnMacroBlockInfo]' to type 'GBX.NET.Gbx`1[GBX.NET.Engines.GameData.CGameItemModel]'.
+PASS a macroblock that reaches the item parser is rescued by the macroblock fallback
+PASS placement matrix puts a copy where its spawn is written
+PASS instance composition keeps the item's own placement and moves it to the copy
+PASS multi-instance item embeds one mesh for twenty copies
+  item=35076B multi(1)=34911B multi(20)=35052B perCopyâ‰ˆ7,4B
+PASS twenty copies cost a transform each, not another mesh
+PASS copies of another item are skipped and the skip is reported
+  kinematic source 121593B, 2 entrie(s) per copy -> 12 entries, 112553B
+PASS a prefab item keeps one shared model per source entry across all copies
+
+16 passed, 0 failed

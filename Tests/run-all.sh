@@ -16,6 +16,7 @@ cd "$root" || exit 1
 suites=(
     FlagConversion
     ItemEdits
+    ItemIcons
     ItemMaterials
     ItemMotion
     ItemScene
@@ -31,6 +32,9 @@ tools=(
     FlagProbe
     ItemChunkIndex
     PathFollowerDiag
+    ProbeAssets
+    TextureLibrary
+    VanillaPreview
     WriterCompatibility
 )
 

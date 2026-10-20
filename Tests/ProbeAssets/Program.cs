@@ -18,6 +18,8 @@ using TM_Item_Studio.Models;
 //   dotnet run --project Tests/ProbeAssets -- --item <path>     generate from another item
 //   dotnet run --project Tests/ProbeAssets -- --out <folder>    another user game folder
 //   dotnet run --project Tests/ProbeAssets -- --verify [path]   verify the plugin's result
+//   dotnet run --project Tests/ProbeAssets -- --inspect-map <path> --skip-lightmap-cache
+//     inspect placements while explicitly excluding unsupported native lightmap cache 0304305B
 
 Gbx.LZO = new GBX.NET.LZO.MiniLZO();
 
@@ -547,6 +549,7 @@ static bool IdentMatches(Ident? ident, string id) =>
 
 int InspectMaps(string? requested, string root)
 {
+    var failures = 0;
     var paths = new List<string>();
     if (!string.IsNullOrWhiteSpace(requested))
     {
@@ -574,7 +577,13 @@ int InspectMaps(string? requested, string root)
         Console.WriteLine($"    written {info.LastWriteTime:yyyy-MM-dd HH:mm:ss}  {info.Length} bytes");
         try
         {
-            var map = Gbx.Parse<CGameCtnChallenge>(path).Node
+            var skipLightmap = Array.IndexOf(args, "--skip-lightmap-cache") >= 0;
+            if (skipLightmap)
+                Console.WriteLine("    excluded      : 0304305B lightmap cache; this is placement evidence only");
+            var map = Gbx.Parse<CGameCtnChallenge>(path, new GbxReadSettings
+            {
+                SkipChunkIds = skipLightmap ? [0x0304305B] : null
+            }).Node
                 ?? throw new InvalidOperationException("no readable node");
             var anchored = map.AnchoredObjects ?? [];
             var mine = anchored.Where(item => IdentMatches(item.ItemModel, probeIdent)).ToList();
@@ -620,11 +629,13 @@ int InspectMaps(string? requested, string root)
         }
         catch (Exception ex)
         {
+            failures++;
             Console.WriteLine($"    FAILED to parse: {ex.GetType().Name}: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
         }
         Console.WriteLine();
     }
-    return 0;
+    return failures == 0 ? 0 : 1;
 }
 
 string? ArgValue(string name)

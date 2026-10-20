@@ -1,0 +1,34 @@
+Source: LogCrash_0000000000B9D61D.txt
+Captured file modified: 2026-10-20 16:34:56 local
+SHA256: 228c7b1a6743b64cded6afbdfed797f12690e9c72b53b7657c8cd5fa9966358a
+
+[Sys] ----------------------------
+[Sys] Largest committed free block size = 2 760 Kb
+[Dx11] DeviceCreated on "NVIDIA GeForce RTX 3070 Ti" (8 017MB dedicated video + 0MB dedicated system + 8 079MB shared system)
+[Dx11] FeatureLevel=11.0
+[Sys] Time is 16h 34mn 56s 558ms
+Win32 Exception : Access violation
+	=>Occured at address 0x00007FF63C91D61D
+	The thread tried to read from the invalid address (data) 0x00000000000000F0
+	rax=000001B47D0C6490   rbx=0000004DD3BDC580   rcx=0000000000000000   rdx=000001B0DA2CA2B0
+	rsi=000001B47F715290   rdi=000001B0DA2CA150   r08=000001B4AD06A570   r09=0000000000000000
+	r10=000001B4AD06A590   r11=000001B0DC320000   r12=0000000000000004   r13=000001B4AD06A570
+	r14=0000004DD3BDC5B0   r15=0000000000000000   rbp=0000004DD3BDC440   rsp=0000004DD3BDC340   rip=00007FF63C91D61D
+	Called from address 0x00007FF63C91DF8A
+	Called from address 0x00007FF63C91E342
+	Called from address 0x00007FF63C986EAA
+	Called from address 0x00007FF63CC2D125
+	Called from address 0x00007FF63CC27312
+	Called from address 0x00007FF63C900B57
+	Called from address 0x00007FF63C076B2F
+	Called from address 0x00007FF63C07563A
+	Called from address 0x00007FF63C053565
+	Called from address 0x00007FF63C6777CE
+	Called from address 0x00007FF63BE83169
+	Called from address 0x00007FF63C8253B0
+	Called from address 0x00007FF63C828B67
+	Called from address 0x00007FF63D2A1BBA
+	Called from address 0x00007FFDBB1ADDA7
+	Called from address 0x00007FFDBD4DEE4C
+End of stack...
+[Sys] Time is 16h 34mn 56s 558ms

@@ -1,0 +1,17 @@
+[   ScriptRuntime] [ TRAC] [16:51:38.294] [tm-control-mcp]  TM Control MCP tool start tm-mcp-pack-epp.ControlItemEditor {"itemPath":"TMIS_Fixes_Export","action":"open"}
+[   ScriptRuntime] [ TRAC] [16:51:38.295] [tm-control-mcp]  TM Control MCP tool done tm-mcp-pack-epp.ControlItemEditor ok 0ms
+[   ScriptRuntime] [ TRAC] [16:51:38.310] [Editor]  [932089] EditorDrawLoopCoro exited
+[   ScriptRuntime] [ TRAC] [16:51:38.317] [Editor]  [932096] Running OnItemEditorLoad callbacks
+[   ScriptRuntime] [ TRAC] [16:51:38.317] [Editor]  [932096] Finished OnItemEditorLoad callbacks
+[   ScriptRuntime] [  LOG] [16:51:38.318] [Editor]  \$bf0\$iWatchForSpriteNod: mainSpriteNod is null
+[   ScriptRuntime] [ TRAC] [16:51:45.911] [tm-control-mcp]  TM Control MCP tool start GetMode {}
+[   ScriptRuntime] [ TRAC] [16:51:45.911] [tm-control-mcp]  TM Control MCP tool done GetMode ok 0ms
+[   ScriptRuntime] [ WARN] [16:51:53.332] [Editor]  After_CGameCtnEditorPluginMap_Update_PreScript: called outside editor! (this is a bug)
+[   ScriptRuntime] [ WARN] [16:51:53.332] [Editor]  After_CGameCtnEditorPluginMap_Update_PreScript: called outside editor! (this is a bug)
+[   ScriptRuntime] [ TRAC] [16:51:53.338] [Editor]  Updating editor watchers.
+[   ScriptRuntime] [ TRAC] [16:51:53.338] [Editor]  [947117] Running OnPlacementModeChanged | Item
+[   ScriptRuntime] [ TRAC] [16:51:53.338] [Editor]  [947117] Finished OnPlacementModeChanged
+[   ScriptRuntime] [ TRAC] [16:51:53.338] [Editor]  Done updating editor watchers.
+[   ScriptRuntime] [ WARN] [16:51:53.592] [EditorHelpers]  Unable to open json file 'C:/Users/PC/OpenplanetNext/PluginStorage/EditorHelpers/EditorFunction_EditorInventory.json': No such file or directory
+[   ScriptRuntime] [ TRAC] [16:52:01.994] [tm-control-mcp]  TM Control MCP tool start GetMode {}
+[   ScriptRuntime] [ TRAC] [16:52:01.994] [tm-control-mcp]  TM Control MCP tool done GetMode ok 0ms

@@ -1,0 +1,21 @@
+Probe item ident: Locked_In_GroupMovement_6
+
+=== C:\Users\PC\Documents\Trackmania\Maps\My Maps\TMIS_Fixes_20261020\TMIS_Final.Map.Gbx
+    written 2026-10-20 16:40:00  103957 bytes
+    excluded      : 0304305B lightmap cache; this is placement evidence only
+    FAILED to parse: NotSupportedException: U07 has something else than -1
+   at GBX.NET.Engines.Game.CGameCtnChallenge.Chunk03043040.<>c__DisplayClass5_0.<Read>b__0(GbxReader r)
+   at GBX.NET.Serialization.GbxReader.ReadEncapsulated(Action`1 action)
+   at GBX.NET.Engines.Game.CGameCtnChallenge.Chunk03043040.Read(CGameCtnChallenge n, GbxReader r)
+   at GBX.NET.Serialization.Chunking.Chunk`1.ReadWrite(T n, GbxReaderWriter rw)
+   at GBX.NET.Serialization.Chunking.Chunk`1.ReadWrite(IClass n, GbxReaderWriter rw)
+   at GBX.NET.Engines.MwFoundations.CMwNod.Read(GbxReaderWriter rw)
+   at GBX.NET.Engines.Game.CGameCtnChallenge.Read(GbxReaderWriter rw)
+   at GBX.NET.Engines.MwFoundations.CMwNod.ReadWrite(GbxReaderWriter rw)
+   at GBX.NET.Serialization.GbxBodyReader.ReadMainNode(IClass node, GbxBody body, GbxReaderWriter rw)
+   at GBX.NET.Serialization.GbxBodyReader.Parse(IClass node)
+   at GBX.NET.Components.GbxBody.Parse(IClass node, GbxReader reader, GbxCompression compression)
+   at GBX.NET.Gbx.Parse(Stream stream, GbxReadSettings settings)
+   at GBX.NET.Gbx.Parse[T](Stream stream, GbxReadSettings settings)
+   at GBX.NET.Gbx.Parse[T](String filePath, GbxReadSettings settings)
+   at Program.<<Main>$>g__InspectMaps|0_9(String requested, String root, <>c__DisplayClass0_0&) in C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ProbeAssets\Program.cs:line 583

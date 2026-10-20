@@ -1,0 +1,5 @@
+PASS: inspect shared capability refusal
+PASS: apply refuses atomically
+PASS: invalid and opaque refuse
+PASS: hidden variants included
+4 passed

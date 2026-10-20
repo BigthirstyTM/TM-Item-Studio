@@ -23,3 +23,7 @@ window.enableItemDropZone = function (zoneId, inputId) {
     zone.addEventListener('drop', acceptFiles);
     zone.dataset.itemDropReady = 'true';
 };
+
+window.enableIconDropZone = function (zoneId, inputId) {
+    window.enableItemDropZone(zoneId, inputId);
+};

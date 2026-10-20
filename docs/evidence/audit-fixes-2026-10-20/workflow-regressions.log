@@ -1,0 +1,1 @@
+PASS: numpad focus/input guards; pointer deselection survives refresh; supported segment choices; absent-placement flag export/reopen.

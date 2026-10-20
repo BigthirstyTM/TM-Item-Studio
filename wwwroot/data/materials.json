@@ -1,0 +1,4907 @@
+﻿[
+    {
+        "path":  "BlueBay\\Media\\Material\\CliffPxz",
+        "name":  "CliffPxz",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\HillPxz",
+        "name":  "HillPxz",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\Land",
+        "name":  "Land",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\RocksTop",
+        "name":  "RocksTop",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\Sand",
+        "name":  "Sand",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\SeaFloor",
+        "name":  "SeaFloor",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionRocks",
+        "name":  "TransitionRocks",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionRocksToCliffPxz",
+        "name":  "TransitionRocksToCliffPxz",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionRocksToLand",
+        "name":  "TransitionRocksToLand",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionRocksToRocksTop",
+        "name":  "TransitionRocksToRocksTop",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionRocksToSand",
+        "name":  "TransitionRocksToSand",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionRocksToSeaFloor",
+        "name":  "TransitionRocksToSeaFloor",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionToCliffPxz",
+        "name":  "TransitionToCliffPxz",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionToLand",
+        "name":  "TransitionToLand",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionToSand",
+        "name":  "TransitionToSand",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\TransitionToSeaFloor",
+        "name":  "TransitionToSeaFloor",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\WarpSand",
+        "name":  "WarpSand",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Material\\Water",
+        "name":  "Water",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1D",
+        "name":  "DecalPaint2Sponsor4x1D",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1NoColorizeD",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeD",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1D",
+        "name":  "DecalPaintSponsor4x1D",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1NoColorizeD",
+        "name":  "DecalPaintSponsor4x1NoColorizeD",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\Deco",
+        "name":  "Deco",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\DecoHill",
+        "name":  "DecoHill",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\DecoHill2",
+        "name":  "DecoHill2",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\StructureInWorld",
+        "name":  "StructureInWorld",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersInWorld",
+        "name":  "TrackBordersInWorld",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersOffInWorld",
+        "name":  "TrackBordersOffInWorld",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\TrackWallClipsInWorld",
+        "name":  "TrackWallClipsInWorld",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "BlueBay\\Media\\Modifier\\StadiumOnTerrain\\TrackWallInWorld",
+        "name":  "TrackWallInWorld",
+        "environment":  "BlueBay"
+    },
+    {
+        "path":  "Clouds\\Media\\Material\\Clouds2",
+        "name":  "Clouds2",
+        "environment":  "Clouds"
+    },
+    {
+        "path":  "Clouds\\Media\\Material\\CloudsT3b",
+        "name":  "CloudsT3b",
+        "environment":  "Clouds"
+    },
+    {
+        "path":  "Clouds\\Media\\Material\\CloudsTech3",
+        "name":  "CloudsTech3",
+        "environment":  "Clouds"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Asphalt",
+        "name":  "Asphalt",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Concrete",
+        "name":  "Concrete",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Dirt",
+        "name":  "Dirt",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\DirtRoad",
+        "name":  "DirtRoad",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Energy",
+        "name":  "Energy",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Forest",
+        "name":  "Forest",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Grass",
+        "name":  "Grass",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Gravel",
+        "name":  "Gravel",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Green",
+        "name":  "Green",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Ice",
+        "name":  "Ice",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Metal",
+        "name":  "Metal",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\MetalFence",
+        "name":  "MetalFence",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\MetalTrans",
+        "name":  "MetalTrans",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\NotCollidable",
+        "name":  "NotCollidable",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Pavement",
+        "name":  "Pavement",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\PavementStair",
+        "name":  "PavementStair",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Plastic",
+        "name":  "Plastic",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\PlayerOnly",
+        "name":  "PlayerOnly",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\ResonantMetal",
+        "name":  "ResonantMetal",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\RoadIce",
+        "name":  "RoadIce",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\RoadSynthetic",
+        "name":  "RoadSynthetic",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Rock",
+        "name":  "Rock",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Rubber",
+        "name":  "Rubber",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\RubberBand",
+        "name":  "RubberBand",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Sand",
+        "name":  "Sand",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\SlidingRubber",
+        "name":  "SlidingRubber",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\SlidingWood",
+        "name":  "SlidingWood",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Snow",
+        "name":  "Snow",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Stone",
+        "name":  "Stone",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Tech",
+        "name":  "Tech",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechArmor",
+        "name":  "TechArmor",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechArrow",
+        "name":  "TechArrow",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechGravityChange",
+        "name":  "TechGravityChange",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechGravityReset",
+        "name":  "TechGravityReset",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechGround",
+        "name":  "TechGround",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechHook",
+        "name":  "TechHook",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechHook2",
+        "name":  "TechHook2",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechLaser",
+        "name":  "TechLaser",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechMagnetic",
+        "name":  "TechMagnetic",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechMagneticAccel",
+        "name":  "TechMagneticAccel",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechNucleus",
+        "name":  "TechNucleus",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechSafe",
+        "name":  "TechSafe",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechSuperMagnetic",
+        "name":  "TechSuperMagnetic",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechTarget",
+        "name":  "TechTarget",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechTeleport",
+        "name":  "TechTeleport",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\TechWall",
+        "name":  "TechWall",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Trunk",
+        "name":  "Trunk",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\WallJump",
+        "name":  "WallJump",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Water",
+        "name":  "Water",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\WetAsphalt",
+        "name":  "WetAsphalt",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\WetDirtRoad",
+        "name":  "WetDirtRoad",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\WetGrass",
+        "name":  "WetGrass",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\WetPavement",
+        "name":  "WetPavement",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Wheat",
+        "name":  "Wheat",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Editors\\MeshEditorMedia\\Materials\\Wood",
+        "name":  "Wood",
+        "environment":  "Editors"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionBumper",
+        "name":  "CollisionBumper",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionConcrete",
+        "name":  "CollisionConcrete",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionDirtRoad",
+        "name":  "CollisionDirtRoad",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionEnergy",
+        "name":  "CollisionEnergy",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionFreeWheeling",
+        "name":  "CollisionFreeWheeling",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionFreeWheelingTechMagnetic",
+        "name":  "CollisionFreeWheelingTechMagnetic",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionIce",
+        "name":  "CollisionIce",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionMetal",
+        "name":  "CollisionMetal",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionPavement",
+        "name":  "CollisionPavement",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionPavementStair",
+        "name":  "CollisionPavementStair",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionPlayerOnly",
+        "name":  "CollisionPlayerOnly",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionSlidingWood",
+        "name":  "CollisionSlidingWood",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionStone",
+        "name":  "CollisionStone",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTech",
+        "name":  "CollisionTech",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechArmor",
+        "name":  "CollisionTechArmor",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechArrow",
+        "name":  "CollisionTechArrow",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechGravityChange",
+        "name":  "CollisionTechGravityChange",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechGround",
+        "name":  "CollisionTechGround",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechHook",
+        "name":  "CollisionTechHook",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechHook2",
+        "name":  "CollisionTechHook2",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechLaser",
+        "name":  "CollisionTechLaser",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechMagnetic",
+        "name":  "CollisionTechMagnetic",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechMagneticAccel",
+        "name":  "CollisionTechMagneticAccel",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechNucleus",
+        "name":  "CollisionTechNucleus",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechSafe",
+        "name":  "CollisionTechSafe",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechSuperMagnetic",
+        "name":  "CollisionTechSuperMagnetic",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechTeleport",
+        "name":  "CollisionTechTeleport",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTechWall",
+        "name":  "CollisionTechWall",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurbo",
+        "name":  "CollisionTurbo",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurbo2",
+        "name":  "CollisionTurbo2",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurbo2TechMagnetic",
+        "name":  "CollisionTurbo2TechMagnetic",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboDirt",
+        "name":  "CollisionTurboDirt",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboGrass",
+        "name":  "CollisionTurboGrass",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboGreen",
+        "name":  "CollisionTurboGreen",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboPlastic",
+        "name":  "CollisionTurboPlastic",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboPlayer",
+        "name":  "CollisionTurboPlayer",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboRoadIce",
+        "name":  "CollisionTurboRoadIce",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboRoadSynthetic",
+        "name":  "CollisionTurboRoadSynthetic",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionTurboTechMagnetic",
+        "name":  "CollisionTurboTechMagnetic",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionWallJump",
+        "name":  "CollisionWallJump",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\CollisionWood",
+        "name":  "CollisionWood",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\EditorHelpers",
+        "name":  "EditorHelpers",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\EditorHelpersTranslucent",
+        "name":  "EditorHelpersTranslucent",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\GrassMarkFenceIntens",
+        "name":  "GrassMarkFenceIntens",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\Invisible",
+        "name":  "Invisible",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\InvisibleShadowCaster",
+        "name":  "InvisibleShadowCaster",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\LightTrail",
+        "name":  "LightTrail",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Effects\\Media\\Material\\LightTrail_Particle",
+        "name":  "LightTrail_Particle",
+        "environment":  "Effects"
+    },
+    {
+        "path":  "Engines\\Media\\Material\\FillColor_ShowInvalid",
+        "name":  "FillColor_ShowInvalid",
+        "environment":  "Engines"
+    },
+    {
+        "path":  "Garage\\Media\\Material\\GarageBackGround",
+        "name":  "GarageBackGround",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\Material\\GarageGround",
+        "name":  "GarageGround",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\Material\\GarageGround2",
+        "name":  "GarageGround2",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\Material\\GarageSocle",
+        "name":  "GarageSocle",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\Material\\ManiaPlanetStation",
+        "name":  "ManiaPlanetStation",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\Material\\ManiaPlanetTitleCover",
+        "name":  "ManiaPlanetTitleCover",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\MaterialModel\\Garage TDiff",
+        "name":  "Garage TDiff",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\MaterialModel\\Garage TDiff GroundReflect",
+        "name":  "Garage TDiff GroundReflect",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "Garage\\Media\\MaterialModel\\Garage TSelfI",
+        "name":  "Garage TSelfI",
+        "environment":  "Garage"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Cliff",
+        "name":  "Cliff",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Cliff2",
+        "name":  "Cliff2",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Cliff3",
+        "name":  "Cliff3",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Cliff4",
+        "name":  "Cliff4",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\CliffTransition2ToCliff3",
+        "name":  "CliffTransition2ToCliff3",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\CliffTransition2ToGrass",
+        "name":  "CliffTransition2ToGrass",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\CliffTransitionToCliff2",
+        "name":  "CliffTransitionToCliff2",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\CliffTransitionToGrass",
+        "name":  "CliffTransitionToGrass",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Grass",
+        "name":  "Grass",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Lake",
+        "name":  "Lake",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\LakeRocks",
+        "name":  "LakeRocks",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\LakeShoreToGrass",
+        "name":  "LakeShoreToGrass",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\LakeShoreToLake",
+        "name":  "LakeShoreToLake",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\TransitionForestToGrass",
+        "name":  "TransitionForestToGrass",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\TransitionForestToTrunkA",
+        "name":  "TransitionForestToTrunkA",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\TreeBranch",
+        "name":  "TreeBranch",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Trees2",
+        "name":  "Trees2",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\TrunkA",
+        "name":  "TrunkA",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\TrunkToGrass",
+        "name":  "TrunkToGrass",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\WarpGround",
+        "name":  "WarpGround",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Material\\Water",
+        "name":  "Water",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1D",
+        "name":  "DecalPaint2Sponsor4x1D",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1NoColorizeD",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeD",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1D",
+        "name":  "DecalPaintSponsor4x1D",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1NoColorizeD",
+        "name":  "DecalPaintSponsor4x1NoColorizeD",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\Deco",
+        "name":  "Deco",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\DecoHill",
+        "name":  "DecoHill",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\DecoHill2",
+        "name":  "DecoHill2",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\StructureInWorld",
+        "name":  "StructureInWorld",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersInWorld",
+        "name":  "TrackBordersInWorld",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersOffInWorld",
+        "name":  "TrackBordersOffInWorld",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\TrackWallClipsInWorld",
+        "name":  "TrackWallClipsInWorld",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "GreenCoast\\Media\\Modifier\\StadiumOnTerrain\\TrackWallInWorld",
+        "name":  "TrackWallInWorld",
+        "environment":  "GreenCoast"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\321Go",
+        "name":  "321Go",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\Bg1",
+        "name":  "Bg1",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\Bg1InRace",
+        "name":  "Bg1InRace",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\BgMainMenuTitleHeader",
+        "name":  "BgMainMenuTitleHeader",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\BgsButtons",
+        "name":  "BgsButtons",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\BgsChallengeMedals",
+        "name":  "BgsChallengeMedals",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\BgsPlayerCard",
+        "name":  "BgsPlayerCard",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\BgsPlayerCard2",
+        "name":  "BgsPlayerCard2",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\EditorBulletButtons",
+        "name":  "EditorBulletButtons",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\EditorButtons",
+        "name":  "EditorButtons",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\EditorButtons2",
+        "name":  "EditorButtons2",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\EditorButtonsSimple",
+        "name":  "EditorButtonsSimple",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\EditorMeshButtons",
+        "name":  "EditorMeshButtons",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\EntryFocusArea",
+        "name":  "EntryFocusArea",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\EntryFocusAreaFocused",
+        "name":  "EntryFocusAreaFocused",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\Hud3dEchelons",
+        "name":  "Hud3dEchelons",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\Icons64x64_1",
+        "name":  "Icons64x64_1",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\Icons64x64_2",
+        "name":  "Icons64x64_2",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\IconsSystem",
+        "name":  "IconsSystem",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\ManiaPlanetLogoBig",
+        "name":  "ManiaPlanetLogoBig",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\ManiaPlanetMainMenu",
+        "name":  "ManiaPlanetMainMenu",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MedalsBig",
+        "name":  "MedalsBig",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MenuBox3dBoxCase",
+        "name":  "MenuBox3dBoxCase",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MenuBox3dGlass",
+        "name":  "MenuBox3dGlass",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MenuBox3dLight",
+        "name":  "MenuBox3dLight",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MenuBox3dMetal",
+        "name":  "MenuBox3dMetal",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MenuBox3dStation",
+        "name":  "MenuBox3dStation",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MenuBox3dTransp",
+        "name":  "MenuBox3dTransp",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MeshModelerIcons",
+        "name":  "MeshModelerIcons",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MeshModelerIcons1",
+        "name":  "MeshModelerIcons1",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\MeshModelerIcons2",
+        "name":  "MeshModelerIcons2",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\ScriptEditorFocusArea",
+        "name":  "ScriptEditorFocusArea",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\ScriptEditorFocusAreaFocused",
+        "name":  "ScriptEditorFocusAreaFocused",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\SkyDome",
+        "name":  "SkyDome",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\SMIconsColorizable",
+        "name":  "SMIconsColorizable",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\SMInterfaceColorizable",
+        "name":  "SMInterfaceColorizable",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\SMInterfaceEmblem",
+        "name":  "SMInterfaceEmblem",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\SMVersusColorizable",
+        "name":  "SMVersusColorizable",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\TitleLogos",
+        "name":  "TitleLogos",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\TranslucentSelection",
+        "name":  "TranslucentSelection",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\UIBgBottomMultiRace",
+        "name":  "UIBgBottomMultiRace",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\UIBgCard",
+        "name":  "UIBgCard",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\UIBgCenterRace",
+        "name":  "UIBgCenterRace",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\UICommon128_1",
+        "name":  "UICommon128_1",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\UICommon64_1",
+        "name":  "UICommon64_1",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\Material\\UICommon64_2",
+        "name":  "UICommon64_2",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\MaterialModel\\BackgroundLayerBlur",
+        "name":  "BackgroundLayerBlur",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\MaterialModel\\BackgroundLayerBlurSimple",
+        "name":  "BackgroundLayerBlurSimple",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\MaterialModel\\BlendTexture",
+        "name":  "BlendTexture",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\MaterialModel\\BlendTextureAndBorderMask",
+        "name":  "BlendTextureAndBorderMask",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\MaterialModel\\BlendTextureHueShift",
+        "name":  "BlendTextureHueShift",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\MaterialModel\\BlendTextureSuperSample",
+        "name":  "BlendTextureSuperSample",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "Menu\\Media\\MaterialModel\\BlendTextureSuperSample_AddModSrcA",
+        "name":  "BlendTextureSuperSample_AddModSrcA",
+        "environment":  "Menu"
+    },
+    {
+        "path":  "PainterTech\\Media\\Material\\FillColor",
+        "name":  "FillColor",
+        "environment":  "PainterTech"
+    },
+    {
+        "path":  "PainterTech\\Media\\Material\\Paint_BlendLayer",
+        "name":  "Paint_BlendLayer",
+        "environment":  "PainterTech"
+    },
+    {
+        "path":  "PainterTech\\Media\\Material\\Paint_ModulateLayer",
+        "name":  "Paint_ModulateLayer",
+        "environment":  "PainterTech"
+    },
+    {
+        "path":  "PainterTech\\Media\\Material\\PaintWithAlpha",
+        "name":  "PaintWithAlpha",
+        "environment":  "PainterTech"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\Cliff",
+        "name":  "Cliff",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\Cliff2",
+        "name":  "Cliff2",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\DetailsCliffToDirt",
+        "name":  "DetailsCliffToDirt",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\DetailsRocks2",
+        "name":  "DetailsRocks2",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\DetailsRocks3",
+        "name":  "DetailsRocks3",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\DetailsRocksToCliff2",
+        "name":  "DetailsRocksToCliff2",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\DetailsRocksToDirt",
+        "name":  "DetailsRocksToDirt",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\DetailsToDirt",
+        "name":  "DetailsToDirt",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\DetailsVegetationToDirt",
+        "name":  "DetailsVegetationToDirt",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\Dirt",
+        "name":  "Dirt",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\LakeBottom",
+        "name":  "LakeBottom",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\RockToDirt",
+        "name":  "RockToDirt",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\WarpGround",
+        "name":  "WarpGround",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\Water",
+        "name":  "Water",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Material\\Waterground",
+        "name":  "Waterground",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1D",
+        "name":  "DecalPaint2Sponsor4x1D",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1NoColorizeD",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeD",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1D",
+        "name":  "DecalPaintSponsor4x1D",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1NoColorizeD",
+        "name":  "DecalPaintSponsor4x1NoColorizeD",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\Deco",
+        "name":  "Deco",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\DecoHill",
+        "name":  "DecoHill",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\DecoHill2",
+        "name":  "DecoHill2",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\StructureInWorld",
+        "name":  "StructureInWorld",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersInWorld",
+        "name":  "TrackBordersInWorld",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersOffInWorld",
+        "name":  "TrackBordersOffInWorld",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\TrackWallClipsInWorld",
+        "name":  "TrackWallClipsInWorld",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "RedIsland\\Media\\Modifier\\StadiumOnTerrain\\TrackWallInWorld",
+        "name":  "TrackWallInWorld",
+        "environment":  "RedIsland"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\AttractorBeam",
+        "name":  "AttractorBeam",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\Bonus",
+        "name":  "Bonus",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\BulletBall1",
+        "name":  "BulletBall1",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\BulletBall1_Intens1",
+        "name":  "BulletBall1_Intens1",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\BulletBall1Explosion",
+        "name":  "BulletBall1Explosion",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\BulletRail1",
+        "name":  "BulletRail1",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\BulletRail1AnimExplosion",
+        "name":  "BulletRail1AnimExplosion",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\BulletRail1Small",
+        "name":  "BulletRail1Small",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\BulletRailImpactSnow",
+        "name":  "BulletRailImpactSnow",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\GoalDeathZone",
+        "name":  "GoalDeathZone",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\Hunter",
+        "name":  "Hunter",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\HunterAnim",
+        "name":  "HunterAnim",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\LightTrail_Particule",
+        "name":  "LightTrail_Particule",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\ManLandSnow",
+        "name":  "ManLandSnow",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\MuzzleFlash",
+        "name":  "MuzzleFlash",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\Rope",
+        "name":  "Rope",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\Scout",
+        "name":  "Scout",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "ShootMania\\Media\\Material\\ScoutAnim",
+        "name":  "ScoutAnim",
+        "environment":  "ShootMania"
+    },
+    {
+        "path":  "Sky\\Media\\Material\\SkyDay",
+        "name":  "SkyDay",
+        "environment":  "Sky"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Ad155Screen",
+        "name":  "Ad155Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Ad155ScreenSmall",
+        "name":  "Ad155ScreenSmall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Ad1x1Screen",
+        "name":  "Ad1x1Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Ad2x1Screen",
+        "name":  "Ad2x1Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Ad2x3Screen",
+        "name":  "Ad2x3Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Ad2x3ScreenVeryBig",
+        "name":  "Ad2x3ScreenVeryBig",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Ad4x1Screen",
+        "name":  "Ad4x1Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Canopy",
+        "name":  "Canopy",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\CanopyGlass",
+        "name":  "CanopyGlass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\CanopyStructure",
+        "name":  "CanopyStructure",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono",
+        "name":  "Chrono",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono-00-00-001",
+        "name":  "Chrono-00-00-001",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono-00-00-01",
+        "name":  "Chrono-00-00-01",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono-00-00-10",
+        "name":  "Chrono-00-00-10",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono-00-01-00",
+        "name":  "Chrono-00-01-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono-00-10-00",
+        "name":  "Chrono-00-10-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono-01-00-00",
+        "name":  "Chrono-01-00-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Chrono-10-00-00",
+        "name":  "Chrono-10-00-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint",
+        "name":  "ChronoCheckpoint",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint-00-00-001",
+        "name":  "ChronoCheckpoint-00-00-001",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint-00-00-01",
+        "name":  "ChronoCheckpoint-00-00-01",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint-00-00-10",
+        "name":  "ChronoCheckpoint-00-00-10",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint-00-01-00",
+        "name":  "ChronoCheckpoint-00-01-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint-00-10-00",
+        "name":  "ChronoCheckpoint-00-10-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint-01-00-00",
+        "name":  "ChronoCheckpoint-01-00-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoCheckpoint-10-00-00",
+        "name":  "ChronoCheckpoint-10-00-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish",
+        "name":  "ChronoFinish",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish-00-00-001",
+        "name":  "ChronoFinish-00-00-001",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish-00-00-01",
+        "name":  "ChronoFinish-00-00-01",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish-00-00-10",
+        "name":  "ChronoFinish-00-00-10",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish-00-01-00",
+        "name":  "ChronoFinish-00-01-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish-00-10-00",
+        "name":  "ChronoFinish-00-10-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish-01-00-00",
+        "name":  "ChronoFinish-01-00-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ChronoFinish-10-00-00",
+        "name":  "ChronoFinish-10-00-00",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\CollisionCanopy",
+        "name":  "CollisionCanopy",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\CollisionGateGameplay",
+        "name":  "CollisionGateGameplay",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\CollisionTrackBorder",
+        "name":  "CollisionTrackBorder",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\CollisionWaterBorder",
+        "name":  "CollisionWaterBorder",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalCurbs",
+        "name":  "DecalCurbs",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalGateGameplay",
+        "name":  "DecalGateGameplay",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalMarks",
+        "name":  "DecalMarks",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalMarksItems",
+        "name":  "DecalMarksItems",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalMarksOnRoadIce",
+        "name":  "DecalMarksOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalMarksRamp",
+        "name":  "DecalMarksRamp",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalMarksStart",
+        "name":  "DecalMarksStart",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalMarksStartOnRoadIce",
+        "name":  "DecalMarksStartOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalObstaclePusher",
+        "name":  "DecalObstaclePusher",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalObstacleTube",
+        "name":  "DecalObstacleTube",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalObstacleTurnstileLeft",
+        "name":  "DecalObstacleTurnstileLeft",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalObstacleTurnstileRight",
+        "name":  "DecalObstacleTurnstileRight",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Logo4x1",
+        "name":  "DecalPaint2Logo4x1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Logo8x1",
+        "name":  "DecalPaint2Logo8x1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1A",
+        "name":  "DecalPaint2Sponsor4x1A",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1B",
+        "name":  "DecalPaint2Sponsor4x1B",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1C",
+        "name":  "DecalPaint2Sponsor4x1C",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1D",
+        "name":  "DecalPaint2Sponsor4x1D",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1NoColorizeA",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeA",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1NoColorizeB",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeB",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1NoColorizeC",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeC",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaint2Sponsor4x1NoColorizeD",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeD",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintLogo4x1",
+        "name":  "DecalPaintLogo4x1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintLogo8x1",
+        "name":  "DecalPaintLogo8x1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintLogo8x1Colorize",
+        "name":  "DecalPaintLogo8x1Colorize",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1A",
+        "name":  "DecalPaintSponsor4x1A",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1B",
+        "name":  "DecalPaintSponsor4x1B",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1C",
+        "name":  "DecalPaintSponsor4x1C",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1D",
+        "name":  "DecalPaintSponsor4x1D",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1NoColorizeA",
+        "name":  "DecalPaintSponsor4x1NoColorizeA",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1NoColorizeB",
+        "name":  "DecalPaintSponsor4x1NoColorizeB",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1NoColorizeC",
+        "name":  "DecalPaintSponsor4x1NoColorizeC",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPaintSponsor4x1NoColorizeD",
+        "name":  "DecalPaintSponsor4x1NoColorizeD",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSpecialMarks",
+        "name":  "DecalSpecialMarks",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSpecialTurbo",
+        "name":  "DecalSpecialTurbo",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSponsor1x1BigA",
+        "name":  "DecalSponsor1x1BigA",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSponsor1x1BigAOnRoadIce",
+        "name":  "DecalSponsor1x1BigAOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSponsor4x1AOnRoadIce",
+        "name":  "DecalSponsor4x1AOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSponsor4x1BOnRoadIce",
+        "name":  "DecalSponsor4x1BOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSponsor4x1COnRoadIce",
+        "name":  "DecalSponsor4x1COnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecalSponsor4x1DOnRoadIce",
+        "name":  "DecalSponsor4x1DOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecoCliff",
+        "name":  "DecoCliff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecoCliffBase",
+        "name":  "DecoCliffBase",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecoHill",
+        "name":  "DecoHill",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecoHill2",
+        "name":  "DecoHill2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\DecoTechnics",
+        "name":  "DecoTechnics",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\GateGameplayScreen",
+        "name":  "GateGameplayScreen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\GlassWaterStart",
+        "name":  "GlassWaterStart",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\GlassWaterWall",
+        "name":  "GlassWaterWall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\GlossyFloor",
+        "name":  "GlossyFloor",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Grass",
+        "name":  "Grass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\GrassFence",
+        "name":  "GrassFence",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\GrassNoFence",
+        "name":  "GrassNoFence",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemBase",
+        "name":  "ItemBase",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemBorder",
+        "name":  "ItemBorder",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemCactus",
+        "name":  "ItemCactus",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemCurveSign",
+        "name":  "ItemCurveSign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemCurveSignB",
+        "name":  "ItemCurveSignB",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemCurveSignC",
+        "name":  "ItemCurveSignC",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemFlag",
+        "name":  "ItemFlag",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemFlagNoAnim",
+        "name":  "ItemFlagNoAnim",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemInflatableFloor",
+        "name":  "ItemInflatableFloor",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemInflatableMat",
+        "name":  "ItemInflatableMat",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemInflatableTube",
+        "name":  "ItemInflatableTube",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemLamp",
+        "name":  "ItemLamp",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemLampLight",
+        "name":  "ItemLampLight",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemLampLightB",
+        "name":  "ItemLampLightB",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemLampLightC",
+        "name":  "ItemLampLightC",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemObstacle",
+        "name":  "ItemObstacle",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemObstacleLight",
+        "name":  "ItemObstacleLight",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemObstacleLightOn",
+        "name":  "ItemObstacleLightOn",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemObstaclePusher",
+        "name":  "ItemObstaclePusher",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemPillar",
+        "name":  "ItemPillar",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemPillar2",
+        "name":  "ItemPillar2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemRamp",
+        "name":  "ItemRamp",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemRoadSign",
+        "name":  "ItemRoadSign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemSpectator",
+        "name":  "ItemSpectator",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemSpectatorLow",
+        "name":  "ItemSpectatorLow",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemSupportConnector",
+        "name":  "ItemSupportConnector",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemSupportTube",
+        "name":  "ItemSupportTube",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemTorchFlame",
+        "name":  "ItemTorchFlame",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemTrackBarrier",
+        "name":  "ItemTrackBarrier",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemTrackBarrier2",
+        "name":  "ItemTrackBarrier2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemTrackBarrierB",
+        "name":  "ItemTrackBarrierB",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemTrackBarrierC",
+        "name":  "ItemTrackBarrierC",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ItemWrongWaySign",
+        "name":  "ItemWrongWaySign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\LightShape",
+        "name":  "LightShape",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\LightSpot",
+        "name":  "LightSpot",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\LightSpot2",
+        "name":  "LightSpot2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\LightTubeBig",
+        "name":  "LightTubeBig",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\LightTubeSmall",
+        "name":  "LightTubeSmall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\OpenTechBorders",
+        "name":  "OpenTechBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\PlatformTech",
+        "name":  "PlatformTech",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\PodiumBorder",
+        "name":  "PodiumBorder",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\PodiumMedalMetal",
+        "name":  "PodiumMedalMetal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\PodiumScreen155",
+        "name":  "PodiumScreen155",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\PodiumSelfIllum",
+        "name":  "PodiumSelfIllum",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\PodiumStepScreen",
+        "name":  "PodiumStepScreen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\PoolBorders",
+        "name":  "PoolBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Pylon",
+        "name":  "Pylon",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceAd6x1",
+        "name":  "RaceAd6x1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceArchCheckpoint",
+        "name":  "RaceArchCheckpoint",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceArchCheckpointSmall",
+        "name":  "RaceArchCheckpointSmall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceArchFinish",
+        "name":  "RaceArchFinish",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceArchFinishSmall",
+        "name":  "RaceArchFinishSmall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceScreenStart",
+        "name":  "RaceScreenStart",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceScreenStartMed",
+        "name":  "RaceScreenStartMed",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceScreenStartSmall",
+        "name":  "RaceScreenStartSmall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceScreenStartSmall8m",
+        "name":  "RaceScreenStartSmall8m",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceTriggerFXCheckpoint",
+        "name":  "RaceTriggerFXCheckpoint",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceTriggerFXFinish",
+        "name":  "RaceTriggerFXFinish",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RaceTriggerFXMultilap",
+        "name":  "RaceTriggerFXMultilap",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RoadBump",
+        "name":  "RoadBump",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RoadDirt",
+        "name":  "RoadDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RoadDirtFullColorize",
+        "name":  "RoadDirtFullColorize",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RoadIce",
+        "name":  "RoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RoadTech",
+        "name":  "RoadTech",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\RoadTechSubIce",
+        "name":  "RoadTechSubIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ScreenBack",
+        "name":  "ScreenBack",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ScreenPusher",
+        "name":  "ScreenPusher",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Show4x1",
+        "name":  "Show4x1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpeakerFront",
+        "name":  "SpeakerFront",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpeakerSide",
+        "name":  "SpeakerSide",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpecialFXGateGameplay",
+        "name":  "SpecialFXGateGameplay",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpecialFXTurbo",
+        "name":  "SpecialFXTurbo",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpecialSignOff",
+        "name":  "SpecialSignOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpecialSignTurbo",
+        "name":  "SpecialSignTurbo",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Speedometer",
+        "name":  "Speedometer",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpeedometerLight",
+        "name":  "SpeedometerLight",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\SpeedometerLight_Dyna",
+        "name":  "SpeedometerLight_Dyna",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Structure",
+        "name":  "Structure",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Technics",
+        "name":  "Technics",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TechnicsSpecials",
+        "name":  "TechnicsSpecials",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TechnicsStep",
+        "name":  "TechnicsStep",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TechnicsStepLow",
+        "name":  "TechnicsStepLow",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TechnicsTrims",
+        "name":  "TechnicsTrims",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TechnicsTrimsColorize",
+        "name":  "TechnicsTrimsColorize",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeDesertBarrier",
+        "name":  "ThemeDesertBarrier",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeRallyBarrier",
+        "name":  "ThemeRallyBarrier",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeRallyCastleBorders",
+        "name":  "ThemeRallyCastleBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeRallyCastleBordersTransparent",
+        "name":  "ThemeRallyCastleBordersTransparent",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeRallyCastleRoof",
+        "name":  "ThemeRallyCastleRoof",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeRallyCastleWall",
+        "name":  "ThemeRallyCastleWall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeRallyCastleWallUV",
+        "name":  "ThemeRallyCastleWallUV",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeSnowRoad",
+        "name":  "ThemeSnowRoad",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeSnowRoadBorder",
+        "name":  "ThemeSnowRoadBorder",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeSnowTempleDetails",
+        "name":  "ThemeSnowTempleDetails",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeSnowTempleFloor",
+        "name":  "ThemeSnowTempleFloor",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeSnowTempleLamp",
+        "name":  "ThemeSnowTempleLamp",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\ThemeSnowTempleTransparent",
+        "name":  "ThemeSnowTempleTransparent",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TrackBorders",
+        "name":  "TrackBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TrackBordersOff",
+        "name":  "TrackBordersOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TrackWall",
+        "name":  "TrackWall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TrackWallClips",
+        "name":  "TrackWallClips",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TrackWallClipsSubIce",
+        "name":  "TrackWallClipsSubIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TriggerFXGateGameplay",
+        "name":  "TriggerFXGateGameplay",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\TriggerFXTurbo",
+        "name":  "TriggerFXTurbo",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Underwater",
+        "name":  "Underwater",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\Water",
+        "name":  "Water",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\WaterBorders",
+        "name":  "WaterBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material\\WaterGround",
+        "name":  "WaterGround",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomBricks",
+        "name":  "CustomBricks",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomConcrete",
+        "name":  "CustomConcrete",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomDirt",
+        "name":  "CustomDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomGlass",
+        "name":  "CustomGlass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomGrass",
+        "name":  "CustomGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomIce",
+        "name":  "CustomIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomMetal",
+        "name":  "CustomMetal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomMetalPainted",
+        "name":  "CustomMetalPainted",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModAddSelfIllum",
+        "name":  "CustomModAddSelfIllum",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModAddSelfIllum2",
+        "name":  "CustomModAddSelfIllum2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModColorize",
+        "name":  "CustomModColorize",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModColorize2",
+        "name":  "CustomModColorize2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModDecal",
+        "name":  "CustomModDecal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModDecal2",
+        "name":  "CustomModDecal2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModOpaque",
+        "name":  "CustomModOpaque",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModOpaque2",
+        "name":  "CustomModOpaque2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModSelfIllum",
+        "name":  "CustomModSelfIllum",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModSelfIllum2",
+        "name":  "CustomModSelfIllum2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModSelfIllumSimple",
+        "name":  "CustomModSelfIllumSimple",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModSelfIllumSimple2",
+        "name":  "CustomModSelfIllumSimple2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModTrans",
+        "name":  "CustomModTrans",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomModTrans2",
+        "name":  "CustomModTrans2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomPlastic",
+        "name":  "CustomPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomPlasticShiny",
+        "name":  "CustomPlasticShiny",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomRock",
+        "name":  "CustomRock",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomRoughWood",
+        "name":  "CustomRoughWood",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomSand",
+        "name":  "CustomSand",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Material_BlockCustom\\CustomSnow",
+        "name":  "CustomSnow",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\Collision_Deprecated",
+        "name":  "Collision_Deprecated",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\SignOff",
+        "name":  "SignOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\Collision_Deprecated",
+        "name":  "Collision_Deprecated",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\SignOff",
+        "name":  "SignOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Boost2\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Cruise\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Fragile\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplayDesert\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplayDesert\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplayDesert\\Screen",
+        "name":  "Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplayRally\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplayRally\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplayRally\\Screen",
+        "name":  "Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplayRally\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplaySnow\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplaySnow\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplaySnow\\Screen",
+        "name":  "Screen",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\GateGameplaySnow\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\InvisibleDecal\\InvisibleDecal",
+        "name":  "InvisibleDecal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\DecalObstacleOff",
+        "name":  "DecalObstacleOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstacleLevel0",
+        "name":  "ItemObstacleLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstacleLevel1",
+        "name":  "ItemObstacleLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstacleLevel2",
+        "name":  "ItemObstacleLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstacleLightLevel0",
+        "name":  "ItemObstacleLightLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstacleLightLevel1",
+        "name":  "ItemObstacleLightLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstacleLightLevel2",
+        "name":  "ItemObstacleLightLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstaclePusherLevel0",
+        "name":  "ItemObstaclePusherLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstaclePusherLevel1",
+        "name":  "ItemObstaclePusherLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ItemObstaclePusherLevel2",
+        "name":  "ItemObstaclePusherLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ScreenPusherLevel0",
+        "name":  "ScreenPusherLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ScreenPusherLevel1",
+        "name":  "ScreenPusherLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacle\\ScreenPusherLevel2",
+        "name":  "ScreenPusherLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstacleLevel0",
+        "name":  "ItemObstacleLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstacleLevel1",
+        "name":  "ItemObstacleLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstacleLevel2",
+        "name":  "ItemObstacleLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstacleLightLevel0",
+        "name":  "ItemObstacleLightLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstacleLightLevel1",
+        "name":  "ItemObstacleLightLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstacleLightLevel2",
+        "name":  "ItemObstacleLightLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstaclePusherLevel0",
+        "name":  "ItemObstaclePusherLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstaclePusherLevel1",
+        "name":  "ItemObstaclePusherLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ItemObstaclePusherLevel2",
+        "name":  "ItemObstaclePusherLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ScreenPusherLevel0",
+        "name":  "ScreenPusherLevel0",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ScreenPusherLevel1",
+        "name":  "ScreenPusherLevel1",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\ItemObstacleDiscontinuous\\ScreenPusherLevel2",
+        "name":  "ScreenPusherLevel2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoBrake\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoEngine\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\NoSteering\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\DecoCliff",
+        "name":  "DecoCliff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\DecoCliffBase",
+        "name":  "DecoCliffBase",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\DecoGrass",
+        "name":  "DecoGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\DecoHill",
+        "name":  "DecoHill",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\DecoHill2",
+        "name":  "DecoHill2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\OpenTechBorders",
+        "name":  "OpenTechBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\PlatformTech",
+        "name":  "PlatformTech",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformDirt\\TrackWall",
+        "name":  "TrackWall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformGrass\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformGrass\\DecoCliff",
+        "name":  "DecoCliff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformGrass\\OpenTechBorders",
+        "name":  "OpenTechBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformGrass\\PlatformTech",
+        "name":  "PlatformTech",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformGrass\\TrackWall",
+        "name":  "TrackWall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\DecoCliff",
+        "name":  "DecoCliff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\DecoCliffBase",
+        "name":  "DecoCliffBase",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\DecoGrass",
+        "name":  "DecoGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\DecoHill",
+        "name":  "DecoHill",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\DecoHill2",
+        "name":  "DecoHill2",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\OpenTechBorders",
+        "name":  "OpenTechBorders",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\PlatformTech",
+        "name":  "PlatformTech",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformIce\\TrackWall",
+        "name":  "TrackWall",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformPlastic\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\PlatformPlastic\\PlatformTech",
+        "name":  "PlatformTech",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Reset\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\SlowMotion\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo\\SignOff",
+        "name":  "SignOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\SignOff",
+        "name":  "SignOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\Turbo2\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\Collision",
+        "name":  "Collision",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\CollisionDirt",
+        "name":  "CollisionDirt",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\CollisionGrass",
+        "name":  "CollisionGrass",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\CollisionPlastic",
+        "name":  "CollisionPlastic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\CollisionRoadIce",
+        "name":  "CollisionRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\CollisionRoadSynthetic",
+        "name":  "CollisionRoadSynthetic",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\Decal",
+        "name":  "Decal",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\DecalOnRoadIce",
+        "name":  "DecalOnRoadIce",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\DecalPlatform",
+        "name":  "DecalPlatform",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\Sign",
+        "name":  "Sign",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\SignOff",
+        "name":  "SignOff",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\SpecialFX",
+        "name":  "SpecialFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium\\Media\\Modifier\\TurboRoulette\\TriggerFX",
+        "name":  "TriggerFX",
+        "environment":  "Stadium"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\Grass",
+        "name":  "Grass",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpCeiling",
+        "name":  "WarpCeiling",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpDetails",
+        "name":  "WarpDetails",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpDetails_Dyna",
+        "name":  "WarpDetails_Dyna",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpFlag",
+        "name":  "WarpFlag",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpGlass",
+        "name":  "WarpGlass",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpGlow",
+        "name":  "WarpGlow",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpGlow_Dyna",
+        "name":  "WarpGlow_Dyna",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpGrass",
+        "name":  "WarpGrass",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpLight",
+        "name":  "WarpLight",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpLight_Dyna",
+        "name":  "WarpLight_Dyna",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpLightRay",
+        "name":  "WarpLightRay",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpLightRay_Dyna",
+        "name":  "WarpLightRay_Dyna",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen155",
+        "name":  "WarpScreen155",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen155B",
+        "name":  "WarpScreen155B",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen155C",
+        "name":  "WarpScreen155C",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen16x9",
+        "name":  "WarpScreen16x9",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen1x4A",
+        "name":  "WarpScreen1x4A",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen2x1A",
+        "name":  "WarpScreen2x1A",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen2x3A",
+        "name":  "WarpScreen2x3A",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen2x3B",
+        "name":  "WarpScreen2x3B",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen4x1A",
+        "name":  "WarpScreen4x1A",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreen4x1B",
+        "name":  "WarpScreen4x1B",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreenBench16x1",
+        "name":  "WarpScreenBench16x1",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpScreenBench8x1",
+        "name":  "WarpScreenBench8x1",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpSpotLightLogo",
+        "name":  "WarpSpotLightLogo",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpTechnic",
+        "name":  "WarpTechnic",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpWall",
+        "name":  "WarpWall",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpWall2",
+        "name":  "WarpWall2",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material\\WarpWall2Bottom",
+        "name":  "WarpWall2Bottom",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material_BlockCustom\\WarpCeiling",
+        "name":  "WarpCeiling",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material_BlockCustom\\WarpDetails",
+        "name":  "WarpDetails",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material_BlockCustom\\WarpGlass",
+        "name":  "WarpGlass",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material_BlockCustom\\WarpTechnic",
+        "name":  "WarpTechnic",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material_BlockCustom\\WarpWall",
+        "name":  "WarpWall",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Stadium256\\Media\\Material_BlockCustom\\WarpWall2",
+        "name":  "WarpWall2",
+        "environment":  "Stadium256"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\CharAnimSkel_Body",
+        "name":  "CharAnimSkel_Body",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\CharAnimSkel_Part",
+        "name":  "CharAnimSkel_Part",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\GlassBasic",
+        "name":  "GlassBasic",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block DecalGeom",
+        "name":  "Tech3 Block DecalGeom",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block Ice",
+        "name":  "Tech3 Block Ice",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block Ice_TcTrans",
+        "name":  "Tech3 Block Ice_TcTrans",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PDiff_Spec_Norm",
+        "name":  "Tech3 Block PDiff_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PDiff_Spec_Norm GrassX2",
+        "name":  "Tech3 Block PDiff_Spec_Norm GrassX2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PoleEmblem",
+        "name":  "Tech3 Block PoleEmblem",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PoleEnergy",
+        "name":  "Tech3 Block PoleEnergy",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PoleEnergyInt",
+        "name":  "Tech3 Block PoleEnergyInt",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PTDiff_Spec_Norm",
+        "name":  "Tech3 Block PTDiff_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PTDiff_Spec_Norm PGrassX2",
+        "name":  "Tech3 Block PTDiff_Spec_Norm PGrassX2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PxzDiff_Spec_Norm",
+        "name":  "Tech3 Block PxzDiff_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PxzDiff_Spec_Norm_X2",
+        "name":  "Tech3 Block PxzDiff_Spec_Norm_X2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PxzTDiff_Spec_Norm",
+        "name":  "Tech3 Block PxzTDiff_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PxzTDiff_Spec_Norm_X2",
+        "name":  "Tech3 Block PxzTDiff_Spec_Norm_X2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyDiffSpecNormSwitch_PyGrassX2",
+        "name":  "Tech3 Block PyDiffSpecNormSwitch_PyGrassX2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxz_Blend2",
+        "name":  "Tech3 Block PyPxz_Blend2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxz_Hue",
+        "name":  "Tech3 Block PyPxz_Hue",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxz_Ids",
+        "name":  "Tech3 Block PyPxz_Ids",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxz_Ids_Tex",
+        "name":  "Tech3 Block PyPxz_Ids_Tex",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxzDiff_Spec_Norm",
+        "name":  "Tech3 Block PyPxzDiff_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxzDiff_Spec_Norm_LM1",
+        "name":  "Tech3 Block PyPxzDiff_Spec_Norm_LM1",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxzTDiffSpecNorm_PyX2Hx2",
+        "name":  "Tech3 Block PyPxzTDiffSpecNorm_PyX2Hx2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxzTLayered",
+        "name":  "Tech3 Block PyPxzTLayered",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block PyPxzTLayered_Decal",
+        "name":  "Tech3 Block PyPxzTLayered_Decal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TAdd",
+        "name":  "Tech3 Block TAdd",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TAddLighted",
+        "name":  "Tech3 Block TAddLighted",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TAddModCV",
+        "name":  "Tech3 Block TAddModCV",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TAddShield",
+        "name":  "Tech3 Block TAddShield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TAddSwitch",
+        "name":  "Tech3 Block TAddSwitch",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TDiff_Spec_Norm",
+        "name":  "Tech3 Block TDiff_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TDiff_Spec_Norm_Probe",
+        "name":  "Tech3 Block TDiff_Spec_Norm_Probe",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TDiff_Spec_Norm_Switch",
+        "name":  "Tech3 Block TDiff_Spec_Norm_Switch",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TDiffA_Spec_Norm",
+        "name":  "Tech3 Block TDiffA_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TDiffABlend_Spec_Norm",
+        "name":  "Tech3 Block TDiffABlend_Spec_Norm",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TEnergySwitch",
+        "name":  "Tech3 Block TEnergySwitch",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TreeSprite",
+        "name":  "Tech3 Block TreeSprite",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TRenderOverlay",
+        "name":  "Tech3 Block TRenderOverlay",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TSelfIllum",
+        "name":  "Tech3 Block TSelfIllum",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block TSelfIllumNightOnly",
+        "name":  "Tech3 Block TSelfIllumNightOnly",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Block WaterWall",
+        "name":  "Tech3 Block WaterWall",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnim ClipAlpha",
+        "name":  "Tech3 BodyAnim ClipAlpha",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel Aniso",
+        "name":  "Tech3 BodyAnimSkel Aniso",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel DiffNrj",
+        "name":  "Tech3 BodyAnimSkel DiffNrj",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel Energy",
+        "name":  "Tech3 BodyAnimSkel Energy",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel Shield",
+        "name":  "Tech3 BodyAnimSkel Shield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel TDOpSNEM",
+        "name":  "Tech3 BodyAnimSkel TDOpSNEM",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel Teleport",
+        "name":  "Tech3 BodyAnimSkel Teleport",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel Transp",
+        "name":  "Tech3 BodyAnimSkel Transp",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyAnimSkel_ShowEnergy",
+        "name":  "Tech3 BodyAnimSkel_ShowEnergy",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 BodyParticule",
+        "name":  "Tech3 BodyParticule",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarDetailsSkelDmg",
+        "name":  "Tech3 CarDetailsSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarDetailsSkelDmg_Decal",
+        "name":  "Tech3 CarDetailsSkelDmg_Decal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarGems",
+        "name":  "Tech3 CarGems",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarGhost",
+        "name":  "Tech3 CarGhost",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarGlass",
+        "name":  "Tech3 CarGlass",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarGlassRefract",
+        "name":  "Tech3 CarGlassRefract",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarGlassSkelDmg",
+        "name":  "Tech3 CarGlassSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarGlassSkelDmg_Decal",
+        "name":  "Tech3 CarGlassSkelDmg_Decal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarSkelDmg Shield",
+        "name":  "Tech3 CarSkelDmg Shield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarSkelDmg Teleport",
+        "name":  "Tech3 CarSkelDmg Teleport",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarSkinSkelDmg",
+        "name":  "Tech3 CarSkinSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 CarSkinSkelDmg_Decal",
+        "name":  "Tech3 CarSkinSkelDmg_Decal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Decal 2d",
+        "name":  "Tech3 Decal 2d",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Decal Sprite",
+        "name":  "Tech3 Decal Sprite",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Decal Sprite VSampler",
+        "name":  "Tech3 Decal Sprite VSampler",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Decal SpriteMacro",
+        "name":  "Tech3 Decal SpriteMacro",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 EditorHelpers",
+        "name":  "Tech3 EditorHelpers",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 GrassFence_VDepLight",
+        "name":  "Tech3 GrassFence_VDepLight",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Sea",
+        "name":  "Tech3 Sea",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Sky",
+        "name":  "Tech3 Sky",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 SpriteAdd",
+        "name":  "Tech3 SpriteAdd",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 SpriteAddSoft",
+        "name":  "Tech3 SpriteAddSoft",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 SpriteAddSoft ColorRotate",
+        "name":  "Tech3 SpriteAddSoft ColorRotate",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 SpriteBlendSoftLightedVtxAmbient",
+        "name":  "Tech3 SpriteBlendSoftLightedVtxAmbient",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Stars",
+        "name":  "Tech3 Stars",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 TitleCover",
+        "name":  "Tech3 TitleCover",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Warp PDiff To PDiffPGrassX2",
+        "name":  "Tech3 Warp PDiff To PDiffPGrassX2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Warp PyaPxzDiff",
+        "name":  "Tech3 Warp PyaPxzDiff",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Warp PyPxzDiff",
+        "name":  "Tech3 Warp PyPxzDiff",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3 Warp_PyaDiff_To_PDiffPGrassX2",
+        "name":  "Tech3 Warp_PyaDiff_To_PDiffPGrassX2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_AddSelfIllumAtHue",
+        "name":  "Tech3_AddSelfIllumAtHue",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_DecalGeom_TOp_PyDNS_X2H2",
+        "name":  "Tech3_Block_DecalGeom_TOp_PyDNS_X2H2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_DecalGeom_TOp_PyPxzDSN_X2",
+        "name":  "Tech3_Block_DecalGeom_TOp_PyPxzDSN_X2",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_PyDSN_PyGrassX2_TDecalMod",
+        "name":  "Tech3_Block_PyDSN_PyGrassX2_TDecalMod",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDiffA_SpecNorm_CubeOut",
+        "name":  "Tech3_Block_TDiffA_SpecNorm_CubeOut",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDiffABlend_SpecNorm_CubeOut",
+        "name":  "Tech3_Block_TDiffABlend_SpecNorm_CubeOut",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_CubeOut",
+        "name":  "Tech3_Block_TDSN_CubeOut",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_CubeOut_CubeIn",
+        "name":  "Tech3_Block_TDSN_CubeOut_CubeIn",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_CubeOut_DecalMod",
+        "name":  "Tech3_Block_TDSN_CubeOut_DecalMod",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_CubeOut_DispIn",
+        "name":  "Tech3_Block_TDSN_CubeOut_DispIn",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_CubeOut_DispIn_Parallax",
+        "name":  "Tech3_Block_TDSN_CubeOut_DispIn_Parallax",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_DecalMod",
+        "name":  "Tech3_Block_TDSN_DecalMod",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_DecalMod_TestOp",
+        "name":  "Tech3_Block_TDSN_DecalMod_TestOp",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSN_TI_CubeOut",
+        "name":  "Tech3_Block_TDSN_TI_CubeOut",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSNI_CubeOut",
+        "name":  "Tech3_Block_TDSNI_CubeOut",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TDSNM_CubeOut_CubeIn",
+        "name":  "Tech3_Block_TDSNM_CubeOut_CubeIn",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TSelfI_TDiffA",
+        "name":  "Tech3_Block_TSelfI_TDiffA",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Block_TSelfI_TxDiffA",
+        "name":  "Tech3_Block_TSelfI_TxDiffA",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna_SphereShield",
+        "name":  "Tech3_Dyna_SphereShield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna_TAdd",
+        "name":  "Tech3_Dyna_TAdd",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna_TAdd_AfterDecals",
+        "name":  "Tech3_Dyna_TAdd_AfterDecals",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna_TAddModCV",
+        "name":  "Tech3_Dyna_TAddModCV",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna_TAddShield",
+        "name":  "Tech3_Dyna_TAddShield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna0_Ice",
+        "name":  "Tech3_Dyna0_Ice",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna0_LProbe_TDSN",
+        "name":  "Tech3_Dyna0_LProbe_TDSN",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna0_TDSNE",
+        "name":  "Tech3_Dyna0_TDSNE",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna0_TDSNI",
+        "name":  "Tech3_Dyna0_TDSNI",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna0_TE",
+        "name":  "Tech3_Dyna0_TE",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna0_TI",
+        "name":  "Tech3_Dyna0_TI",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna1_TDSNE",
+        "name":  "Tech3_Dyna1_TDSNE",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Dyna1_TDSNI",
+        "name":  "Tech3_Dyna1_TDSNI",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_DynaFacing_ForceNMap_CubeOut_TestOp",
+        "name":  "Tech3_DynaFacing_ForceNMap_CubeOut_TestOp",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_FxHitShield",
+        "name":  "Tech3_FxHitShield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_MenuBox",
+        "name":  "Tech3_MenuBox",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_MenuBox_Light",
+        "name":  "Tech3_MenuBox_Light",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_MenuBox_Transp",
+        "name":  "Tech3_MenuBox_Transp",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Voxel_TDSNI_CubeOut",
+        "name":  "Tech3_Voxel_TDSNI_CubeOut",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Warp_TDiffSpec_VertexTween",
+        "name":  "Tech3_Warp_TDiffSpec_VertexTween",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Warp_TDiffSpecNormSI_CSpecSoft",
+        "name":  "Tech3_Warp_TDiffSpecNormSI_CSpecSoft",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Water_MultiH",
+        "name":  "Tech3_Water_MultiH",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\Tech3_Weapon_Laser",
+        "name":  "Tech3_Weapon_Laser",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\Material\\ZOnly_Water",
+        "name":  "ZOnly_Water",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Block_TDSN",
+        "name":  "Block_TDSN",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_ActionMakerOtherFrames",
+        "name":  "BodyAnimSkel_ActionMakerOtherFrames",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_Aniso",
+        "name":  "BodyAnimSkel_Aniso",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_Diffuse_Energy_Specular_Normal",
+        "name":  "BodyAnimSkel_Diffuse_Energy_Specular_Normal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_DiffuseOp_Energy_Specular_Normal_TMask",
+        "name":  "BodyAnimSkel_DiffuseOp_Energy_Specular_Normal_TMask",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_DiffuseTransp_2Sided",
+        "name":  "BodyAnimSkel_DiffuseTransp_2Sided",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_DiffuseTransp_Specular",
+        "name":  "BodyAnimSkel_DiffuseTransp_Specular",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_DiffuseTransp_Specular_Normal",
+        "name":  "BodyAnimSkel_DiffuseTransp_Specular_Normal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_Energy",
+        "name":  "BodyAnimSkel_Energy",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_Shield",
+        "name":  "BodyAnimSkel_Shield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_ShowEnergy",
+        "name":  "BodyAnimSkel_ShowEnergy",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\BodyAnimSkel_Teleport",
+        "name":  "BodyAnimSkel_Teleport",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\CharAnimSkel_Body",
+        "name":  "CharAnimSkel_Body",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\CharAnimSkel_Part",
+        "name":  "CharAnimSkel_Part",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Dyna0_Shield",
+        "name":  "Dyna0_Shield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Dyna0_TDSNE",
+        "name":  "Dyna0_TDSNE",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Dyna0_TDSNI",
+        "name":  "Dyna0_TDSNI",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Dyna0_TE",
+        "name":  "Dyna0_TE",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Dyna0_TI",
+        "name":  "Dyna0_TI",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Dyna0_TI_AddModCV",
+        "name":  "Dyna0_TI_AddModCV",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Dyna0_TIce",
+        "name":  "Dyna0_TIce",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Static_TDOBSN",
+        "name":  "Static_TDOBSN",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Static_TDOSN",
+        "name":  "Static_TDOSN",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Static_TDSN",
+        "name":  "Static_TDSN",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Static_TDSNE",
+        "name":  "Static_TDSNE",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Static_TDSNI",
+        "name":  "Static_TDSNI",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Static_TDSNI_Night",
+        "name":  "Static_TDSNI_Night",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Static_TIAdd",
+        "name":  "Static_TIAdd",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Tech3_Block_TDSN_CubeOut_DispIn",
+        "name":  "Tech3_Block_TDSN_CubeOut_DispIn",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Tech3_Block_TDSN_CubeOut_DispIn_Parallax",
+        "name":  "Tech3_Block_TDSN_CubeOut_DispIn_Parallax",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Tech3_DeclSprite",
+        "name":  "Tech3_DeclSprite",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\Tech3_DeclSpriteMacro",
+        "name":  "Tech3_DeclSpriteMacro",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleDetails",
+        "name":  "VehicleDetails",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleDetailsDmg",
+        "name":  "VehicleDetailsDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleDetailsDmgDecal",
+        "name":  "VehicleDetailsDmgDecal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleDetailsDmgNormal",
+        "name":  "VehicleDetailsDmgNormal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleDetailsNoSkelDmg",
+        "name":  "VehicleDetailsNoSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGems",
+        "name":  "VehicleGems",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGemsNoSkelDmg",
+        "name":  "VehicleGemsNoSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGlass",
+        "name":  "VehicleGlass",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGlassDmg",
+        "name":  "VehicleGlassDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGlassDmgCrack",
+        "name":  "VehicleGlassDmgCrack",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGlassDmgDecal",
+        "name":  "VehicleGlassDmgDecal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGlassNoSkelDmg",
+        "name":  "VehicleGlassNoSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGlassRefract",
+        "name":  "VehicleGlassRefract",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleGlassRefractNoSkelDmg",
+        "name":  "VehicleGlassRefractNoSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleShield",
+        "name":  "VehicleShield",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleSkin",
+        "name":  "VehicleSkin",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleSkinDmg",
+        "name":  "VehicleSkinDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleSkinDmg_Decal",
+        "name":  "VehicleSkinDmg_Decal",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleSkinNoSkelDmg",
+        "name":  "VehicleSkinNoSkelDmg",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Techno3\\Media\\MaterialInstance\\VehicleTeleport",
+        "name":  "VehicleTeleport",
+        "environment":  "Techno3"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Boost_Turbo",
+        "name":  "Boost_Turbo",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Boost_Turbo2",
+        "name":  "Boost_Turbo2",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Boost_TurboRoulette2",
+        "name":  "Boost_TurboRoulette2",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Boost_TurboRoulette3",
+        "name":  "Boost_TurboRoulette3",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ExhaustBoost",
+        "name":  "ExhaustBoost",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ExhaustFlame2",
+        "name":  "ExhaustFlame2",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ExhaustNitro",
+        "name":  "ExhaustNitro",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\GrassMarkGround",
+        "name":  "GrassMarkGround",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleChunksDirt",
+        "name":  "ParticleChunksDirt",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleChunksSand",
+        "name":  "ParticleChunksSand",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleChunksSnow",
+        "name":  "ParticleChunksSnow",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleExhaustCenter",
+        "name":  "ParticleExhaustCenter",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleSmokeAsphalt",
+        "name":  "ParticleSmokeAsphalt",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleSmokeDirt",
+        "name":  "ParticleSmokeDirt",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleSmokeDirtHovering",
+        "name":  "ParticleSmokeDirtHovering",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleSmokeSand",
+        "name":  "ParticleSmokeSand",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\ParticleSmokeSnow",
+        "name":  "ParticleSmokeSnow",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Tech3_CommonCarDetails",
+        "name":  "Tech3_CommonCarDetails",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Tech3_CommonCarGlass",
+        "name":  "Tech3_CommonCarGlass",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Tech3_CommonCarPilot",
+        "name":  "Tech3_CommonCarPilot",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Tech3_CommonCarSkin",
+        "name":  "Tech3_CommonCarSkin",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Tech3_CommonCarWheels",
+        "name":  "Tech3_CommonCarWheels",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\Tech3_ParticleGlass",
+        "name":  "Tech3_ParticleGlass",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\WheelMarksAsphalt",
+        "name":  "WheelMarksAsphalt",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\WheelMarksDirt",
+        "name":  "WheelMarksDirt",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\WheelMarksIce",
+        "name":  "WheelMarksIce",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\WheelMarksSand",
+        "name":  "WheelMarksSand",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\WheelMarksSnow",
+        "name":  "WheelMarksSnow",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "Vehicles\\Media\\Material\\WheelMarksWet",
+        "name":  "WheelMarksWet",
+        "environment":  "Vehicles"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\Beach",
+        "name":  "Beach",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\Land",
+        "name":  "Land",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\WarpGround",
+        "name":  "WarpGround",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\Water",
+        "name":  "Water",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\WaterBottom",
+        "name":  "WaterBottom",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\WaterShore",
+        "name":  "WaterShore",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\WaterShoreRocky",
+        "name":  "WaterShoreRocky",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\WaterShoreRockyToWaterBottom",
+        "name":  "WaterShoreRockyToWaterBottom",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\WaterShoreToBeach",
+        "name":  "WaterShoreToBeach",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Material\\WaterShoreToWaterBottom",
+        "name":  "WaterShoreToWaterBottom",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1D",
+        "name":  "DecalPaint2Sponsor4x1D",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\DecalPaint2Sponsor4x1NoColorizeD",
+        "name":  "DecalPaint2Sponsor4x1NoColorizeD",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1D",
+        "name":  "DecalPaintSponsor4x1D",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\DecalPaintSponsor4x1NoColorizeD",
+        "name":  "DecalPaintSponsor4x1NoColorizeD",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\Deco",
+        "name":  "Deco",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\DecoHill",
+        "name":  "DecoHill",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\DecoHill2",
+        "name":  "DecoHill2",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\StructureInWorld",
+        "name":  "StructureInWorld",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersInWorld",
+        "name":  "TrackBordersInWorld",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\TrackBordersOffInWorld",
+        "name":  "TrackBordersOffInWorld",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\TrackWallClipsInWorld",
+        "name":  "TrackWallClipsInWorld",
+        "environment":  "WhiteShore"
+    },
+    {
+        "path":  "WhiteShore\\Media\\Modifier\\StadiumOnTerrain\\TrackWallInWorld",
+        "name":  "TrackWallInWorld",
+        "environment":  "WhiteShore"
+    }
+]

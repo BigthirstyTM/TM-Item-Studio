@@ -51,7 +51,7 @@ function run(command, args, extraEnv = {}) {
         for (const asset of ['_framework/TM-Item-Studio.wasm', 'js/meshViewer.js']) {
             console.log(`Published ${asset} SHA256: ${crypto.createHash('sha256').update(fs.readFileSync(path.join(webRoot, asset))).digest('hex')}`);
         }
-        await run(process.execPath, ['Tests/Browser/material-preview.cjs', path.join(fixtures, 'light-capability.Item.Gbx')],
+        await run(process.execPath, ['Tests/Browser/material-preview.cjs', path.join(root, 'Tests/Browser/Fixtures/Approved/Blimp.Item.gbx')],
             { STUDIO_BASE_URL: baseUrl });
     } finally {
         if (server?.listening) await new Promise(resolve => server.close(resolve));

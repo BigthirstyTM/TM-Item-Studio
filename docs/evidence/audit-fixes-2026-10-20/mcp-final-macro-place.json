@@ -1,0 +1,20 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "canPlace": true,
+        "coord": "<23, 9, 22>",
+        "modelName": "SupportConnectorX6_Macroblock",
+        "mode": "ground",
+        "placed": true,
+        "modelIsGround": false
+      },
+      "success": true
+    },
+    "tool": "tm-mcp-pack-epp.PlaceMacroblockModelNative"
+  }
+}

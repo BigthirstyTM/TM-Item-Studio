@@ -4,9 +4,16 @@ Trackmania 2020 Item Studio is a browser-based editor for `.Item.Gbx` files.
 It provides an interactive 3D viewport and exposes item metadata, placement,
 kinematics, lights, sockets, physics and visual information.
 
+See the [approved audit fix report](docs/audit-fixes-2026-10-20.md) for the
+20 October regression results, native test evidence, and remaining compatibility
+limits. Focused regression commands are in [Tests/Browser](Tests/Browser/README.md).
+
 ## Features
 
 - Load one or more Trackmania item files.
+- Load extracted vanilla items with their real mesh: open the `.Item.Gbx`, then use
+  **Load GameData dependencies** and choose the extracted `GameData\Stadium` folder.
+  Studio follows only that item's referenced `.Gbx` dependency closure; the folder is never uploaded wholesale.
 - Detect and browse embedded multi-variant items.
 - Switch variants in the 3D viewport.
 - Inspect and edit placement pivots, sockets, lights and kinematic settings.
@@ -110,6 +117,32 @@ folder in that panel. The folder is selected through the browser and remains
 local: Studio indexes filenames only and reads a texture file only when it is
 needed for the currently loaded item.
 
+For a complete Trackmania 2020 library, the repository includes a builder at
+`Tests/TextureLibrary`. On this machine it has been used to create:
+
+```text
+C:\Users\PC\Documents\Trackmania\Items\_BlenderAssets\Trackmania2020_Textures
+```
+
+The builder parses the extracted `GameData\*.Material.Gbx` files, follows each
+material's actual `CPlugBitmap.ImageFile` reference, and copies only the
+referenced image files. It also writes `manifest.json`, which maps full
+material links to exact texture roles and prevents filename-only collisions
+between environments. The current generated library contains 590 material
+entries and 863 referenced texture files; 12 extracted material files could
+not be parsed by the installed GBX.NET version and are reported in the
+manifest. Rebuild it with:
+
+```powershell
+dotnet run --project Tests/TextureLibrary -- `
+  'C:\Users\PC\OpenplanetNext\Extract\GameData' `
+  'C:\Users\PC\Documents\Trackmania\Items\_BlenderAssets\Trackmania2020_Textures'
+```
+
+Choose that generated folder in **Materials & LOD**. The browser reads it
+read-only; the extracted `GameData` files and GBX material data are never
+modified.
+
 The current package is about 918 MB, so Studio intentionally does not import
 the zip into browser memory. A Chromium-based browser is required for the
 local folder picker. Texture matching is deterministic and based on the
@@ -121,9 +154,29 @@ with red=roughness and green=metallic, and `_I` as self-illumination. A plain
 filename remains a base-color fallback for nonstandard material folders. A
 missing base-color token, a filename set that several distinct materials
 share, or an unreadable file (including malformed DDS) leaves the neutral
-preview in place. DDS textures are decoded through the bundled three.js
-revision. This preview never changes GBX material data, UVs, collision, or
-the exported item.
+preview in place. DXT DDS textures use the bundled three.js decoder; Trackmania
+ATI1/ATI2 (BC4/BC5) normal and packed-surface formats are decoded locally to
+RGBA for browsers whose WebGL stack does not expose those compressed formats.
+The matcher also recognizes the wiki's `_H` height, `_L` light, `_T` glass-colour,
+`_O` glass-overlay, `_M` mask, `_X2` large-overlay and hue-mask variants;
+height and light maps are applied to the preview, while the other auxiliary
+maps remain indexed for material diagnostics. Blendermania naming forms such as
+`TM_<material>_asset` and compound names are normalized to the corresponding
+texture token as well.
+Colorable `Material_BlockCustom` maps use their green channel as a grayscale
+mask and the authored item color as the visible tint; the green marker itself
+is never shown in the viewport.
+Texture previewing never changes GBX material data, UVs, collision, or the
+exported item. The separate authored-material link editor below deliberately
+does change the selected material link when the item is exported.
+
+Each authored material slot also exposes its full `Link` in the **Materials &
+LOD** panel. The editable field and dropdown use the generated
+`wwwroot/data/materials.json` library, built from the extracted game
+`*.Material.Gbx` paths (including the other environments), while preserving
+links that are present in an uploaded item but absent from the library. A
+changed link updates the viewport immediately and is written into the next
+GBX export.
 
 ## Exporting files and variants
 
@@ -280,3 +333,9 @@ multi-variant items can contain valid `0xFFFFFFFF` null node references inside
 surface data. The upstream parser currently treats one of these references as
 an unknown class ID, so the local assembly preserves the official API and
 handles that sentinel as a null reference.
+
+The assembly is refreshed from the newest stable upstream release by
+`eng/Update-GbxNet.ps1`; the scheduled workflow opens an update pull request
+after the parser and Studio build checks pass. See
+[docs/gbx-net-updates.md](docs/gbx-net-updates.md) for the updater and the
+separate GBX.NET CLI assessment.

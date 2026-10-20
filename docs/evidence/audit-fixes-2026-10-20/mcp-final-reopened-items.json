@@ -1,0 +1,281 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "limit": 30,
+        "hasCenter": false,
+        "items": [
+          {
+            "variant": 0,
+            "index": 0,
+            "name": "SupportConnectorX6",
+            "pos": [
+              704,
+              8,
+              768
+            ],
+            "coord": [
+              22,
+              9,
+              24
+            ],
+            "scale": 1,
+            "isFlying": true,
+            "idName": "TMIS_Final_Export",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 1,
+            "name": "SupportConnectorX6",
+            "pos": [
+              736,
+              8,
+              768
+            ],
+            "coord": [
+              23,
+              9,
+              24
+            ],
+            "scale": 1,
+            "isFlying": true,
+            "idName": "TMIS_Final_Export_x2",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 2,
+            "name": "SupportConnectorX6",
+            "pos": [
+              784,
+              8,
+              768
+            ],
+            "coord": [
+              24,
+              9,
+              24
+            ],
+            "scale": 1,
+            "isFlying": true,
+            "idName": "TMIS_Final_Merged",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 3,
+            "name": "SupportConnectorX6",
+            "pos": [
+              832,
+              8,
+              768
+            ],
+            "coord": [
+              26,
+              9,
+              24
+            ],
+            "scale": 1,
+            "isFlying": true,
+            "idName": "TMIS_Final_Variants",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 4,
+            "name": "ObstaclePusher4mLevel1",
+            "pos": [
+              768,
+              8,
+              816
+            ],
+            "coord": [
+              24,
+              9,
+              25
+            ],
+            "scale": 1,
+            "isFlying": true,
+            "idName": "TMIS_Final_Motion",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 5,
+            "name": "SupportConnectorX6",
+            "pos": [
+              704,
+              8,
+              816
+            ],
+            "coord": [
+              22,
+              9,
+              25
+            ],
+            "scale": 1,
+            "isFlying": true,
+            "idName": "TMIS_Final_Icon",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 6,
+            "name": "SupportConnectorX6",
+            "pos": [
+              736,
+              8,
+              816
+            ],
+            "coord": [
+              23,
+              9,
+              25
+            ],
+            "scale": 1,
+            "isFlying": true,
+            "idName": "TMIS_Final_Flag",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 7,
+            "name": "SupportConnectorX6",
+            "pos": [
+              736,
+              8,
+              704
+            ],
+            "coord": [
+              4294967295,
+              4294967295,
+              4294967295
+            ],
+            "scale": 1,
+            "isFlying": false,
+            "idName": "TMIS_Final_Export",
+            "rot": [
+              0,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "variant": 0,
+            "index": 8,
+            "name": "SupportConnectorX6",
+            "pos": [
+              752,
+              8,
+              704
+            ],
+            "coord": [
+              4294967295,
+              4294967295,
+              4294967295
+            ],
+            "scale": 1,
+            "isFlying": false,
+            "idName": "TMIS_Final_Export",
+            "rot": [
+              1.5708,
+              0,
+              0
+            ],
+            "waypointType": 3,
+            "rotDeg": [
+              90,
+              0,
+              0
+            ]
+          }
+        ],
+        "count": 9,
+        "total": 9
+      },
+      "success": true
+    },
+    "tool": "GetItems"
+  }
+}

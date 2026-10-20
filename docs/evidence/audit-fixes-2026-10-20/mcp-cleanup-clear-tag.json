@@ -1,0 +1,17 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "tag": "",
+        "trackedCount": 0,
+        "active": false
+      },
+      "success": true
+    },
+    "tool": "tm-mcp-pack-epp.SetAgentTag"
+  }
+}

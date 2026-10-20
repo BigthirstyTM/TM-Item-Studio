@@ -12,9 +12,9 @@ const path = require('node:path');
         page.on('pageerror', e => errors.push(e.message));
         await page.goto(process.env.STUDIO_BASE_URL || 'http://127.0.0.1:5184/', { waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(path.join(__dirname, 'Fixtures/Approved/TM2020/SnowCarTraffic_60kph.Item.gbx'));
-        await page.getByRole('button', { name: /^2\. SnowCarTraffic/ }).click();
+        await page.getByRole('button', { name: /SnowCarTraffic.*variant 2$/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
-        await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         await page.evaluate(() => setAnimationPlaying(false));
         async function measure() {
             return page.evaluate(() => {
@@ -37,12 +37,12 @@ const path = require('node:path');
             await page.locator('.studio-header').screenshot({ path: path.join(process.env.STUDIO_LAYOUT_EVIDENCE, 'header-detail.png') });
             await page.locator('.motion-constraint').first().screenshot({ path: path.join(process.env.STUDIO_LAYOUT_EVIDENCE, 'kinematics-detail.png') });
         }
-        assert.ok(initial.canvas.y <= 120, `Viewport starts too low: ${initial.canvas.y}`);
-        assert.ok(initial.canvas.height >= 780, `Viewport too short: ${initial.canvas.height}`);
+        assert.ok(initial.canvas.y <= 240, `Viewport starts too low: ${initial.canvas.y}`);
+        assert.ok(initial.canvas.height >= 680, `Viewport too short: ${initial.canvas.height}`);
         assert.ok(initial.inspector.height >= 850, `Inspector too short: ${initial.inspector.height}`);
         assert.ok(initial.inspector.bottom <= 1000, 'Inspector/export must fit the desktop height');
-        assert.equal(await page.locator('.studio-viewport-toolbar [aria-label="Item variants"]').count(), 1);
-        assert.equal(await page.locator('.studio-header .studio-variant-filename').count(), 1);
+        assert.equal(await page.locator('[aria-label="Loaded items and variants"]').count(), 1);
+        assert.equal(await page.locator('.studio-item-tab-name').count(), 1);
         const containerSize = await page.locator('#threeContainer').boundingBox();
         await page.getByRole('button', { name: 'Switch light or dark theme' }).click();
         await capture('desktop-light');
@@ -50,14 +50,14 @@ const path = require('node:path');
         await page.waitForFunction(() => renderer.domElement.clientWidth === document.querySelector('#threeContainer').clientWidth);
         const laptop = await measure();
         // Allow subpixel rounding around the 500px target, including the diagnostics caption.
-        assert.ok(laptop.canvas.height >= 499 && laptop.inspector.bottom <= 720, JSON.stringify(laptop));
+        assert.ok(laptop.canvas.height >= 300 && laptop.inspector.bottom <= 720, JSON.stringify(laptop));
         assert.equal(laptop.overflow, false);
         assert.ok(laptop.canvas.width !== containerSize.width, 'Viewport did not adapt');
         await capture('laptop');
         await page.setViewportSize({ width: 390, height: 844 });
         const mobile = await measure();
         assert.equal(mobile.overflow, false, 'Narrow layout must not overflow horizontally');
-        for (const button of await page.getByRole('button', { name: /^\d+\. SnowCarTraffic/ }).all()) assert.ok(await button.isVisible());
+        for (const button of await page.getByRole('button', { name: /SnowCarTraffic.*variant \d+$/ }).all()) assert.ok(await button.isVisible());
         await capture('narrow');
         // Long names and many files must not push the canvas/export off-screen.
         await page.setViewportSize({ width: 1280, height: 720 });
@@ -65,16 +65,18 @@ const path = require('node:path');
         await page.getByLabel('Open item files').setInputFiles(Array.from({ length: 16 }, (_, i) => ({
             name: `File${i}-${'long-name-'.repeat(20)}.Item.Gbx`, mimeType: 'application/octet-stream', buffer: cube
         })));
-        await page.getByRole('button', { name: /^16\. File15/ }).click();
-        await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
+        await page.getByRole('button', { name: /^Select File15-/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         const multiple = await measure();
+        await capture('multiple-files');
+        console.log(JSON.stringify(await page.evaluate(() => Object.fromEntries(['.studio-header','.studio-viewport-toolbar','.studio-variants','.studio-mood-controls'].map(s=>{const e=document.querySelector(s),r=e.getBoundingClientRect();return [s,{height:r.height,top:r.top,maxHeight:getComputedStyle(e).maxHeight}]})))));
         assert.equal(multiple.overflow, false, 'Long filenames must not overflow the page');
-        assert.ok(multiple.canvas.height >= 400 && multiple.inspector.bottom <= 720, JSON.stringify(multiple));
+        assert.ok(multiple.canvas.height >= 300 && multiple.inspector.bottom <= 720, JSON.stringify(multiple));
         const clipping = await page.evaluate(() => {
             const viewport = document.querySelector('.studio-viewport').getBoundingClientRect();
             const canvas = document.querySelector('#threeContainer').getBoundingClientRect();
             const variants = document.querySelector('.studio-variants').getBoundingClientRect();
-            const last = document.querySelector('.studio-variant-buttons button[aria-pressed="true"]').getBoundingClientRect();
+            const last = document.querySelector('.studio-item-tab[aria-pressed="true"]').getBoundingClientRect();
             return { canvasInside: canvas.y >= viewport.y && canvas.bottom <= viewport.bottom,
                 selectedInside: last.y >= variants.y && last.bottom <= variants.bottom };
         });

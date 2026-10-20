@@ -1,0 +1,25 @@
+[   ScriptRuntime] [ TRAC] [16:31:13.684] [Editor]  Caching inventory complete.
+[   ScriptRuntime] [ TRAC] [16:31:35.382] [tm-control-mcp]  TM Control MCP tool start GetReadiness {"want":"editor"}
+[   ScriptRuntime] [ TRAC] [16:31:35.382] [tm-control-mcp]  TM Control MCP tool done GetReadiness ok 0ms
+[   ScriptRuntime] [ TRAC] [16:31:35.533] [tm-control-mcp]  TM Control MCP tool start GetItems {"limit":20}
+[   ScriptRuntime] [ TRAC] [16:31:35.534] [tm-control-mcp]  TM Control MCP tool done GetItems ok 1ms
+[   ScriptRuntime] [ TRAC] [16:32:30.981] [tm-control-mcp]  TM Control MCP tool start tm-mcp-pack-epp.ControlItemEditor {"itemPath":"TMIS_Fixes_Export","action":"open"}
+[   ScriptRuntime] [ TRAC] [16:32:30.982] [tm-control-mcp]  TM Control MCP tool done tm-mcp-pack-epp.ControlItemEditor ok 1ms
+[   ScriptRuntime] [ TRAC] [16:32:30.996] [Editor]  [286914] EditorDrawLoopCoro exited
+[   ScriptRuntime] [ TRAC] [16:32:31.002] [Editor]  [286920] Running OnItemEditorLoad callbacks
+[   ScriptRuntime] [ TRAC] [16:32:31.002] [Editor]  [286920] Finished OnItemEditorLoad callbacks
+[   ScriptRuntime] [  LOG] [16:32:31.031] [Editor]  \$bf0\$iWatchForSpriteNod: mainSpriteNod is null
+[   ScriptRuntime] [  LOG] [16:32:31.031] [EditorDeveloper]  Patch reverted!
+[   ScriptRuntime] [ TRAC] [16:32:31.132] [tm-control-mcp]  TM Control MCP tool start GetMode {}
+[   ScriptRuntime] [ TRAC] [16:32:31.132] [tm-control-mcp]  TM Control MCP tool done GetMode ok 0ms
+[   ScriptRuntime] [ TRAC] [16:34:23.563] [tm-control-mcp]  TM Control MCP tool start GetMode {}
+[   ScriptRuntime] [ TRAC] [16:34:23.563] [tm-control-mcp]  TM Control MCP tool done GetMode ok 0ms
+[   ScriptRuntime] [ TRAC] [16:34:23.648] [tm-control-mcp]  TM Control MCP tool start tm-mcp-pack-epp.InspectMacroblockModel {"path":"Blocks/TMIS_Fixes_20261020_V2/TMIS_Pair.Macroblock.Gbx","limit":5,"includeItems":true}
+[   ScriptRuntime] [ TRAC] [16:34:23.648] [tm-control-mcp]  TM Control MCP tool done tm-mcp-pack-epp.InspectMacroblockModel err 0ms
+[   ScriptRuntime] [ WARN] [16:34:56.530] [Editor]  After_CGameCtnEditorPluginMap_Update_PreScript: called outside editor! (this is a bug)
+[   ScriptRuntime] [ WARN] [16:34:56.530] [Editor]  After_CGameCtnEditorPluginMap_Update_PreScript: called outside editor! (this is a bug)
+[   ScriptRuntime] [ TRAC] [16:34:56.536] [Editor]  Updating editor watchers.
+[   ScriptRuntime] [ TRAC] [16:34:56.536] [Editor]  [432454] Running OnPlacementModeChanged | Item
+[   ScriptRuntime] [ TRAC] [16:34:56.536] [Editor]  [432454] Finished OnPlacementModeChanged
+[   ScriptRuntime] [ TRAC] [16:34:56.536] [Editor]  Done updating editor watchers.
+[   ScriptRuntime] [  LOG] [16:34:56.538] [EditorDeveloper]  Patched! Backup: "0F 84 96 04 00 00"

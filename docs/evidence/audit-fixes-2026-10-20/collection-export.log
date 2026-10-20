@@ -1,0 +1,15 @@
+PASS: upload/export/reopen: numeric no-op
+PASS: upload/export/reopen: numeric ID and author edits
+PASS: upload/export/reopen: unknown numeric ID
+PASS: upload/export/reopen: custom string ID
+PASS: upload/export/reopen: numeric-looking string ID
+PASS: upload/export/reopen: known name string ID
+PASS: upload/export/reopen: empty ID
+PASS: upload/export/reopen: explicit numeric repair
+PASS: upload/export/reopen: lookback marker is not a numeric collection
+PASS: upload/export/reopen: largest numeric ID
+PASS: upload/export/reopen: change to custom string
+PASS: upload/export/reopen: clear collection
+PASS: upload/export/reopen: public static reproduction repair
+PASS: upload/export/reopen: public kinematic reproduction repair
+PASS: upload/export/reopen: approved convex-surface pusher no-op

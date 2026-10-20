@@ -12,9 +12,11 @@
 @using System.Globalization
 @using System.Reflection
 @using System.Numerics
+@using System.Security.Cryptography
 @using TM_Item_Studio.Models
 @using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 @inject IJSRuntime JS
+@inject HttpClient Http
 @inject NavigationManager Navigation
 
 <PageTitle>Trackmania 2020 Item Studio</PageTitle>
@@ -46,12 +48,24 @@
             </div>
         </details>
         <div class="studio-upload">
-            <label for="item-upload" class="btn btn-sm btn-outline-secondary">Open item files</label>
+            <label for="item-upload" class="btn btn-sm btn-outline-secondary" data-helper="Open one or more .Item.Gbx files. Multiple files can be inspected together in Composite viewport mode.">Open item files</label>
             <InputFile id="item-upload" OnChange="LoadFiles" multiple accept=".gbx" class="visually-hidden" />
+            <label for="vanilla-folder-upload" class="btn btn-sm btn-outline-primary" data-helper="After opening a vanilla .Item.Gbx, choose the extracted GameData folder (or Stadium for Stadium assets). Item Studio follows the item's Media GBX references so its real mesh can be shown.">Load GameData dependencies</label>
+            <InputFile id="vanilla-folder-upload" OnChange="LoadVanillaFolder" multiple webkitdirectory directory class="visually-hidden" />
         </div>
+        <button class="btn btn-sm @(helperMode ? "btn-primary" : "btn-outline-secondary")" type="button" aria-pressed="@helperMode.ToString().ToLowerInvariant()" @onclick="ToggleHelperMode" data-helper="Turn on Getting Started help. Hover settings to see what they change and how to use them.">@(helperMode ? "Helper on" : "Helper")</button>
         <button class="btn btn-sm btn-outline-secondary" type="button" onclick="studioTheme.toggle()" aria-label="Switch light or dark theme">Light / dark</button>
     </div>
 </header>
+
+@if (helperMode)
+{
+    <section class="studio-helper-banner" role="note" aria-label="Getting Started">
+        <strong>Getting Started</strong>
+        <span>1. Load an item. 2. Use the viewport buttons or numpad keys to inspect it. 3. Open an inspector section to edit a setting. 4. Export when ready.</span>
+        <span class="studio-helper-banner-hint">Hover a highlighted control for details. Turn Helper off to return to the normal interface.</span>
+    </section>
+}
 
 @if (isLoading)
 {
@@ -86,13 +100,13 @@
                 <div class="studio-viewport-toolbar">
                     <!-- Layer toggles -->
                     <div class="btn-group btn-group-sm">
-                        <button class="btn @(showMeshes ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("meshes"))">
+                        <button class="btn @(showMeshes ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("meshes"))" data-helper="Show or hide renderable mesh geometry in the viewport. Use this to focus on pivots, lights or paths.">
                             Meshes
                         </button>
-                        <button class="btn @(showPivots ? "btn-warning text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("pivots"))">
+                        <button class="btn @(showPivots ? "btn-warning text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("pivots"))" data-helper="Show or hide PivotPositions. These are the editable placement anchors stored by the item.">
                             Pivots (@detectedPivots.Count)
                         </button>
-                        <button class="btn @(showLights ? "btn-info text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("lights"))">
+                        <button class="btn @(showLights ? "btn-info text-dark" : "btn-outline-secondary")" @onclick="@(() => ToggleLayer("lights"))" data-helper="Show or hide authored light markers. Light color, intensity and radius can be edited when present.">
                             Lights (@detectedLights.Count)
                         </button>
                         @if (authoredConstraints.Count > 0)
@@ -103,49 +117,69 @@
                         }
                     </div>
 
-                    <div class="studio-variants" role="group" aria-label="Item variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
-                        @foreach (var file in LoadedFiles())
-                        {
-                            <div class="studio-variant-file" role="group" aria-label="@file.Label">
-                                @if (CanCombineFiles) { <span class="studio-variant-group-label" title="@file.Label">@file.Label</span> }
-                                <div class="studio-variant-buttons">
-                                    @foreach (var entry in file.Entries)
+                    <div class="studio-variants" role="group" aria-label="Loaded items and variants" aria-busy="@isSelectingVariant.ToString().ToLowerInvariant()">
+                        <div class="studio-variants-heading">
+                            <span>Loaded items</span>
+                            <span class="studio-variants-count">@LoadedFiles().Count()</span>
+                        </div>
+                        <div class="studio-item-switcher">
+                            @foreach (var file in LoadedFiles())
+                            {
+                                var fileActive = file.Entries.Any(entry => entry.Index == activeVariantIndex);
+                                var firstEntry = file.Entries[0];
+                                <div class="studio-item-switcher-row @(fileActive ? "studio-item-switcher-row-active" : "")">
+                                    <button class="studio-item-tab @(fileActive ? "studio-item-tab-active" : "")"
+                                            aria-label="Select @file.Label"
+                                            aria-pressed="@fileActive.ToString().ToLowerInvariant()"
+                                            title="@file.Label"
+                                            aria-disabled="@isSelectingVariant.ToString().ToLowerInvariant()"
+                                            @onclick="@(() => SelectVariant(firstEntry.Index))">
+                                        <span class="studio-item-tab-name">@file.Label</span>
+                                        <span class="studio-item-tab-count">@file.Entries.Length</span>
+                                    </button>
+                                    @if (file.Entries.Length > 1)
                                     {
-                                        var variantIndex = entry.Index;
-                                        <button class="btn btn-sm @(variantIndex == activeVariantIndex ? "btn-primary" : "btn-outline-secondary")"
-                                                aria-label="@($"{variantIndex + 1}. {entry.Source.Name}")" title="@($"{file.Label} — variant {entry.Source.VariantNumber}")"
-                                                aria-pressed="@((variantIndex == activeVariantIndex).ToString().ToLowerInvariant())"
-                                                aria-disabled="@isSelectingVariant.ToString().ToLowerInvariant()" @onclick="@(() => SelectVariant(variantIndex))">
-                                            @entry.Source.VariantNumber
-                                        </button>
+                                        <div class="studio-item-variants" aria-label="Variants for @file.Label">
+                                            @foreach (var entry in file.Entries)
+                                            {
+                                                var variantIndex = entry.Index;
+                                                <button class="studio-item-variant @(variantIndex == activeVariantIndex ? "studio-item-variant-active" : "")"
+                                                        aria-label="@($"{file.Label}, variant {entry.Source.VariantNumber}")"
+                                                        aria-pressed="@((variantIndex == activeVariantIndex).ToString().ToLowerInvariant())"
+                                                        aria-disabled="@isSelectingVariant.ToString().ToLowerInvariant()"
+                                                        @onclick="@(() => SelectVariant(variantIndex))">
+                                                    @entry.Source.VariantNumber
+                                                </button>
+                                            }
+                                        </div>
                                     }
                                 </div>
-                            </div>
-                        }
-                        <span class="visually-hidden" role="status">@(isSelectingVariant ? "Loading variant…" : "Variant ready. Export preserves every variant in the selected file.")</span>
+                            }
+                        </div>
+                        <span class="visually-hidden" role="status">@(isSelectingVariant ? "Loading item…" : "Select an item to make it active.")</span>
                     </div>
                     @if (CanCombineFiles)
                     {
                         <div class="form-check form-switch ms-2">
-                            <input class="form-check-input" id="compositeViewportMode" type="checkbox" @bind="compositeViewportMode" @bind:after="OnCompositeModeChanged" />
+                            <input class="form-check-input" id="compositeViewportMode" type="checkbox" @bind="compositeViewportMode" @bind:after="OnCompositeModeChanged" data-helper="When multiple files are loaded, show their selected variants together in one viewport. Original item transforms are preserved.">
                             <label class="form-check-label small" for="compositeViewportMode">Composite viewport (multi-item)</label>
                         </div>
                     }
                     @if (compositeViewportMode && SelectedSource is not null)
                     {
-                        <span class="small text-info">Active item: <strong>@SelectedSource.Name</strong></span>
+                        <span class="studio-active-item small text-info" title="@SelectedSource.Name">Active item: <strong>@SelectedSource.Name</strong></span>
                     }
 
                     <!-- Animation and general controls -->
                     <div class="studio-view-controls">
                         @if (isMovingItem)
                         {
-                            <button class="btn btn-sm @(isPlaying ? "btn-warning" : "btn-success")" @onclick="ToggleAnimation">
+                            <button class="btn btn-sm @(isPlaying ? "btn-warning" : "btn-success")" aria-label="Play or pause viewport animation" data-helper="Pause or resume the viewport animation without changing its serialized motion timeline." @onclick="ToggleAnimation">
                                 @(isPlaying ? "⏸" : "▶")
                             </button>
                             @if (authoredConstraints.Count == 0)
                             {
-                                <select class="form-select form-select-sm" style="width: auto;" value="@detectedAxis" @onchange="OnAxisChanged">
+                                <select class="form-select form-select-sm" style="width: auto;" aria-label="Legacy preview axis" data-help-key="axis" value="@detectedAxis" @onchange="OnAxisChanged">
                                     <option value="y">Y Axis</option>
                                     <option value="x">X Axis</option>
                                     <option value="z">Z Axis</option>
@@ -153,6 +187,12 @@
                             }
                         }
                         <button class="btn btn-sm btn-outline-light" @onclick="ToggleWireframe">Wire</button>
+                        <div class="studio-view-presets" role="group" aria-label="Viewport views">
+                            <button class="btn btn-sm btn-outline-secondary" title="Perspective view (Numpad 5)" data-helper="Perspective orbit view. Keyboard shortcut: Numpad 5." @onclick="@(() => SetViewportView("perspective"))">Persp</button>
+                            <button class="btn btn-sm btn-outline-secondary" title="Top view (Numpad 7)" data-helper="World top view looking down the Y axis. Keyboard shortcut: Numpad 7." @onclick="@(() => SetViewportView("top"))">Top</button>
+                            <button class="btn btn-sm btn-outline-secondary" title="Front view (Numpad 1)" data-helper="Front view along the Z axis. Keyboard shortcut: Numpad 1." @onclick="@(() => SetViewportView("front"))">Front</button>
+                            <button class="btn btn-sm btn-outline-secondary" title="Right view (Numpad 3)" data-helper="Right-side view along the X axis. Keyboard shortcut: Numpad 3." @onclick="@(() => SetViewportView("right"))">Right</button>
+                        </div>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset Camera</button>
                         @if (hasMesh)
                         {
@@ -162,6 +202,13 @@
                 </div>
                 
                 <!-- 3D Canvas container -->
+                <div class="studio-mood-controls p-2 d-flex gap-1 flex-wrap" role="group" aria-label="Trackmania viewport mood">
+                    <span class="small align-self-center me-1">World mood</span>
+                    @foreach (var mood in new[] { "neutral", "morning", "day", "evening", "night" })
+                    {
+                        <button class="btn btn-sm @(viewportMood == mood ? "btn-primary" : "btn-outline-secondary")" aria-pressed="@((viewportMood == mood).ToString().ToLowerInvariant())" @onclick="@(() => SetViewportMood(mood))">@CultureInfo.InvariantCulture.TextInfo.ToTitleCase(mood)</button>
+                    }
+                </div>
                 <div id="threeContainer">
                 </div>
             </div>
@@ -195,8 +242,9 @@
             </div>
             @if (hasMesh)
             {
-                <p class="small text-muted mt-2">Neutral preview — textures are not loaded.</p>
+                <p class="small text-muted mt-2">@(gameDataIndexed ? "GameData textures loaded locally. Grid: 1 m / 8 m / 32 m." : "Choose GameData or a local texture folder in Materials & LOD to load matching Trackmania textures.")</p>
             }
+            @if (moodStatus is not null) { <p class="small text-muted" role="status">@moodStatus</p> }
         </div>
 
         <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
@@ -267,25 +315,29 @@
             </div>
 
             <div class="studio-inspector-content p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
+                @if (SelectedSource?.IsReadOnly == true)
+                {
+                    <div class="alert alert-info small" role="status"><strong>Vanilla asset preview</strong><p class="mb-0 text-break">@SelectedSource.PreviewDescription</p><p class="mb-0">Mesh parts: @modelParts.Count · Materials: @detectedMaterials.Count. Original file retained unchanged.</p></div>
+                }
                 
-                @if (activeTab == "general")
+                @if (activeTab == "general" && SelectedSource?.IsReadOnly != true)
                 {
                     <h6 class="border-bottom pb-1 text-primary">1. Ident (Id, Author, Collection) <span class="text-muted" title="Defines the item's internal ID, author and context collection.">?</span></h6>
                     <div class="mb-2">
-                        <label for="ident-id" class="form-label mb-0 fw-bold">Ident.Id / File name</label>
+                        <label for="ident-id" class="form-label mb-0 fw-bold" data-help-key="identidfilename">Ident.Id / File name</label>
                         <input id="ident-id" type="text" class="form-control form-control-sm" @bind="identId" @bind:after="UpdateIdent" />
                     </div>
                     <div class="mb-2">
-                        <label for="ident-author" class="form-label mb-0 fw-bold">Ident.Author</label>
+                        <label for="ident-author" class="form-label mb-0 fw-bold" data-help-key="identauthor">Ident.Author</label>
                         <input id="ident-author" type="text" class="form-control form-control-sm" @bind="identAuthor" @bind:after="UpdateIdent" />
                     </div>
                     <div class="mb-2">
-                        <label for="ident-collection" class="form-label mb-0 fw-bold">Ident.Collection</label>
+                        <label for="ident-collection" class="form-label mb-0 fw-bold" data-help-key="identcollection">Ident.Collection</label>
                         <input id="ident-collection" type="text" class="form-control form-control-sm" aria-describedby="ident-collection-help" @bind="identCollection" @bind:after="UpdateIdent" />
                         <small id="ident-collection-help" class="text-muted">Unchanged values keep their encoding. Numeric edits use IDs 0–1073741823 (26 for TM2020); other edits stay strings.</small>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">ItemType (EItemType)</label>
+                        <label class="form-label mb-0 fw-bold" data-help-key="itemtypeeitemtype">ItemType (EItemType)</label>
                         <select class="form-select form-select-sm" @bind="itemModel.ItemType">
                             @foreach (var type in Enum.GetValues<CGameItemModel.EItemType>())
                             {
@@ -294,98 +346,100 @@
                         </select>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Archetype / Inventory Path</label>
+                        <label class="form-label mb-0 fw-bold" data-help-key="archetypeinventorypath">Archetype / Inventory Path</label>
                         <input type="text" class="form-control form-control-sm" value="@(itemModel.ArchetypeRef ?? "None")" readonly />
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-8">
-                            <label class="form-label mb-0 fw-bold">Internal item name</label>
+                            <label class="form-label mb-0 fw-bold" data-help-key="internalitemname">Internal item name</label>
                             <input type="text" class="form-control form-control-sm" @bind="itemModel.Name" />
                             <div class="form-text">Exports with an Ident.Id use that ID as the internal item name to avoid Trackmania catalog collisions.</div>
                         </div>
                         <div class="col-4">
-                            <label class="form-label mb-0 fw-bold">CopperPrice</label>
+                            <label class="form-label mb-0 fw-bold" data-help-key="copperprice">CopperPrice</label>
                             <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.CopperPrice" />
                         </div>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Description</label>
+                        <label class="form-label mb-0 fw-bold" data-help-key="description">Description</label>
                         <textarea class="form-control form-control-sm" rows="2" @bind="itemModel.Description"></textarea>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <label class="form-label mb-0 small fw-bold">PageName</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="pagename">PageName</label>
                             <input type="text" class="form-control form-control-sm" @bind="itemModel.PageName" />
                         </div>
                         <div class="col-6">
-                            <label class="form-label mb-0 small fw-bold">CatalogPosition</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="catalogposition">CatalogPosition</label>
                             <input type="number" class="form-control form-control-sm" @bind="itemModel.CatalogPosition" />
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <label class="form-label mb-0 small fw-bold">NbAvailableMin</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="nbavailablemin">NbAvailableMin</label>
                             <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.NbAvailableMin" />
                         </div>
                         <div class="col-6">
-                            <label class="form-label mb-0 small fw-bold">NbAvailableMax</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="nbavailablemax">NbAvailableMax</label>
                             <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.NbAvailableMax" />
                         </div>
                     </div>
                     <div class="form-check form-switch mb-1">
                         <input class="form-check-input" type="checkbox" id="internalItem" @bind="itemModel.IsInternal" />
-                        <label class="form-check-label small" for="internalItem">IsInternal</label>
+                        <label class="form-check-label small" for="internalItem" data-help-key="isinternal">IsInternal</label>
                     </div>
                     <div class="form-check form-switch mb-1">
                         <input class="form-check-input" type="checkbox" id="needUnlock" @bind="itemModel.NeedUnlock" />
-                        <label class="form-check-label small" for="needUnlock">NeedUnlock</label>
+                        <label class="form-check-label small" for="needUnlock" data-help-key="needunlock">NeedUnlock</label>
                     </div>
                     <div class="form-check form-switch mb-1">
                         <input class="form-check-input" type="checkbox" id="advancedItem" @bind="itemModel.IsAdvanced" />
-                        <label class="form-check-label small" for="advancedItem">IsAdvanced</label>
+                        <label class="form-check-label small" for="advancedItem" data-help-key="isadvanced">IsAdvanced</label>
                     </div>
                     <div class="form-check form-switch mb-1">
                         <input class="form-check-input" type="checkbox" id="autoIcon" @bind="itemModel.IconUseAutoRender" />
-                        <label class="form-check-label small" for="autoIcon">IconUseAutoRender</label>
+                        <label class="form-check-label small" for="autoIcon" data-help-key="iconuseautorender">IconUseAutoRender</label>
                     </div>
                     <div class="row g-2 mb-2 mt-1">
                         <div class="col-8">
-                            <label class="form-label mb-0 small fw-bold">SkinDirectory</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="skindirectory">SkinDirectory</label>
                             <input type="text" class="form-control form-control-sm" @bind="itemModel.SkinDirectory" />
                         </div>
                         <div class="col-4">
-                            <label class="form-label mb-0 small fw-bold">IconQuarterRotationY</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="iconquarterrotationy">IconQuarterRotationY</label>
                             <input type="number" min="0" max="3" class="form-control form-control-sm" @bind="itemModel.IconQuarterRotationY" />
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-8">
-                            <label class="form-label mb-0 small fw-bold">DefaultWeaponName</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="defaultweaponname">DefaultWeaponName</label>
                             <input type="text" class="form-control form-control-sm" @bind="itemModel.DefaultWeaponName" />
                         </div>
                         <div class="col-4">
-                            <label class="form-label mb-0 small fw-bold">DefaultCamIndex</label>
+                            <label class="form-label mb-0 small fw-bold" data-help-key="defaultcamindex">DefaultCamIndex</label>
                             <input type="number" min="0" class="form-control form-control-sm" @bind="itemModel.DefaultCamIndex" />
                         </div>
                     </div>
                     <div class="form-check form-switch mb-1">
                         <input class="form-check-input" type="checkbox" id="disableLightmap" @bind="itemModel.DisableLightmap" />
-                        <label class="form-check-label small" for="disableLightmap">DisableLightmap</label>
+                        <label class="form-check-label small" for="disableLightmap" data-help-key="disablelightmap">DisableLightmap</label>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Icon (CPlugBitmap / DXT buffer)</label>
-                        <div class="mb-2 p-2 bg-dark rounded text-center">
-                            <canvas id="iconPreviewCanvas" width="128" height="128" style="width:128px;height:128px;image-rendering:auto;background:#20242a;border:1px solid #495057;"></canvas>
+                        <label class="form-label mb-0 fw-bold" data-help-key="iconcplugbitmapdxtbuffer">Stored inventory icon</label>
+                        <div id="icon-dropzone" class="icon-dropzone mb-2 p-2 bg-dark rounded text-center" data-helper="Drop an image here to replace the item icon. The image is center-cropped and normalized to 64×64 RGBA pixels.">
+                            <canvas id="iconPreviewCanvas" width="128" height="128" aria-label="Stored item icon preview" style="width:128px;height:128px;image-rendering:auto;border:1px solid #495057;"></canvas>
+                            <span class="icon-dropzone-hint">Drop an image here</span>
                         </div>
                         <div class="input-group input-group-sm">
-                            <InputFile OnChange="UploadIcon" accept="image/jpeg,image/png,image/webp" class="form-control" />
+                            <InputFile id="icon-upload" aria-label="Replace item icon" data-help-key="iconcplugbitmapdxtbuffer" OnChange="UploadIcon" accept="image/jpeg,image/png,image/webp" class="form-control" />
                             <span class="input-group-text" title="The image is center-cropped and resized to the 64x64 RGBA Icon format used by the item model.">?</span>
                         </div>
                         <small class="text-muted">JPG, PNG or WebP. The image is normalized to 64x64. @iconFileName</small>
                         @if (!string.IsNullOrWhiteSpace(iconStatus))
                         {
-                            <small class="d-block text-info">@iconStatus</small>
+                            <small class="d-block text-info" role="status">@iconStatus</small>
                         }
+                        <small class="d-block text-muted" role="status">@iconPreviewStatus</small>
                     </div>
                 }
 
@@ -396,64 +450,64 @@
                     {
                         <div class="row g-2 mb-2">
                             <div class="col-4">
-                                <label class="form-label mb-0 small fw-bold">GroundPoint X</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="groundpointx">GroundPoint X</label>
                                 <input type="number" step="0.1" class="form-control form-control-sm" value="@itemModel.GroundPoint.X" @onchange="@(e => UpdateGroundPoint(0, e.Value))" />
                             </div>
                             <div class="col-4">
-                                <label class="form-label mb-0 small fw-bold">GroundPoint Y</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="groundpointy">GroundPoint Y</label>
                                 <input type="number" step="0.1" class="form-control form-control-sm" value="@itemModel.GroundPoint.Y" @onchange="@(e => UpdateGroundPoint(1, e.Value))" />
                             </div>
                             <div class="col-4">
-                                <label class="form-label mb-0 small fw-bold">GroundPoint Z</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="groundpointz">GroundPoint Z</label>
                                 <input type="number" step="0.1" class="form-control form-control-sm" value="@itemModel.GroundPoint.Z" @onchange="@(e => UpdateGroundPoint(2, e.Value))" />
                             </div>
                         </div>
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">PainterGroundMargin (m)</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="paintergroundmarginm">PainterGroundMargin (m)</label>
                                 <input type="number" step="0.01" class="form-control form-control-sm" @bind="itemModel.PainterGroundMargin" />
                             </div>
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">OrbitalCenterHeightFromGround (m)</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="orbitalcenterheightfromgroundm">OrbitalCenterHeightFromGround (m)</label>
                                 <input type="number" step="0.1" class="form-control form-control-sm" @bind="itemModel.OrbitalCenterHeightFromGround" />
                             </div>
                         </div>
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">OrbitalRadiusBase (m)</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="orbitalradiusbasem">OrbitalRadiusBase (m)</label>
                                 <input type="number" step="0.1" class="form-control form-control-sm" @bind="itemModel.OrbitalRadiusBase" />
                             </div>
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">OrbitalPreviewAngle</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="orbitalpreviewangle">OrbitalPreviewAngle</label>
                                 <input type="number" step="0.01" class="form-control form-control-sm" @bind="itemModel.OrbitalPreviewAngle" />
                             </div>
                         </div>
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">GridSnap H Step (m)</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="gridsnaphstepm">GridSnap H Step (m)</label>
                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapHStep" />
                             </div>
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">GridSnap V Step (m)</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="gridsnapvstepm">GridSnap V Step (m)</label>
                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapVStep" />
                             </div>
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">GridSnap H Offset</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="gridsnaphoffset">GridSnap H Offset</label>
                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapHOffset" />
                             </div>
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">GridSnap V Offset</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="gridsnapvoffset">GridSnap V Offset</label>
                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.GridSnapVOffset" />
                             </div>
                         </div>
 
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">Fly V Step</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="flyvstep">Fly V Step</label>
                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.FlyVStep" />
                             </div>
                             <div class="col-6">
-                                <label class="form-label mb-0 small fw-bold">Fly V Offset</label>
+                                <label class="form-label mb-0 small fw-bold" data-help-key="flyvoffset">Fly V Offset</label>
                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="itemModel.DefaultPlacement.FlyVOffset" />
                             </div>
                         </div>
@@ -461,19 +515,19 @@
                         <h6 class="border-bottom pb-1 mt-3 text-primary">Rotation placement flags</h6>
                         <div class="form-check form-switch mb-1">
                             <input class="form-check-input" type="checkbox" id="yawOnly" @bind="itemModel.DefaultPlacement.YawOnly" />
-                            <label class="form-check-label small" for="yawOnly">YawOnly</label>
+                            <label class="form-check-label small" for="yawOnly" data-help-key="yawonly">YawOnly</label>
                         </div>
                         <div class="form-check form-switch mb-1">
                             <input class="form-check-input" type="checkbox" id="notOnObject" @bind="itemModel.DefaultPlacement.NotOnObject" />
-                            <label class="form-check-label small" for="notOnObject">NotOnObject</label>
+                            <label class="form-check-label small" for="notOnObject" data-help-key="notonobject">NotOnObject</label>
                         </div>
                         <div class="form-check form-switch mb-1">
                             <input class="form-check-input" type="checkbox" id="autoRot" @bind="itemModel.DefaultPlacement.AutoRotation" />
-                            <label class="form-check-label small" for="autoRot">AutoRotation</label>
+                            <label class="form-check-label small" for="autoRot" data-help-key="autorotation">AutoRotation</label>
                         </div>
                         <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" id="switchPivot" @bind="itemModel.DefaultPlacement.SwitchPivotManually" />
-                            <label class="form-check-label small" for="switchPivot">SwitchPivotManually</label>
+                            <label class="form-check-label small" for="switchPivot" data-help-key="switchpivotmanually">SwitchPivotManually</label>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
@@ -496,19 +550,19 @@
                                         </button>
                                         @if (pIdx > 0)
                                         {
-                                            <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" @onclick="@(() => RemovePivot(pIdx))">✕</button>
+                                            <button class="btn btn-xs btn-outline-danger ms-1" style="font-size:0.7em;" aria-label="@($"Remove pivot {pIdx + 1}")" data-helper="Remove this placement pivot from the exported item. Other pivots and the mesh remain; select a replacement pivot before removing an anchor you use." @onclick="@(() => RemovePivot(pIdx))">✕</button>
                                         }
                                     </div>
                                 </div>
                                 <div class="row g-1">
                                     <div class="col-4">
-                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="p.X" @bind:after="@(() => OnPivotChanged(pIdx))" />
+                                        <input type="number" step="0.1" class="form-control form-control-sm" aria-label="@($"p {pIdx + 1} X")" data-help-key="pivotposition" @bind="p.X" @bind:after="@(() => OnPivotChanged(pIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="p.Y" @bind:after="@(() => OnPivotChanged(pIdx))" />
+                                        <input type="number" step="0.1" class="form-control form-control-sm" aria-label="@($"p {pIdx + 1} Y")" data-help-key="pivotposition" @bind="p.Y" @bind:after="@(() => OnPivotChanged(pIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="p.Z" @bind:after="@(() => OnPivotChanged(pIdx))" />
+                                        <input type="number" step="0.1" class="form-control form-control-sm" aria-label="@($"p {pIdx + 1} Z")" data-help-key="pivotposition" @bind="p.Z" @bind:after="@(() => OnPivotChanged(pIdx))" />
                                     </div>
                                 </div>
                             </div>
@@ -535,28 +589,28 @@
                             <div class="card p-2 bg-light mb-2">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <strong class="small">Alternative @(aIdx + 1)</strong>
-                                    <button class="btn btn-xs btn-outline-danger" style="font-size:0.7em;" @onclick="@(() => RemovePlacementAlternative(aIdx))">✕</button>
+                                    <button class="btn btn-xs btn-outline-danger" style="font-size:0.7em;" aria-label="@($"Remove placement alternative {aIdx + 1}")" data-helper="Remove this alternative placement transform from the exported item. It does not remove geometry or other placement alternatives." @onclick="@(() => RemovePlacementAlternative(aIdx))">✕</button>
                                 </div>
                                 <div class="row g-1 mb-1">
                                     <div class="col-4">
-                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="alternative.X" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                        <input type="number" step="0.1" class="form-control form-control-sm" aria-label="@($"alternative {aIdx + 1} X")" data-help-key="alternative" @bind="alternative.X" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="alternative.Y" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                        <input type="number" step="0.1" class="form-control form-control-sm" aria-label="@($"alternative {aIdx + 1} Y")" data-help-key="alternative" @bind="alternative.Y" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" step="0.1" class="form-control form-control-sm" @bind="alternative.Z" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                        <input type="number" step="0.1" class="form-control form-control-sm" aria-label="@($"alternative {aIdx + 1} Z")" data-help-key="alternative" @bind="alternative.Z" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
                                     </div>
                                 </div>
                                 <div class="row g-1">
                                     <div class="col-4">
-                                        <input type="number" step="1" class="form-control form-control-sm" @bind="alternative.RotX" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                        <input type="number" step="1" class="form-control form-control-sm" aria-label="@($"alternative {aIdx + 1} RotX")" data-help-key="alternative" @bind="alternative.RotX" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" step="1" class="form-control form-control-sm" @bind="alternative.RotY" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                        <input type="number" step="1" class="form-control form-control-sm" aria-label="@($"alternative {aIdx + 1} RotY")" data-help-key="alternative" @bind="alternative.RotY" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" step="1" class="form-control form-control-sm" @bind="alternative.RotZ" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
+                                        <input type="number" step="1" class="form-control form-control-sm" aria-label="@($"alternative {aIdx + 1} RotZ")" data-help-key="alternative" @bind="alternative.RotZ" @bind:after="@(() => OnPlacementAlternativeChanged(aIdx))" />
                                     </div>
                                 </div>
                             </div>
@@ -597,7 +651,7 @@
 
                         <div class="form-check form-switch mb-2">
                             <input class="form-check-input" type="checkbox" id="flagNormalizePlacement" @bind="normalizeFlagPlacement" />
-                            <label class="form-check-label small" for="flagNormalizePlacement">
+                            <label class="form-check-label small" for="flagNormalizePlacement" data-help-key="flagnormalizeplacement">
                                 Also write the measured placement values (flags, cube, snapping, fly steps)
                             </label>
                         </div>
@@ -624,7 +678,7 @@
                 @if (activeTab == "gameplay")
                 {
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold">Waypoint Type</label>
+                        <label class="form-label mb-0 fw-bold" data-help-key="waypointtype">Waypoint Type</label>
                         <select class="form-select form-select-sm" @bind="itemModel.WaypointType">
                             @foreach (var wp in Enum.GetValues<CGameItemModel.EWaypointType>())
                             {
@@ -639,11 +693,11 @@
                         {
                             <p class="small text-muted mb-2">
                                 This item is a <strong>static object</strong>. Convert it to a <strong>KinematicObject</strong> to add motion.
-                                Collision (collision surface) is derived automatically from the visual 3D model so the car collides correctly right away.
+                                A collision surface is derived from supported visual geometry. Verify moving-body contact in the native game before relying on it.
                             </p>
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <button class="btn btn-sm btn-primary" @onclick="ConvertStaticItemToKinematic"
-                                        title="Converts this static item in one click to a moving item with 100% accurate collision.">
+                                        title="Creates a moving body and constraint, deriving collision from supported visual geometry. Native motion and vehicle contact require testing.">
                                     ⚙️ Convert to KinematicObject (one-click)
                                 </button>
                                 <span class="badge text-bg-success">Includes auto-collision</span>
@@ -660,7 +714,7 @@
                                         and turns the path into one continuous motion through chained constraints.
                                     </p>
                                     <div class="alert alert-warning py-1 mb-2">
-                                        Stable limit: maximaal <strong>@ItemKinematicEntityTemplate.MaxSafeDrawPathSegments</strong> line segments (incl. laatste punt terug naar start bij loop).
+                                        Supported limit: at most <strong>@ItemKinematicEntityTemplate.MaxSafeDrawPathSegments</strong> line segments (including the return to the start when looping).
                                     </div>
                                     <div class="d-flex flex-wrap gap-2 mb-2">
                                         <button class="btn btn-sm @(drawPathCaptureEnabled ? "btn-danger" : "btn-outline-primary")" @onclick="ToggleDrawPathCapture">
@@ -675,21 +729,21 @@
                                     </div>
                                     <div class="row g-2 align-items-end">
                                         <div class="col-4">
-                                            <label class="form-label mb-0" style="font-size:0.8em;">Curve detail</label>
+                                            <label class="form-label mb-0" style="font-size:0.8em;" data-help-key="curvedetail">Curve detail</label>
                                             <input type="number" min="1" max="16" class="form-control form-control-sm" @bind="drawPathDetail" />
                                         </div>
                                         <div class="col-4">
-                                            <label class="form-label mb-0" style="font-size:0.8em;">Speed (m/s)</label>
+                                            <label class="form-label mb-0" style="font-size:0.8em;" data-help-key="speedms">Speed (m/s)</label>
                                             <input type="number" min="0.1" step="0.1" class="form-control form-control-sm" @bind="drawPathMetersPerSecond" />
                                         </div>
                                         <div class="col-4">
-                                            <label class="form-label mb-0" style="font-size:0.8em;">Max segments</label>
+                                            <label class="form-label mb-0" style="font-size:0.8em;" data-help-key="maxsegments">Max segments</label>
                                             <input type="number" min="2" max="@ItemKinematicEntityTemplate.MaxSafeDrawPathSegments" class="form-control form-control-sm" @bind="drawPathMaxSegments" />
                                         </div>
                                         <div class="col-12">
                                             <div class="form-check mt-1">
                                                 <input class="form-check-input" type="checkbox" id="drawPathClosedLoop" @bind="drawPathClosedLoop" />
-                                                <label class="form-check-label" for="drawPathClosedLoop">
+                                                <label class="form-check-label" for="drawPathClosedLoop" data-help-key="autoclosepathforsmoothlooping">
                                                     Auto-close path for smooth looping
                                                 </label>
                                             </div>
@@ -704,7 +758,7 @@
                             <details class="text-muted small mt-2">
                                 <summary class="cursor-pointer">Optional: upload custom templates (advanced)</summary>
                                 <div class="mt-2">
-                                    <label class="form-label mb-1 small fw-bold">Moving item template (.Item.Gbx)</label>
+                                    <label class="form-label mb-1 small fw-bold" data-help-key="movingitemtemplateitemgbx">Moving item template (.Item.Gbx)</label>
                                     <InputFile OnChange="UploadMovingTemplate" accept=".gbx" class="form-control form-control-sm" />
                                     @if (!string.IsNullOrWhiteSpace(movingTemplateStatus))
                                     {
@@ -712,7 +766,7 @@
                                     }
                                 </div>
                                 <div class="mt-2">
-                                    <label class="form-label mb-1 small fw-bold">Constraint template (.Constraint.Gbx)</label>
+                                    <label class="form-label mb-1 small fw-bold" data-help-key="constrainttemplateconstraintgbx">Constraint template (.Constraint.Gbx)</label>
                                     <InputFile OnChange="UploadConstraintTemplate" accept=".gbx" class="form-control form-control-sm" />
                                     @if (!string.IsNullOrWhiteSpace(constraintTemplateStatus))
                                     {
@@ -731,44 +785,44 @@
                                 </div>
                                 <div class="card-body p-2 small">
                                     <div class="mb-2">
-                                        <label class="form-label fw-bold mb-1">Choose motion type / preset</label>
+                                        <label class="form-label fw-bold mb-1" data-help-key="choosemotiontypepreset">Choose motion type / preset</label>
                                         <div class="d-flex flex-column gap-1">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="pathPresetMode" id="presetRelay" value="relay" checked="@(pathPresetMode == "relay")" @onchange="@(() => pathPresetMode = "relay")" />
-                                                <label class="form-check-label" for="presetRelay">
+                                                <label class="form-check-label" for="presetRelay" data-help-key="presetrelay">
                                                     <strong>A ➔ B ➔ C Path (100% Havok Collision - Relay)</strong>
-                                                    <span class="badge text-bg-success ms-1">Recommended for gameplay</span>
-                                                    <div class="text-muted" style="font-size: 0.85em;">Uses synchronized root bodies. The car physically collides with every part of the path.</div>
+                                                    <span class="badge text-bg-success ms-1">Native test required</span>
+                                                    <div class="text-muted" style="font-size: 0.85em;">Uses synchronized root bodies for successive path sections. Verify timing, handover and vehicle contact in Trackmania.</div>
                                                 </label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="pathPresetMode" id="presetHandover" value="handover" checked="@(pathPresetMode == "handover")" @onchange="@(() => pathPresetMode = "handover")" />
-                                                <label class="form-check-label" for="presetHandover">
-                                                    <strong>L-Path with Occluder / Parked Handover (100% Collision)</strong>
-                                                    <span class="badge text-bg-success ms-1">Proven root bodies</span>
+                                                <label class="form-check-label" for="presetHandover" data-help-key="presethandover">
+                                                    <strong>L-Path with Occluder / Parked Handover</strong>
+                                                    <span class="badge text-bg-success ms-1">World-root bodies</span>
                                                     <div class="text-muted" style="font-size: 0.85em;">Body 1 moves A➔B. Body 2 (hidden in tunnel/wall or parked) takes over at B to C➔B, then Body 1 returns.</div>
                                                 </label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="pathPresetMode" id="presetChained" value="chained" checked="@(pathPresetMode == "chained")" @onchange="@(() => pathPresetMode = "chained")" />
-                                                <label class="form-check-label" for="presetChained">
+                                                <label class="form-check-label" for="presetChained" data-help-key="presetchained">
                                                     <strong>A ➔ B ➔ C Path (Single Body - Smooth Chained)</strong>
                                                     <span class="badge text-bg-warning text-dark ms-1">Visually smooth</span>
-                                                    <div class="text-muted" style="font-size: 0.85em;">A single block follows an L-path visually through a safe carrier. Collision works in TM on the main axis.</div>
+                                                    <div class="text-muted" style="font-size: 0.85em;">A single visible body follows an L-path through a mesh-backed carrier. Native child-body collision must be tested separately.</div>
                                                 </label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="pathPresetMode" id="presetSingle" value="single_axis" checked="@(pathPresetMode == "single_axis")" @onchange="@(() => pathPresetMode = "single_axis")" />
-                                                <label class="form-check-label" for="presetSingle">
+                                                <label class="form-check-label" for="presetSingle" data-help-key="presetsingle">
                                                     <strong>1-Axis Linear Motion (Back-and-forth / Lift / Door)</strong>
-                                                    <span class="badge text-bg-success ms-1">100% Collision</span>
+                                                    <span class="badge text-bg-success ms-1">Native test required</span>
                                                 </label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="pathPresetMode" id="presetRotation" value="rotation" checked="@(pathPresetMode == "rotation")" @onchange="@(() => pathPresetMode = "rotation")" />
-                                                <label class="form-check-label" for="presetRotation">
+                                                <label class="form-check-label" for="presetRotation" data-help-key="presetrotation">
                                                     <strong>Rotation / Spinning Obstacle (360° Mill / Spinner)</strong>
-                                                    <span class="badge text-bg-success ms-1">100% Collision</span>
+                                                    <span class="badge text-bg-success ms-1">Native test required</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -779,7 +833,7 @@
                                         <div class="row g-2 border-top pt-2 mb-2">
                                             <div class="col-12 fw-bold text-secondary">Segment 1 (A ➔ B)</div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Axis</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="axis">Axis</label>
                                                 <select class="form-select form-select-sm" @bind="pathSegment1Axis">
                                                     <option value="x">X Axis</option>
                                                     <option value="y">Y Axis</option>
@@ -787,11 +841,11 @@
                                                 </select>
                                             </div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Distance (m)</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="distancem">Distance (m)</label>
                                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment1Distance" />
                                             </div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duration (sec)</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="durationsec">Duration (sec)</label>
                                                 <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
                                             </div>
                                         </div>
@@ -799,7 +853,7 @@
                                         <div class="row g-2 border-top pt-2 mb-2">
                                             <div class="col-12 fw-bold text-secondary">Segment 2 (B ➔ C)</div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Axis</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="axis">Axis</label>
                                                 <select class="form-select form-select-sm" @bind="pathSegment2Axis">
                                                     <option value="x">X Axis</option>
                                                     <option value="y">Y Axis</option>
@@ -807,11 +861,11 @@
                                                 </select>
                                             </div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Distance (m)</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="distancem">Distance (m)</label>
                                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment2Distance" />
                                             </div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duration (sec)</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="durationsec">Duration (sec)</label>
                                                 <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment2Duration" />
                                             </div>
                                         </div>
@@ -820,8 +874,8 @@
                                         {
                                             <div class="form-check form-switch mb-2">
                                                 <input class="form-check-input" type="checkbox" id="pathLoopType" @bind="pathIsPingPong" />
-                                                <label class="form-check-label" for="pathLoopType">
-                                                    @(pathIsPingPong ? "Ping-Pong (A ➔ B ➔ C ➔ B ➔ A)" : "Gesloten Lus (Rechthoek A ➔ B ➔ C ➔ D ➔ A)")
+                                                <label class="form-check-label" for="pathLoopType" data-help-key="pathlooptype">
+                                                    @(pathIsPingPong ? "Ping-Pong (A ➔ B ➔ C ➔ B ➔ A)" : "Closed loop (Rectangle A ➔ B ➔ C ➔ D ➔ A)")
                                                 </label>
                                             </div>
                                         }
@@ -830,7 +884,7 @@
                                     {
                                         <div class="row g-2 border-top pt-2 mb-2">
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Axis</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="axis">Axis</label>
                                                 <select class="form-select form-select-sm" @bind="pathSegment1Axis">
                                                     <option value="x">X Axis</option>
                                                     <option value="y">Y Axis</option>
@@ -838,17 +892,17 @@
                                                 </select>
                                             </div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Distance (m)</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="distancem">Distance (m)</label>
                                                 <input type="number" step="0.5" class="form-control form-control-sm" @bind="pathSegment1Distance" />
                                             </div>
                                             <div class="col-4">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duration (sec)</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="durationsec">Duration (sec)</label>
                                                 <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
                                             </div>
                                             <div class="col-12 mt-1">
                                                 <div class="form-check form-switch">
                                                     <input class="form-check-input" type="checkbox" id="singlePingPong" @bind="pathIsPingPong" />
-                                                    <label class="form-check-label" for="singlePingPong">
+                                                    <label class="form-check-label" for="singlePingPong" data-help-key="singlepingpong">
                                                         @(pathIsPingPong ? "Back-and-forth (Ping-Pong)" : "One-way (Loop)")
                                                     </label>
                                                 </div>
@@ -859,7 +913,7 @@
                                     {
                                         <div class="row g-2 border-top pt-2 mb-2">
                                             <div class="col-6">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Rotation axis</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="rotationaxis">Rotation axis</label>
                                                 <select class="form-select form-select-sm" @bind="pathSegment1Axis">
                                                     <option value="y">Y Axis (horizontal spin)</option>
                                                     <option value="x">X Axis (wheel/roll)</option>
@@ -867,7 +921,7 @@
                                                 </select>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label mb-0" style="font-size: 0.8em;">Duration per loop (sec)</label>
+                                                <label class="form-label mb-0" style="font-size: 0.8em;" data-help-key="durationperloopsec">Duration per loop (sec)</label>
                                                 <input type="number" step="0.5" min="0.1" class="form-control form-control-sm" @bind="pathSegment1Duration" />
                                             </div>
                                         </div>
@@ -885,8 +939,8 @@
                                     <div class="alert alert-light border mt-2 mb-0 text-muted" style="font-size: 0.8em;">
                                         <strong>💡 Havok collision notes (Trackmania 2020):</strong>
                                         <ul class="mb-0 ps-3">
-                                            <li><strong>Root Constraints (<code>Ent1 = -1</code>):</strong> Have 100% dynamic collision in-game (the car bounces/drives on the block).</li>
-                                            <li><strong>Chained Constraints (<code>Ent1 &ge; 0</code>):</strong> Follow the path visually, but Nadeo's game engine does not move the child Havok body with it. For gameplay obstacles we recommend the <strong>Relay</strong> preset.</li>
+                                            <li><strong>Root Constraints (<code>Ent1 = -1</code>):</strong> Bind the body directly to the world. Studio validates the serialized layout; vehicle contact still needs a native test.</li>
+                                            <li><strong>Chained Constraints (<code>Ent1 &ge; 0</code>):</strong> Follow a parent body. Browser playback does not establish that native child collision follows the same path; compare the exported layout in game.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -968,15 +1022,15 @@
                             }
                             <div class="row g-2 mb-2">
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small fw-bold">Animation type</label>
+                                    <label class="form-label mb-0 small fw-bold" data-help-key="animationtype">Animation type</label>
                                     <select class="form-select form-select-sm" value="@(isOscillating ? "osc" : "spin")" @onchange="OnAnimTypeChanged">
                                         <option value="spin">Continuous rotation</option>
                                         <option value="osc">PingPong / oscillation</option>
                                     </select>
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small fw-bold">RotAxis</label>
-                                    <select class="form-select form-select-sm" value="@detectedAxis" @onchange="OnAxisChanged">
+                                    <label class="form-label mb-0 small fw-bold" data-help-key="rotaxis">RotAxis</label>
+                                    <select class="form-select form-select-sm" aria-label="Legacy preview axis" data-help-key="axis" value="@detectedAxis" @onchange="OnAxisChanged">
                                         <option value="y">Y Axis</option>
                                         <option value="x">X Axis</option>
                                         <option value="z">Z Axis</option>
@@ -987,28 +1041,28 @@
                             {
                                 <div class="row g-2 mb-2">
                                     <div class="col-6">
-                                        <label class="form-label mb-0 small">AngleMinDeg (°)</label>
+                                        <label class="form-label mb-0 small" data-help-key="anglemindeg">AngleMinDeg (°)</label>
                                         <input type="number" step="5" class="form-control form-control-sm" @bind="minAngle" @bind:after="OnKinematicChanged" />
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label mb-0 small">AngleMaxDeg (°)</label>
+                                        <label class="form-label mb-0 small" data-help-key="anglemaxdeg">AngleMaxDeg (°)</label>
                                         <input type="number" step="5" class="form-control form-control-sm" @bind="maxAngle" @bind:after="OnKinematicChanged" />
                                     </div>
                                 </div>
                             }
                             <div class="row g-2 mb-2">
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small">Period / Duration (sec)</label>
+                                    <label class="form-label mb-0 small" data-help-key="perioddurationsec">Period / Duration (sec)</label>
                                     <input type="number" min="0.01" step="0.05" class="form-control form-control-sm" @bind="animationPeriodSeconds" @bind:after="OnKinematicChanged" />
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small">Phase offset (sec)</label>
+                                    <label class="form-label mb-0 small" data-help-key="phaseoffsetsec">Phase offset (sec)</label>
                                     <input type="number" step="0.05" class="form-control form-control-sm" @bind="animationPhaseSeconds" @bind:after="OnKinematicChanged" />
                                 </div>
                             </div>
                             <div class="row g-2 mb-2">
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small">TransAxis</label>
+                                    <label class="form-label mb-0 small" data-help-key="transaxis">TransAxis</label>
                                     <select class="form-select form-select-sm" @bind="translationAxis" @bind:after="OnKinematicChanged">
                                         <option value="x">X Axis</option>
                                         <option value="y">Y Axis</option>
@@ -1016,29 +1070,29 @@
                                     </select>
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label mb-0 small">Translation distance (m)</label>
+                                    <label class="form-label mb-0 small" data-help-key="translationdistancem">Translation distance (m)</label>
                                     <input type="number" step="0.05" class="form-control form-control-sm" @bind="translationDistance" @bind:after="OnKinematicChanged" />
                                 </div>
                             </div>
                             <div class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" id="harmonicMotion" @bind="harmonicEasing" @bind:after="OnKinematicChanged" />
-                                <label class="form-check-label small" for="harmonicMotion">Harmonic easing</label>
+                                <label class="form-check-label small" for="harmonicMotion" data-help-key="harmoniceasing">Harmonic easing</label>
                             </div>
                             <div class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" id="invertMotion" @bind="invertMotion" @bind:after="OnKinematicChanged" />
-                                <label class="form-check-label small" for="invertMotion">Invert direction</label>
+                                <label class="form-check-label small" for="invertMotion" data-help-key="invertdirection">Invert direction</label>
                             </div>
                             <div class="row g-2 mb-2">
                                 <div class="col-4">
-                                    <label class="form-label mb-0 small">Pivot offset X</label>
+                                    <label class="form-label mb-0 small" data-help-key="pivotoffsetx">Pivot offset X</label>
                                     <input type="number" step="0.05" class="form-control form-control-sm" @bind="pivotOffsetX" @bind:after="OnKinematicChanged" />
                                 </div>
                                 <div class="col-4">
-                                    <label class="form-label mb-0 small">Pivot offset Y</label>
+                                    <label class="form-label mb-0 small" data-help-key="pivotoffsety">Pivot offset Y</label>
                                     <input type="number" step="0.05" class="form-control form-control-sm" @bind="pivotOffsetY" @bind:after="OnKinematicChanged" />
                                 </div>
                                 <div class="col-4">
-                                    <label class="form-label mb-0 small">Pivot offset Z</label>
+                                    <label class="form-label mb-0 small" data-help-key="pivotoffsetz">Pivot offset Z</label>
                                     <input type="number" step="0.05" class="form-control form-control-sm" @bind="pivotOffsetZ" @bind:after="OnKinematicChanged" />
                                 </div>
                             </div>
@@ -1081,30 +1135,30 @@
 
                                 <div class="row g-1 mb-1">
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">X (read-only)</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;" data-help-key="readonlyposition">X (read-only)</label>
                                         <input type="number" step="0.2" class="form-control form-control-sm" value="@light.X.ToString(CultureInfo.InvariantCulture)" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} X (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Y (read-only)</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;" data-help-key="readonlyposition">Y (read-only)</label>
                                         <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Y.ToString(CultureInfo.InvariantCulture)" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Y (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Z (read-only)</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;" data-help-key="readonlyposition">Z (read-only)</label>
                                         <input type="number" step="0.2" class="form-control form-control-sm" value="@light.Z.ToString(CultureInfo.InvariantCulture)" readonly aria-readonly="true" aria-label="@($"Light {lIdx + 1} Z (read-only)")" title="Light position is not serialized by this editor." />
                                     </div>
                                 </div>
 
                                 <div class="row g-1 align-items-center">
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Color</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;" data-help-key="color">Color</label>
                                         <input type="color" class="form-control form-control-color w-100 p-0" style="height: 28px;" aria-label="@($"Light {lIdx + 1} color")" @bind="light.ColorHtml" @bind:after="@(() => OnLightColorChanged(lIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Intensity</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;" data-help-key="intensity">Intensity</label>
                                         <input type="number" step="0.5" class="form-control form-control-sm" aria-label="@($"Light {lIdx + 1} intensity")" @bind="light.Intensity" @bind:after="@(() => OnLightChanged(lIdx))" />
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label mb-0" style="font-size: 0.75em;">Radius (m)</label>
+                                        <label class="form-label mb-0" style="font-size: 0.75em;" data-help-key="radiusm">Radius (m)</label>
                                         <input type="number" step="1.0" class="form-control form-control-sm" aria-label="@($"Light {lIdx + 1} radius")" @bind="light.Radius" @bind:after="@(() => OnLightChanged(lIdx))" />
                                     </div>
                                 </div>
@@ -1210,27 +1264,27 @@
                                                 <td class="text-end">@part.VertexCount</td>
                                                 <td class="text-end">@part.TriangleCount</td>
                                                 <td class="text-center">
-                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Enabled" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                    <input type="checkbox" class="form-check-input" aria-label="@($"Enabled preview for {part.Path}")" data-help-key="meshenabled" @bind="cfg.Enabled" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
                                                 </td>
                                                 <td class="text-center">
-                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Visible" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                    <input type="checkbox" class="form-check-input" aria-label="@($"Visible preview for {part.Path}")" data-help-key="meshvisible" @bind="cfg.Visible" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
                                                 </td>
                                                 <td class="text-center">
-                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Collidable" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                    <input type="checkbox" class="form-check-input" aria-label="@($"Collidable preview for {part.Path}")" data-help-key="meshcollidable" @bind="cfg.Collidable" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
                                                 </td>
                                                 <td class="text-center">
-                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Effect" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                    <input type="checkbox" class="form-check-input" aria-label="@($"Effect preview for {part.Path}")" data-help-key="mesheffect" @bind="cfg.Effect" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
                                                 </td>
                                                 <td class="text-center">
-                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Waypoint" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                    <input type="checkbox" class="form-check-input" aria-label="@($"Waypoint preview for {part.Path}")" data-help-key="meshwaypoint" @bind="cfg.Waypoint" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
                                                 </td>
                                                 <td class="text-center">
-                                                    <input type="checkbox" class="form-check-input" @bind="cfg.Movable" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
+                                                    <input type="checkbox" class="form-check-input" aria-label="@($"Movable preview for {part.Path}")" data-help-key="meshmovable" @bind="cfg.Movable" @bind:after="() => OnMeshPartFlagChanged(part.Path)" @onclick:stopPropagation="true" />
                                                 </td>
                                                 <td class="small">@part.MaterialSummary</td>
                                                 <td>
                                                     <select class="form-select form-select-sm"
-                                                            value="@GetMeshPartMode(part.Path)"
+                                                            aria-label="@($"Motion mode for {part.Path}")" data-help-key="meshmotion" value="@GetMeshPartMode(part.Path)"
                                                             @onclick:stopPropagation="true"
                                                             @onchange="@(e => OnMeshPartModeChanged(part.Path, e))">
                                                         <option value="auto">Auto</option>
@@ -1262,9 +1316,18 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <strong class="small">Authored materials (@detectedMaterials.Count)</strong>
+                        <div>
+                            <strong class="small d-block">Authored materials (@detectedMaterials.Count)</strong>
+                            @if (!string.IsNullOrWhiteSpace(materialLibraryStatus))
+                            {
+                                <small class="text-muted">@materialLibraryStatus</small>
+                            }
+                        </div>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="SelectTextureDirectory">Choose local texture folder</button>
                     </div>
+                    <label for="texture-folder-upload" class="btn btn-sm btn-outline-secondary mb-2" data-help-key="loadtexturefolder">Load texture folder</label>
+                    <InputFile id="texture-folder-upload" OnChange="LoadTextureFolder" multiple webkitdirectory directory class="visually-hidden" />
+                    <p class="small text-muted mb-2">For the complete game library, choose <code>C:\Users\PC\Documents\Trackmania\Items\_BlenderAssets\Trackmania2020_Textures</code>. This curated folder contains only textures referenced by extracted <code>*.Material.Gbx</code> files and uses its manifest for exact full-link matching.</p>
                     @if (!string.IsNullOrEmpty(textureDirectoryStatus))
                     {
                         <p class="small text-muted">@textureDirectoryStatus</p>
@@ -1274,13 +1337,28 @@
                         <div class="list-group small mb-2">
                             @foreach (var material in detectedMaterials)
                             {
-                                <div class="list-group-item">
-                                    <strong>Slot @material.Index:</strong> @(material.GameMaterialName ?? material.Name ?? "Unnamed material")
-                                    <div class="text-muted text-break">@((material.GameMaterialLink ?? material.Path).Replace('\\', '/'))</div>
+                                <div class="list-group-item material-slot-editor">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+                                        <strong>Slot @material.Index:</strong>
+                                        <span class="text-muted text-break small">@(material.GameMaterialName ?? material.Name ?? "Unnamed material")</span>
+                                    </div>
+                                    <div class="text-muted text-break small mb-1">@material.Path</div>
+                                    <label class="small text-muted d-block" for="@MaterialEditorId(material.Path)" data-help-key="fullmateriallink">Full material link</label>
+                                    <input id="@MaterialEditorId(material.Path)" class="form-control form-control-sm mb-1"
+                                           disabled="@(SelectedSource?.IsReadOnly == true)" value="@MaterialLinkValue(material)"
+                                           @onchange="@(e => OnMaterialLinkChanged(material.Path, e))" />
+                                        <select disabled="@(SelectedSource?.IsReadOnly == true)" class="form-select form-select-sm" value="@MaterialLinkValue(material)" aria-label="@($"Game material for {material.Path}")" data-help-key="fullmateriallink"
+                                            @onchange="@(e => OnMaterialLinkChanged(material.Path, e))">
+                                        <option value="">Choose a material from the game library…</option>
+                                        @foreach (var link in MaterialOptionsFor(material))
+                                        {
+                                            <option value="@link">@link</option>
+                                        }
+                                    </select>
                                 </div>
                             }
                         </div>
-                        <p class="small text-muted">Texture preview is local and read-only. Studio maps Trackmania PBR texture sets by native material link: <code>_D</code> base color, <code>_N</code> normal, <code>_R</code> roughness/metallic and <code>_I</code> self-illumination. It does not modify material, UV, collision, or export data.</p>
+                        <p class="small text-muted">Texture indexing and preview are local and read-only. Studio maps Trackmania PBR sets by native material link: <code>_D</code> base color, <code>_N</code> normal, <code>_R</code> roughness/metallic, <code>_I</code> self-illumination, <code>_H</code> height, <code>_L</code> light and <code>_T</code> glass color. It also indexes auxiliary <code>_O</code>, <code>_M</code>, <code>_X2</code> and hue-mask maps. Texture preview does not modify UV, collision, or export data; the full-link editor above is the separate authored-material export edit.</p>
                     }
                     else
                     {
@@ -1352,24 +1430,24 @@
                             }
                             <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;" title="Select world offset gizmo in viewport"
                                     @onclick="@(() => SelectCompositeOffsetGizmo(part.SourceIndex))">🎯</button>
-                            <label class="mb-0">X</label>
+                            <label class="mb-0" data-help-key="x">X</label>
                             <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                   @bind="offset.X" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                            <label class="mb-0">Y</label>
+                                   aria-label="@($"offset X {part.SourceIndex}")" @bind="offset.X" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                            <label class="mb-0" data-help-key="y">Y</label>
                             <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                   @bind="offset.Y" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                            <label class="mb-0">Z</label>
+                                   aria-label="@($"offset Y {part.SourceIndex}")" @bind="offset.Y" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                            <label class="mb-0" data-help-key="z">Z</label>
                             <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                   @bind="offset.Z" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                            <label class="mb-0">RX</label>
+                                   aria-label="@($"offset Z {part.SourceIndex}")" @bind="offset.Z" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                            <label class="mb-0" data-help-key="rx">RX</label>
                             <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
-                                   @bind="offset.RotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                            <label class="mb-0">RY</label>
+                                   aria-label="@($"offset RotX {part.SourceIndex}")" @bind="offset.RotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                            <label class="mb-0" data-help-key="ry">RY</label>
                             <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
-                                   @bind="offset.RotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                            <label class="mb-0">RZ</label>
+                                   aria-label="@($"offset RotY {part.SourceIndex}")" @bind="offset.RotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                            <label class="mb-0" data-help-key="rz">RZ</label>
                             <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
-                                   @bind="offset.RotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                   aria-label="@($"offset RotZ {part.SourceIndex}")" @bind="offset.RotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
                         </div>
                     }
                     @if (compositeGroupTransforms.Count > 0)
@@ -1386,140 +1464,140 @@
                                 <button class="btn btn-xs btn-outline-secondary" style="font-size:0.7em;"
                                         title="Select group gizmo in viewport"
                                         @onclick="@(() => SelectCompositeGroupGizmo(group.GroupId))">🎯</button>
-                                <label class="mb-0">X</label>
+                                <label class="mb-0" data-help-key="x">X</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                       @bind="transform.X" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">Y</label>
+                                       aria-label="@($"transform X {group.GroupId}")" @bind="transform.X" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="y">Y</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                       @bind="transform.Y" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">Z</label>
+                                       aria-label="@($"transform Y {group.GroupId}")" @bind="transform.Y" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="z">Z</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                       @bind="transform.Z" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">RX</label>
+                                       aria-label="@($"transform Z {group.GroupId}")" @bind="transform.Z" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="rx">RX</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
-                                       @bind="transform.RotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">RY</label>
+                                       aria-label="@($"transform RotX {group.GroupId}")" @bind="transform.RotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="ry">RY</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
-                                       @bind="transform.RotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">RZ</label>
+                                       aria-label="@($"transform RotY {group.GroupId}")" @bind="transform.RotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="rz">RZ</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="1"
-                                       @bind="transform.RotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">PX</label>
+                                       aria-label="@($"transform RotZ {group.GroupId}")" @bind="transform.RotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="px">PX</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                       @bind="transform.PivotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">PY</label>
+                                       aria-label="@($"transform PivotX {group.GroupId}")" @bind="transform.PivotX" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="py">PY</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                       @bind="transform.PivotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                <label class="mb-0">PZ</label>
+                                       aria-label="@($"transform PivotY {group.GroupId}")" @bind="transform.PivotY" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                <label class="mb-0" data-help-key="pz">PZ</label>
                                 <input type="number" class="form-control form-control-sm studio-transform-input" step="0.1"
-                                       @bind="transform.PivotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                       aria-label="@($"transform PivotZ {group.GroupId}")" @bind="transform.PivotZ" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
                             </div>
                             <div class="motion-constraint mt-2 mb-2">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <strong>Group motion</strong>
                                     <div class="form-check mb-0">
-                                        <input class="form-check-input" type="checkbox" id="@($"group-motion-composite-tab-{group.GroupId}")" @bind="motion.Enabled" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <label class="form-check-label" for="@($"group-motion-composite-tab-{group.GroupId}")">Active</label>
+                                        <input class="form-check-input" type="checkbox" id="@($"group-motion-composite-tab-{group.GroupId}")" aria-label="@($"Group {group.GroupId + 1} Enabled")" data-help-key="active" @bind="motion.Enabled" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <label class="form-check-label" for="@($"group-motion-composite-tab-{group.GroupId}")" data-help-key="active">Active</label>
                                     </div>
                                 </div>
                                 <div class="motion-channel">
                                     <h6>Translation m</h6>
                                     <div class="motion-range">
-                                        <label class="small text-muted mb-0">Axis</label>
-                                        <label class="small text-muted mb-0">From</label>
-                                        <label class="small text-muted mb-0">To</label>
-                                        <select class="form-select form-select-sm" @bind="motion.TransAxis" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <label class="small text-muted mb-0" data-help-key="axis">Axis</label>
+                                        <label class="small text-muted mb-0" data-help-key="from">From</label>
+                                        <label class="small text-muted mb-0" data-help-key="to">To</label>
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} TransAxis")" data-help-key="axis" @bind="motion.TransAxis" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option value="X">X</option>
                                             <option value="Y">Y</option>
                                             <option value="Z">Z</option>
                                         </select>
-                                        <input type="number" class="form-control form-control-sm" step="0.1" @bind="motion.TransMin" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <input type="number" class="form-control form-control-sm" step="0.1" @bind="motion.TransMax" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="number" class="form-control form-control-sm" step="0.1" aria-label="@($"Group {group.GroupId + 1} TransMin")" data-help-key="from" @bind="motion.TransMin" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="number" class="form-control form-control-sm" step="0.1" aria-label="@($"Group {group.GroupId + 1} TransMax")" data-help-key="to" @bind="motion.TransMax" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid motion-segment-labels">
                                         <span>#</span><span>Duration ms</span><span>Easing</span><span>Reverse</span>
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">1</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.TransDurationA" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.TransEaseA" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} TransDurationA")" data-help-key="duration" @bind="motion.TransDurationA" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} TransEaseA")" data-help-key="easing" @bind="motion.TransEaseA" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.TransReverseA" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} TransReverseA")" data-help-key="reverse" @bind="motion.TransReverseA" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">2</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.TransDurationB" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.TransEaseB" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} TransDurationB")" data-help-key="duration" @bind="motion.TransDurationB" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} TransEaseB")" data-help-key="easing" @bind="motion.TransEaseB" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.TransReverseB" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} TransReverseB")" data-help-key="reverse" @bind="motion.TransReverseB" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">3</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.TransDurationC" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.TransEaseC" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} TransDurationC")" data-help-key="duration" @bind="motion.TransDurationC" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} TransEaseC")" data-help-key="easing" @bind="motion.TransEaseC" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.TransReverseC" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} TransReverseC")" data-help-key="reverse" @bind="motion.TransReverseC" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">4</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.TransDurationD" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.TransEaseD" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} TransDurationD")" data-help-key="duration" @bind="motion.TransDurationD" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} TransEaseD")" data-help-key="easing" @bind="motion.TransEaseD" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.TransReverseD" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} TransReverseD")" data-help-key="reverse" @bind="motion.TransReverseD" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                 </div>
                                 <div class="motion-channel">
                                     <h6>Rotation °</h6>
                                     <div class="motion-range">
-                                        <label class="small text-muted mb-0">Axis</label>
-                                        <label class="small text-muted mb-0">From</label>
-                                        <label class="small text-muted mb-0">To</label>
-                                        <select class="form-select form-select-sm" @bind="motion.RotAxis" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <label class="small text-muted mb-0" data-help-key="axis">Axis</label>
+                                        <label class="small text-muted mb-0" data-help-key="from">From</label>
+                                        <label class="small text-muted mb-0" data-help-key="to">To</label>
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} RotAxis")" data-help-key="axis" @bind="motion.RotAxis" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option value="X">X</option>
                                             <option value="Y">Y</option>
                                             <option value="Z">Z</option>
                                         </select>
-                                        <input type="number" class="form-control form-control-sm" step="1" @bind="motion.RotMinDeg" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <input type="number" class="form-control form-control-sm" step="1" @bind="motion.RotMaxDeg" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="number" class="form-control form-control-sm" step="1" aria-label="@($"Group {group.GroupId + 1} RotMinDeg")" data-help-key="active" @bind="motion.RotMinDeg" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="number" class="form-control form-control-sm" step="1" aria-label="@($"Group {group.GroupId + 1} RotMaxDeg")" data-help-key="active" @bind="motion.RotMaxDeg" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid motion-segment-labels">
                                         <span>#</span><span>Duration ms</span><span>Easing</span><span>Reverse</span>
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">1</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.RotDurationA" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.RotEaseA" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} RotDurationA")" data-help-key="duration" @bind="motion.RotDurationA" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} RotEaseA")" data-help-key="easing" @bind="motion.RotEaseA" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.RotReverseA" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} RotReverseA")" data-help-key="reverse" @bind="motion.RotReverseA" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">2</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.RotDurationB" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.RotEaseB" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} RotDurationB")" data-help-key="duration" @bind="motion.RotDurationB" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} RotEaseB")" data-help-key="easing" @bind="motion.RotEaseB" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.RotReverseB" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} RotReverseB")" data-help-key="reverse" @bind="motion.RotReverseB" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">3</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.RotDurationC" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.RotEaseC" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} RotDurationC")" data-help-key="duration" @bind="motion.RotDurationC" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} RotEaseC")" data-help-key="easing" @bind="motion.RotEaseC" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.RotReverseC" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} RotReverseC")" data-help-key="reverse" @bind="motion.RotReverseC" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                     <div class="motion-segment-grid">
                                         <span class="motion-segment-number">4</span>
-                                        <input type="number" class="form-control form-control-sm" min="50" step="50" @bind="motion.RotDurationD" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
-                                        <select class="form-select form-select-sm" @bind="motion.RotEaseD" @bind:after="OnCompositeWorldOffsetChanged">
+                                        <input type="number" class="form-control form-control-sm" min="50" step="50" aria-label="@($"Group {group.GroupId + 1} RotDurationD")" data-help-key="duration" @bind="motion.RotDurationD" @bind:event="oninput" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <select class="form-select form-select-sm" aria-label="@($"Group {group.GroupId + 1} RotEaseD")" data-help-key="easing" @bind="motion.RotEaseD" @bind:after="OnCompositeWorldOffsetChanged">
                                             <option>Linear</option><option>QuadInOut</option><option>QuadIn</option><option>QuadOut</option><option>Constant</option>
                                         </select>
-                                        <input type="checkbox" @bind="motion.RotReverseD" @bind:after="OnCompositeWorldOffsetChanged" />
+                                        <input type="checkbox" aria-label="@($"Group {group.GroupId + 1} RotReverseD")" data-help-key="reverse" @bind="motion.RotReverseD" @bind:after="OnCompositeWorldOffsetChanged" />
                                     </div>
                                 </div>
                             </div>
@@ -1550,18 +1628,18 @@
                     </p>
 
                     <div class="mb-2">
-                        <label for="macroblock-name" class="form-label mb-1 small fw-bold">Macroblock name</label>
+                        <label for="macroblock-name" class="form-label mb-1 small fw-bold" data-help-key="macroblockname">Macroblock name</label>
                         <input id="macroblock-name" type="text" class="form-control form-control-sm" @bind="macroblockName" />
                     </div>
 
                     <div class="d-flex flex-wrap gap-2 align-items-end mb-2">
-                        <label class="small mb-0">Copies
+                        <label class="small mb-0" data-help-key="copies">Copies
                             <input type="number" min="1" step="1" class="form-control form-control-sm" style="width:4.5rem" @bind="macroblockGridCount" />
                         </label>
-                        <label class="small mb-0">Columns
+                        <label class="small mb-0" data-help-key="columns">Columns
                             <input type="number" min="1" step="1" class="form-control form-control-sm" style="width:4.5rem" @bind="macroblockGridColumns" />
                         </label>
-                        <label class="small mb-0">Spacing m
+                        <label class="small mb-0" data-help-key="spacingm">Spacing m
                             <input type="number" step="any" class="form-control form-control-sm" style="width:5rem" @bind="macroblockGridSpacing" />
                         </label>
                         <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="FillMacroblockGrid">▦ Fill grid</button>
@@ -1587,13 +1665,13 @@
                                 var instance = macroblockInstances[index];
                                 <div class="d-flex flex-wrap align-items-center gap-1 mb-1" @key="instance">
                                     <span style="width:1.6rem">@(index + 1)</span>
-                                    <input aria-label="@($"Instance {index + 1} X")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PosX" @bind:after="RefreshMacroblockViewport" />
-                                    <input aria-label="@($"Instance {index + 1} Y")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PosY" @bind:after="RefreshMacroblockViewport" />
-                                    <input aria-label="@($"Instance {index + 1} Z")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PosZ" @bind:after="RefreshMacroblockViewport" />
-                                    <input aria-label="@($"Instance {index + 1} pitch")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.PitchDeg" @bind:after="RefreshMacroblockViewport" />
-                                    <input aria-label="@($"Instance {index + 1} yaw")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.YawDeg" @bind:after="RefreshMacroblockViewport" />
-                                    <input aria-label="@($"Instance {index + 1} roll")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.RollDeg" @bind:after="RefreshMacroblockViewport" />
-                                    <input aria-label="@($"Instance {index + 1} scale")" type="number" step="any" min="0.01" class="form-control form-control-sm" style="width:4.6rem" @bind="instance.Scale" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} X")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="x" @bind="instance.PosX" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} Y")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="y" @bind="instance.PosY" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} Z")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="z" @bind="instance.PosZ" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} pitch")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="rx" @bind="instance.PitchDeg" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} yaw")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="ry" @bind="instance.YawDeg" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} roll")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="rz" @bind="instance.RollDeg" @bind:after="RefreshMacroblockViewport" />
+                                    <input aria-label="@($"Instance {index + 1} scale")" type="number" step="any" min="0.01" class="form-control form-control-sm" style="width:4.6rem" data-help-key="scale" @bind="instance.Scale" @bind:after="RefreshMacroblockViewport" />
                                     <button type="button" class="btn btn-sm btn-outline-danger" title="Remove this copy" @onclick="@(() => RemoveMacroblockInstance(index))">✕</button>
                                 </div>
                             }
@@ -1628,7 +1706,7 @@
             </div>
             
             <div class="p-2 border-top bg-light d-flex justify-content-between align-items-center">
-                <small class="text-muted">Item Studio v1.5</small>
+                <small class="text-muted">Item Studio @StudioVersion</small>
                 <button class="btn btn-sm btn-primary" disabled="@(!CanExportSelectedFile)" @onclick="@(() => ExportGbx())">
                     💾 Export selected file
                 </button>
@@ -1702,6 +1780,10 @@ else if (itemModel is null)
 }
 
 @code {
+    private static string StudioVersion => typeof(Home).Assembly
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "development";
+    private sealed record MaterialLibraryEntry(string Path, string Name, string Environment);
+
     private IEnumerable<(string Label, (ItemVariantSource Source, int Index)[] Entries)> LoadedFiles()
     {
         var files = variantSources.Select((source, index) => (Source: source, Index: index)).GroupBy(v => v.Source.GbxFile).ToArray();
@@ -1921,6 +2003,7 @@ else if (itemModel is null)
     private CGameItemModel? itemModel;
     private Gbx<CGameItemModel>? gbxFile;
     private bool isLoading = false;
+    private bool helperMode;
     private string? errorMessage;
     private string? statusMessage;
     private bool hasMesh = false;
@@ -1935,17 +2018,20 @@ else if (itemModel is null)
     private readonly Dictionary<Gbx<CGameItemModel>, int> compositeVariantSelection = new(ReferenceEqualityComparer.Instance);
     private readonly Dictionary<int, int> compositeDocToSourceIndex = new();
     private bool compositeViewportMode;
-    private bool CanCombineFiles => variantSources.Select(source => source.GbxFile).Distinct().Take(2).Count() > 1;
+    private bool CanCombineFiles => variantSources.All(source => !source.IsReadOnly) && variantSources.Select(source => source.GbxFile).Distinct().Take(2).Count() > 1;
     private int activeVariantIndex;
     private ItemVariantSource? SelectedSource => activeVariantIndex >= 0 && activeVariantIndex < variantSources.Count ? variantSources[activeVariantIndex] : null;
-    private bool CanExportSelectedFile => SelectedSource is not null;
+    private bool CanExportSelectedFile => SelectedSource is { IsReadOnly: false };
     private bool CanExportCombinedFiles => CanCombineFiles;
     private bool CanExportCompositeMerged => CompositeViewportSources().Count >= 2;
     private string? iconFileName;
     private string? iconStatus;
+    private string? iconPreviewStatus;
     private bool iconPreviewPending;
     private IReadOnlyList<ItemSceneMaterial> detectedMaterials = Array.Empty<ItemSceneMaterial>();
     private string? textureDirectoryStatus;
+    private readonly List<MaterialLibraryEntry> materialLibrary = new();
+    private string? materialLibraryStatus;
     // Editable identification fields.
     private string identId = "";
     private string identAuthor = "";
@@ -2197,9 +2283,25 @@ else if (itemModel is null)
         dotNetHelper = DotNetObjectReference.Create(this);
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var entries = await Http.GetFromJsonAsync<MaterialLibraryEntry[]>("data/materials.json") ?? [];
+            materialLibrary.Clear();
+            materialLibrary.AddRange(entries.OrderBy(entry => entry.Path, StringComparer.OrdinalIgnoreCase));
+            materialLibraryStatus = $"{materialLibrary.Count:N0} material links available from the extracted game data.";
+        }
+        catch (Exception ex)
+        {
+            materialLibraryStatus = "Material library unavailable: " + ex.Message;
+        }
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender) await JS.InvokeVoidAsync("registerStudioDebug", dotNetHelper);
+        await JS.InvokeVoidAsync("studioHelp.bind");
         if (itemModel == null)
         {
             await JS.InvokeVoidAsync("enableItemDropZone", "item-dropzone", "empty-item-upload");
@@ -2207,10 +2309,10 @@ else if (itemModel is null)
 
         if (itemModel == null || isViewerInitialized)
         {
-            if (iconPreviewPending && itemModel != null)
+            if (itemModel != null && activeTab == "general")
             {
-                await RenderIconPreview();
-                iconPreviewPending = false;
+                iconPreviewPending = !await RenderIconPreview();
+                await JS.InvokeVoidAsync("enableIconDropZone", "icon-dropzone", "icon-upload");
             }
             return;
         }
@@ -2218,20 +2320,51 @@ else if (itemModel is null)
         await JS.InvokeVoidAsync("init3DViewer", "threeContainer", dotNetHelper);
         isViewerInitialized = true;
         await UpdateScenePayload(authoredMotionScene);
-        if (iconPreviewPending)
+        if (activeTab == "general")
         {
-            await RenderIconPreview();
-            iconPreviewPending = false;
+            iconPreviewPending = !await RenderIconPreview();
+            await JS.InvokeVoidAsync("enableIconDropZone", "icon-dropzone", "icon-upload");
         }
     }
 
     private void ReturnToHome() => Navigation.NavigateTo("/", forceLoad: true);
 
-    private async Task LoadFiles(InputFileChangeEventArgs e)
+    private Task LoadFiles(InputFileChangeEventArgs e)
+        => LoadFileSet(e.GetMultipleFiles(maximumFileCount: 64));
+
+    private async Task LoadVanillaFolder(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            var selection = await JS.InvokeAsync<TextureDirectorySelection>("indexStudioGameData", "vanilla-folder-upload", true);
+            gameDataIndexed = true;
+            textureDirectoryStatus = $"Using GameData {selection.Name} ({selection.FileCount:N0} local files).";
+            var count = 0;
+            var missing = new HashSet<string>();
+            foreach (var source in variantSources.GroupBy(source => source.Document).Select(group => group.First()))
+            {
+                var result = await GbxDependencyLoader.HydrateAsync(source.Document, ResolveGameData);
+                count += result.LoadedCount;
+                foreach (var reference in result.Missing) missing.Add(reference);
+                await PrepareAssetPreview(source);
+            }
+            geometryCache.Clear(); uploadedGeometry.Clear(); authoredMotionScene = null;
+            if (variantSources.Count > 0) await LoadVariant(activeVariantIndex);
+            statusMessage = $"Vanilla dependencies loaded: {count} model/material GBX files. Textures and moods indexed from {selection.Name}.";
+            if (missing.Count > 0) statusMessage += $" Unresolved references: {missing.Count}.";
+        }
+        catch (Exception ex) { errorMessage = "Error while loading GameData: " + ex.Message; }
+        finally { isLoading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadFileSet(IReadOnlyList<IBrowserFile> files)
     {
         isLoading = true;
         errorMessage = null;
         variantSources.Clear();
+        assetLoadErrors.Clear();
         compositeVariantSelection.Clear();
         compositeDocToSourceIndex.Clear();
         compositeWorldOffsets.Clear();
@@ -2288,8 +2421,18 @@ else if (itemModel is null)
                 await JS.InvokeVoidAsync("dispose3DViewer");
             }
 
-            foreach (var file in e.GetMultipleFiles(maximumFileCount: 16))
+            var candidates = files.Where(file => file.Name.EndsWith(".gbx", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(file => NormalizeDependencyPath(file.Name), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.OrdinalIgnoreCase);
+            var bytesCache = new Dictionary<IBrowserFile, byte[]>(ReferenceEqualityComparer.Instance);
+            var externalCount = 0;
+            var externalMissing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var externalFailed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var file in files)
             {
+                try
+                {
                 using var memoryStream = new MemoryStream();
                 await file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(memoryStream);
                 var originalBytes = memoryStream.ToArray();
@@ -2299,36 +2442,45 @@ else if (itemModel is null)
                     continue;
                 }
 
-                Gbx<CGameItemModel> parsedGbx;
-                try
+                Gbx parsedDocument;
+                string? previewReason = null;
+                try { parsedDocument = Gbx.Parse(new MemoryStream(originalBytes), new GbxReadSettings { SafeSkippableChunks = true }); }
+                catch (Exception parseError)
                 {
-                    parsedGbx = Gbx.Parse<CGameItemModel>(new MemoryStream(originalBytes));
+                    // Preserve unsupported native records and still expose their declared skin model.
+                    try { parsedDocument = Gbx.Parse(new MemoryStream(originalBytes), new GbxReadSettings { SafeSkippableChunks = true, IgnoreExceptionsInBody = true }); }
+                    catch { parsedDocument = Gbx.ParseHeader(new MemoryStream(originalBytes)); }
+                    previewReason = $"Native model parser: {parseError.Message}. Header and referenced skin preview.";
                 }
-                catch (Exception itemError)
+                var parsedGbx = parsedDocument as Gbx<CGameItemModel>;
+                var previewOnly = parsedGbx is null || parsedGbx.Node.EntityModel is CGameVehicleModel || previewReason is not null;
+
+                var dependencies = await GbxDependencyLoader.HydrateAsync(parsedDocument, async referencePath =>
                 {
-                    // Every non-item GBX that slips past the class-id dispatch reaches the item
-                    // parser, which answers with an InvalidCastException ("Specified cast is not
-                    // valid."). Retry as a macroblock before reporting the failure.
-                    if (ItemMacroblock.TryRead(originalBytes, out var macroNode, out var macroError) && macroNode is not null)
+                    var dependencyFile = FindDependencyFile(referencePath, candidates);
+                    if (dependencyFile is null) return await ResolveGameData(referencePath);
+                    if (!bytesCache.TryGetValue(dependencyFile, out var dependencyBytes))
                     {
-                        ApplyMacroblock(macroNode, file.Name);
-                        await RefreshMacroblockViewport();
-                        continue;
+                        using var dependencyStream = new MemoryStream();
+                        await dependencyFile.OpenReadStream(maxAllowedSize: 256 * 1024 * 1024).CopyToAsync(dependencyStream);
+                        dependencyBytes = dependencyStream.ToArray();
+                        bytesCache[dependencyFile] = dependencyBytes;
                     }
+                    return new GbxDependencyLoader.ResolvedFile(dependencyFile.Name, dependencyBytes);
+                });
+                externalCount += dependencies.LoadedCount;
+                foreach (var missing in dependencies.Missing) externalMissing.Add(missing);
+                foreach (var failed in dependencies.Failed) externalFailed.Add(failed);
 
-                    var classId = ItemMacroblock.ClassIdOf(originalBytes);
-                    throw new InvalidOperationException(
-                        $"Could not read {file.Name} as an item (class id "
-                        + (classId is null ? "unknown" : $"0x{classId:X8}")
-                        + $", not a macroblock either): {itemError.Message}"
-                        + (macroError is null ? string.Empty : $" Macroblock read: {macroError}"),
-                        itemError);
+                if (previewOnly)
+                {
+                    var asset = ItemVariantSource.FromAsset(Path.GetFileNameWithoutExtension(file.Name), parsedDocument, originalBytes, previewReason);
+                    await PrepareAssetPreview(asset);
+                    variantSources.Add(asset);
                 }
-
-                var parsedModel = parsedGbx.Node;
-                if (parsedModel == null) continue;
-
-                variantSources.AddRange(ItemVariantSource.FromFile(Path.GetFileNameWithoutExtension(file.Name), parsedGbx, originalBytes));
+                else variantSources.AddRange(ItemVariantSource.FromFile(Path.GetFileNameWithoutExtension(file.Name), parsedGbx!, originalBytes));
+                }
+                catch (Exception fileError) { assetLoadErrors.Add($"{file.Name}: {fileError.Message}"); }
             }
 
             if (variantSources.Count > 0)
@@ -2337,7 +2489,14 @@ else if (itemModel is null)
                 foreach (var selected in CompositeViewportSources())
                     compositeVariantSelection[selected.Source.GbxFile] = selected.SourceIndex;
                 await SelectVariant(0);
+                if (externalCount > 0)
+                {
+                    statusMessage = $"Loaded {externalCount} external GBX dependencies.";
+                    if (externalMissing.Count > 0 || externalFailed.Count > 0)
+                        statusMessage += $" Unresolved: {externalMissing.Count + externalFailed.Count}.";
+                }
             }
+            if (assetLoadErrors.Count > 0) errorMessage = string.Join("; ", assetLoadErrors);
         }
         catch (Exception ex)
         {
@@ -2351,10 +2510,48 @@ else if (itemModel is null)
         }
     }
 
+    private static string NormalizeDependencyPath(string value)
+        => value.Replace('/', '\\').TrimStart('\\').ToLowerInvariant();
+
+    private static IBrowserFile? FindDependencyFile(string referencePath,
+        IReadOnlyDictionary<string, IBrowserFile[]> candidates)
+    {
+        var normalized = NormalizeDependencyPath(referencePath);
+        if (candidates.TryGetValue(normalized, out var exact) && exact.Length == 1)
+            return exact[0];
+
+        var separator = normalized.LastIndexOf('\\');
+        var basename = separator >= 0 ? normalized[(separator + 1)..] : normalized;
+        if (candidates.TryGetValue(basename, out var byName) && byName.Length == 1)
+            return byName[0];
+
+        // Some browsers expose a relative path as IBrowserFile.Name. Use a
+        // unique suffix match when the exact directory prefix differs.
+        var suffix = candidates.Where(pair => pair.Key.EndsWith("\\" + normalized, StringComparison.OrdinalIgnoreCase))
+            .SelectMany(pair => pair.Value).ToArray();
+        return suffix.Length == 1 ? suffix[0] : null;
+    }
+
     private async Task SelectVariant(int index)
     {
         if (isSelectingVariant || index < 0 || index >= variantSources.Count) return;
-        compositeVariantSelection[variantSources[index].GbxFile] = index;
+        var file = variantSources[index].GbxFile;
+        if (compositeVariantSelection.TryGetValue(file, out var previousIndex)
+            && previousIndex != index
+            && compositeWorldOffsets.TryGetValue(previousIndex, out var previousOffset)
+            && !compositeWorldOffsets.ContainsKey(index))
+        {
+            compositeWorldOffsets[index] = new CompositeWorldTransform
+            {
+                X = previousOffset.X,
+                Y = previousOffset.Y,
+                Z = previousOffset.Z,
+                RotX = previousOffset.RotX,
+                RotY = previousOffset.RotY,
+                RotZ = previousOffset.RotZ
+            };
+        }
+        compositeVariantSelection[file] = index;
         isSelectingVariant = true;
         errorMessage = null;
         try
@@ -2381,9 +2578,15 @@ else if (itemModel is null)
     {
         activeVariantIndex = index;
         var source = variantSources[index];
-        iconPreviewPending |= !ReferenceEquals(itemModel, source.Model);
+        if (!ReferenceEquals(itemModel, source.Model))
+        {
+            iconPreviewPending = true;
+            iconStatus = iconPreviewStatus = null;
+            iconFileName = null;
+        }
         itemModel = source.Model;
         gbxFile = source.GbxFile;
+        if (source.IsReadOnly) activeTab = "model";
         if (string.IsNullOrWhiteSpace(macroblockName))
             macroblockName = ItemMacroblock.DefaultName(itemModel);
         hasMesh = false;
@@ -2505,7 +2708,7 @@ else if (itemModel is null)
 
     private static string DescribeMeshFunction(ModelPart part, MeshPartConfig cfg)
     {
-        if (!cfg.Enabled) return "Disabled (uitgeschakeld in preview).";
+        if (!cfg.Enabled) return "Disabled in preview.";
         var roles = new List<string>();
         if (cfg.Visible) roles.Add("Visible mesh");
         if (cfg.Collidable) roles.Add("Collidable");
@@ -2611,7 +2814,11 @@ else if (itemModel is null)
         int? variant = source.Model.EntityModel is NPlugItem_SVariantList { Variants: { } variants } && source.Variant is { } selected
             ? Array.IndexOf(variants, selected) : null;
         var doc = documentOrdinal >= 0 ? documentOrdinal : document;
-        return ItemScene.Build(source.PreviewRoot, doc, variant, geometryCache);
+        var result = ItemScene.Build(source.PreviewRoot, doc, variant, geometryCache, resolveExternal: true);
+        if (source.TextureContext is { } context)
+            result = result with { Preview = result.Preview with { Materials = result.Preview.Materials.Select(material =>
+                material.Representation == "SkinMaterial" ? material with { GameMaterialLink = context + "/" + material.Name } : material).ToArray() } };
+        return result;
     }
 
     private Task UpdateScenePayload()
@@ -2734,7 +2941,7 @@ else if (itemModel is null)
         }
 
         errorMessage = null;
-        kinematicTemplateStatus = "Constraint en bijbehorende entity succesvol verwijderd.";
+        kinematicTemplateStatus = "Removed the constraint and its associated entity.";
         selectedConstraintIndex = -1;
         selectedWaypointIsPointB = null;
         geometryCache.Clear();
@@ -2969,7 +3176,7 @@ else if (itemModel is null)
                     axis1, pathSegment1Distance, dur1Ms,
                     axis2, pathSegment2Distance, dur2Ms);
                 if (result.Success)
-                    pathStatusMessage = "A ➔ B ➔ C relay path generated with 100% Havok collision!";
+                    pathStatusMessage = "A ➔ B ➔ C relay path generated. Native motion and vehicle contact are not yet verified.";
                 else
                     errorMessage = "Error generating relay path: " + result.Reason;
                 break;
@@ -2981,7 +3188,7 @@ else if (itemModel is null)
                     axis1, pathSegment1Distance, dur1Ms,
                     axis2, pathSegment2Distance, dur2Ms);
                 if (result.Success)
-                    pathStatusMessage = "Occluder / parked handover L-path generated with 100% Havok collision!";
+                    pathStatusMessage = "Occluder / parked handover L-path generated. Native motion and vehicle contact are not yet verified.";
                 else
                     errorMessage = "Error generating handover path: " + result.Reason;
                 break;
@@ -3003,7 +3210,7 @@ else if (itemModel is null)
                 var result = ItemKinematicEntityTemplate.ConfigureSingleAxisMotion(
                     firstConstraint, axis1, pathSegment1Distance, dur1Ms, pathIsPingPong);
                 if (result.Success)
-                    pathStatusMessage = "1-axis linear motion configured with 100% Havok collision!";
+                    pathStatusMessage = "1-axis linear motion configured. Native motion and vehicle contact are not yet verified.";
                 break;
             }
             case "rotation":
@@ -3011,7 +3218,7 @@ else if (itemModel is null)
                 var result = ItemKinematicEntityTemplate.ConfigureRotationMotion(
                     firstConstraint, axis1, 0, 360, dur1Ms, isOscillating: false);
                 if (result.Success)
-                    pathStatusMessage = "Rotation motion configured with 100% Havok collision!";
+                    pathStatusMessage = "Rotation motion configured. Native motion and vehicle contact are not yet verified.";
                 break;
             }
         }
@@ -3323,7 +3530,8 @@ else if (itemModel is null)
                     geometryId = g.GeometryId,
                     positionsBytes = ViewerBuffers.Pack(g.LocalPositions),
                     indicesBytes = ViewerBuffers.Pack(g.Indices),
-                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals)
+                    normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals),
+                    uvsBytes = PrimaryUvBytes(g)
                 }),
                 parts = allParts.Select(part => (object)new
                 {
@@ -3335,10 +3543,11 @@ else if (itemModel is null)
                         : (int?)null,
                     geometryId = part.geometry.GeometryId,
                     worldTransform = ApplyCompositeWorldOffset(part.geometry.WorldTransform, part.entry.SourceIndex, useComposite),
-                    positionsBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Positions),
-                    indicesBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Indices),
-                    normalsBytes = part.geometry.GeometryId.HasValue || part.geometry.Normals is null ? null : ViewerBuffers.Pack(part.geometry.Normals),
-                    isCollision = part.geometry.IsCollision && !forcedRenderableGeometryPaths.Contains(part.geometry.Path),
+                     positionsBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Positions),
+                     indicesBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Indices),
+                     normalsBytes = part.geometry.GeometryId.HasValue || part.geometry.Normals is null ? null : ViewerBuffers.Pack(part.geometry.Normals),
+                     uvsBytes = part.geometry.GeometryId.HasValue ? null : PrimaryUvBytes(part.geometry),
+                     isCollision = part.geometry.IsCollision && !forcedRenderableGeometryPaths.Contains(part.geometry.Path),
                     meshMode = GetMeshPartMode(part.geometry.Path),
                     enabled = GetMeshPartConfig(part.geometry.Path).Enabled,
                     visible = GetMeshPartConfig(part.geometry.Path).Visible,
@@ -3350,7 +3559,7 @@ else if (itemModel is null)
                 }).Concat(instanceParts).ToArray(),
                 materials = authoredScene.Preview.Materials.Select(material => new
                 {
-                    material.Path, material.GameMaterialName, material.GameMaterialLink
+                    material.Path, material.GameMaterialName, material.GameMaterialLink, material.Color, material.TexturePaths
                 }),
                 compositeOffsets = useComposite
                     ? composite.Select(part =>
@@ -3425,7 +3634,7 @@ else if (itemModel is null)
                 .Concat(BuildPlainInstanceParts()).ToArray(),
             materials = authoredMotionScene?.Preview.Materials.Select(material => new
             {
-                material.Path, material.GameMaterialName, material.GameMaterialLink
+                material.Path, material.GameMaterialName, material.GameMaterialLink, material.Color, material.TexturePaths
             }),
             selectedMeshPath = selectedMeshPartPath,
             pivots = detectedPivots,
@@ -3456,7 +3665,9 @@ else if (itemModel is null)
         var marker = visualPath.LastIndexOf(visualMarker, StringComparison.Ordinal);
         if (marker < 0) return [];
         var solidPath = visualPath[..marker];
-        return scene.Mappings.Where(mapping => mapping.SolidPath == solidPath).Select(mapping => (object)new
+        if (!int.TryParse(visualPath[(marker + visualMarker.Length)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var visualIndex))
+            return [];
+        return scene.Mappings.Where(mapping => mapping.SolidPath == solidPath && mapping.VisualIndex == visualIndex).Select(mapping => (object)new
         {
             materialIndex = mapping.MaterialIndex,
             materialPath = $"{mapping.SolidPath}/material:{mapping.MaterialIndex}",
@@ -3464,10 +3675,54 @@ else if (itemModel is null)
         }).ToArray();
     }
 
+    private static byte[]? PrimaryUvBytes(ItemSceneGeometry geometry)
+        => geometry.UVs.TryGetValue(0, out var uvs) ? ViewerBuffers.Pack(uvs) : null;
+
+    private string MaterialEditorId(string materialPath)
+        => "material-link-" + Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(materialPath))).ToLowerInvariant()[..12];
+
+    private string MaterialLinkValue(ItemSceneMaterial material)
+        => material.GameMaterialLink ?? material.Name ?? string.Empty;
+
+    private IEnumerable<string> MaterialOptionsFor(ItemSceneMaterial material)
+    {
+        var current = MaterialLinkValue(material);
+        if (!string.IsNullOrWhiteSpace(current) && !materialLibrary.Any(entry => entry.Path.Equals(current, StringComparison.OrdinalIgnoreCase)))
+            yield return current;
+        foreach (var entry in materialLibrary)
+            yield return entry.Path;
+    }
+
+    private async Task OnMaterialLinkChanged(string materialPath, ChangeEventArgs args)
+    {
+        var link = args.Value?.ToString()?.Trim();
+        if (string.IsNullOrWhiteSpace(link) || authoredMotionScene is null)
+            return;
+        var descriptor = authoredMotionScene.Preview.Materials.FirstOrDefault(material => material.Path == materialPath);
+        if (descriptor is null || descriptor.SourceId is not int sourceId
+            || !authoredMotionScene.Handles.Sources.TryGetValue(sourceId, out var source)
+            || source is not CPlugSolid2Model.Material material)
+        {
+            errorMessage = "This material slot is read-only because its authored material instance is not exposed by the GBX data.";
+            return;
+        }
+
+        material.MaterialUserInst ??= new CPlugMaterialUserInst();
+        material.MaterialUserInst.IsUsingGameMaterial = true;
+        material.MaterialUserInst.Link = link;
+        authoredMotionScene = ReadSelectedScene();
+        detectedMaterials = authoredMotionScene.Preview.Materials;
+        statusMessage = $"Updated material slot {descriptor.Index} to {link}. The live preview and the next GBX export use this link.";
+        errorMessage = null;
+        await UpdateScenePayload(authoredMotionScene);
+    }
+
     private sealed class TextureDirectorySelection
     {
         public string Name { get; init; } = "";
         public int FileCount { get; init; }
+        public int ManifestMaterialCount { get; init; }
+        public int ManifestTextureCount { get; init; }
     }
 
     private async Task SelectTextureDirectory()
@@ -3475,7 +3730,9 @@ else if (itemModel is null)
         try
         {
             var selection = await JS.InvokeAsync<TextureDirectorySelection>("selectStudioTextureDirectory");
-            textureDirectoryStatus = $"Using local folder {selection.Name} ({selection.FileCount:N0} files indexed).";
+            textureDirectoryStatus = selection.ManifestMaterialCount > 0
+                ? $"Using curated Trackmania library {selection.Name} ({selection.ManifestMaterialCount:N0} material links and {selection.ManifestTextureCount:N0} referenced textures indexed)."
+                : $"Using local folder {selection.Name} ({selection.FileCount:N0} files indexed).";
             await UpdateScenePayload(authoredMotionScene);
         }
         catch (JSException ex)
@@ -3486,7 +3743,14 @@ else if (itemModel is null)
 
     private void ToggleTab(string tab)
     {
+        if (SelectedSource?.IsReadOnly == true && tab is not ("model" or "general" or "visual")) return;
         activeTab = activeTab == tab ? string.Empty : tab;
+    }
+
+    private async Task ToggleHelperMode()
+    {
+        helperMode = !helperMode;
+        await JS.InvokeVoidAsync("setStudioHelperMode", helperMode);
     }
 
     private void OpenCompositeTab()
@@ -3512,53 +3776,68 @@ else if (itemModel is null)
 
         if (e.File.Size > 2 * 1024 * 1024)
         {
-            iconStatus = "Het pictogram mag maximaal 2 MB groot zijn.";
+            iconStatus = "The icon must be no larger than 2 MB.";
             return;
         }
 
-        using var stream = new MemoryStream();
-        await e.File.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024).CopyToAsync(stream);
-        var normalized = await JS.InvokeAsync<NormalizedIcon>("normalizeIcon", stream.ToArray(), 64);
-        ApplyIconPixels(normalized.Pixels, 64, 64);
-        iconFileName = e.File.Name;
-        itemModel.IconWebP = Convert.FromBase64String(normalized.WebPBase64);
-        iconStatus = "Icon normalized to 64x64 and stored in the item model.";
-        iconPreviewPending = true;
-        StateHasChanged();
+        var target = itemModel;
+        try
+        {
+            using var stream = new MemoryStream();
+            await e.File.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024).CopyToAsync(stream);
+            var normalized = await JS.InvokeAsync<NormalizedIcon>("normalizeIcon", stream.ToArray(), 64);
+            var webp = Convert.FromBase64String(normalized.WebPBase64);
+            if (!ReferenceEquals(target, itemModel)) return;
+            ItemIcon.Replace(target, normalized.Pixels, 64, 64, webp);
+            iconFileName = e.File.Name;
+            iconStatus = "Icon normalized to 64x64 and stored in the item model.";
+            iconPreviewPending = true;
+        }
+        catch (Exception)
+        {
+            if (ReferenceEquals(target, itemModel))
+                iconStatus = "Could not decode this image. Choose a valid JPG, PNG or WebP; the previous icon is unchanged.";
+        }
     }
 
-    private async Task RenderIconPreview()
+    private async Task<bool> RenderIconPreview()
     {
-        if (itemModel?.Icon == null) return;
-        var pixels = new int[64 * 64 * 4];
-        for (var y = 0; y < 64; y++)
+        var target = itemModel;
+        string result;
+        try
         {
-            for (var x = 0; x < 64; x++)
+            // The serialized WebP is authoritative when both representations exist.
+            if (target?.IconWebP is { Length: > 0 } webp)
+                result = await JS.InvokeAsync<string>("renderIconPreviewFromBytes", "iconPreviewCanvas", webp);
+            else if (target?.Icon is { } icon)
             {
-                var color = itemModel.Icon[y, x];
-                var offset = (y * 64 + x) * 4;
-                pixels[offset] = (int)Math.Clamp(color.R, 0, 255);
-                pixels[offset + 1] = (int)Math.Clamp(color.G, 0, 255);
-                pixels[offset + 2] = (int)Math.Clamp(color.B, 0, 255);
-                pixels[offset + 3] = (int)Math.Clamp(color.A, 0, 255);
+                var raw = ItemIcon.ReadRaw(icon);
+                result = await JS.InvokeAsync<string>("renderIconPreview", "iconPreviewCanvas", raw.Pixels, raw.Width, raw.Height);
             }
+            else result = await JS.InvokeAsync<string>("clearIconPreview", "iconPreviewCanvas");
         }
-        await JS.InvokeVoidAsync("renderIconPreview", "iconPreviewCanvas", pixels, 64, 64);
-    }
-
-    private void ApplyIconPixels(int[] pixels, int width, int height)
-    {
-        var icon = new GBX.NET.Color[width, height];
-        for (var y = 0; y < height; y++)
+        catch (Exception)
         {
-            for (var x = 0; x < width; x++)
-            {
-                var offset = (y * width + x) * 4;
-                icon[y, x] = new GBX.NET.Color(
-                    pixels[offset], pixels[offset + 1], pixels[offset + 2], pixels[offset + 3]);
-            }
+            await JS.InvokeVoidAsync("clearIconPreview", "iconPreviewCanvas");
+            result = "decode-failed";
         }
-        itemModel!.Icon = icon;
+        if (!ReferenceEquals(target, itemModel) || result == "superseded") return true;
+        var message = result switch
+        {
+            "missing" => target?.IconFid is not null
+                ? "This item references an external bitmap icon; no embedded preview is available. Drop an image to replace it."
+                : "No stored icon. The game may generate one automatically; drop an image to supply one.",
+            "decode-failed" => "The stored icon could not be decoded. Drop a JPG, PNG or WebP to replace it.",
+            "transparent" => "The stored icon is fully transparent.",
+            "black" => "The stored icon contains only black visible pixels.",
+            _ => null
+        };
+        if (message != iconPreviewStatus)
+        {
+            iconPreviewStatus = message;
+            StateHasChanged();
+        }
+        return result != "pending";
     }
 
     private async Task ToggleOriginalMotion()
@@ -3712,28 +3991,24 @@ else if (itemModel is null)
     }
 
     [JSInvokable]
-    public void OnMeshPartSelected(string path)
+    public void OnMeshPartSelected(string? path)
     {
         selectedMeshPartPath = string.IsNullOrWhiteSpace(path) ? null : path;
-        activeTab = "visual";
-        if (compositeViewportMode && selectedMeshPartPath is not null
-            && TryExtractDocumentOrdinal(selectedMeshPartPath, out var docOrdinal)
-            && compositeDocToSourceIndex.TryGetValue(docOrdinal, out var sourceIndex)
-            && sourceIndex != activeVariantIndex)
-        {
-            _ = SelectVariant(sourceIndex);
-        }
+        if (selectedMeshPartPath is null)
+            compositeSelectionOrder.Clear();
+        else
+            activeTab = "visual";
         StateHasChanged();
     }
 
     [JSInvokable]
-    public async Task OnMeshPartSelectedWithModifiers(string path, bool additive, bool range)
+    public async Task OnCompositeSourceSelected(int sourceIndex, bool additive, bool range)
     {
-        OnMeshPartSelected(path);
-        if (!compositeViewportMode || selectedMeshPartPath is null
-            || !TryExtractDocumentOrdinal(selectedMeshPartPath, out var docOrdinal)
-            || !compositeDocToSourceIndex.TryGetValue(docOrdinal, out var sourceIndex))
+        if (!compositeViewportMode || sourceIndex < 0 || sourceIndex >= variantSources.Count)
             return;
+
+        if (activeVariantIndex != sourceIndex)
+            await SelectVariant(sourceIndex);
 
         if (!additive && !range)
         {
@@ -3745,10 +4020,22 @@ else if (itemModel is null)
             compositeSelectionOrder.Add(sourceIndex);
         }
 
-        if (authoredMotionScene is not null)
-            await UpdateScenePayload(authoredMotionScene);
-        else
-            await UpdateScenePayload();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnViewportMeshSelected(string? path, int? sourceIndex, bool additive, bool range)
+    {
+        if (path is not null && sourceIndex.HasValue)
+            await OnCompositeSourceSelected(sourceIndex.Value, additive, range);
+        OnMeshPartSelected(path);
+        await UpdateScenePayload(authoredMotionScene);
+    }
+
+    [JSInvokable]
+    public void OnMeshPartSelectedWithModifiers(string? path, bool _, bool __)
+    {
+        OnMeshPartSelected(path);
     }
 
     private static bool TryExtractDocumentOrdinal(string path, out int ordinal)
@@ -4686,6 +4973,7 @@ else if (itemModel is null)
 
     private async Task ToggleWireframe() => await JS.InvokeVoidAsync("toggleWireframe");
     private async Task ResetCamera() => await JS.InvokeVoidAsync("resetCamera");
+    private async Task SetViewportView(string view) => await JS.InvokeVoidAsync("setStudioView", view);
     
     private async Task DownloadObj()
     {

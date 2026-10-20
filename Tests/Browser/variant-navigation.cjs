@@ -32,7 +32,7 @@ const fs = require('node:fs');
         await page.waitForFunction(() => variantRenders.length > 0 || document.querySelector('.alert-danger') || document.querySelector('#blazor-error-ui')?.style.display === 'block');
         assert.equal(await page.locator('.alert-danger').count(), 0, await page.locator('body').innerText());
         assert.ok(await page.evaluate(() => variantRenders.length > 0), await page.locator('body').innerText());
-        const variants = page.getByRole('button', { name: /^\d+\. SnowCarTraffic/ });
+        const variants = page.getByRole('button', { name: /SnowCarTraffic.*variant \d+$/ });
         assert.equal(await variants.count(), 9);
         const layout = await variants.evaluateAll(buttons => ({
             labels: buttons.map(b => b.innerText.trim()),
@@ -41,9 +41,9 @@ const fs = require('node:fs');
         const durations = [];
         for (const n of [2, 3, 2, 1, 3]) {
             const before = await page.evaluate(() => ({ count: variantRenders.length, time: performance.now() }));
-            await page.getByRole('button', { name: new RegExp(`^${n}\\. SnowCarTraffic`) }).click();
+            await page.getByRole('button', { name: new RegExp(`SnowCarTraffic.*variant ${n}$`) }).click();
             await page.waitForFunction(count => variantRenders.length > count, before.count);
-            await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
+            await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
             durations.push(await page.evaluate(start => performance.now() - start, before.time));
         }
         console.log(JSON.stringify({ layout, switchMilliseconds: durations }));
@@ -72,8 +72,8 @@ const fs = require('node:fs');
         // A generous ceiling for loaded CI machines; the previous dev build takes ~15s.
         const budget = Number(process.env.STUDIO_VARIANT_BUDGET_MS || 5000);
         assert.ok(durations.every(ms => ms < budget), `Variant switch exceeds ${budget}ms: ${durations}`);
-        await page.waitForFunction(() => document.querySelector('[aria-label="Item variants"]').getAttribute('aria-busy') === 'false');
-        const focusRetained = await page.getByRole('button', { name: /^3\. SnowCarTraffic/ }).evaluate(button => button === document.activeElement);
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
+        const focusRetained = await page.getByRole('button', { name: /SnowCarTraffic.*variant 3$/ }).evaluate(button => button === document.activeElement);
         async function screenshot(name) {
             if (!process.env.STUDIO_VARIANT_EVIDENCE) return;
             fs.mkdirSync(process.env.STUDIO_VARIANT_EVIDENCE, { recursive: true });
@@ -101,19 +101,19 @@ const fs = require('node:fs');
         assert.ok(obj.split('\n').some(l => /^f \d+ \d+ \d+$/.test(l)), 'OBJ lost triangle indices');
         // Multiple documents retain separate identities while their visible choices stay short.
         await page.getByLabel('Open item files').setInputFiles([fixture, path.join(__dirname, 'Fixtures/Approved/TM2020/Item.Item.Gbx')]);
-        const cube = page.getByRole('button', { name: /^10\. Item/ });
+        const cube = page.getByRole('button', { name: /^Select Item\.Item/ });
         await cube.click();
         assert.equal(await cube.getAttribute('aria-pressed'), 'true');
-        assert.equal(await cube.innerText(), '1');
-        assert.equal(await page.locator('.studio-variant-file').count(), 2);
-        assert.equal(await page.getByRole('button', { name: /^1\. SnowCarTraffic/ }).innerText(), '1');
+        assert.match(await cube.innerText(), /Item/);
+        assert.equal(await page.locator('.studio-item-switcher-row').count(), 2);
+        assert.equal(await page.getByRole('button', { name: /SnowCarTraffic.*variant 1$/ }).innerText(), '1');
         await page.getByLabel('Open item files').setInputFiles([
             { name: 'same.Item.Gbx', mimeType: 'application/octet-stream', buffer: fs.readFileSync(fixture) },
             { name: 'same.Item.Gbx', mimeType: 'application/octet-stream', buffer: fs.readFileSync(path.join(__dirname, 'Fixtures/Approved/TM2020/Item.Item.Gbx')) }
         ]);
-        const otherDocument = page.getByRole('button', { name: /^10\. same/ });
+        const otherDocument = page.getByRole('button', { name: /^Select same.*\(file 2\)/ });
         await otherDocument.click();
-        const headings = await page.locator('.studio-variant-filename').allTextContents();
+        const headings = await page.locator('.studio-item-tab-name').allTextContents();
         console.log(JSON.stringify({ focusRetained, duplicateFileHeadings: headings }));
         assert.ok(focusRetained, 'Variant selection must retain keyboard focus on its initiating button');
         assert.equal(new Set(headings).size, 2, 'Distinct documents with equal filenames need distinct visible headings');

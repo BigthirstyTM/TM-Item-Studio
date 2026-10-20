@@ -1,0 +1,20 @@
+Probe item ident: Locked_In_GroupMovement_6
+
+=== C:\Users\PC\Documents\Trackmania\Maps\My Maps\TMIS_Fixes_20261020\TMIS_Fixes_Placement.Map.Gbx
+    written 2026-10-20 16:29:15  103229 bytes
+    excluded      : 0304305B lightmap cache; this is placement evidence only
+    map name      : TMIS_Fixes_Placement
+    blocks        : 0
+    anchored      : 4 (of which ours: 0)
+    macroblock ref: 0
+    macroblock inst: 0
+    expected items: 4 [TMIS_Fixes_Export, TMIS_Fixes_Export_x2, TMIS_Fixes_Merged, TMIS_Fixes_Variants]
+    mentions ours : False
+      stored ident: id='TMIS_Fixes_Export' collection='Stadium2020' author='Ci0bwEqqQ3Sy2z1WG9qxyQ' pos <704, 8, 768> scale 1
+      stored ident: id='TMIS_Fixes_Export_x2' collection='Stadium2020' author='Ci0bwEqqQ3Sy2z1WG9qxyQ' pos <736, 8, 768> scale 1
+      stored ident: id='TMIS_Fixes_Merged' collection='Stadium2020' author='Ci0bwEqqQ3Sy2z1WG9qxyQ' pos <784, 8, 768> scale 1
+      stored ident: id='TMIS_Fixes_Variants' collection='Stadium2020' author='Ci0bwEqqQ3Sy2z1WG9qxyQ' pos <832, 8, 768> scale 1
+      first object chunks: 3
+        Chunk03101002 id=0x03101002 v8
+        Chunk03101004 id=0x03101004 v0
+        Chunk03101005 id=0x03101005

@@ -1,0 +1,67 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "inventory": {
+          "nbMacroblocks": 6451,
+          "nbItems": 8395,
+          "loadingStatus": "loaded from CGameEditorPluginMap",
+          "note": "Blocks/macroblocks come from CGameEditorPluginMap; items come from E++ inventory wrapper exports.",
+          "source": "pluginMap",
+          "nbTerrainBlocks": 1,
+          "isScanningBlocks": false,
+          "isScanningMacroblocks": false,
+          "loadingStatusShort": "ready",
+          "isScanningItems": false,
+          "nbBlocks": 3757
+        },
+        "query": "tmis_final",
+        "type": "all",
+        "count": 7,
+        "results": [
+          {
+            "path": "TMIS_Final_Variants",
+            "name": "TMIS_Variants",
+            "type": "item"
+          },
+          {
+            "path": "TMIS_Final_Export_x2",
+            "name": "TMIS_Multi",
+            "type": "item"
+          },
+          {
+            "path": "TMIS_Final_Merged",
+            "name": "TMIS_Merged",
+            "type": "item"
+          },
+          {
+            "path": "TMIS_Final_Icon",
+            "name": "TMIS_Icon",
+            "type": "item"
+          },
+          {
+            "path": "TMIS_Final_Flag",
+            "name": "TMIS_Flag",
+            "type": "item"
+          },
+          {
+            "path": "TMIS_Final_Export",
+            "name": "TMIS_Export",
+            "type": "item"
+          },
+          {
+            "path": "TMIS_Final_Motion",
+            "name": "TMIS_Motion",
+            "type": "item"
+          }
+        ]
+      },
+      "success": true
+    },
+    "tool": "tm-mcp-pack-epp.FindInventory"
+  }
+}

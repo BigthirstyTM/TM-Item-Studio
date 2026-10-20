@@ -63,7 +63,7 @@ public partial class Home
         if (modelParts.Count == 0)
             messages.Add(new("no-mesh-geometry", "No mesh geometry available. A fallback material cannot replace an external or unsupported mesh."));
         else
-            messages.Add(new("textures-not-loaded", "Neutral preview — textures are not loaded. Game materials and texture files are not evaluated by this viewer."));
+            messages.Add(new("textures-not-loaded", "Neutral preview — choose a local texture folder in Materials & LOD to load matching Trackmania textures. Game materials and texture files are not read from the uploaded GBX archive."));
         return (preview, dependencies, messages);
     }
 

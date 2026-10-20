@@ -1,0 +1,3 @@
+PASS: gated controls read-only/absent; light color/intensity/radius round-trip.
+PASS: export bytes unchanged after preview-only interactions.
+PASS: static conversion advertised; empty geometry refused without losing the source.

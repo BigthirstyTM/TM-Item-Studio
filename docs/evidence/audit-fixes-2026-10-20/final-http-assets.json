@@ -1,0 +1,82 @@
+[
+  {
+    "port": 5183,
+    "file": "index.html",
+    "status": 200,
+    "bytes": 1406,
+    "sha256": "f78553e607190b24a91b46d5580f2f982b14fbb625f71f9419dee80ef051e037",
+    "matchesSource": true
+  },
+  {
+    "port": 5202,
+    "file": "index.html",
+    "status": 200,
+    "bytes": 1406,
+    "sha256": "f78553e607190b24a91b46d5580f2f982b14fbb625f71f9419dee80ef051e037",
+    "matchesSource": true
+  },
+  {
+    "port": 5183,
+    "file": "js/meshViewer.js",
+    "status": 200,
+    "bytes": 108163,
+    "sha256": "39d351496a58016f9b73fc18bdf7c42fa8d7f901872c7b8c877ca01048f60e84",
+    "matchesSource": true
+  },
+  {
+    "port": 5202,
+    "file": "js/meshViewer.js",
+    "status": 200,
+    "bytes": 108163,
+    "sha256": "39d351496a58016f9b73fc18bdf7c42fa8d7f901872c7b8c877ca01048f60e84",
+    "matchesSource": true
+  },
+  {
+    "port": 5183,
+    "file": "js/studioIcons.js",
+    "status": 200,
+    "bytes": 3549,
+    "sha256": "571c21c34555e43974653b310c13dce6f06389d9054024696af18b611d0727e4",
+    "matchesSource": true
+  },
+  {
+    "port": 5202,
+    "file": "js/studioIcons.js",
+    "status": 200,
+    "bytes": 3549,
+    "sha256": "571c21c34555e43974653b310c13dce6f06389d9054024696af18b611d0727e4",
+    "matchesSource": true
+  },
+  {
+    "port": 5183,
+    "file": "js/studioHelp.js",
+    "status": 200,
+    "bytes": 28389,
+    "sha256": "c66a3e9a84afcdf76645a979607cab4b418f72d53c8d1d00677fa0c2f4da5231",
+    "matchesSource": true
+  },
+  {
+    "port": 5202,
+    "file": "js/studioHelp.js",
+    "status": 200,
+    "bytes": 28389,
+    "sha256": "c66a3e9a84afcdf76645a979607cab4b418f72d53c8d1d00677fa0c2f4da5231",
+    "matchesSource": true
+  },
+  {
+    "port": 5183,
+    "file": "css/app.css",
+    "status": 200,
+    "bytes": 28610,
+    "sha256": "86b8a57fc4e0b97a2b836d2c987b95b8fc24c819ffd4f475a1afb5b9ef0e11be",
+    "matchesSource": true
+  },
+  {
+    "port": 5202,
+    "file": "css/app.css",
+    "status": 200,
+    "bytes": 28610,
+    "sha256": "86b8a57fc4e0b97a2b836d2c987b95b8fc24c819ffd4f475a1afb5b9ef0e11be",
+    "matchesSource": true
+  }
+]

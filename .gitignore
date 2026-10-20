@@ -8,4 +8,6 @@ ParseProbe-output.Item.Gbx
 .vscode/
 .vs/
 node_modules/
+# Local publishes, full game logs, exported fixtures, and temporary audit output.
+artifacts/
 !Tests/Browser/Fixtures/Approved/TM2020/*.Item.Gbx

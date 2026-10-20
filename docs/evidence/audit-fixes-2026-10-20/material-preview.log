@@ -1,0 +1,13 @@
+PASS: imported scene payload carries UV0 buffers.
+PASS: each imported visual mesh carries its own material mapping.
+PASS: water/glass texture scrolls in the live viewport.
+PASS: matched textures applied to the right meshes; neutral fallback for absent/ambiguous/unreadable.
+PASS: Trackmania _D/_N/_R maps bind to the PBR material with sRGB base color.
+PASS: textured materials ignore authored color overlays in the viewport.
+PASS: custom color-mask textures use the authored item color.
+PASS: Trackmania ATI1/ATI2 (BC4/BC5) maps decode to usable textures.
+PASS: deterministic matching report (tokens, statuses, files) matches the rules.
+PASS: curated material manifest resolves exact full links.
+PASS: only matched files were read; unreadable DDS failed neutrally; stale load discarded.
+PASS: export bytes unchanged after directory selection and preview rendering.
+PASS: no page errors.

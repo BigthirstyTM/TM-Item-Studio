@@ -137,7 +137,7 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             });
             check('static geometry and source buffers survive time and camera-only framing', () => {
                 const positions = [10, 20, 30, 12, 20, 30, 10, 22, 30];
-                renderStudioScene({ parts: [part('static', 'static', { positions, isMoving: true })] });
+                renderStudioScene({ frameCamera: true, parts: [part('static', 'static', { positions, isMoving: true })] });
                 advance(1000);
                 near(vertex('static'), [10, 20, 30]);
                 near(staticGroup.position.toArray(), [0, 0, 0]); near(movingGroup.position.toArray(), [0, 0, 0]);
@@ -173,8 +173,8 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             check('independent rotation/translation timing and reversed keys', () => {
                 renderStudioScene({ parts: [part()], motions: [motion({ fields: fields({ translationMin: 3, translationMax: 9,
                     translation: track(100, 1, true), angleMaxDegrees: 180, rotation: track(200) }) })] });
-                advance(25);
-                near(vertex('mesh'), [7.5 + Math.cos(Math.PI / 8), Math.sin(Math.PI / 8), 0]);
+                advance(50); // The renderer intentionally runs at 30fps; sample a rendered frame.
+                near(vertex('mesh'), [6 + Math.cos(Math.PI / 4), Math.sin(Math.PI / 4), 0]);
             });
             check('empty and zero-duration timelines stay distinct; easing and reversal match explicit samples', () => {
                 require(sampleTimeline(timeline(empty()), 5, 0, 3, 9) === 3, 'Empty must use minimum');
@@ -208,10 +208,22 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             check('pause, speed and phase updates preserve authored data and camera', () => {
                 renderStudioScene({ parts: [part()], motions: [motion()] });
                 setAnimationPlaying(false); advance(50); near(vertex('mesh'), [1, 0, 0]);
-                setAnimationPlaying(true); setAnimationSpeed(2); tick(75); near(vertex('mesh'), [6, 0, 0]); setAnimationSpeed(1);
+                setAnimationPlaying(true); setAnimationSpeed(2); tick(100); near(vertex('mesh'), [1, 0, 0]); setAnimationSpeed(1);
                 camera.position.set(21, 22, 23); const target = controls.target.toArray();
                 setTypedMotionPreview({ previewPhase01: .25 }); near(vertex('mesh'), [3.5, 0, 0]);
                 near(camera.position.toArray(), [21, 22, 23]); near(controls.target.toArray(), target);
+            });
+            check('edits preserve the camera; reset frames visible geometry and restores world up', () => {
+                const data = { parts: [part('framed', null, { positions: [100, 20, 30, 102, 20, 30, 100, 22, 30] })] };
+                camera.position.set(50, 60, 70); controls.target.set(3, 4, 5);
+                renderStudioScene(data);
+                near(camera.position.toArray(), [50, 60, 70]); near(controls.target.toArray(), [3, 4, 5]);
+                setStudioView('top'); resetCamera();
+                near(camera.up.toArray(), [0, 1, 0]); near(controls.target.toArray(), [101, 21, 30]);
+                near(vertex('framed'), [100, 20, 30]);
+                require(activeStudioView === 'perspective', 'Reset retained top-view state');
+                renderStudioScene({ ...data, frameCamera: true });
+                near(controls.target.toArray(), [101, 21, 30]);
             });
             check('legacy kinematic parts are staged in the moving group and animate', () => {
                 renderStudioScene({ playing: true, hasTranslationMotion: false, isOscillating: true,

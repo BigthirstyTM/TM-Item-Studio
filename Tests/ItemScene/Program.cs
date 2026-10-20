@@ -234,6 +234,14 @@ Check("external entity, mesh, shapes, variants and materials never resolve", () 
     // Prove the fixture trap is live; only this explicit control is allowed to invoke the loader.
     try { _ = staticModel.Mesh; } catch (Exception) { }
     Require(calls == 1, "External resolver trap was not active.");
+
+    var resolvedTable = new GbxRefTable();
+    var resolvedRef = new GbxRefTableFile(resolvedTable, 0, false, "resolved-mesh.Gbx");
+    var resolvedSolid = Solid();
+    resolvedTable.ExternalNodes[resolvedRef.FilePath] = () => new Gbx<CPlugSolid2Model>(resolvedSolid);
+    var resolvedModel = new CPlugStaticObjectModel { MeshFile = resolvedRef };
+    var resolvedScene = ItemScene.Build(resolvedModel, 0, null, null, resolveExternal: true).Preview;
+    Require(resolvedScene.Geometry.Count == 1 && !Has(resolvedScene, "external-reference"), "Opt-in external mesh resolution did not render the dependency.");
 });
 
 Check("unsupported nodes stay visible in inventory", () =>
@@ -584,6 +592,18 @@ Check("collision unknown, ambiguous, missing and invalid layouts are distinguish
     invalidMesh.Triangles = []; invalidMesh.Vertices = [new(float.NaN, 0, 0)];
     invalid = ItemScene.Build(new CPlugSurface { Surf = invalidMesh }, 0).Preview;
     Require(invalid.Collisions.Single().State == ItemSceneState.Invalid && Has(invalid, "nonfinite-position"), "Invalid empty mesh labelled absent.");
+});
+
+Check("skin MaterialIds retain authored shaded geometry slots", () =>
+{
+    var solid = Solid();
+    solid.CustomMaterials = [];
+    solid.MaterialIds = ["_SkinDmg_Skin"];
+    var scene = ItemScene.Build(solid, 0).Preview;
+    Require(scene.Geometry.Count == 1, "Skin geometry was lost.");
+    Require(scene.Materials.Count == 1 && scene.Materials[0].Representation == "SkinMaterial", "Skin material table was not used.");
+    Require(scene.Materials[0].GameMaterialName == "_SkinDmg_Skin", "Skin material identity was lost.");
+    Require(!Has(scene, "mapping-index"), "Valid skin mapping was rejected.");
 });
 
 Console.WriteLine($"{passed} passed, {failed} failed.");

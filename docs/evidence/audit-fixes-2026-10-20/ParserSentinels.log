@@ -1,0 +1,9 @@
+Assembly: 2.4.5
+SHA256: 1a9edc022a1730c17b118a2d417e3d6affff3f0712f159dd56486c587428ebeb
+PASS: ordinary null index
+PASS: indexed null class id
+PASS: unknown class id rejected
+PASS: truncated class id rejected
+PASS: truncated node index rejected
+PASS: empty stream rejected
+6 passed, 0 failed (compatibility patch).

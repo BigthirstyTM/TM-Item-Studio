@@ -114,17 +114,19 @@ assert.ok(fixture, 'Usage: node capability-gating.cjs <light-capability.Item.Gbx
         console.log('PASS: export bytes unchanged after preview-only interactions.');
 
         // A document without a dynamic prefab shows the static-object branch instead:
-        // Convert to KinematicObject disabled, honest wording, no trajectory promise.
+        // Static conversion is offered; an empty document must receive an actionable refusal.
         const emptyItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAFQHeyvoRAAA=', 'base64');
         await page.getByLabel('Open item files').setInputFiles({ name: 'empty.Item.Gbx', mimeType: 'application/octet-stream', buffer: emptyItem });
         await page.getByRole('button', { name: 'Export selected file' }).waitFor();
         await page.getByRole('button', { name: 'WaypointType, Gameplay & Kinematics' }).click();
         const convertKinematic = page.getByRole('button', { name: /Convert to KinematicObject/ });
         await convertKinematic.waitFor();
-        assert.ok(await convertKinematic.isDisabled(), 'Convert to KinematicObject must be disabled');
-        await page.getByText('this editor cannot convert it').waitFor();
+        assert.ok(await convertKinematic.isEnabled(), 'Static conversion is an explicit supported action');
+        await convertKinematic.click();
+        await page.getByText(/Could not convert this static item/i).first().waitFor();
+        assert.equal(await convertKinematic.isEnabled(), true, 'Refusing an empty source must leave the static source intact');
         assert.equal((await page.locator('body').innerText()).match(/trajectory/ig), null, 'Trajectory promise still present');
-        console.log('PASS: both conversion branches disabled with honest wording.');
+        console.log('PASS: static conversion advertised; empty geometry refused without losing the source.');
         assert.deepEqual(errors, []);
     } finally {
         await browser.close();

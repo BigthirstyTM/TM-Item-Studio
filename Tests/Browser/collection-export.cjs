@@ -24,10 +24,10 @@ module.exports = async function checkCollection(baseUrl, work) {
             { name: 'largest numeric ID', kind: 'number', value: '26', editCollection: '1073741823', number: 1073741823, text: null },
             { name: 'change to custom string', kind: 'number', value: '26', editCollection: 'BespokeCollection', number: null, text: 'BespokeCollection' },
             { name: 'clear collection', kind: 'number', value: '26', editCollection: '', number: null, text: null },
-            { name: 'public static reproduction repair', source: 'CustomItem_Static.Item.Gbx', editCollection: '26', number: 26, text: null, id: '', author: '-oTBhm4_S1-UxnlnBizUDA' },
-            { name: 'public kinematic reproduction repair', source: 'CustomItem_Kinematic.Item.Gbx', editCollection: '26', number: 26, text: null, id: '', author: 'BigthirstyTM' },
+            { name: 'public static reproduction repair', source: 'CustomItem_Static.Item.Gbx', editCollection: '26', number: 26, text: null, id: 'Collectable_Base', author: '-oTBhm4_S1-UxnlnBizUDA' },
+            { name: 'public kinematic reproduction repair', source: 'CustomItem_Kinematic.Item.Gbx', editCollection: '26', number: 26, text: null, id: 'Deep_dip_Animated', author: 'BigthirstyTM' },
             { name: 'approved convex-surface pusher no-op', source: 'ObstaclePusher4mLevel1.Item.Gbx',
-                fixtureDirectory: 'Fixtures/Approved', number: 26, text: null, id: '', author: 'Ci0bwEqqQ3Sy2z1WG9qxyQ', requireGeometry: true },
+                fixtureDirectory: 'Fixtures/Approved', number: 26, text: null, id: 'ObstaclePusher4mLevel1', author: 'Ci0bwEqqQ3Sy2z1WG9qxyQ', requireGeometry: true },
         ];
         for (const test of cases) {
             const page = await browser.newPage();

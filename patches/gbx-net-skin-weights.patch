@@ -1,0 +1,22 @@
+﻿diff --git a/Src/GBX.NET/Engines/Plug/CPlugVertexStream.cs b/Src/GBX.NET/Engines/Plug/CPlugVertexStream.cs
+index 4cc8551..0b6bd16 100644
+--- a/Src/GBX.NET/Engines/Plug/CPlugVertexStream.cs
++++ b/Src/GBX.NET/Engines/Plug/CPlugVertexStream.cs
+@@ -11,6 +11,7 @@ public partial class CPlugVertexStream
+     private DataDecl[]? dataDecls;
+     private SortedDictionary<int, Vec2[]> uvs = [];
+     private Vec2[]? blendWeight;
++    private Vec3[]? blendWeight3;
+     private Vec3[]? positions;
+     private Vec3[]? positions2;
+     private Vec3[]? normals;
+@@ -85,6 +86,9 @@ public partial class CPlugVertexStream
+                     case EPlugVDclType.Float3:
+                         switch (decl.WeightCount)
+                         {
++                            case EPlugVDcl.BlendWeight:
++                                rw.Array<Vec3>(ref n.blendWeight3!, n.count);
++                                break;
+                             case EPlugVDcl.Position:
+                                 rw.Array<Vec3>(ref n.positions!, n.count);
+                                 break;

@@ -1,0 +1,113 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "map": {
+          "decorationIdName": "48x48Screen155Day",
+          "name": "TMIS_Final",
+          "nbItems": 9,
+          "vertexCount": 21047,
+          "fileName": "My Maps\\TMIS_Fixes_20261020\\TMIS_Final.Map.Gbx",
+          "nbBakedBlocks": 2304,
+          "fullFileName": "C:\\Users\\PC\\Documents\\Trackmania\\Maps\\My Maps\\TMIS_Fixes_20261020\\TMIS_Final.Map.Gbx",
+          "nbScriptItems": 0,
+          "decorationName": "48x48Screen155Day",
+          "size": [
+            48,
+            40,
+            48
+          ],
+          "nbBlocks": 2304,
+          "bounds": {
+            "meters": {
+              "min": [
+                0,
+                -64,
+                0
+              ],
+              "maxExclusive": [
+                1536,
+                256,
+                1536
+              ],
+              "baseHeightOffset": 64,
+              "maxInclusiveCoordOrigin": [
+                1504,
+                248,
+                1504
+              ],
+              "blockUnitSize": [
+                32,
+                8,
+                32
+              ]
+            },
+            "coord": {
+              "min": [
+                0,
+                0,
+                0
+              ],
+              "maxExclusive": [
+                48,
+                40,
+                48
+              ],
+              "maxInclusive": [
+                47,
+                39,
+                47
+              ]
+            }
+          },
+          "decorationSize": {
+            "z": 48,
+            "y": 40,
+            "x": 48
+          }
+        },
+        "want": "editor",
+        "inventory": {
+          "nbMacroblocks": 6451,
+          "nbItems": 0,
+          "loadingStatus": "loaded from CGameEditorPluginMap",
+          "note": "Blocks/macroblocks come from CGameEditorPluginMap; items come from E++ inventory wrapper exports.",
+          "source": "pluginMap",
+          "nbTerrainBlocks": 1,
+          "isScanningBlocks": false,
+          "isScanningMacroblocks": false,
+          "loadingStatusShort": "ready",
+          "isScanningItems": false,
+          "nbBlocks": 3757
+        },
+        "warnings": [],
+        "mode": "MapEditor",
+        "checks": {
+          "modeOk": true,
+          "calculatingShadows": false,
+          "socketAlive": true,
+          "editorReadyForRequest": true,
+          "inventoryReady": true,
+          "menuModuleAvailable": false,
+          "dialogClear": true,
+          "eppToolPack": true,
+          "hasChallenge": true
+        },
+        "dialog": {
+          "dialogKind": "none",
+          "available": true,
+          "hasFrame": false,
+          "dialog": 0
+        },
+        "blockingReasons": [],
+        "ready": true
+      },
+      "success": true
+    },
+    "tool": "GetReadiness"
+  }
+}
