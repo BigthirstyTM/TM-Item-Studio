@@ -1,0 +1,9 @@
+[meta]
+name = "TMIS FX Custom Composite Placement"
+author = "TM Item Studio"
+category = "Development"
+version = "0.1.0"
+site = ""
+
+[script]
+dependencies = ["Editor"]

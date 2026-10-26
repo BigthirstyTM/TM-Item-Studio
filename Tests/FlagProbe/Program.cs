@@ -28,6 +28,7 @@ Gbx.LZO = new GBX.NET.LZO.MiniLZO();
 const string GameData = @"C:\Users\PC\OpenplanetNext\Extract\GameData";
 
 var argsList = args.ToList();
+if (argsList.FirstOrDefault() == "--research") return FlagResearch.Run(argsList.Skip(1).ToArray());
 var tagsIndex = argsList.IndexOf("--tags");
 if (tagsIndex >= 0 && tagsIndex + 1 < argsList.Count)
 {
@@ -662,8 +663,8 @@ void LodWalk(object node, string path, HashSet<object> seen, int depth)
                     ? buffer.GetType().GetProperty("Indices")?.GetValue(buffer) as int[] : null;
                 BoxAligned? bounds = visual is CPlugVisual plugVisual ? plugVisual.BoundingBox : null;
                 var boundsText = bounds is not { } box ? ""
-                    : $", bounds [{Round(box.X)},{Round(box.Y)},{Round(box.Z)}]-[{Round(box.X2)},{Round(box.Y2)},{Round(box.Z2)}] "
-                        + $"(size {Round(box.X2 - box.X)}x{Round(box.Y2 - box.Y)}x{Round(box.Z2 - box.Z)})";
+                    : $", bounds center=[{Round(box.X)},{Round(box.Y)},{Round(box.Z)}] half=[{Round(box.X2)},{Round(box.Y2)},{Round(box.Z2)}] "
+                        + $"(size {Round(2 * box.X2)}x{Round(2 * box.Y2)}x{Round(2 * box.Z2)})";
                 Console.WriteLine($"  {Indent(depth + 2)}visual {visualIndex}: {visualType.Name}, "
                     + $"vertices {(positions?.Length.ToString() ?? "?")}, indices {(indices?.Length.ToString() ?? "?")}{boundsText}");
                 if (visualType.GetProperty("Chunks", BindingFlags.Public | BindingFlags.Instance)?.GetValue(visual) is IEnumerable visualChunks)
@@ -863,9 +864,9 @@ int DescribeItems(List<string> files)
             {
                 var entries = enumerable.Cast<object?>().ToList();
                 if (entries.Count == 0) continue;
-                if (argsList.Contains("--members") && entries[0] is not null)
-                    Console.WriteLine($"    members of {entries[0].GetType().FullName}: "
-                        + string.Join(", ", entries[0].GetType()
+                if (argsList.Contains("--members") && entries[0] is { } firstEntry)
+                    Console.WriteLine($"    members of {firstEntry.GetType().FullName}: "
+                        + string.Join(", ", firstEntry.GetType()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                             .Select(x => $"{x.Name}:{x.PropertyType.Name}")));
                 var slotFiles = entries.Select(FileOf).ToList();

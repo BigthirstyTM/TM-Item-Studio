@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Models/FxEmissionPoint.cs" Link="FxEmissionPoint.cs" />
+    <Compile Include="../../Models/FxMeshPreview.cs" Link="FxMeshPreview.cs" />
+    <Compile Include="../../Models/FxEmitterTransform.cs" Link="FxEmitterTransform.cs" />
+    <Compile Include="../../Models/FxIdentity.cs" Link="FxIdentity.cs" />
+    <Compile Include="../../Models/ItemScene.cs" Link="ItemScene.cs" />
+    <Compile Include="../../Models/ItemSceneTraversal.cs" Link="ItemSceneTraversal.cs" />
+    <Compile Include="../../Models/ItemSceneGeometry.cs" Link="ItemSceneGeometry.cs" />
+    <Compile Include="../../Models/ItemSceneGeometryCache.cs" Link="ItemSceneGeometryCache.cs" />
+    <Reference Include="GBX.NET"><HintPath>../../lib/GBX.NET.dll</HintPath><Private>true</Private></Reference>
+    <PackageReference Include="GBX.NET.LZO" Version="2.1.6" />
+    <PackageReference Include="TmEssentials" Version="2.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
+  </ItemGroup>
+</Project>

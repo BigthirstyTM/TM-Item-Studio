@@ -155,6 +155,16 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                 require(collisionGroup.visible === false, 'Collision should start hidden'); toggleLayer('collision'); toggleLayer('meshes');
                 require(collisionGroup.visible && !movingGroup.visible, 'Mesh visibility also hides collision'); toggleLayer('meshes');
             });
+            check('flag conversion anchor is visible in item space and follows its motion owner', () => {
+                renderStudioScene({ parts: [part('flag-mesh', 'child')], motions: [motion()] });
+                setFlagConversionAnchor(2, 3, 4, true);
+                scene.updateMatrixWorld(true);
+                near(flagAnchorObject.position.toArray(), [2, 3, 4]);
+                advance(50);
+                scene.updateMatrixWorld(true);
+                near(flagAnchorObject.position.toArray(), [7, 3, 4]);
+                require(flagAnchorObject.visible && flagAnchorObject.userData.type === 'flag-anchor', 'Flag anchor marker was not visible/editable');
+            });
             check('nonidentity parent and child rest transforms compose without framing offsets', () => {
                 const rest = new THREE.Matrix4().makeTranslation(10, 0, 0).multiply(new THREE.Matrix4().makeRotationZ(Math.PI / 2)).toArray();
                 renderStudioScene({ parts: [part('rest', 'child', { positions: [10, 1, 0, 9, 0, 0, 10, 0, 0] })], motions: [motion({
@@ -212,6 +222,20 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
                 camera.position.set(21, 22, 23); const target = controls.target.toArray();
                 setTypedMotionPreview({ previewPhase01: .25 }); near(vertex('mesh'), [3.5, 0, 0]);
                 near(camera.position.toArray(), [21, 22, 23]); near(controls.target.toArray(), target);
+            });
+            check('baked cloth frames interpolate and obey play/pause and preview toggle', () => {
+                const base = part('cloth');
+                const frame0 = base.positions;
+                const frame1 = [2, 0, 0, 1, 1, 0, 1, 0, 0];
+                renderStudioScene({ playing: true, parts: [{ ...base,
+                    // Three baked frames; the final frame closes the loop at frame zero.
+                    animationPositions: [...frame0, ...frame1, ...frame0], animationFrameCount: 3, animationPeriodSeconds: 4 }] });
+                setClothAnimationPreview(true); setAnimationPlaying(true); advance(1000);
+                const movingPose = vertex('cloth');
+                require(movingPose[0] > 1.05 && movingPose[0] < 2, `Baked cloth did not interpolate a frame: ${movingPose}`);
+                setAnimationPlaying(false); const frozen = vertex('cloth'); advance(1000); near(vertex('cloth'), frozen);
+                setClothAnimationPreview(false); advance(1000); near(vertex('cloth'), frozen);
+                setClothAnimationPreview(true); setAnimationPlaying(true);
             });
             check('edits preserve the camera; reset frames visible geometry and restores world up', () => {
                 const data = { parts: [part('framed', null, { positions: [100, 20, 30, 102, 20, 30, 100, 22, 30] })] };

@@ -10,10 +10,12 @@
     "test:kinematic-preservation": "node run-kinematic-preservation.cjs",
     "test:material-preview": "node run-material-preview.cjs",
     "test:variant-navigation": "node run-kinematic-preservation.cjs --variants",
+    "test:waving-flag-converter": "node run-waving-flag-converter.cjs",
     "test:workflow-regressions": "node workflow-regressions.cjs",
     "test:helper-coverage": "node helper-coverage.cjs",
     "test:icon-pipeline": "node icon-pipeline.cjs",
-    "test:native-fixtures": "node native-export-fixtures.cjs"
+    "test:native-fixtures": "node native-export-fixtures.cjs",
+    "test:fx-visibility": "node fx-visibility.cjs"
   },
   "devDependencies": { "playwright": "1.61.1" }
 }

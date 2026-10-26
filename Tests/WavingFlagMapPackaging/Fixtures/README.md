@@ -1,0 +1,11 @@
+# Native map fixture provenance
+
+`NativeSaved.Map.Gbx` is the immutable Trackmania native save captured on 22 October 2026 during the disposable Stadium flag visibility experiment. Original source: `artifacts/flag-selfcontained-20261022/gravity-start-race-visibility-native/TMIS_Gravity_Three_Shapes_Start_Visibility_Native.Map.Gbx`.
+
+SHA-256: `431C9F7B40652DE7941E68C0005175443C9E80E8FAEF2BAEC918904A7C157E5C` (1,734,699 bytes). It contains five road blocks, one native Flag16m and three embedded custom flag anchors, native validation data including the author time and validation ghost, and the native writer's unresolved material-reference layout. The fixture contains no account credentials.
+
+The selected Long250 repair must produce SHA-256 `C043DCB2A0925DC1503D73446209D96B230BFE8E756C8940F47B6DED9A664A59`. Repairing Swallowtail, Long250 and Round sequentially must produce the accepted full proof map SHA-256 `F4899504479FEED65073C29D0DA7D16D0F3F703AE743B5A2706CA2E171C7869E`. Source Items and exact three dependencies are the tracked files in `Resources/Flags`, embedded in the test executable.
+
+Run `dotnet run --project Tests/WavingFlagMapPackaging`. No ignored artifacts or generated binaries from another suite are required. Optional `-- --fixtures <new-directory>` emits the four browser inputs. The no-native browser input is created offline by removing the native anchor and serializing a separate map; it is a refusal control and is not native gameplay evidence. These checks prove binary preservation and bounded matching only; they do not run the game or establish rendering or validation acceptance.
+
+The browser harness uses `-- --verify-output <browser-map> <desktop-expected-map> <native-input-map> <source-package-zip> <new-report-json>`. It verifies exact map headers, restoration of the original raw map body by replacing only the ZIP and its three enclosing length words, all embedded uncompressed payloads, exact selected Item normalization, original unrelated ZIP local/central metadata, and byte-idempotent desktop repair. Desktop and WASM Deflate bytes may differ; newly written ZIP records may use DOS or Unix creator metadata, and new dependencies may gain Unix default permissions. The verifier allows only these explicit differences and records them. It does not run the game.

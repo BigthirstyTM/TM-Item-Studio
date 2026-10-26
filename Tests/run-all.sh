@@ -15,6 +15,8 @@ cd "$root" || exit 1
 
 suites=(
     FlagConversion
+    WavingFlagExport
+    WavingFlagMapPackaging
     ItemEdits
     ItemIcons
     ItemMaterials

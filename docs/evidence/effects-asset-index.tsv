@@ -1,0 +1,41 @@
+﻿assetKind	relativePath	bytes	parserClass	refPath	notes
+item	Items/ShowFogger8M.Item.Gbx	1992	CGameItemModel	Media/Prefab/Items/Show/Fogger8M.Prefab.Gbx; Media/PlaceParam/Fogger.PlaceParam.Gbx	Ornament; Type=Lamp; 1 variant
+item	Items/ShowFogger16M.Item.Gbx	2024	CGameItemModel	Media/Prefab/Items/Show/Fogger16M.Prefab.Gbx; Media/PlaceParam/Fogger.PlaceParam.Gbx	Ornament; Type=Lamp; 1 variant
+item	Items/ShowFoggerWithLight8m.Item.Gbx	2330	CGameItemModel	Media/Prefab/Items/Show/FoggerWithLight8m.Prefab.Gbx; Media/PlaceParam/Fogger.PlaceParam.Gbx	Ornament; Type=Lamp; adds FoggerSpot.Light through prefab
+item	Items/ShowFoggerWithLight16m.Item.Gbx	2360	CGameItemModel	Media/Prefab/Items/Show/FoggerWithLight16M.Prefab.Gbx; Media/PlaceParam/Fogger.PlaceParam.Gbx	Ornament; Type=Lamp; adds FoggerSpot.Light through prefab
+item	Items/Sparkler8m.Item.Gbx	2908	CGameItemModel	Media/Prefab/Items/Show/Sparkler8m.Prefab.Gbx; Media/PlaceParam/Fogger.PlaceParam.Gbx	Ornament; 1 variant
+item	Items/Sparkler16m.Item.Gbx	2588	CGameItemModel	Media/Prefab/Items/Show/Sparkler16m.Prefab.Gbx; Media/PlaceParam/Fogger.PlaceParam.Gbx	Ornament; 1 variant
+prefab	Media/Prefab/Items/Show/Fogger8M.Prefab.Gbx	41654	CPlugPrefab	Material/Technics.Material.Gbx; Material/Grass.Material.Gbx; Prefab/Items/Show/Fogger8M.FxSys.Gbx	Dyna carrier + FxSystem
+prefab	Media/Prefab/Items/Show/Fogger16M.Prefab.Gbx	41616	CPlugPrefab	Material/Technics.Material.Gbx; Prefab/Items/Show/Fogger16M.FxSys.Gbx	Dyna carrier + FxSystem
+prefab	Media/Prefab/Items/Show/FoggerWithLight8m.Prefab.Gbx	43391	CPlugPrefab	Material/Technics.Material.Gbx; Light/FoggerSpot.Light.Gbx; Prefab/Items/Show/Fogger8M.FxSys.Gbx	Dyna carrier + light + FxSystem
+prefab	Media/Prefab/Items/Show/FoggerWithLight16M.Prefab.Gbx	43313	CPlugPrefab	Material/Technics.Material.Gbx; Light/FoggerSpot.Light.Gbx; Prefab/Items/Show/Fogger16M.FxSys.Gbx	Dyna carrier + light + FxSystem
+prefab	Media/Prefab/Items/Show/Sparkler8m.Prefab.Gbx	74524	CPlugPrefab	Material/Technics.Material.Gbx; Prefab/Items/Show/Sparkler8m.FxSys.Gbx	Dyna carrier + FxSystem
+prefab	Media/Prefab/Items/Show/Sparkler16m.Prefab.Gbx	75458	CPlugPrefab	Material/Technics.Material.Gbx; Prefab/Items/Show/Sparkler16m.FxSys.Gbx	Dyna carrier + FxSystem
+fxsys	Media/Prefab/Items/Show/Fogger8M.FxSys.Gbx	355	unknown CPlugFxSystem (GBX.NET parser gap)	MotionParticleEmitterModel/Fogger8M.ParticleModel.Gbx	RefTable parsed; root class 0x0915C000
+fxsys	Media/Prefab/Items/Show/Fogger16M.FxSys.Gbx	357	unknown CPlugFxSystem (GBX.NET parser gap)	MotionParticleEmitterModel/Fogger16M.ParticleModel.Gbx	RefTable parsed; root class 0x0915C000
+fxsys	Media/Prefab/Items/Show/Sparkler8m.FxSys.Gbx	746	unknown CPlugFxSystem (GBX.NET parser gap)	MotionParticleEmitterModel/Sparkler8m.ParticleModel.Gbx; MotionParticleEmitterModel/SparklerEnd8m.ParticleModel.Gbx	RefTable parsed; root class 0x0915C000
+fxsys	Media/Prefab/Items/Show/Sparkler16m.FxSys.Gbx	594	unknown CPlugFxSystem (GBX.NET parser gap)	MotionParticleEmitterModel/Sparkler16m.ParticleModel.Gbx; MotionParticleEmitterModel/SparklerEnd16m.ParticleModel.Gbx	RefTable parsed; root class 0x0915C000
+fxsys	Media/Prefab/Items/Show/PodiumSparkler.FxSys.Gbx	924	unknown CPlugFxSystem (GBX.NET parser gap)	MotionParticleEmitterModel/PodiumSparkler.ParticleModel.Gbx; MotionParticleEmitterModel/PodiumSparklerEnd.ParticleModel.Gbx	Additional native sparkler carrier
+particleModel	MotionParticleEmitterModel/Fogger8M.ParticleModel.Gbx	1846	CPlugParticleEmitterModel	Media/Texture/FoggerSmoke.Texture.gbx	CPlugParticleEmitterModel; 1 submodel
+particleModel	MotionParticleEmitterModel/Fogger16M.ParticleModel.Gbx	1847	CPlugParticleEmitterModel	Media/Texture/FoggerSmoke.Texture.gbx	CPlugParticleEmitterModel; 1 submodel
+particleModel	MotionParticleEmitterModel/Sparkler8m.ParticleModel.Gbx	1863	CPlugParticleEmitterModel	Media/Texture/Sparkler_D.Texture.gbx	CPlugParticleEmitterModel; 1 submodel
+particleModel	MotionParticleEmitterModel/Sparkler16m.ParticleModel.Gbx	1864	CPlugParticleEmitterModel	Media/Texture/Sparkler_D.Texture.gbx	CPlugParticleEmitterModel; 1 submodel
+particleModel	MotionParticleEmitterModel/SparklerEnd8m.ParticleModel.Gbx	1883	CPlugParticleEmitterModel	Media/Texture/SparklerEnd_D.Texture.gbx	CPlugParticleEmitterModel; end submodel
+particleModel	MotionParticleEmitterModel/SparklerEnd16m.ParticleModel.Gbx	1867	CPlugParticleEmitterModel	Media/Texture/SparklerEnd_D.Texture.gbx	CPlugParticleEmitterModel; end submodel
+particleModel	MotionParticleEmitterModel/PodiumSparkler.ParticleModel.Gbx	1884	CPlugParticleEmitterModel	Media/Texture/Sparkler_D.Texture.gbx	Additional native sparkler carrier
+particleModel	MotionParticleEmitterModel/PodiumSparklerEnd.ParticleModel.Gbx	1873	CPlugParticleEmitterModel	Media/Texture/SparklerEnd_D.Texture.gbx	Additional native sparkler carrier
+texture	Media/Texture/FoggerSmoke.Texture.gbx	359	CPlugBitmap	Media/Texture/Image/FoggerSmoke.dds	Official fogger bitmap dependency
+texture	Media/Texture/Sparkler_D.Texture.gbx	358	CPlugBitmap	Media/Texture/Image/Sparkler_D.dds	Official sparkler bitmap dependency
+texture	Media/Texture/SparklerEnd_D.Texture.gbx	361	CPlugBitmap	Media/Texture/Image/SparklerEnd_D.dds	Official sparkler end bitmap dependency
+waterParticle	Vehicles/MotionParticleEmitterModel/Water/WaterSpray.ParticleModel.Gbx	3447	CPlugParticleEmitterModel	Media/Texture/WaterSplash.Texture.gbx	Candidate visual sprinkler carrier; no official Sprinkler*.Item.Gbx
+waterParticle	Vehicles/MotionParticleEmitterModel/Water/WaterSprayThin.ParticleModel.Gbx	1876	CPlugParticleEmitterModel	Media/Texture/WaterSplash.Texture.gbx	Candidate thin spray carrier; no official Sprinkler*.Item.Gbx
+waterParticle	Vehicles/MotionParticleEmitterModel/Water/WaterSprayAndSteam.ParticleModel.Gbx	3590	CPlugParticleEmitterModel	Vehicles/Media/Texture/WaterSplash.Texture.gbx; Effects/Media/Texture/WHITE_SMOKE_2.Texture.gbx	Candidate spray/steam carrier; no official Sprinkler*.Item.Gbx
+item	Items/ShowTorch.Item.Gbx	1891	CGameItemModel	Media/Prefab/Items/Show/Torch.Prefab.Gbx; Media/PlaceParam/Lamp.PlaceParam.Gbx	Official torch item; prefab refs TorchSmoke.FxSys, TorchLight.Light and ItemTorchFlame.Material
+item	Items/ShowTorchSmall.Item.Gbx	2224	CGameItemModel	Media/Prefab/Items/Show/TorchSmall.Prefab.Gbx; Media/PlaceParam/Lamp.PlaceParam.Gbx	Official small torch item; prefab refs TorchSmoke.FxSys and TorchLight.Light
+prefab	Media/Prefab/Items/Show/Torch.Prefab.Gbx	38622	CPlugPrefab	Material/ItemTorchFlame.Material.gbx; Light/TorchLight.Light.gbx; Prefab/Items/Show/TorchSmoke.FxSys.Gbx	Native torch flame + smoke + light carrier
+prefab	Media/Prefab/Items/Show/TorchSmall.Prefab.Gbx	45094	CPlugPrefab	Material/ItemTorchFlame.Material.gbx; Light/TorchLight.Light.gbx; Prefab/Items/Show/TorchSmoke.FxSys.Gbx	Native small torch flame + smoke carrier
+fxsys	Media/Prefab/Items/Show/TorchSmoke.FxSys.Gbx	359	unknown CPlugFxSystem (GBX.NET parser gap)	MotionParticleEmitterModel/TorchSmoke.ParticleModel.Gbx	Additional Stadium carrier; custom clone not yet native-tested
+fxsys	Media/Prefab/Items/Show/PodiumSparkler.FxSys.Gbx	924	unknown CPlugFxSystem (GBX.NET parser gap)	MotionParticleEmitterModel/PodiumSparkler.ParticleModel.Gbx; MotionParticleEmitterModel/PodiumSparklerEnd.ParticleModel.Gbx	Additional Sparkler carrier; no direct Item root found
+particleModel	MotionParticleEmitterModel/TorchSmoke.ParticleModel.Gbx	1848	CPlugParticleEmitterModel	Media/Texture/FoggerSmoke.Texture.gbx	Torch smoke particle source
+particleModel	Effects/Particles/FlyingLeaves_BaseModel.ParticleModel.Gbx	1831	CPlugParticleEmitterModel	Media/Texture/Confettis.Texture.gbx	Hidden environment particle source; item carrier not proven
+particleModel	Effects/Particles/InFogEmitter.ParticleModel.Gbx	1947	CPlugParticleEmitterModel	Vehicles/Media/Material/ParticleSmokeAsphalt.Material.gbx; ShootMania/Media/Texture/LightGreySmoke.Texture.gbx	Hidden fog particle source; item carrier not proven

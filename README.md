@@ -24,6 +24,26 @@ limits. Focused regression commands are in [Tests/Browser](Tests/Browser/README.
 - Measure an item against the game's own flag items and convert it into a flag
   (`Type=Flag` variant, upright world-aligned placement with the flag's eight patch layouts) as a
   separate `.Item.Gbx`, leaving the original usable.
+- Export tested waving flag shapes or convert supported inline static geometry into
+  animated cloth, with material dependencies and a saved-map packaging step.
+
+## FX items (Sparkler, Fogger and sprinkler research)
+
+The **Audio & effects** panel now recognizes embedded `CPlugFxSystem` carriers,
+shows the retained particle dependencies and exposes the validated emission-point
+XYZ writer. Existing emitters are translated together, so the two Sparkler
+emitters keep their native spacing. All other particle, GPU, smoke, atlas,
+colour, physics and graph-composition fields remain preserved/read-only until a
+one-variable native fixture passes. The disabled **Add FX** control is
+intentional: no safe graph merge/save route is proven yet.
+
+The native status and hidden-carrier results are recorded in
+[`docs/evidence/fx-native-test-status-2026-10-25.md`](docs/evidence/fx-native-test-status-2026-10-25.md)
+and the complete field matrix is [`docs/evidence/fx-settings-matrix.tsv`](docs/evidence/fx-settings-matrix.tsv).
+The English route index is [`docs/fx-research-index-2026-10-25.md`](docs/fx-research-index-2026-10-25.md);
+the row-level hidden inventory is [`docs/evidence/fx-hidden-catalog-full.tsv`](docs/evidence/fx-hidden-catalog-full.tsv).
+The Audio & effects tab also shows the carrier and candidate route table so
+preload-only assets are clearly separated from supported item templates.
 
 ## Macroblock export (item instancing)
 
@@ -53,6 +73,16 @@ up in the viewport as soon as the referenced item is open.
 
 ## Flag items
 
+The **Flag item conversion** tab includes a **Waving flag converter**. It exports
+the exact tested swallowtail, long and round shapes, or creates an experimental
+86-frame cloth animation from supported static triangles. The download is a ZIP
+with the Item and three material dependencies. **Package a saved map** embeds the
+complete graph after Trackmania saving. The proven cold-start setup requires a
+genuine native Stadium 16 m flag in the map. New source-mesh conversions and new
+packaged outputs still need native testing. See the
+[technical converter guide](docs/waving-flag-converter.md) and
+[native evidence](docs/custom-flag-embedded-no-openplanet-2026-10-22.md).
+
 The **Flag** tab measures the open item against the settings read out of the game's own flag
 (`Flag16m.Item.Gbx`, its prefab, its place-param and its cloth mesh) and can convert the item into
 a flag. The conversion changes classification and placement only — pivots, geometry, materials and
@@ -70,10 +100,10 @@ rejected *before* anything is written, so a refused conversion leaves the bytes 
 - **Convert to flag** writes a new item whose id ends in `_Flag`, so both stay in the inventory.
   The export runs on its own snapshot of the document and reparses its own bytes before
   downloading.
-- The waving cloth is the author's mesh and material: the conversion copies the flag's
-  classification and placement, never a mesh. The cloth is out of scope of the conversion; see
-  [docs/item-flag-conversion.md](docs/item-flag-conversion.md) for the measured mesh, material and
-  LOD settings and for the open question about the cloth at long range.
+- The **Classification and placement only** section retains this original metadata
+  operation. It does not animate a mesh; use the new waving converter for that.
+  [docs/item-flag-conversion.md](docs/item-flag-conversion.md) records the measured
+  metadata, mesh and LOD settings.
 
 `Tests/FlagConversion` covers the measured shape, the save/reparse round trip, the export snapshot
 isolation and the refused-write byte equality; `Tests/FlagProbe` is the evidence tool that reads
@@ -300,6 +330,19 @@ the current checkout automatically; no development server is needed. See
 [collection regression details](Tests/Browser/CollectionArchive/README.md).
 
 ## Notes
+
+### Embedded FX carriers
+
+Studio can open an embedded Sparkler/Fogger carrier, show its real mesh and
+particle dependencies, move the validated emitter origin in item space, and
+export a native `.Item.Gbx` while preserving the opaque FX graph. The export
+does not require the optional `.fxsettings.json` diagnostic file. Spawn rate,
+lifetime, size, colour, physics, render mode, texture replacement, new FX
+graphs and kinematic conversion remain read-only until an independent native
+one-variable probe proves both loading and persistence. See the
+[FX settings matrix](docs/evidence/fx-settings-matrix.tsv),
+[particle-model audit](docs/custom-fx-particle-model-audit-2026-10-25.md) and
+[hidden FX catalog](docs/custom-fx-hidden-catalog-2026-10-25.md).
 
 Imported kinematic constraints retain their authored axes, scalar ranges, easing,
 reversed keys and separate translation/rotation timelines. The kinematics panel

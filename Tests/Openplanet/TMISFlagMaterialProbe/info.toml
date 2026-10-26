@@ -1,0 +1,9 @@
+[meta]
+name = "TMIS flag material probe (temporary)"
+author = "TM Item Studio"
+category = "Developer"
+version = "0.1.0"
+
+[script]
+defines = ["DEV"]
+dependencies = ["Editor"]

@@ -1,6 +1,20 @@
-# Flag items (TM2020): the measured settings, and what is still open
+# Flag items (TM2020): measured metadata and waving-cloth exports
 
-**Date:** 2026-10-15
+**Date:** 2026-10-15; runtime corrections through 2026-10-22
+**Current implementation:** [Waving flag converter and embedded-map export](waving-flag-converter.md).
+**Current native evidence:** [Embedded custom flags without Openplanet](custom-flag-embedded-no-openplanet-2026-10-22.md).
+Long, swallowtail and round custom flags now animate in a dependency-complete
+embedded map after a cold start without Openplanet or loose custom assets,
+including an ordinary Local race. The proven route still requires a genuine
+native Flag16m anchor and dependency/reference repair after native saving.
+The authoring package contains an Item plus three sibling dependencies; a
+single independently initialized Item remains unresolved. New SourceMesh
+conversion writes actual animated geometry but is offline verified only.
+The first comparison on the 2026-02-02 game build showed normally sized, waving
+custom candidates. Later isolated tests **did reproduce severe rendering failures**:
+oversized/deformed cloth, missing cloth, and edited geometry not visibly respected.
+Those early failures are historical controls. Placement metadata alone does not
+create cloth or repair its rendering; the new waving exporter is a separate path.
 **Evidence:** the game's own files under `C:\Users\PC\OpenplanetNext\Extract\GameData`
 (`Stadium/Items/Flag16m.Item.Gbx`, `Stadium/Media/Prefab/Items/Flag/Flag16m.Prefab.Gbx`,
 `Stadium/Media/Dyna/Flag/Flag.DynaObject.Gbx` and `Flag.Mesh.Gbx`,
@@ -11,8 +25,7 @@
 **Reproduce:** `Tests/FlagProbe` (`dump`, `--tags`, `--placement`, `--profile`, `--describe`,
 `--lod`, `--lodstats`, `--entries`, `--convert`) and `Tests/FlagConversion` (the conversion suite).
 
-Nothing here is documented by Nadeo; every value below was read out of the files. There is no
-public tooling or write-up for custom flags, so the vanilla flag *is* the specification.
+Every value below was read out of files. The vanilla flag is the reference for this investigation.
 
 ## 1. What makes an item a flag
 
@@ -93,14 +106,20 @@ range: they are what makes two placed flags wave out of step.
 | Visuals | 5: 180, 180, 72, 72, 18 indices | 5: 726, 216, 54, 24, 6 indices |
 | `LodMask` per visual | `1, 1, 2, 2, 4` | `1, 2, 4, 8, 16` |
 | Materials | `Technics`, `TechnicsTrims` | `ItemFlag` (LOD0–3), `ItemFlagNoAnim` (far LOD) |
-| Local bounds | 0.135 × 13.008 × 0.135 m | 2.265 m tall, 0.098 m thick, 1.965 m from the pole axis |
+| Authored local AABB size | approximately 0.270 × 14.016 × 0.270 m across pole visuals | LOD0: approximately 3.930 × 3.628 × 2.016 m |
+
+`BoxAligned` stores **center and half extent**, not minimum and maximum. The earlier
+dimensions were calculated incorrectly. The actual LOD0 cloth vertex envelope over
+all 86 frames is approximately 4.031 × 4.523 × 4.209 m; this differs from its authored
+AABB. Recalculating bounds over all frames did not by itself fix custom rendering.
 
 The cloth's two materials are the animated one (`ItemFlag.Material.Gbx`, whose shader is
 `Techno3\Media\Material\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx` — a vertex-tween "warp"
 shader) and a non-animated one (`ItemFlagNoAnim.Material.Gbx`) for the far LOD. A mesh can carry
 them either as external `Materials` references (vanilla) or as `CustomMaterials` records whose
-`Link` names the game material (`ItemFlag`, `ItemFlagNoAnim`) — the custom item uses the latter and
-still waves, so the link form is sufficient.
+`Link` names the game material (`ItemFlag`, `ItemFlagNoAnim`). The link form loaded
+and produced motion in some tests, but did not establish correct rendering of an
+independent edited cloth mesh.
 
 **A mesh with more LOD levels than LOD distances is normal.** In the corpus, 6 488 of 6 588
 Nadeo solids have shaded-geometry masks that address more levels than `LodMaxDistAtFov90` has
@@ -131,13 +150,13 @@ LOD data should not be "fixed" by padding the distance list.
 - A newer variant-list version is refused rather than downgraded.
 - An item without placement parameters is classified and reported, but keeps its own placement and
   the note says so.
-- Verified by `Tests/FlagConversion` (68 checks: measured-shape assertions, save/reparse round
+- Verified by `Tests/FlagConversion` (74 checks on 2026-10-21: measured-shape assertions, save/reparse round
   trips, export snapshot isolation, refused-write byte equality) and registered in
   `Tests/run-all.sh`.
 
-### The XertroV flag (a real repair)
+### The XertroV flag (placement metadata correction)
 
-`ztest-flag3.Item.Gbx` was tagged like a flag but carried the wrong shape. Measured deviations
+`ztest-flag3.Item.Gbx` was tagged like a flag but carried different placement metadata. Measured deviations
 before and after `Tests/FlagProbe --convert`:
 
 | Field | Before | After |
@@ -149,50 +168,57 @@ before and after `Tests/FlagProbe --convert`:
 | `PlacementClass.AlignToInterior` | `true` | `false` |
 | `PlacementClass.PatchLayouts` | 9 entries | 8 entries |
 
-Six deviations became zero, and the file reparses with `isFlag=True`. That is also the answer to
-"why did the old custom flag not work": it was *classified* as a flag in the inventory, but its
-placement class was an ordinary aligned one, so it did not stand upright and did not align as a
-flag. (See [docs/evidence/flag-xertrov-repair.txt](evidence/flag-xertrov-repair.txt).)
+Six deviations became zero, and the file reparses with `isFlag=True`.
+This proves a metadata correction, **not the cause of the reported rendering problem**.
+On 2026-10-21 both the original and the metadata-corrected dynamic flag rendered in the
+controlled placement tests. See [flag-xertrov-repair.txt](evidence/flag-xertrov-repair.txt)
+for the earlier file measurements and the current runtime report for the game observations.
 
-## 4. Still open: the cloth disappears at range
+## 4. Runtime failures: early visibility was insufficient evidence
 
-After the repair the cloth waves and the pole stands, but in game the cloth mesh disappears
-completely once the camera is far enough (the pole keeps rendering), and a flag placed far away
-waves chaotically. Measurements taken so far:
+Early 2026-10-21 tests showed normally sized dynamic inline candidates through 550 m,
+including at `[1360,8,1360]`, in the editor and editor playground, and after saving
+and reopening a map. These were observations of visible flags, not proof that the
+renderer respected the custom vertices. Later tests with an unmistakably different
+raster mesh rendered oversized/deformed cloth, including after a clean game start
+with that candidate alone. Other material-storage variants rendered no cloth.
+The specific earlier origin/distance mechanism has not been isolated.
 
-- The cloth's geometry, `LodMaxDistAtFov90`, `LodMask` list, both wave materials (by link name) and
-  the prefab entry transform are **identical to the vanilla flag's**, byte for byte. A mesh with
+Updated measurements:
+
+- The original custom cloth's parsed vertex positions/topology, `LodMaxDistAtFov90`,
+  `LodMask` list, material link names and prefab entry transform match vanilla. A mesh with
   more LOD levels than distances is the corpus norm (§2).
-- The one remaining structural difference is *storage*: Nadeo keeps the cloth outside the item —
+- A structural difference is *storage*: Nadeo keeps the cloth outside the item —
   `Ents[1].ModelFile` → `Dyna\Flag\Flag.DynaObject.Gbx` → `MeshFile` → `Flag.Mesh.Gbx` — while the
   custom item embeds both the dyna object and its mesh inline in the item, and therefore also keeps
-  a visible second copy of that mesh in the item's own node tree.
+  that mesh in the item's own node tree. Inline graphs loaded in live tests;
+  loading is insufficient evidence of correct custom rendering.
+- The original custom file also differs in index-buffer flags (`0` versus vanilla `2`),
+  material representation, and its missing `090F4000` game-skin header. Both index-flag
+  candidates rendered; setting `2` is preservation of vanilla data, not a confirmed fix.
+- The animated LODs each contain 86 subvisual animation frames. The far LOD is intentionally
+  nonanimated. A geometry edit must account for every frame and LOD; changing classification
+  alone cannot create this animation.
 - Note that no working item in the user's corpus references a sibling `.Mesh.Gbx` either: some
   files sit next to their item, but the items do not reference them (`AutoTerrainer_Test.Item.Gbx`
   has `MeshFile = null`). So "externalise the mesh" is an experiment, not an established fix.
 
-`Tests/FlagProbe --convert` therefore gained three variants that isolate the storage question; they
-were built from the original item and written to `02. Freebuff RE Items`:
+Earlier `Tests/FlagProbe --convert` experiments isolated the storage question. They are
+research fixtures, **not recommended exports**:
 
 | File | Arrangement | What it answers |
 | --- | --- | --- |
-| `XertrovFlagRepair.Item.Gbx` | unchanged: inline dyna object with inline cloth mesh | the current behaviour (cloth vanishes at range, cloth off the pole) |
+| `XertrovFlagRepair.Item.Gbx` | inline dyna object with inline cloth mesh | visible in the 2026-10-21 placement check; older failure not reproduced |
 | `XertrovFlag_nomesh.Item.Gbx` | dyna entry kept, its `Mesh` removed | is the inline cloth mesh itself what the item renderer mishandles? (cloth should be invisible) |
-| `XertrovFlag_static.Item.Gbx` | cloth moved onto a plain `CPlugStaticObjectModel` entry, no dyna body | does the wave survive without a dyna instance (is the waving the vertex-tween material)? |
+| `XertrovFlag_static.Item.Gbx` | cloth moved onto a plain `CPlugStaticObjectModel` entry, no dyna body | **crashed the game on placement** on 2026-10-21; do not use |
 | `XertrovFlag_external.Item.Gbx` + `XertrovFlag_external.Mesh.Gbx` | Nadeo's arrangement: dyna `MeshFile` → companion `.Mesh.Gbx` | does externalising the cloth mesh restore it at range? |
 
-Commands:
-
-```bash
-dotnet run --project Tests/FlagProbe -- --convert \
-  "C:\Users\PC\Documents\Trackmania\Items\XertrovItems\ztest-flag3.Item.Gbx" \
-  "C:\Users\PC\Documents\Trackmania\Items\02. Freebuff RE Items\XertrovFlag_static.Item.Gbx" \
-  --cloth-static
-```
-
-Replace `--cloth-static` with `--cloth-nomesh` or `--cloth-external`; add `--keep-placement` to
-apply only the variant tag and the placement class without normalising the placement-parameter
-values.
+The historically named `--research final` command generates **research candidates**,
+not approved custom templates. All generated models have been archived outside the
+live Items directory. Static-cloth, material-name-only and frame-table-removal
+experiments caused crashes and are rejected; successful GBX.NET parsing is
+insufficient to establish engine safety.
 
 ## 5. Reproducing the measurements
 

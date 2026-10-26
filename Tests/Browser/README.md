@@ -32,3 +32,31 @@ The older `run-*.cjs` commands publish/serve a snapshot themselves; consult each
 runner for its port and optional arguments. Native parsing, inventory visibility,
 placement, motion, and contact remain distinct acceptance levels. See
 [the fix report](../../docs/audit-fixes-2026-10-20.md) for the tested matrix and gaps.
+
+`npm --prefix Tests/Browser run test:waving-flag-converter` builds the bounded
+offline source/map fixtures, publishes this checkout and serves only that output
+on an OS-assigned localhost port. Headless Chromium performs real uploads and
+downloads: all three preset ZIPs must retain the exact audited Item/dependency
+bytes; supported source geometry produces an explicitly unverified animation
+package; unsupported dynamic geometry is refused; a matching native-saved map
+packages with exact decoded payloads and an independently audited raw map splice;
+and a map without native Flag16m
+is refused without a download. It also runs `workflow-regressions.cjs` against
+the same publication, including the older classification-only flag workflow.
+Set `STUDIO_WAVING_EVIDENCE` to a new output directory to preserve downloaded
+packages and the English JSON validation report. The map fixture generator uses
+the pinned native research map documented by `Tests/WavingFlagMapPackaging`;
+these browser checks do not launch Trackmania or establish new native rendering.
+
+For an embedded FX carrier extracted from a native map, run
+`STUDIO_BASE_URL=http://127.0.0.1:5099 npm --prefix Tests/Browser run test:fx-visibility -- <Item.Gbx> <dependency-folder>`.
+The check uploads the local dependency tree, opens the item, and verifies that
+the Audio & effects panel reports the opaque `CPlugFxSystem` carrier and its
+particle texture references.
+
+The desktop and WASM ZIP writers can differ in their Deflate bytes and creator
+OS metadata for newly written records. The independent console verifier checks
+the exact map header, recovery of the original raw body outside the ZIP and
+three length words, exact selected Item/dependency payloads, unrelated raw ZIP
+records and byte-exact idempotency. It records concrete output hashes rather
+than requiring compression streams from different runtimes to be identical.
