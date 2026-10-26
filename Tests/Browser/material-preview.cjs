@@ -65,6 +65,20 @@ function syntheticDds(size, [r, g, b]) {
     block.writeUInt16LE(color, 10); block.writeUInt16LE(color, 12);
     return Buffer.concat([header, block]);
 }
+function syntheticAtiDds(fourCC) {
+    const header = Buffer.alloc(128);
+    header.write('DDS ', 0, 'ascii');
+    header.writeUInt32LE(124, 4);
+    header.writeUInt32LE(0x8100f, 8);
+    header.writeUInt32LE(4, 12); header.writeUInt32LE(4, 16);
+    header.writeUInt32LE(fourCC === 'ATI2' ? 16 : 8, 20);
+    header.writeUInt32LE(32, 76); header.writeUInt32LE(0x4, 80); header.write(fourCC, 84, 'ascii');
+    header.writeUInt32LE(0x1000, 108);
+    const block = Buffer.alloc(fourCC === 'ATI2' ? 16 : 8);
+    block[0] = block[1] = 255;
+    if (fourCC === 'ATI2') block[8] = block[9] = 255;
+    return Buffer.concat([header, block]);
+}
 
 // Matching expectations, all through the real viewer code paths:
 // - link/name token: last path segment, backslash-insensitive, case-folded, `_asset[.N]` stripped
@@ -85,14 +99,20 @@ const MATERIALS = [
     ['solid:8/material:0', 'nothing_like_this'],                   // no candidate → neutral
     ['solid:9/material:0', 'corrupt'],                             // truncated DDS → neutral
     ['solid:10/material:0', 'dup'],                                // dup.png beats sub/dup.png
-    ['solid:11/material:0', 'SWAP']                                // stale-version probe
+    ['solid:11/material:0', 'SWAP'],                               // stale-version probe
+    ['solid:12/material:0', 'bc4'],                                // Trackmania ATI1/BC4 scalar map
+    ['solid:13/material:0', 'bc5'],                                // Trackmania ATI2/BC5 packed map
+    ['solid:14/material:0', null, 'TM_FixtureOnly_CustomMaterial_asset'], // Blender asset material-name fallback
+    ['solid:15/material:0', null, 'GlassWaterWall']                         // glass _T base fallback
 ];
 const EXPECTED_FILES = {
     'solid:0/material:0': 'roadtech_d.png', 'solid:1/material:0': 'roadtech_d.png',
     'solid:2/material:0': 'signage_d.dds', 'solid:3/material:0': 'weird.webp',
     'solid:4/material:0': 'sub/folder/casemixed.png', 'solid:5/material:0': 'multi_d.png',
     'solid:6/material:0': null, 'solid:7/material:0': null, 'solid:8/material:0': null,
-    'solid:9/material:0': 'corrupt.dds', 'solid:10/material:0': 'dup.png', 'solid:11/material:0': 'fastswap.png'
+    'solid:9/material:0': 'corrupt.dds', 'solid:10/material:0': 'dup.png', 'solid:11/material:0': 'fastswap.png',
+    'solid:12/material:0': 'bc4_d.dds', 'solid:13/material:0': 'bc5_d.png', 'solid:14/material:0': 'custommaterial_d.png',
+    'solid:15/material:0': 'glasswaterwall_t.dds'
 };
 const EXPECTED_STATUS = {
     'solid:6/material:0': 'ambiguous', 'solid:7/material:0': 'ambiguous', 'solid:8/material:0': 'absent'
@@ -101,43 +121,73 @@ const EXPECTED_MAPS = { // applied texture image dimensions, per material slot
     'solid:0/material:0': [3, 3], 'solid:1/material:0': [3, 3], 'solid:2/material:0': [4, 4],
     'solid:3/material:0': [5, 5], 'solid:4/material:0': [6, 6], 'solid:5/material:0': [7, 7],
     'solid:6/material:0': null, 'solid:7/material:0': null, 'solid:8/material:0': null,
-    'solid:9/material:0': null, 'solid:10/material:0': [2, 2], 'solid:11/material:0': [4, 4]
+    'solid:9/material:0': null, 'solid:10/material:0': [2, 2], 'solid:11/material:0': [4, 4],
+    'solid:12/material:0': [4, 4], 'solid:13/material:0': [4, 4], 'solid:14/material:0': [4, 4],
+    'solid:15/material:0': [4, 4]
 };
 const MUST_READ = ['roadtech_d.png', 'roadtech_n.png', 'roadtech_r.png', 'signage_d.dds', 'weird.webp', 'Sub/Folder/CaSeMiXeD.PNG',
-    'multi_d.png', 'dup.png', 'corrupt.dds', 'slowload.png', 'fastswap.png'];
+    'multi_d.png', 'dup.png', 'corrupt.dds', 'slowload.png', 'fastswap.png', 'bc4_d.dds', 'bc5_d.png', 'bc5_n.dds',
+    'custommaterial_d.png', 'glasswaterwall_t.dds'];
 const NEVER_READ = ['multi.png', 'sub/dup.png', 'clash_a.png', 'clash_d.png', 'readme.txt'];
-const FILE_COUNT = 16; // 15 images + readme.txt (indexed but never matched)
+const FILE_COUNT = 21; // 20 images + readme.txt (indexed but never matched)
 
 function scenePayload(swapLink) {
     const materials = MATERIALS.map(([slot, link, name]) => ({ path: slot, index: 0, sourceId: 1,
         name: name ?? link ?? 'fixture', state: 'present', representation: 'CustomMaterial',
-        gameMaterialName: name ?? null, gameMaterialLink: link ?? null }));
+        gameMaterialName: name ?? null, gameMaterialLink: link ?? null,
+        // A game material may carry a selectable overlay tint. The viewport
+        // must keep the diffuse texture's real colors when that tint is green.
+        color: slot === 'solid:0/material:0' ? [0, 255, 0]
+            : slot === 'solid:14/material:0' ? [255, 255, 255] : null }));
     materials[11].gameMaterialLink = swapLink;
     const part = (slot, offset) => ({ name: `part-${slot}`, positions: [offset, 0, 0, offset + 1, 0, 0, offset, 1, 0],
+        uvs: [0, 0, 1, 0, 0, 1],
         indices: [0, 1, 2], mappings: [{ materialIndex: null, lodMask: null, materialPath: slot }] });
     // 13 meshes: slot 0 appears twice to pin "the right meshes" per material.
     const parts = MATERIALS.map(([slot], index) => part(slot, index)).concat([part('solid:0/material:0', 100)]);
-    return { materials, parts, playing: false };
+    return { materials, parts, playing: true };
 }
 
 (async () => {
     const work = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-material-preview-'));
-    const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
+    const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_EXECUTABLE ? { executablePath: process.env.CHROMIUM_EXECUTABLE } : {}), args: ['--enable-unsafe-swiftshader'] });
     try {
         const page = await browser.newPage({ acceptDownloads: true, viewport: { width: 1440, height: 1000 } });
         page.setDefaultTimeout(45000);
         const errors = [], warnings = [];
         page.on('pageerror', error => errors.push(error.message));
         page.on('console', message => { if (message.type() === 'warning') warnings.push(message.text()); });
-        await page.goto(process.env.STUDIO_BASE_URL || 'http://127.0.0.1:5183/', { waitUntil: 'networkidle' });
+        await page.goto(process.env.STUDIO_BASE_URL || 'http://127.0.0.1:5183/', { waitUntil: 'domcontentloaded' });
+        await page.evaluate(() => {
+            const originalRender = window.renderStudioScene;
+            window.__lastAppScenePayload = null;
+            window.renderStudioScene = payload => {
+                window.__lastAppScenePayload = payload;
+                return originalRender(payload);
+            };
+        });
         await page.getByLabel('Open item files').setInputFiles(fixture);
-        await page.getByRole('button', { name: 'Export selected file' }).waitFor();
+        await page.getByRole('button', { name: /Export selected file/ }).waitFor().catch(async error => {
+            console.error('Fixture load state: ' + await page.locator('body').innerText());
+            console.error('Buttons: ' + JSON.stringify(await page.locator('button').evaluateAll(buttons => buttons.filter(button => button.textContent.includes('Export')).map(button => ({ text: button.textContent, rect: button.getBoundingClientRect().toJSON(), visibility: getComputedStyle(button).visibility, aria: button.getAttribute('aria-label') })))));
+            throw error;
+        });
         await page.waitForFunction(() => typeof renderer !== 'undefined' && renderer?.domElement.isConnected);
+        assert.ok(await page.evaluate(() => (window.__lastAppScenePayload?.geometryDefinitions ?? [])
+            .some(definition => (definition.uvsBytes?.byteLength ?? definition.uvsBytes?.length ?? 0) > 0)),
+            'the imported scene payload must carry UV0 buffers for textured meshes');
+        console.log('PASS: imported scene payload carries UV0 buffers.');
+        const mappingAudit = await page.evaluate(() => (window.__lastAppScenePayload?.parts ?? [])
+            .filter(part => typeof part.path === 'string' && part.path.includes('/visual:'))
+            .map(part => ({ path: part.path, mappings: part.mappings ?? [] })));
+        assert.ok(mappingAudit.length > 1 && mappingAudit.every(part => part.mappings.length === 1),
+            'each visual mesh must receive only its own shaded material mapping');
+        console.log('PASS: each imported visual mesh carries its own material mapping.');
 
         // Export bytes must be identical before and after every preview step below.
         const exportTo = async filename => {
             const event = page.waitForEvent('download');
-            await page.getByRole('button', { name: 'Export selected file' }).click();
+            await page.getByRole('button', { name: /Export selected file/ }).click();
             const file = path.join(work, filename);
             await (await event).saveAs(file);
             return fs.readFileSync(file);
@@ -192,10 +242,15 @@ function scenePayload(swapLink) {
             'clash_a.png': { type: 'image/png', bytes: [...syntheticPng(5, [230, 140, 30])] },
             'corrupt.dds': { type: 'image/vnd.ms-dds', bytes: [...syntheticDds(4, [90, 30, 160]).subarray(0, 136)] }, // truncated mid-block
             'dup.png': { type: 'image/png', bytes: [...syntheticPng(2, [40, 190, 60])] },
-            'sub/dup.png': { type: 'image/png', bytes: [...syntheticPng(8, [50, 200, 70])] },
-            'slowload.png': { type: 'image/png', bytes: [...syntheticPng(8, [170, 30, 200])], delay: 700 },
-            'fastswap.png': { type: 'image/png', bytes: [...syntheticPng(4, [30, 200, 200])] },
-            'readme.txt': { type: 'text/plain', bytes: Array.from(new TextEncoder().encode('synthetic fixture index - not a texture')) }
+             'sub/dup.png': { type: 'image/png', bytes: [...syntheticPng(8, [50, 200, 70])] },
+             'slowload.png': { type: 'image/png', bytes: [...syntheticPng(8, [170, 30, 200])], delay: 700 },
+             'fastswap.png': { type: 'image/png', bytes: [...syntheticPng(4, [30, 200, 200])] },
+             'bc4_d.dds': { type: 'image/vnd.ms-dds', bytes: [...syntheticAtiDds('ATI1')] },
+             'bc5_d.png': { type: 'image/png', bytes: [...syntheticPng(4, [30, 200, 200])] },
+             'bc5_n.dds': { type: 'image/vnd.ms-dds', bytes: [...syntheticAtiDds('ATI2')] },
+             'custommaterial_d.png': { type: 'image/png', bytes: [...syntheticPng(4, [0, 235, 0])] },
+             'glasswaterwall_t.dds': { type: 'image/vnd.ms-dds', bytes: [...syntheticDds(4, [40, 200, 220])] },
+             'readme.txt': { type: 'text/plain', bytes: Array.from(new TextEncoder().encode('synthetic fixture index - not a texture')) }
         });
 
         // The real panel flow first, while the viewer state is still entirely
@@ -221,7 +276,6 @@ function scenePayload(swapLink) {
         // the slow texture must be discarded, the fast one applied.
         await page.evaluate(payload => renderStudioScene(payload), scenePayload('deep/slowload'));
         await page.evaluate(payload => renderStudioScene(payload), scenePayload('deep/fastswap'));
-
         await page.waitForFunction(expected => {
             const seen = {};
             for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
@@ -231,13 +285,35 @@ function scenePayload(swapLink) {
             });
             return Object.entries(expected).every(([key, value]) => JSON.stringify(seen[key] ?? null) === JSON.stringify(value));
         }, EXPECTED_MAPS);
+        const animatedBefore = await page.evaluate(() => {
+            let offset = null;
+            staticGroup.traverse(mesh => {
+                if (mesh.isMesh && mesh.userData.mappings?.some(mapping => mapping.materialPath === 'solid:15/material:0'))
+                    offset = [mesh.material.map?.offset?.x ?? null, mesh.material.map?.offset?.y ?? null];
+            });
+            return offset;
+        });
+        await page.waitForTimeout(150);
+        const animatedAfter = await page.evaluate(() => {
+            let offset = null;
+            staticGroup.traverse(mesh => {
+                if (mesh.isMesh && mesh.userData.mappings?.some(mapping => mapping.materialPath === 'solid:15/material:0'))
+                    offset = [mesh.material.map?.offset?.x ?? null, mesh.material.map?.offset?.y ?? null];
+            });
+            return offset;
+        });
+        assert.notDeepEqual(animatedAfter, animatedBefore, 'water/glass material texture did not animate in the viewport');
+        console.log('PASS: water/glass texture scrolls in the live viewport.');
         console.log('PASS: matched textures applied to the right meshes; neutral fallback for absent/ambiguous/unreadable.');
 
         assert.deepEqual(await page.evaluate(() => {
             let material;
+            let hasUv = false;
             staticGroup.traverse(mesh => {
-                if (mesh.isMesh && mesh.userData.mappings?.some(mapping => mapping.materialPath === 'solid:0/material:0'))
+                if (mesh.isMesh && mesh.userData.mappings?.some(mapping => mapping.materialPath === 'solid:0/material:0')) {
                     material ??= mesh.material;
+                    hasUv ||= Boolean(mesh.geometry.getAttribute('uv'));
+                }
             });
             return {
                 map: [material.map.image.width, material.map.image.height],
@@ -245,13 +321,47 @@ function scenePayload(swapLink) {
                 roughness: [material.roughnessMap.image.width, material.roughnessMap.image.height],
                 metalness: [material.metalnessMap.image.width, material.metalnessMap.image.height],
                 baseEncoding: material.map.encoding,
-                normalEncoding: material.normalMap.encoding
+                normalEncoding: material.normalMap.encoding,
+                hasUv
             };
         }), {
             map: [3, 3], normal: [3, 3], roughness: [3, 3], metalness: [3, 3],
-            baseEncoding: 3001, normalEncoding: 3000
+            baseEncoding: 3001, normalEncoding: 3000, hasUv: true
         }, 'Trackmania _D/_N/_R maps were not assigned with the expected color spaces');
         console.log('PASS: Trackmania _D/_N/_R maps bind to the PBR material with sRGB base color.');
+        assert.equal(await page.evaluate(() => {
+            let color;
+            staticGroup.traverse(mesh => {
+                if (mesh.isMesh && mesh.userData.mappings?.some(mapping => mapping.materialPath === 'solid:0/material:0'))
+                    color ??= mesh.material.color.getHexString();
+            });
+            return color;
+        }), 'ffffff', 'authored material color overlay tinted the textured preview');
+        console.log('PASS: textured materials ignore authored color overlays in the viewport.');
+        assert.deepEqual(await page.evaluate(() => {
+            let material;
+            staticGroup.traverse(mesh => {
+                if (mesh.isMesh && mesh.userData.mappings?.some(mapping => mapping.materialPath === 'solid:14/material:0'))
+                    material ??= mesh.material;
+            });
+            const shader = { fragmentShader: 'diffuseColor *= texelColor;' };
+            material.onBeforeCompile(shader);
+            return { color: material.color.getHexString(), shader: shader.fragmentShader };
+        }), { color: 'ffffff', shader: 'diffuseColor *= vec4(vec3(texelColor.g), texelColor.a);' },
+            'custom color-mask texture did not use its authored color');
+        console.log('PASS: custom color-mask textures use the authored item color.');
+        assert.deepEqual(await page.evaluate(() => {
+            const result = {};
+            staticGroup.traverse(mesh => {
+                const path = mesh.userData.mappings?.[0]?.materialPath;
+                if (!mesh.isMesh || !path) return;
+                if (path === 'solid:12/material:0') result.bc4 = [mesh.material.map?.image?.width, mesh.material.map?.image?.height];
+                if (path === 'solid:13/material:0') result.bc5 = [mesh.material.map?.image?.width, mesh.material.map?.image?.height,
+                    mesh.material.normalMap?.image?.width, mesh.material.normalMap?.image?.height];
+            });
+            return result;
+        }), { bc4: [4, 4], bc5: [4, 4, 4, 4] }, 'ATI1/ATI2 DDS maps were not decoded for Trackmania materials');
+        console.log('PASS: Trackmania ATI1/ATI2 (BC4/BC5) maps decode to usable textures.');
 
         const info = await page.evaluate(() => getStudioTexturePreviewInfo());
         assert.equal(info.directory, 'SyntheticTextures');
@@ -265,7 +375,28 @@ function scenePayload(swapLink) {
         assert.equal(matches['solid:3/material:0']?.token, 'weird', 'name-fallback token not derived');
         assert.equal(matches['solid:2/material:0']?.token, 'signage', '_asset suffix not stripped');
         assert.equal(matches['solid:4/material:0']?.token, 'casemixed', 'link token not case/backslash normalized');
+        assert.equal(matches['solid:14/material:0']?.token, 'custommaterial', 'Blender TM_/compound material name fallback not derived');
+        assert.equal(matches['solid:15/material:0']?.file, 'glasswaterwall_t.dds', 'glass _T texture was not used as a base fallback');
         console.log('PASS: deterministic matching report (tokens, statuses, files) matches the rules.');
+
+        const manifestMatch = await page.evaluate(() => {
+            const handle = { getFile: async () => new File([new Uint8Array([1])], 'manifest_d.png') };
+            textureFiles.set('manifest/manifest_d.png', handle);
+            textureManifest = { version: 1, materials: [{
+                link: 'Stadium\\Media\\Material\\ManifestMaterial', environment: 'Stadium',
+                aliases: ['manifestmaterial'], colorable: true, targetColor: [0, 1, 0],
+                textures: { base: 'manifest/manifest_d.png' }
+            }] };
+            const result = matchTextureFiles([{
+                path: 'manifest-slot', gameMaterialLink: 'Stadium\\Media\\Material\\ManifestMaterial'
+            }]).get('manifest-slot');
+            textureManifest = null;
+            textureFiles.delete('manifest/manifest_d.png');
+            return { status: result?.status, file: result?.file, colorable: result?.colorable };
+        });
+        assert.deepEqual(manifestMatch, { status: 'matched', file: 'manifest/manifest_d.png', colorable: false },
+            'curated material manifest did not resolve the exact full material link or over-classify a regular material');
+        console.log('PASS: curated material manifest resolves exact full links.');
 
         await page.waitForTimeout(1100); // let the stale 700ms load land and be discarded
         assert.deepEqual(await page.evaluate(() => {
@@ -277,7 +408,7 @@ function scenePayload(swapLink) {
             });
             return seen;
         }), EXPECTED_MAPS, 'a stale in-flight texture overwrote a newer render');
-        assert.equal(await page.evaluate(() => getStudioViewerDebugInfo().meshes), 13);
+        assert.equal(await page.evaluate(() => getStudioViewerDebugInfo().meshes), MATERIALS.length + 1);
 
         const reads = await page.evaluate(() => window.__textureStubState.reads);
         const readSet = new Set(reads);

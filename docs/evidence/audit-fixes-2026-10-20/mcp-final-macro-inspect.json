@@ -1,0 +1,161 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "specError": "",
+        "inventory": {
+          "nbMacroblocks": 6451,
+          "nbItems": 8395,
+          "loadingStatus": "loaded from CGameEditorPluginMap",
+          "note": "Blocks/macroblocks come from CGameEditorPluginMap; items come from E++ inventory wrapper exports.",
+          "source": "pluginMap",
+          "nbTerrainBlocks": 1,
+          "isScanningBlocks": false,
+          "isScanningMacroblocks": false,
+          "loadingStatusShort": "ready",
+          "isScanningItems": false,
+          "nbBlocks": 3757
+        },
+        "limit": 10,
+        "model": {
+          "macroblockAutoTerrainBuf": {
+            "len": 0,
+            "ptr": "0x0000000000000000",
+            "cap": 0
+          },
+          "isGround": false,
+          "connected": false,
+          "name": "SupportConnectorX6_Macroblock",
+          "macroblockRaw1C0": {
+            "0x1d4": "0x00000000",
+            "0x20c": "0x3f716080",
+            "0x208": "0x3ec02000",
+            "0x1d0": "0x00000000",
+            "0x1c0": "0x00000000",
+            "0x204": "0x00000000",
+            "0x1f4": "0x3f716080",
+            "0x1c8": "0x00000000",
+            "0x1ec": "0xfff0f0f0",
+            "0x1c4": "0x00000000",
+            "0x200": "0x00000000",
+            "0x1f0": "0x3eb72100",
+            "0x1e0": "0xbd0bedc3",
+            "0x1d8": "0x00000000",
+            "0x1cc": "0x00000000",
+            "0x1e4": "0xbc555462",
+            "0x1fc": "0x00000000",
+            "0x1dc": "0x00000000",
+            "0x1e8": "0x00000000",
+            "0x1f8": "0x00000000"
+          },
+          "initialized": false,
+          "type": "macroblock",
+          "hasCheckpoint": false,
+          "idName": "SupportConnectorX6_Macroblock",
+          "hasFinish": false,
+          "hasMultilap": false,
+          "hasStart": false,
+          "macroblockRaw180": {
+            "0x1b0": "0x00000000",
+            "0x180": "0x3d8d7ca0",
+            "0x1a4": "0x00000000",
+            "0x198": "0x00000000",
+            "0x188": "0x00000001",
+            "0x1bc": "0x00000000",
+            "0x184": "0x00007ff6",
+            "0x1a8": "0x00000000",
+            "0x190": "0x00000000",
+            "0x1ac": "0x00000020",
+            "0x1a0": "0x00000000",
+            "0x194": "0x3f716080",
+            "0x18c": "0x00000003",
+            "0x1b4": "0x00000000",
+            "0x19c": "0x00000000",
+            "0x1b8": "0x00000000"
+          }
+        },
+        "source": "path(user-fid)",
+        "contents": {
+          "nbItems": 2,
+          "returnedItems": 2,
+          "returnedBlocks": 0,
+          "items": [
+            {
+              "variant": 0,
+              "index": 0,
+              "name": "TMIS_Final_Export",
+              "pos": {
+                "z": 0,
+                "y": -56,
+                "x": 0
+              },
+              "coord": [
+                0,
+                0,
+                0
+              ],
+              "internalPos": {
+                "z": 0,
+                "y": 0,
+                "x": 0
+              },
+              "isFlying": false,
+              "rot": {
+                "z": 0,
+                "y": 0,
+                "x": 0
+              },
+              "rotDeg": {
+                "z": 0,
+                "y": 0,
+                "x": 0
+              }
+            },
+            {
+              "variant": 0,
+              "index": 1,
+              "name": "TMIS_Final_Export",
+              "pos": {
+                "z": 0,
+                "y": -56,
+                "x": 16
+              },
+              "coord": [
+                0,
+                0,
+                0
+              ],
+              "internalPos": {
+                "z": 0,
+                "y": 0,
+                "x": 16
+              },
+              "isFlying": false,
+              "rot": {
+                "z": 0,
+                "y": 0,
+                "x": 1.5708
+              },
+              "rotDeg": {
+                "z": 0,
+                "y": 0,
+                "x": 90
+              }
+            }
+          ],
+          "nbBlocks": 0,
+          "blocks": []
+        },
+        "specOk": true,
+        "includeItems": true,
+        "skinNote": "Block skins are not included here; this uses E++ MacroblockSpec block/item conversion."
+      },
+      "success": true
+    },
+    "tool": "tm-mcp-pack-epp.InspectMacroblockModel"
+  }
+}

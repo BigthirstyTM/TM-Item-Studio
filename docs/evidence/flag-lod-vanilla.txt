@@ -1,0 +1,32 @@
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Items\Flag16m.Item.Gbx
+
+====================================================================================================
+FILE C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Prefab\Items\Flag\Flag16m.Prefab.Gbx
+            CPlugSolid2Model  [Mesh]
+              LodMaxDistAtFov90 = [16, 64, 512]
+              Visuals = 5
+              ShadedGeoms = 5
+                visual 0, material 0, LodMask 1
+                visual 1, material 1, LodMask 1
+                visual 2, material 0, LodMask 2
+                visual 3, material 1, LodMask 2
+                visual 4, material 0, LodMask 4
+              CustomMaterials = 0
+              Materials = 2
+              CPlugVisualIndexedTriangles  [Visuals[0]]
+              CPlugVisualIndexedTriangles  [Visuals[1]]
+              CPlugVisualIndexedTriangles  [Visuals[2]]
+              CPlugVisualIndexedTriangles  [Visuals[3]]
+              CPlugVisualIndexedTriangles  [Visuals[4]]
+          NPlugDynaObjectModel_SInstanceParams  [Ents[1].Params]
+            Version = 2
+            PeriodSc = 8
+            TextureId = 0
+            IsKinematic = false
+            PeriodScMax = 16
+            Phase01 = 0
+            Phase01Max = 1
+            CastStaticShadow = false
+            GameVersion = Unspecified
+

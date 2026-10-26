@@ -33,9 +33,17 @@ public sealed class ItemVariantSource
     public string FileName { get; }
     public int VariantNumber { get; }
     public Gbx<CGameItemModel> GbxFile { get; }
+    public Gbx Document => assetDocument ?? GbxFile;
+    private Gbx? assetDocument;
+    private byte[]? assetBytes;
+    public long? OriginalAssetSize => assetBytes?.LongLength;
+    public bool IsReadOnly => assetDocument is not null;
+    public string? PreviewDescription { get; set; }
+    public string? TextureContext { get; set; }
+    public CMwNod? PreviewOverride { get; set; }
     public CGameItemModel Model => GbxFile.Node;
     public NPlugItem_SVariant? Variant { get; }
-    public CMwNod? PreviewRoot => Variant is null ? Model : Variant.EntityModel;
+    public CMwNod? PreviewRoot => PreviewOverride ?? (Variant is null ? Model : Variant.EntityModel);
     /// <summary>Explains when saving re-encodes an imported archive instead of preserving its bytes.</summary>
     public string? SerializationWarning { get; }
     public bool RequiresReencodingAcknowledgement => SerializationWarning is not null;
@@ -66,7 +74,16 @@ public sealed class ItemVariantSource
 
     public void Save(Stream destination)
     {
+        if (assetBytes is not null) { destination.Write(assetBytes); return; }
         GbxFile.Save(destination);
+    }
+
+    public static ItemVariantSource FromAsset(string name, Gbx document, byte[] originalBytes, string? description = null)
+    {
+        var model = new CGameItemModel { EntityModel = document.Node,
+            Ident = new Ident(name, "Stadium2020", "Nadeo") };
+        return new ItemVariantSource(name, new Gbx<CGameItemModel>(model), null, null, null)
+        { assetDocument = document, assetBytes = originalBytes, PreviewDescription = description ?? $"{document.Node?.GetType().Name} — read-only asset preview" };
     }
 
     /// <summary>Combines documents using the first file's item-level metadata.</summary>

@@ -1,0 +1,18 @@
+PASS: binary geometry preserves positions, normals and indices; corrupt buffers reject
+PASS: shared local geometry survives variant instances and retires on invalidation
+PASS: duration and endpoint storage produce equivalent motion without mutation
+PASS: endpoint duplicates, decreases, and normalized limits match native loading
+PASS: static geometry and source buffers survive time and camera-only framing
+PASS: actual target moves, unrelated interleaved static and collision ownership remain stable
+PASS: nonidentity parent and child rest transforms compose without framing offsets
+PASS: parent dependencies evaluate before children regardless of payload order
+PASS: independent rotation/translation timing and reversed keys
+PASS: empty and zero-duration timelines stay distinct; easing and reversal match explicit samples
+PASS: microsecond clock handles exact, phased and neighbouring loop boundaries
+PASS: pause, speed and phase updates preserve authored data and camera
+PASS: edits preserve the camera; reset frames visible geometry and restores world up
+PASS: legacy kinematic parts are staged in the moving group and animate
+PASS: invalid modes, keys, matrices, duplicate writers and cycles reject atomically
+PASS: all material/LOD mappings filter together; unknown mapping is not invented
+PASS: zero lights, absolute radius geometry and uneditable gizmos
+PASS: 17 typed-viewer groups and disposal.

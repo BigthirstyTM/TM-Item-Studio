@@ -1,0 +1,7 @@
+[   ScriptRuntime] [ TRAC] [16:56:25.366] [tm-control-mcp]  TM Control MCP tool start ControlPlugin {"id":"EditorDeveloper","action":"load"}
+[   ScriptRuntime] [ TRAC] [16:56:25.367] [tm-control-mcp]  TM Control MCP tool done ControlPlugin err not_found 0ms
+[   ScriptRuntime] [ TRAC] [16:56:41.316] [tm-control-mcp]  TM Control MCP tool start ListPlugins {"includeUnloaded":true}
+[   ScriptRuntime] [ TRAC] [16:56:41.321] [tm-control-mcp]  TM Control MCP tool done ListPlugins ok 5ms
+[    ScriptEngine] [ TRAC] [16:57:16.393]  Loaded plugin 'EditorDeveloper' (version 1.0)
+[   ScriptRuntime] [ TRAC] [16:57:32.583] [tm-control-mcp]  TM Control MCP tool start ListPlugins {"includeUnloaded":true}
+[   ScriptRuntime] [ TRAC] [16:57:32.586] [tm-control-mcp]  TM Control MCP tool done ListPlugins ok 3ms

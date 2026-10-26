@@ -14,7 +14,11 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root" || exit 1
 
 suites=(
+    FlagConversion
+    WavingFlagExport
+    WavingFlagMapPackaging
     ItemEdits
+    ItemIcons
     ItemMaterials
     ItemMotion
     ItemScene
@@ -27,8 +31,12 @@ suites=(
 )
 
 tools=(
+    FlagProbe
     ItemChunkIndex
     PathFollowerDiag
+    ProbeAssets
+    TextureLibrary
+    VanillaPreview
     WriterCompatibility
 )
 

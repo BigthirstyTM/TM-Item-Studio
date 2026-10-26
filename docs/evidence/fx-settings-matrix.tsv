@@ -1,0 +1,44 @@
+﻿category	field	owner	current_status	native_probe_order	notes
+carrier	ItemId/collection/author/name/description	CGameItemModel	item-level safe	0	Identity and catalog metadata; does not alter FX output.
+carrier	ItemType=Ornament	CGameItemModel	item-level safe	0	Vanilla fogger and sparkler roots use Ornament.
+carrier	Prefab reference	CPlugPrefab	graph-preserve only	0	Must retain the complete external prefab/FxSystem graph.
+carrier	Placement class/pivots/snap	NPlugItem_SVariantList	item-level safe	0	Placement can be tested independently of particle output.
+fx-node	ContextClassId/ExtraContextClassId	CPlugFxSystem	opaque/native-only	later	Known runtime fields; no GBX.NET writer for the FxSystem root.
+fx-node	RootNode composition	CPlugFxSystem	opaque/native-only	later	Parallel/Condition/SubFxSystem/UpdateVar/SoundEmitter composition.
+fx-node	Emitter joint and local/world offset	CPlugFxSystemNode_ParticleEmitter	opaque/native-only	later	Controls attachment point and offset.
+fx-node	Direction/velocity expressions	CPlugFxSystemNode_ParticleEmitter	opaque/native-only	later	UpExpr/DOVExpr/world velocity are context-dependent.
+fx-node	Spawn-frequency/scale/opacity modifiers	CPlugFxSystemNode_ParticleEmitter	opaque/native-only	later	Probe one expression/modifier at a time.
+emitter	ParticleEmitterSubModels	CPlugParticleEmitterModel	typed read-only discovery; writer unproven	later	External submodel refs are present in official carriers; the 83-model corpus audit found no safe full-graph writer.
+emitter	IsSplashMode	CPlugParticleEmitterModel	typed read-only discovery; writer unproven	later	Global splash behavior flag; changing it has no native one-variable proof.
+emitter	ShadowMapTexelSize	CPlugParticleEmitterModel	typed read-only discovery; writer unproven	later	Global emitter shadow parameter; changing it has no native one-variable proof.
+spawn	MaxParticleCount	CPlugParticleEmitterSubModel	typed candidate	later	Hard upper bound on active particles.
+spawn	SpawnPeriod	CPlugParticleEmitterSubModel	typed candidate	later	Continuous emission interval.
+spawn	SpawnCond/SpawnMinDist	CPlugParticleEmitterSubModel	typed candidate	later	Period, active, distance and one-shot style conditions.
+life	Life/LifeVariation	CPlugParticleEmitterSubModel	typed candidate	later	Particle lifetime and random variation.
+size	SizeBirth/SizeBirthVariation/SizeBirthRatioXY	CPlugParticleEmitterSubModel	typed candidate	later	Initial size and aspect ratio.
+size	SizeOverLife/SizeXOverLife	CPlugParticleEmitterSubModel	typed candidate	later	Size curves; test separately from birth size.
+color	ColorGradient/ColorGradientUse	CPlugParticleEmitterSubModel	typed candidate	later	Color and color-over-life modes.
+color	ColorModulateWithTransparency	CPlugParticleEmitterSubModel	typed candidate	later	Couples RGB output to alpha.
+alpha	TransparencyBirth/TransparencyBirthVariation	CPlugParticleEmitterSubModel	typed candidate	later	Initial opacity and variation.
+alpha	TransparencyOverLife	CPlugParticleEmitterSubModel	typed candidate	later	Fade curve.
+physics	WeightBirth/WeightBirthVariation	CPlugParticleEmitterSubModel	typed candidate	later	Particle weight/gravity response.
+physics	FluidFrictionBirth/Variation/Intensity	CPlugParticleEmitterSubModel	typed candidate	later	Fluid drag; distinct from item collision.
+physics	CollisionEnabled/Bounce/Radius/Damper	CPlugParticleEmitterSubModel	typed candidate	later	Particle collision only, not map/item collision.
+render	StandardRenderMode/MultiStateRenderMode	CPlugParticleEmitterSubModel	typed candidate	later	Quad/line/beam/mesh/water render modes.
+render	TextureAtlas/DimX/DimY/FixedIndex	CPlugParticleEmitterSubModel	typed candidate	later	Sprite atlas and frame selection.
+render	UScaleDist/VScaleDist	CPlugParticleEmitterSubModel	typed candidate	later	Texture coordinate distribution.
+render	BeamLengthSpeedScale	CPlugParticleEmitterSubModel	typed candidate	later	Beam length from particle speed.
+render	RollSpeedBirth/RollSpeedBirthVariation	CPlugParticleEmitterSubModel	typed candidate	later	Sprite/mesh roll.
+render	CircularTrailVertPerPartCount	CPlugParticleEmitterSubModel	typed candidate	later	Trail geometry density.
+render	SortSprites/PrecalcEnabled/PrecalcPartCount/SampleRate	CPlugParticleEmitterSubModel	typed candidate	later	Ordering and precalculation; test only after visual carrier passes.
+render	Visual/Solid2Model and material/shader refs	CPlugParticleEmitterSubModel	graph-preserve only	later	Dependencies must resolve through the native FID graph.
+gpu	Bitmap/texture2/texture3/texture4	CPlugParticleGpuModel	opaque/native-only	later	Bitmap slot may be nod-ref or FID path depending on chunk version.
+gpu	IsFogEmitter	CPlugParticleGpuModel	opaque/native-only	later	Fog-specific GPU flag.
+gpu	FogEmissionRate	CPlugParticleGpuModel	preload proven for 0/100/1000; native Save As clone baseline proven	later	FogVolumetric rate 0..1000 fixtures differ inside embedded FX payload; rate-0 editor Save As timed out, so visual/round-trip setting proof remains open.
+gpu	GpuSpawn U01..U32/BoxAligned	CPlugParticleGpuSpawn	opaque/native-only	later	Approximately 30 mostly unnamed fields; do not expose before probes.
+smoke	LifeSpanMs/InfluenceRadius/Gravity	SimulatedSmoke	opaque/native-only	later	Fog/steam smoke simulation layer.
+smoke	Size/alpha/color/filament curves	SimulatedSmoke	opaque/native-only	later	Native output and persistence unverified.
+water	WaterSplash/CameraWaterDroplets/WaterSplashVelY	Particle render/splash model	candidate only	later	Decorative sprinkler route; not map water volume.
+water	CPlugDynaWaterModel keys and surface	CPlugDynaWaterModel	typed fields but unnamed	later	Waterfall visual/forces route; not a free water region.
+light	FoggerSpot light presence/intensity/color	CPlugLight/GxLight	carrier variant proven	later	Use ShowFoggerWithLight as separate carrier control.
+fx-node	LocalOffsetExpr (emitter point)	CPlugFxSystemNode_ParticleEmitter	native probe passed for Fogger+Sparkler preload; Fogger placed/saved/reopened	float3(0)->float3(1) length-preserving raw patch; arbitrary Studio export remains sidecar-only

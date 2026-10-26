@@ -1,0 +1,12 @@
+PASS: SnowCar no-op export preserves all authored constraint bytes.
+PASS: authored duration-mode preview and exact imported controls. Reopening export.
+Checking SnowCar variant 2
+Checking SnowCar variant 3
+Checking SnowCar variant 4
+Checking SnowCar variant 5
+Checking SnowCar variant 6
+Checking SnowCar variant 7
+Checking SnowCar variant 8
+Checking SnowCar variant 9
+Checking no-op after variant switches and explicit edits.
+PASS: authored controls and motion, all SnowCar variants, exact range/key edits and reopen.

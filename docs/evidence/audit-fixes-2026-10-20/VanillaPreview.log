@@ -1,0 +1,11 @@
+PASS Stadium/Items/CactusMedium.Item.Gbx: 7 geometries, 2 materials; skin=False; partial=False; dependencies=10
+PASS Stadium/Items/CactusVerySmall.Item.Gbx: 7 geometries, 2 materials; skin=False; partial=False; dependencies=7
+PASS Stadium/Media/Static/Vegetation/Cactus.StaticObject.Gbx: 7 geometries, 2 materials; skin=False; partial=False; dependencies=5
+PASS Stadium/Media/Static/Vegetation/Cactus.Mesh.Gbx: 6 geometries, 2 materials; skin=False; partial=False; dependencies=3
+PASS Vehicles/Items/Cars/CarSport.Item.Gbx: 31 geometries, 7 materials; skin=True; partial=False; dependencies=0
+PASS Vehicles/Items/Cars/CarSnow.Item.Gbx: 24 geometries, 6 materials; skin=True; partial=False; dependencies=0
+PASS Vehicles/Items/Cars/CarRally.Item.Gbx: 30 geometries, 7 materials; skin=True; partial=False; dependencies=0
+PASS Vehicles/Items/Cars/CarDesert.Item.Gbx: 32 geometries, 7 materials; skin=True; partial=False; dependencies=0
+PASS ShootMania/Items/Characters/CharacterPilot.Item.gbx: 12 geometries, 3 materials; skin=True; partial=True; dependencies=0
+PASS Skins/Models/CharacterPilot/Stadium/Female/Player.Mesh.gbx: 12 geometries, 3 materials; skin=False; partial=True; dependencies=0
+10 passed, 0 failed.

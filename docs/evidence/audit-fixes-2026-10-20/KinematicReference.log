@@ -1,0 +1,17 @@
+Bundled parser SHA256: 1a9edc022a1730c17b118a2d417e3d6affff3f0712f159dd56486c587428ebeb
+PASS: tracked fixture identity pins the analyzed archives
+PASS: kinematic archive parses into the full mapped graph
+PASS: static archive parses into the common-item graph
+PASS: parse, save and reparse preserve both tracked archives structurally
+PASS: constraint and timeline fields round-trip through the typed adapter
+PASS: binding resolver classifies the tracked constraint as world-relative and supported
+PASS: typed segment schema exposes no per-key waypoints
+PASS: exported kinematic template carries explicit collision surface meshes
+PASS: synthetic two-object/two-constraint item builds from scratch and reparses
+PASS: binding resolver classifies world->A and A->B constraints as supported flat bindings
+PASS: experiment graph keeps every binding-resolver guard active
+PASS: chained constraint edits rebind and round-trip through save and reparse
+PASS: composed preview evaluates both constraints of the chain independently
+PASS: nested prefab item DeathPit parses, collects flattened slots, and resolves all 3 constraints
+PASS: AuthoredMotionPreview builds all 3 valid tracks for DeathPit without diagnostics
+15 passed, 0 failed.

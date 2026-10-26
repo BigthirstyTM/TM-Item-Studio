@@ -1,0 +1,154 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "pathCheckReliable": false,
+        "mapPost": {
+          "decorationIdName": "48x48Screen155Day",
+          "name": "Unnamed",
+          "nbItems": 9,
+          "vertexCount": 21047,
+          "fileName": "",
+          "nbBakedBlocks": 2304,
+          "nbScriptItems": 0,
+          "decorationName": "48x48Screen155Day",
+          "size": [
+            48,
+            40,
+            48
+          ],
+          "nbBlocks": 2304,
+          "bounds": {
+            "meters": {
+              "min": [
+                0,
+                -64,
+                0
+              ],
+              "maxExclusive": [
+                1536,
+                256,
+                1536
+              ],
+              "baseHeightOffset": 64,
+              "maxInclusiveCoordOrigin": [
+                1504,
+                248,
+                1504
+              ],
+              "blockUnitSize": [
+                32,
+                8,
+                32
+              ]
+            },
+            "coord": {
+              "min": [
+                0,
+                0,
+                0
+              ],
+              "maxExclusive": [
+                48,
+                40,
+                48
+              ],
+              "maxInclusive": [
+                47,
+                39,
+                47
+              ]
+            }
+          },
+          "decorationSize": {
+            "z": 48,
+            "y": 40,
+            "x": 48
+          }
+        },
+        "dialogPre": {
+          "dialogKind": "none",
+          "available": true,
+          "hasFrame": false,
+          "dialog": 0,
+          "activeMenus": []
+        },
+        "gamePathHint": "C:\\Users\\PC\\Documents\\Trackmania\\Maps/My Maps/TMIS_Fixes_20261020/TMIS_Final.Map.Gbx",
+        "fileName": "My Maps/TMIS_Fixes_20261020/TMIS_Final.Map.Gbx",
+        "note": "SaveMap returned without exception. Under Proton/Wine, IO::FromUserGameFolder may return a Wine path that Openplanet IO cannot reliably stat.",
+        "mapsFileName": "My Maps/TMIS_Fixes_20261020/TMIS_Final.Map.Gbx",
+        "mapPre": {
+          "decorationIdName": "48x48Screen155Day",
+          "name": "Unnamed",
+          "nbItems": 9,
+          "vertexCount": 21047,
+          "fileName": "",
+          "nbBakedBlocks": 2304,
+          "nbScriptItems": 0,
+          "decorationName": "48x48Screen155Day",
+          "size": [
+            48,
+            40,
+            48
+          ],
+          "nbBlocks": 2304,
+          "bounds": {
+            "meters": {
+              "min": [
+                0,
+                -64,
+                0
+              ],
+              "maxExclusive": [
+                1536,
+                256,
+                1536
+              ],
+              "baseHeightOffset": 64,
+              "maxInclusiveCoordOrigin": [
+                1504,
+                248,
+                1504
+              ],
+              "blockUnitSize": [
+                32,
+                8,
+                32
+              ]
+            },
+            "coord": {
+              "min": [
+                0,
+                0,
+                0
+              ],
+              "maxExclusive": [
+                48,
+                40,
+                48
+              ],
+              "maxInclusive": [
+                47,
+                39,
+                47
+              ]
+            }
+          },
+          "decorationSize": {
+            "z": 48,
+            "y": 40,
+            "x": 48
+          }
+        },
+        "saved": true,
+        "overwrite": false
+      },
+      "success": true
+    },
+    "tool": "SaveMapAs"
+  }
+}

@@ -4,9 +4,16 @@ Trackmania 2020 Item Studio is a browser-based editor for `.Item.Gbx` files.
 It provides an interactive 3D viewport and exposes item metadata, placement,
 kinematics, lights, sockets, physics and visual information.
 
+See the [approved audit fix report](docs/audit-fixes-2026-10-20.md) for the
+20 October regression results, native test evidence, and remaining compatibility
+limits. Focused regression commands are in [Tests/Browser](Tests/Browser/README.md).
+
 ## Features
 
 - Load one or more Trackmania item files.
+- Load extracted vanilla items with their real mesh: open the `.Item.Gbx`, then use
+  **Load GameData dependencies** and choose the extracted `GameData\Stadium` folder.
+  Studio follows only that item's referenced `.Gbx` dependency closure; the folder is never uploaded wholesale.
 - Detect and browse embedded multi-variant items.
 - Switch variants in the 3D viewport.
 - Inspect and edit placement pivots, sockets, lights and kinematic settings.
@@ -14,6 +21,29 @@ kinematics, lights, sockets, physics and visual information.
 - Export visible geometry as OBJ.
 - Duplicate the loaded item into macroblock instances and export them as `.Macroblock.Gbx`, or
   embed the copies into a single multi-instance `.Item.Gbx` whose mesh is stored once.
+- Measure an item against the game's own flag items and convert it into a flag
+  (`Type=Flag` variant, upright world-aligned placement with the flag's eight patch layouts) as a
+  separate `.Item.Gbx`, leaving the original usable.
+- Export tested waving flag shapes or convert supported inline static geometry into
+  animated cloth, with material dependencies and a saved-map packaging step.
+
+## FX items (Sparkler, Fogger and sprinkler research)
+
+The **Audio & effects** panel now recognizes embedded `CPlugFxSystem` carriers,
+shows the retained particle dependencies and exposes the validated emission-point
+XYZ writer. Existing emitters are translated together, so the two Sparkler
+emitters keep their native spacing. All other particle, GPU, smoke, atlas,
+colour, physics and graph-composition fields remain preserved/read-only until a
+one-variable native fixture passes. The disabled **Add FX** control is
+intentional: no safe graph merge/save route is proven yet.
+
+The native status and hidden-carrier results are recorded in
+[`docs/evidence/fx-native-test-status-2026-10-25.md`](docs/evidence/fx-native-test-status-2026-10-25.md)
+and the complete field matrix is [`docs/evidence/fx-settings-matrix.tsv`](docs/evidence/fx-settings-matrix.tsv).
+The English route index is [`docs/fx-research-index-2026-10-25.md`](docs/fx-research-index-2026-10-25.md);
+the row-level hidden inventory is [`docs/evidence/fx-hidden-catalog-full.tsv`](docs/evidence/fx-hidden-catalog-full.tsv).
+The Audio & effects tab also shows the carrier and candidate route table so
+preload-only assets are clearly separated from supported item templates.
 
 ## Macroblock export (item instancing)
 
@@ -40,6 +70,45 @@ fills the instance table instead of being parsed as an item. When a non-item fil
 reaches the item parser (which answers with `Specified cast is not valid.`), the loader
 retries it as a macroblock before reporting the class id it actually found. The copies show
 up in the viewport as soon as the referenced item is open.
+
+## Flag items
+
+The **Flag item conversion** tab includes a **Waving flag converter**. It exports
+the exact tested swallowtail, long and round shapes, or creates an experimental
+86-frame cloth animation from supported static triangles. The download is a ZIP
+with the Item and three material dependencies. **Package a saved map** embeds the
+complete graph after Trackmania saving. The proven cold-start setup requires a
+genuine native Stadium 16 m flag in the map. New source-mesh conversions and new
+packaged outputs still need native testing. See the
+[technical converter guide](docs/waving-flag-converter.md) and
+[native evidence](docs/custom-flag-embedded-no-openplanet-2026-10-22.md).
+
+The **Flag** tab measures the open item against the settings read out of the game's own flag
+(`Flag16m.Item.Gbx`, its prefab, its place-param and its cloth mesh) and can convert the item into
+a flag. The conversion changes classification and placement only — pivots, geometry, materials and
+metadata stay as authored — and it refuses rather than guesses: an external placement file, an
+opaque placement-class chunk, a newer variant-list version or an item without an entity model is
+rejected *before* anything is written, so a refused conversion leaves the bytes untouched.
+
+- The measured signature: a variant tagged `Type=Flag` in a variant list of version 1, plus a
+  placement class that is the only one in 8 802 items with `AlwaysUp=true` **and**
+  `AlignToWorldDir=true`. Its eight patch layouts place the flag on the border, water, open and
+  curve groups at the item's two sizes.
+- **Inspect** reports every measured deviation (`PlacementClass.AlwaysUp: False instead of true.`),
+  which is exactly how the older hand-made custom flag was diagnosed: it carried the flag tag but an
+  ordinary aligned placement class, so it never stood upright.
+- **Convert to flag** writes a new item whose id ends in `_Flag`, so both stay in the inventory.
+  The export runs on its own snapshot of the document and reparses its own bytes before
+  downloading.
+- The **Classification and placement only** section retains this original metadata
+  operation. It does not animate a mesh; use the new waving converter for that.
+  [docs/item-flag-conversion.md](docs/item-flag-conversion.md) records the measured
+  metadata, mesh and LOD settings.
+
+`Tests/FlagConversion` covers the measured shape, the save/reparse round trip, the export snapshot
+isolation and the refused-write byte equality; `Tests/FlagProbe` is the evidence tool that reads
+the game's assets (`--tags`, `--placement`, `--profile`, `--describe`, `--lod`, `--lodstats`,
+`--entries`, `--convert`).
 
 ### Multi-instance item export
 
@@ -78,6 +147,32 @@ folder in that panel. The folder is selected through the browser and remains
 local: Studio indexes filenames only and reads a texture file only when it is
 needed for the currently loaded item.
 
+For a complete Trackmania 2020 library, the repository includes a builder at
+`Tests/TextureLibrary`. On this machine it has been used to create:
+
+```text
+C:\Users\PC\Documents\Trackmania\Items\_BlenderAssets\Trackmania2020_Textures
+```
+
+The builder parses the extracted `GameData\*.Material.Gbx` files, follows each
+material's actual `CPlugBitmap.ImageFile` reference, and copies only the
+referenced image files. It also writes `manifest.json`, which maps full
+material links to exact texture roles and prevents filename-only collisions
+between environments. The current generated library contains 590 material
+entries and 863 referenced texture files; 12 extracted material files could
+not be parsed by the installed GBX.NET version and are reported in the
+manifest. Rebuild it with:
+
+```powershell
+dotnet run --project Tests/TextureLibrary -- `
+  'C:\Users\PC\OpenplanetNext\Extract\GameData' `
+  'C:\Users\PC\Documents\Trackmania\Items\_BlenderAssets\Trackmania2020_Textures'
+```
+
+Choose that generated folder in **Materials & LOD**. The browser reads it
+read-only; the extracted `GameData` files and GBX material data are never
+modified.
+
 The current package is about 918 MB, so Studio intentionally does not import
 the zip into browser memory. A Chromium-based browser is required for the
 local folder picker. Texture matching is deterministic and based on the
@@ -89,9 +184,29 @@ with red=roughness and green=metallic, and `_I` as self-illumination. A plain
 filename remains a base-color fallback for nonstandard material folders. A
 missing base-color token, a filename set that several distinct materials
 share, or an unreadable file (including malformed DDS) leaves the neutral
-preview in place. DDS textures are decoded through the bundled three.js
-revision. This preview never changes GBX material data, UVs, collision, or
-the exported item.
+preview in place. DXT DDS textures use the bundled three.js decoder; Trackmania
+ATI1/ATI2 (BC4/BC5) normal and packed-surface formats are decoded locally to
+RGBA for browsers whose WebGL stack does not expose those compressed formats.
+The matcher also recognizes the wiki's `_H` height, `_L` light, `_T` glass-colour,
+`_O` glass-overlay, `_M` mask, `_X2` large-overlay and hue-mask variants;
+height and light maps are applied to the preview, while the other auxiliary
+maps remain indexed for material diagnostics. Blendermania naming forms such as
+`TM_<material>_asset` and compound names are normalized to the corresponding
+texture token as well.
+Colorable `Material_BlockCustom` maps use their green channel as a grayscale
+mask and the authored item color as the visible tint; the green marker itself
+is never shown in the viewport.
+Texture previewing never changes GBX material data, UVs, collision, or the
+exported item. The separate authored-material link editor below deliberately
+does change the selected material link when the item is exported.
+
+Each authored material slot also exposes its full `Link` in the **Materials &
+LOD** panel. The editable field and dropdown use the generated
+`wwwroot/data/materials.json` library, built from the extracted game
+`*.Material.Gbx` paths (including the other environments), while preserving
+links that are present in an uploaded item but absent from the library. A
+changed link updates the viewport immediately and is written into the next
+GBX export.
 
 ## Exporting files and variants
 
@@ -173,10 +288,14 @@ coverage.
 
 ```bash
 dotnet restore
-dotnet run
+dotnet watch run
 ```
 
-The development server uses the URL configured in `Properties/launchSettings.json`.
+`dotnet watch` enables .NET Hot Reload while developing: supported C# and Razor
+changes are applied without restarting the app, and changes that cannot be
+hot-reloaded trigger an automatic rebuild/restart. The development server uses
+the URL configured in `Properties/launchSettings.json`. Use `dotnet run` when a
+one-shot server without file watching is preferred.
 
 ## GitHub Pages deployment
 
@@ -212,6 +331,19 @@ the current checkout automatically; no development server is needed. See
 
 ## Notes
 
+### Embedded FX carriers
+
+Studio can open an embedded Sparkler/Fogger carrier, show its real mesh and
+particle dependencies, move the validated emitter origin in item space, and
+export a native `.Item.Gbx` while preserving the opaque FX graph. The export
+does not require the optional `.fxsettings.json` diagnostic file. Spawn rate,
+lifetime, size, colour, physics, render mode, texture replacement, new FX
+graphs and kinematic conversion remain read-only until an independent native
+one-variable probe proves both loading and persistence. See the
+[FX settings matrix](docs/evidence/fx-settings-matrix.tsv),
+[particle-model audit](docs/custom-fx-particle-model-audit-2026-10-25.md) and
+[hidden FX catalog](docs/custom-fx-hidden-catalog-2026-10-25.md).
+
 Imported kinematic constraints retain their authored axes, scalar ranges, easing,
 reversed keys and separate translation/rotation timelines. The kinematics panel
 edits those stored fields directly; it does not replace them with a preset.
@@ -244,3 +376,9 @@ multi-variant items can contain valid `0xFFFFFFFF` null node references inside
 surface data. The upstream parser currently treats one of these references as
 an unknown class ID, so the local assembly preserves the official API and
 handles that sentinel as a null reference.
+
+The assembly is refreshed from the newest stable upstream release by
+`eng/Update-GbxNet.ps1`; the scheduled workflow opens an update pull request
+after the parser and Studio build checks pass. See
+[docs/gbx-net-updates.md](docs/gbx-net-updates.md) for the updater and the
+separate GBX.NET CLI assessment.

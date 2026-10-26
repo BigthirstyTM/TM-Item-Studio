@@ -10,8 +10,9 @@ namespace TM_Item_Studio.Models;
 
 public static partial class ItemScene
 {
-    private sealed partial class Builder(int? variantOrdinal, ItemSceneGeometryCache? geometryCache)
+    private sealed partial class Builder(int? variantOrdinal, ItemSceneGeometryCache? geometryCache, bool resolveExternalReferences)
     {
+        private readonly bool resolveExternal = resolveExternalReferences;
         private readonly List<ItemSceneNode> nodes = new();
         private readonly List<ItemSceneGeometry> geometry = new();
         private readonly List<ItemSceneMapping> mappings = new();
@@ -44,12 +45,30 @@ public static partial class ItemScene
         {
             if (file is not null)
             {
-                // FilePath is metadata; never call GetFullPath/GetNode or the resolving property.
+                if (resolveExternal && TryReadExternal(readInline, out var resolved))
+                {
+                    Visit(resolved, path, parent, Matrix4x4.Identity, world, entry, depth + 1, collisionSource);
+                    return;
+                }
                 Node(path, parent, file, ItemSceneKind.Other, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
                 Issue(path, "external-reference", ItemSceneState.Unresolved, $"External reference: {file.FilePath}");
                 return;
             }
             Visit(readInline(), path, parent, Matrix4x4.Identity, world, entry, depth + 1, collisionSource);
+        }
+
+        private static bool TryReadExternal<T>(Func<T?> read, out T? value) where T : class
+        {
+            try
+            {
+                value = read();
+                return value is not null;
+            }
+            catch
+            {
+                value = null;
+                return false;
+            }
         }
 
         internal void Visit(CMwNod? source, string path, string? parent, Matrix4x4? local,
@@ -132,7 +151,7 @@ public static partial class ItemScene
                             handles.Entries.Add(owner);
                             if (!entLocal.HasValue || !entWorld.HasValue)
                                 Issue(entPath, "invalid-transform", ItemSceneState.Invalid, "Nonfinite, singular or non-unit transform; geometry omitted.");
-                            if (ent.ModelFile is not null)
+                            if (ent.ModelFile is not null && !(resolveExternal && TryReadExternal(() => ent.Model, out _)))
                             {
                                 Node(entPath, path, ent, ItemSceneKind.Entity, ItemSceneState.Unresolved, entLocal, entWorld);
                                 Issue(entPath, "external-reference", ItemSceneState.Unresolved, $"External entity reference: {ent.ModelFile.FilePath}");
@@ -233,6 +252,13 @@ public static partial class ItemScene
         private void CollisionEdge(GbxRefTableFile? file, Func<CMwNod?> inline, string path, string parent,
             Matrix4x4? world, ItemSceneEntryHandle? entry, int depth, ItemSceneCollisionSource source)
         {
+            if (file is not null && resolveExternal && TryReadExternal(inline, out var resolved) && resolved is CPlugSurface resolvedSurface)
+            {
+                Node(path, parent, resolved, ItemSceneKind.Collision, world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid, Matrix4x4.Identity, world);
+                Surface(resolvedSurface, path, world, entry, source);
+                collisions.Add(new(path, entry?.Path, "External shape", ItemSceneState.Present, source));
+                return;
+            }
             if (file is not null) collisions.Add(new(path, entry?.Path, "External shape", ItemSceneState.Unresolved, source));
             else if (inline() is null) collisions.Add(new(path, entry?.Path, "No shape", ItemSceneState.Absent, source));
             Edge(file, inline, path, parent, world, entry, depth, source);
@@ -259,6 +285,12 @@ public static partial class ItemScene
         {
             if (file is not null)
             {
+                if (resolveExternal && TryReadExternal(inline, out var resolved) && resolved is not null)
+                {
+                    Node(path, parent, resolved, ItemSceneKind.Collision, world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid, Matrix4x4.Identity, world);
+                    Surface(resolved, path, world, entry, source);
+                    return;
+                }
                 Node(path, parent, file, ItemSceneKind.Collision, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
                 collisions.Add(new(path, entry?.Path, "External shape reference", ItemSceneState.Unresolved, source));
                 Issue(path, "external-reference", ItemSceneState.Unresolved, $"External shape reference: {file.FilePath}");
@@ -285,6 +317,11 @@ public static partial class ItemScene
         {
             if (file is not null)
             {
+                if (resolveExternal && TryReadExternal(inline, out var resolved))
+                {
+                    Node(path, parent, resolved, ItemSceneKind.Other, world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid, Matrix4x4.Identity, world);
+                    return;
+                }
                 Node(path, parent, file, ItemSceneKind.Other, ItemSceneState.Unresolved, Matrix4x4.Identity, world);
                 Issue(path, "external-reference", ItemSceneState.Unresolved, $"External tree auxiliary reference: {file.FilePath}");
             }
@@ -300,7 +337,7 @@ public static partial class ItemScene
             var visuals = solid.Visuals ?? Array.Empty<CPlugVisual>();
             var custom = solid.CustomMaterials;
             var ordinary = solid.Materials;
-            var materialCount = custom is { Length: > 0 } ? custom.Length : ordinary?.Length ?? 0;
+            var materialCount = custom is { Length: > 0 } ? custom.Length : ordinary is { Length: > 0 } ? ordinary.Length : solid.MaterialIds?.Length ?? 0;
             var materialOffset = materials.Count;
             var lodDistances = solid.LodMaxDistAtFov90;
             var validLod = lodDistances?.All(x => float.IsFinite(x) && x >= 0) != false;
@@ -316,13 +353,39 @@ public static partial class ItemScene
                     var name = instance?.MaterialName ?? material?.MaterialName;
                     materials.Add(new(matPath, i, material is null ? null : Id(material), name,
                         material is null ? ItemSceneState.Absent : ItemSceneState.Present, "CustomMaterial",
-                        instance?.MaterialName, instance?.Link));
+                        instance?.MaterialName, instance?.Link, instance?.Color?.ToArray()));
+                }
+                else if (ordinary is not { Length: > 0 })
+                {
+                    var name = solid.MaterialIds![i];
+                    var instance = solid.MaterialInsts?.ElementAtOrDefault(i);
+                    materials.Add(new(matPath, i, instance is null ? null : Id(instance), name,
+                        ItemSceneState.Present, "SkinMaterial", instance?.MaterialName ?? name, instance?.Link, instance?.Color?.ToArray()));
                 }
                 else
                 {
                     var material = ordinary![i];
-                    var state = material?.File is not null ? ItemSceneState.Unresolved : material?.Node is null ? ItemSceneState.Absent : ItemSceneState.Present;
-                    materials.Add(new(matPath, i, material is null ? null : Id(material), solid.MaterialIds?.ElementAtOrDefault(i), state, "Material"));
+                    CPlugMaterial? resolvedMaterial = null;
+                    if (material is not null && (material.File is null || resolveExternal))
+                    {
+                        try { resolvedMaterial = material.Node; }
+                        catch { /* keep the slot diagnostic-only when a dependency is absent */ }
+                    }
+                    var state = material is null ? ItemSceneState.Absent
+                        : resolvedMaterial is not null ? ItemSceneState.Present
+                        : material.File is not null ? ItemSceneState.Unresolved : ItemSceneState.Absent;
+                    var link = material?.File?.FilePath;
+                    if (link?.EndsWith(".Material.Gbx", StringComparison.OrdinalIgnoreCase) == true)
+                        link = link[..^".Material.Gbx".Length];
+                    var name = solid.MaterialIds?.ElementAtOrDefault(i);
+                    if (string.IsNullOrWhiteSpace(name) && link is not null)
+                        name = link.Replace('\\', '/').Split('/').Last();
+                    var textures = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var slot in resolvedMaterial?.CustomMaterial?.Textures ?? [])
+                        if (slot.Texture is CPlugBitmap { ImageFile: { } image } && !string.IsNullOrWhiteSpace(image.FilePath))
+                            textures.TryAdd(slot.Name ?? "", image.FilePath);
+                    materials.Add(new(matPath, i, material is null ? null : Id(material), name, state, "Material", name, link,
+                        TexturePaths: textures));
                     if (state == ItemSceneState.Unresolved)
                         Issue(matPath, "external-reference", state, $"External material reference: {material!.File!.FilePath}");
                 }

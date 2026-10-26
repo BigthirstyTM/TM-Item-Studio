@@ -34,7 +34,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         });
         await page.getByLabel('Open item files').setInputFiles(fixture);
         await page.getByRole('button', { name: 'Export selected file' }).waitFor();
-        await page.getByRole('button', { name: /^2\. SnowCarTraffic/ }).click();
+        await page.getByRole('button', { name: /SnowCarTraffic.*variant 2$/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
         // SnowCar re-encodes on save in this WASM writer, so the export gate added with
         // standalone exports requires the compatibility acknowledgement before exporting.
@@ -74,16 +74,15 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         assert.equal(await page.getByLabel('Translation minimum (m)', { exact: true }).inputValue(), '0');
         assert.equal(await page.getByLabel('Translation maximum (m)', { exact: true }).inputValue(), '32');
         assert.equal(await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).inputValue(), '1920');
-        assert.equal(await page.getByText('Using authored motion settings', { exact: true }).count(), 1,
-            'Import must select original motion, not a replacement preset');
+        assert.match(await page.locator('body').innerText(), /Original.*preserved|IsDuration=true.*preserved/,
+            'Import must report preserved authored timing');
         console.log('PASS: authored duration-mode preview and exact imported controls. Reopening export.');
         await page.reload({ waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(exported);
-        await page.getByRole('button', { name: /^2\./ }).click();
+        await page.getByRole('button', { name: /variant 2$/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
         await acknowledgeReencoding();
-        assert.equal(await page.getByText('Using authored motion settings', { exact: true }).count(), 1,
-            'Reopened item must still use its authored motion');
+        assert.match(await page.locator('body').innerText(), /IsDuration=true.*preserved/, 'Reopened item must report its authored timing');
         if (process.env.STUDIO_MOTION_EVIDENCE) {
             fs.mkdirSync(process.env.STUDIO_MOTION_EVIDENCE, { recursive: true });
             await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).scrollIntoViewIfNeeded();
@@ -93,7 +92,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         // Variant changes must read that variant's controls, including descending ranges.
         for (let variant = 1; variant < 9; variant++) {
             console.log(`Checking SnowCar variant ${variant + 1}`);
-            await page.getByRole('button', { name: new RegExp(`^${variant + 1}\\.`) }).click();
+            await page.getByRole('button', { name: new RegExp(`variant ${variant + 1}$`) }).click();
             const first = expected.find(c => c.path.includes(`/variant:${variant}/`));
             assert.ok(first);
             assert.equal(Number(await page.getByLabel('Translation maximum (m)', { exact: true }).first().inputValue()), first.TransMax);
@@ -101,7 +100,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
             assert.equal(Number(await page.getByLabel('Rotation maximum (degrees)', { exact: true }).first().inputValue()), first.AngleMaxDeg);
             assert.equal(Number(await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).first().inputValue()), first.translation[0].milliseconds);
         }
-        await page.getByRole('button', { name: /^2\./ }).click();
+        await page.getByRole('button', { name: /variant 2$/ }).click();
         console.log('Checking no-op after variant switches and explicit edits.');
         const exportTo = async filename => {
             await acknowledgeReencoding();
@@ -117,8 +116,8 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         await page.getByLabel('Translation maximum (m)', { exact: true }).press('Tab');
         assert.equal(await page.evaluate(() => typedMotions[0].fields.translationMax), 40,
             'An authored edit must rebuild the live motion alongside invalidated shared geometry');
-        await page.getByRole('button', { name: /^3\./ }).click();
-        await page.getByRole('button', { name: /^2\./ }).click();
+        await page.getByRole('button', { name: /variant 3$/ }).click();
+        await page.getByRole('button', { name: /variant 2$/ }).click();
         assert.equal(await page.evaluate(() => typedMotions[0].fields.translationMax), 40,
             'Returning to an edited variant must not resurrect stale cached motion');
         assert.deepEqual(inspect(await exportTo('range-edit.Item.Gbx')), inspect(fixture, ['translation-max', '40']),
@@ -130,7 +129,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
             'Changing one key must preserve mode, easing, reversal, other keys and independent rotation');
         await page.reload({ waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(edited);
-        await page.getByRole('button', { name: /^2\./ }).click();
+        await page.getByRole('button', { name: /variant 2$/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
         assert.equal(await page.getByLabel('Translation maximum (m)', { exact: true }).inputValue(), '40');
         assert.equal(await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).inputValue(), '1440');

@@ -1,0 +1,254 @@
+@using GBX.NET
+@using GBX.NET.Engines.GameData
+@using TM_Item_Studio.Models
+@inject IJSRuntime JS
+
+<section class="mb-4" aria-label="Waving flag converter">
+    <h6 class="border-bottom pb-1 text-primary">Waving flag converter</h6>
+    <p class="small mb-2">Turn a supported static mesh into animated cloth, or export a tested flag shape. The package includes the item and its three material dependencies.</p>
+    <div class="alert alert-info small py-2" role="note">
+        Keep at least one native Stadium 16 m flag in the map. After saving in Trackmania, use the map packaging step below to restore the dependency files. The tested embedded maps run without loose custom files or a flag plugin.
+    </div>
+    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+        <span class="small fw-semibold">Viewport cloth preview</span>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-helper="Enable or disable the baked cloth animation in the Studio viewport. This changes only the preview, not the exported item." @onclick="ToggleClothPreview">
+            @(previewCloth ? "Disable cloth preview" : "Enable cloth preview")
+        </button>
+    </div>
+    <p class="small text-muted mb-2">Recognised baked flag frames now animate directly in the viewport. Use the toolbar play/pause button to control the time.</p>
+    <label class="form-label small" for="wavingFlagMode">Cloth source</label>
+    <select id="wavingFlagMode" class="form-select form-select-sm mb-2" data-helper="Choose a tested flag preset or convert the current item's supported static mesh. Presets use the measured native flag package." @bind="mode">
+        <option value="@ItemWavingFlagExport.Mode.SourceMesh">Convert this item's mesh (experimental)</option>
+        <option value="@ItemWavingFlagExport.Mode.Swallowtail">Tested swallowtail flag</option>
+        <option value="@ItemWavingFlagExport.Mode.Long250">Tested long flag (250%)</option>
+        <option value="@ItemWavingFlagExport.Mode.Round">Tested round flag</option>
+    </select>
+    @if (mode == ItemWavingFlagExport.Mode.SourceMesh)
+    {
+        <label class="form-label small" for="wavingFlagSelection">Geometry to convert</label>
+        <select id="wavingFlagSelection" class="form-select form-select-sm mb-2" data-helper="Choose whether the converter uses every supported mesh part or only the mesh part selected in the viewport." @bind="selectionMode">
+            <option value="whole">Whole item</option>
+            <option value="selected">Selected viewport mesh part</option>
+        </select>
+        @if (selectionMode == "selected")
+        {
+            <div class="alert @(string.IsNullOrWhiteSpace(SelectedPartPath) ? "alert-warning" : "alert-info") small py-2" role="status">
+                @if (string.IsNullOrWhiteSpace(SelectedPartPath))
+                {
+                    <span>Click a mesh part in the viewport first. The selected visual path will be converted as cloth.</span>
+                }
+                else
+                {
+                    <span>Selected visual: <code class="text-break">@SelectedPartPath</code></span>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" type="button" @onclick="ClearViewportSelection">Clear selection</button>
+                }
+            </div>
+        }
+        <p class="small text-muted mb-2">Select a mesh directly in the 3D viewport. The magenta outline identifies the selected visual; the waving export will contain only that visual when “Selected viewport mesh part” is active.</p>
+        @if (capability is { } info)
+        {
+            <p class="small @(info.Supported ? "text-info" : "text-warning")" role="status">@info.Summary</p>
+        }
+        <p class="small text-muted">All supported static triangles become cloth, using the native flag material. Source textures and collision are not retained. Newly converted geometry still needs an ingame test.</p>
+        <label class="form-label small" for="wavingFlagEdge">Fixed edge in item coordinates</label>
+        <select id="wavingFlagEdge" class="form-select form-select-sm mb-2" data-helper="Choose the item-local edge that stays attached to the flag host when the cloth package is exported." @bind="edge">
+            <option value="@ItemWavingFlagExport.AttachmentEdge.MinimumX">Minimum X</option>
+            <option value="@ItemWavingFlagExport.AttachmentEdge.MaximumX">Maximum X</option>
+            <option value="@ItemWavingFlagExport.AttachmentEdge.MinimumZ">Minimum Z</option>
+            <option value="@ItemWavingFlagExport.AttachmentEdge.MaximumZ">Maximum Z</option>
+        </select>
+        <div class="row g-2 mb-2">
+            <div class="col-6"><label class="form-label small" for="wavingFlagAmplitude">Wave amplitude (m)</label><input id="wavingFlagAmplitude" class="form-control form-control-sm" type="number" min="0" max="20" step="0.05" data-helper="Maximum cloth displacement from the rest surface in meters. Larger values make the preview more dramatic and need native checking." @bind="amplitude" /></div>
+            <div class="col-6"><label class="form-label small" for="wavingFlagWavelength">Wavelength (m)</label><input id="wavingFlagWavelength" class="form-control form-control-sm" type="number" min="0.01" max="10000" step="0.1" data-helper="Distance between repeating wave peaks in meters. Use a larger value for broad folds and a smaller value for tighter ripples." @bind="wavelength" /></div>
+            <div class="col-6"><label class="form-label small" for="wavingFlagPeriod">Loop period (s)</label><input id="wavingFlagPeriod" class="form-control form-control-sm" type="number" min="0.25" max="600" step="0.5" data-helper="Seconds for one complete preview loop. This controls the generated cloth timing and should be checked in the native game." @bind="period" /></div>
+        </div>
+        <div class="card bg-light border mb-2 p-2">
+            <strong class="small">Attachment anchor</strong>
+            <p class="small text-muted mb-1">The yellow marker is the cloth host origin. Drag it in the viewport or edit the item-local coordinates below. The selected geometry is rebased so this point stays attached to the item.</p>
+            <div class="row g-1">
+                <div class="col-4"><label class="form-label small mb-0" for="wavingFlagAnchorX">X</label><input id="wavingFlagAnchorX" class="form-control form-control-sm" type="number" step="0.01" data-helper="Item-local X coordinate of the cloth attachment point. The mesh is rebased around this anchor during conversion." @bind="anchorX" @bind:after="AnchorFieldsChanged" /></div>
+                <div class="col-4"><label class="form-label small mb-0" for="wavingFlagAnchorY">Y</label><input id="wavingFlagAnchorY" class="form-control form-control-sm" type="number" step="0.01" data-helper="Item-local Y coordinate of the cloth attachment point. Adjust this to keep the flag at the intended height." @bind="anchorY" @bind:after="AnchorFieldsChanged" /></div>
+                <div class="col-4"><label class="form-label small mb-0" for="wavingFlagAnchorZ">Z</label><input id="wavingFlagAnchorZ" class="form-control form-control-sm" type="number" step="0.01" data-helper="Item-local Z coordinate of the cloth attachment point. Adjust this to move the fixed edge forward or back on the host." @bind="anchorZ" @bind:after="AnchorFieldsChanged" /></div>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary mt-2" type="button" data-helper="Set the cloth attachment point back to the item origin." @onclick="ResetAnchor">Reset anchor to item origin</button>
+        </div>
+        <label class="form-label small" for="wavingFlagName">Export name</label>
+        <input id="wavingFlagName" class="form-control form-control-sm mb-2" data-helper="Optional file/item name for the converted waving flag package. Use a unique name to keep the source item available." @bind="outputName" placeholder="Custom_Waving_Flag" />
+    }
+    else
+    {
+        <p class="small text-muted">Exports the exact tested shape and animation. The preset's original timing, pole and material are preserved.</p>
+    }
+    <button class="btn btn-sm btn-primary" disabled="@(busy || Source is null || (mode == ItemWavingFlagExport.Mode.SourceMesh && (capability?.Supported != true || (selectionMode == "selected" && string.IsNullOrWhiteSpace(SelectedPartPath)))))" @onclick="Export">@(busy ? "Converting…" : "Export waving flag package (.zip)")</button>
+    @if (!string.IsNullOrEmpty(status)) { <p class="small text-info mt-2" role="status">@status</p> }
+    @if (!string.IsNullOrEmpty(error)) { <p class="small text-danger mt-2" role="alert">@error</p> }
+    @foreach (var warning in warnings) { <p class="small text-warning mt-1 mb-1">@warning</p> }
+
+    <h6 class="border-bottom pb-1 mt-3 text-primary">Package a saved map</h6>
+    <p class="small">Save your map with the custom flag and a native 16 m flag. Choose that saved map and the exported flag ZIP. This creates a new map with the complete embedded flag package.</p>
+    <p class="small text-muted">For several flag ZIPs, upload the preceding downloaded map for each next package. Test the final map after restarting Trackmania.</p>
+    <label class="form-label small" for="wavingFlagPackageUpload">Flag package ZIP</label>
+    <InputFile id="wavingFlagPackageUpload" data-helper="Choose the exported waving flag ZIP for map packaging. The ZIP is read locally and is not uploaded." OnChange="LoadPackage" accept=".zip" class="form-control form-control-sm mb-2" />
+    <label class="form-label small" for="wavingFlagMapUpload">Native-saved map (.Map.Gbx)</label>
+    <InputFile id="wavingFlagMapUpload" data-helper="Choose the native-saved map that contains the custom flag and a vanilla Stadium flag. The map is read locally for embedding." OnChange="LoadMap" accept=".gbx" class="form-control form-control-sm mb-2" />
+    <button class="btn btn-sm btn-outline-primary" disabled="@(packaging || packageBytes is null || mapBytes is null)" @onclick="PackageMap">@(packaging ? "Packaging…" : "Download embedded flag map (.Map.Gbx)")</button>
+    @if (mapReport is not null)
+    {
+        <button class="btn btn-sm btn-outline-secondary mt-1" @onclick="DownloadMapReport">Download map packaging report (.json)</button>
+    }
+    @if (!string.IsNullOrEmpty(mapStatus)) { <p class="small text-info mt-2" role="status">@mapStatus</p> }
+    @if (!string.IsNullOrEmpty(mapError)) { <p class="small text-danger mt-2" role="alert">@mapError</p> }
+    @foreach (var warning in mapWarnings) { <p class="small text-warning mt-1 mb-1">@warning</p> }
+</section>
+
+@code {
+    [Parameter] public Gbx<CGameItemModel>? Source { get; set; }
+    [Parameter] public string? PreferredId { get; set; }
+    [Parameter] public Func<Task<Gbx<CGameItemModel>>>? PrepareSource { get; set; }
+    [Parameter] public string? SelectedPartPath { get; set; }
+    [Parameter] public EventCallback ClearSelectionRequested { get; set; }
+    [Parameter] public ItemWavingFlagExport.AnchorPoint Anchor { get; set; } = ItemWavingFlagExport.AnchorPoint.Origin;
+    [Parameter] public EventCallback<ItemWavingFlagExport.AnchorPoint> AnchorChanged { get; set; }
+    private ItemWavingFlagExport.Mode mode = ItemWavingFlagExport.Mode.SourceMesh;
+    private ItemWavingFlagExport.AttachmentEdge edge = ItemWavingFlagExport.AttachmentEdge.MinimumX;
+    private string selectionMode = "whole";
+    private ItemWavingFlagExport.Capability? capability;
+    private Gbx<CGameItemModel>? measuredSource;
+    private float amplitude = 0.25f, wavelength = 4f, period = 12f;
+    private string? outputName, status, error, mapStatus, mapError, mapName, mapReport, mapReportName;
+    private bool busy, packaging;
+    private bool previewCloth = true;
+    private float anchorX, anchorY, anchorZ;
+    private ItemWavingFlagExport.AnchorPoint lastParameterAnchor = ItemWavingFlagExport.AnchorPoint.Origin;
+    private byte[]? packageBytes, mapBytes;
+    private IReadOnlyList<string> warnings = Array.Empty<string>(), mapWarnings = Array.Empty<string>();
+
+    protected override void OnParametersSet()
+    {
+        if (!ReferenceEquals(Source, measuredSource))
+        {
+            measuredSource = Source;
+            capability = Source is null ? null : ItemWavingFlagExport.GetCapability(Source);
+            status = error = null;
+            warnings = Array.Empty<string>();
+            anchorX = Anchor.X; anchorY = Anchor.Y; anchorZ = Anchor.Z;
+            lastParameterAnchor = Anchor;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Anchor != lastParameterAnchor)
+        {
+            anchorX = Anchor.X; anchorY = Anchor.Y; anchorZ = Anchor.Z;
+            lastParameterAnchor = Anchor;
+        }
+        if (mode == ItemWavingFlagExport.Mode.SourceMesh && Source is not null)
+            await JS.InvokeVoidAsync("setFlagConversionAnchor", anchorX, anchorY, anchorZ, true);
+        await JS.InvokeVoidAsync("setClothAnimationPreview", previewCloth);
+    }
+
+    private async Task ToggleClothPreview()
+    {
+        previewCloth = !previewCloth;
+        await JS.InvokeVoidAsync("setClothAnimationPreview", previewCloth);
+    }
+
+    private ItemWavingFlagExport.AnchorPoint CurrentAnchor => new(anchorX, anchorY, anchorZ);
+
+    private async Task AnchorFieldsChanged()
+    {
+        await JS.InvokeVoidAsync("setFlagConversionAnchor", anchorX, anchorY, anchorZ, true);
+        await AnchorChanged.InvokeAsync(CurrentAnchor);
+    }
+
+    private async Task ResetAnchor()
+    {
+        anchorX = anchorY = anchorZ = 0;
+        await AnchorFieldsChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnFlagAnchorMoved(float x, float y, float z)
+    {
+        anchorX = (float)Math.Round(x, 3);
+        anchorY = (float)Math.Round(y, 3);
+        anchorZ = (float)Math.Round(z, 3);
+        await AnchorChanged.InvokeAsync(CurrentAnchor);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Export()
+    {
+        if (Source is null) return;
+        busy = true; error = status = null; warnings = Array.Empty<string>();
+        await Task.Yield();
+        try
+        {
+            var input = mode == ItemWavingFlagExport.Mode.SourceMesh && PrepareSource is not null
+                ? await PrepareSource() : Source;
+            var result = ItemWavingFlagExport.Export(input, new ItemWavingFlagExport.Options
+            {
+                Mode = mode, Edge = edge, Amplitude = amplitude, Wavelength = wavelength,
+                PeriodSeconds = period, OutputName = mode == ItemWavingFlagExport.Mode.SourceMesh ? outputName : null,
+                SelectionPaths = mode == ItemWavingFlagExport.Mode.SourceMesh && selectionMode == "selected" && !string.IsNullOrWhiteSpace(SelectedPartPath)
+                    ? new[] { SelectedPartPath! } : Array.Empty<string>(),
+                Anchor = mode == ItemWavingFlagExport.Mode.SourceMesh ? CurrentAnchor : null
+            }, PreferredId);
+            packageBytes = result.Bytes;
+            await JS.InvokeVoidAsync("downloadBinaryGbx", result.FileName, Convert.ToBase64String(result.Bytes));
+            warnings = result.Warnings;
+            status = $"Exported {result.FileName}. This package is also ready for the map packaging step below.";
+        }
+        catch (Exception ex) { error = "Flag export refused: " + ex.Message; }
+        finally { busy = false; }
+    }
+
+    private async Task ClearViewportSelection()
+    {
+        await ClearSelectionRequested.InvokeAsync();
+    }
+
+    private async Task LoadPackage(InputFileChangeEventArgs args)
+    {
+        packageBytes = null; mapError = mapStatus = mapReport = null; mapWarnings = Array.Empty<string>();
+        try { packageBytes = await Read(args.File, 64 * 1024 * 1024); mapStatus = $"Flag package selected: {args.File.Name}."; }
+        catch (Exception ex) { mapError = "Cannot read flag package: " + ex.Message; }
+    }
+
+    private async Task LoadMap(InputFileChangeEventArgs args)
+    {
+        mapBytes = null; mapName = null; mapError = mapStatus = mapReport = null; mapWarnings = Array.Empty<string>();
+        try { mapBytes = await Read(args.File, 128 * 1024 * 1024); mapName = args.File.Name; }
+        catch (Exception ex) { mapError = "Cannot read map: " + ex.Message; }
+    }
+
+    private async Task PackageMap()
+    {
+        if (mapBytes is null || packageBytes is null) return;
+        packaging = true; mapError = mapStatus = mapReport = null; mapWarnings = Array.Empty<string>();
+        await Task.Yield();
+        try
+        {
+            var result = ItemWavingFlagMapExport.Repair(mapBytes, packageBytes, mapName);
+            await JS.InvokeVoidAsync("downloadBinaryGbx", result.FileName, Convert.ToBase64String(result.Bytes));
+            mapWarnings = result.Warnings;
+            mapReport = result.ReportJson;
+            mapReportName = result.FileName + ".packaging.json";
+            mapStatus = $"Exported {result.FileName}. Test this exact file after restarting Trackmania.";
+        }
+        catch (Exception ex) { mapError = "Map packaging refused: " + ex.Message; }
+        finally { packaging = false; }
+    }
+
+    private Task DownloadMapReport() => JS.InvokeVoidAsync("downloadBinaryGbx", mapReportName,
+        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(mapReport!))).AsTask();
+
+    private static async Task<byte[]> Read(IBrowserFile file, long maxBytes)
+    {
+        using var stream = file.OpenReadStream(maxBytes);
+        using var memory = new MemoryStream();
+        await stream.CopyToAsync(memory);
+        return memory.ToArray();
+    }
+}

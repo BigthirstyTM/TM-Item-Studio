@@ -13,8 +13,8 @@
         <div class="motion-timeline-heading">
             <label class="motion-count small">Segments
                 <select class="form-select form-select-sm" aria-label="@($"{Name} segment count")" @bind:get="keys.Length" @bind:set="SetCount">
-                    @if (keys.Length is < 1 or > 10) { <option value="@keys.Length">@keys.Length (stored)</option> }
-                    @for (var n = 1; n <= 10; n++) { <option value="@n">@n</option> }
+                    @if (keys.Length < 1 || keys.Length > ItemMotion.MaxSegments) { <option value="@keys.Length" disabled>@keys.Length (stored; unsupported)</option> }
+                    @for (var n = 1; n <= ItemMotion.MaxSegments; n++) { <option value="@n">@n</option> }
                 </select>
             </label>
             <span class="small text-muted" title="@($"IsDuration={Source.IsDuration.ToString().ToLowerInvariant()} (preserved). Times are milliseconds.")">
@@ -47,7 +47,7 @@
         }
         <details class="motion-timeline-help small text-muted">
             <summary>Segment editing</summary>
-            Reducing the count removes trailing functions. New functions are linear, forward, and one second long. Existing functions and the timing mode are preserved.
+            Trackmania supports at most @ItemMotion.MaxSegments segments per timeline. Reducing the count removes trailing functions. New functions are linear, forward, and one second long. Existing functions and the timing mode are preserved.
         </details>
         @if (validationError is not null) { <p role="alert" class="small text-danger">@validationError</p> }
     }

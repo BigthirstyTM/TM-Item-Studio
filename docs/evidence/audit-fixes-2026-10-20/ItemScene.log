@@ -1,0 +1,27 @@
+PASS: document cache preserves shared occurrences, fresh paths and explicit edit invalidation
+PASS: nested rotations, repeated prefab and original entry ownership
+PASS: path-local cycles retain independent instances and serializable preview
+PASS: save/reparse keeps shared prefab topology and entry transforms
+PASS: attribute streams join by semantic, retaining UV0 and UV1
+PASS: duplicate position streams and mixed CPU data are unsupported
+PASS: CPU indexed attributes retain normals and multiple UV sets
+PASS: material/visual/LOD mappings preserve original order and mask
+PASS: bad indices and nonfinite attributes produce diagnostics without mutation
+PASS: invalid quaternions and overflow suppress geometry
+PASS: inverse-transpose normals and finite source bounds
+PASS: external entity, mesh, shapes, variants and materials never resolve
+PASS: unsupported nodes stay visible in inventory
+PASS: selected variant scopes are explicit and null roots are absent
+PASS: light zero values and explicit socket ownership
+PASS: light ownership classes and value persistence capability
+PASS: light save/reparse keeps ownership, sockets and persisted values
+PASS: collision mesh, compound transform, cycle and generated status
+PASS: collision sources classify slots without resolving externals
+PASS: collision inventory is read-only over serialized item bytes
+PASS: tree roots, solid wrappers and nested affine locations
+PASS: shared trees, cycles and unsupported subclasses preserve base graph
+PASS: tree external slots never resolve
+PASS: collision versions select serialized cooked or ordinary triangles
+PASS: collision unknown, ambiguous, missing and invalid layouts are distinguished
+PASS: skin MaterialIds retain authored shaded geometry slots
+26 passed, 0 failed.

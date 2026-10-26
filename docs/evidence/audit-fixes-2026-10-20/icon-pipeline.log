@@ -1,0 +1,1 @@
+PASS: raw rectangular orientation; metadata leaves pixels unchanged; GBX WebP flip; invalid upload atomicity; missing icon clears; actual drop/export/reopen; black/transparent/decode states.

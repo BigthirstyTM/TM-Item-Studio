@@ -1,0 +1,8 @@
+[   ScriptRuntime] [ TRAC] [16:46:29.503] [tm-control-mcp]  TM Control MCP tool start ControlPlugin {"id":"EditorCameraHotkeys","action":"load"}
+[    ScriptEngine] [ TRAC] [16:46:29.529] [tm-control-mcp]  Loaded zipped plugin 'EditorCameraHotkeys' (version 0.2.4)
+[   ScriptRuntime] [ TRAC] [16:46:29.544] [tm-control-mcp]  TM Control MCP tool done ControlPlugin ok 41ms
+[   ScriptRuntime] [ TRAC] [16:46:29.653] [tm-control-mcp]  TM Control MCP tool start ControlPlugin {"id":"EditorDeveloper","action":"unload"}
+[   ScriptRuntime] [ TRAC] [16:46:29.653] [tm-control-mcp]  TM Control MCP tool done ControlPlugin ok 0ms
+[    ScriptEngine] [ TRAC] [16:46:29.669]  Unloading plugin 'EditorDeveloper'
+[   ScriptRuntime] [ TRAC] [16:46:29.753] [tm-control-mcp]  TM Control MCP tool start ListPlugins {"includeUnloaded":true}
+[   ScriptRuntime] [ TRAC] [16:46:29.755] [tm-control-mcp]  TM Control MCP tool done ListPlugins ok 3ms

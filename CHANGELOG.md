@@ -2,9 +2,26 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
-## [Unreleased]
+## [0.5.0] - 2026-10-26
 
 ### Added
+
+- **Flag items**: measure an item against the game's own flag and convert it into one
+  (`Models/ItemFlagConversion.cs`, `Models/ItemFlagExport.cs`, the **Flag** tab in the item
+  editor). The measured signature is a variant tagged `Type=Flag` in a variant list of version 1
+  plus the only placement class in 8 802 items with `AlwaysUp=true` and `AlignToWorldDir=true`,
+  together with its eight patch layouts. The conversion writes the classification and the
+  placement and leaves pivots, geometry, materials and metadata alone; refusals (external placement
+  file, opaque `2E020005`, newer variant-list version, no entity model) all run before the first
+  write, so a rejected conversion leaves the bytes untouched. The export works on its own snapshot
+  and reparses its bytes before downloading. Evidence and the measured settings are written up in
+  `docs/item-flag-conversion.md`.
+- `Tests/FlagConversion`, a flag conversion suite (measured shape, save/reparse round trip, export
+  snapshot isolation, refused-write byte equality), registered in `Tests/run-all.sh`.
+- `Tests/FlagProbe`, the evidence tool used to derive the flag settings: corpus tag/profile scans,
+  a GBX dumper, `--lod` (per-solid LOD distances, masks, per-visual geometry and authored bounds),
+  `--lodstats` (LOD distance/level consistency over a corpus), `--entries` (prefab entries with
+  their transforms) and `--convert` (measure, convert and write, with cloth layout variants).
 
 - **Macroblock & instances** tab: duplicate the loaded item into placed copies (add,
   duplicate, grid fill, per-copy position/rotation/scale) and export them as

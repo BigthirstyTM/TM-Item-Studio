@@ -1,0 +1,19 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "limit": 20,
+        "hasCenter": false,
+        "items": [],
+        "count": 0,
+        "total": 0
+      },
+      "success": true
+    },
+    "tool": "GetItems"
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\wwwroot\\js\\meshViewer.js",
+    "bytes": 108163,
+    "sha256": "39d351496a58016f9b73fc18bdf7c42fa8d7f901872c7b8c877ca01048f60e84"
+  },
+  {
+    "path": "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\wwwroot\\js\\studioHelp.js",
+    "bytes": 28389,
+    "sha256": "c66a3e9a84afcdf76645a979607cab4b418f72d53c8d1d00677fa0c2f4da5231"
+  },
+  {
+    "path": "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\wwwroot\\js\\studioIcons.js",
+    "bytes": 3549,
+    "sha256": "571c21c34555e43974653b310c13dce6f06389d9054024696af18b611d0727e4"
+  },
+  {
+    "path": "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\lib\\GBX.NET.dll",
+    "bytes": 3205632,
+    "sha256": "1a9edc022a1730c17b118a2d417e3d6affff3f0712f159dd56486c587428ebeb"
+  },
+  {
+    "path": "C:\\Users\\PC\\OpenplanetNext\\Plugins\\Editor.op",
+    "bytes": 931469,
+    "sha256": "a07d1450ff06ca281bbfd5b1f44b7c08e647a2c13d472e1efd7ac4e4036fa644"
+  },
+  {
+    "path": "C:\\Users\\PC\\Documents\\Trackmania\\Maps\\My Maps\\TMIS_Fixes_20261020\\TMIS_Final.Map.Gbx",
+    "bytes": 103957,
+    "sha256": "0b87818080d8e57c7e3d9d9aae6f6ab1763b75d62aaf80256f164aae9ffd2428"
+  }
+]

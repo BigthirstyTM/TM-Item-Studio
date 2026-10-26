@@ -16,7 +16,8 @@ public sealed record ItemSceneDiagnostic(string Path, string Code, ItemSceneStat
 public sealed record ItemSceneNode(string Path, string? ParentPath, int? SourceId, ItemSceneKind Kind,
     ItemSceneState State, string Type, float[]? LocalTransform, float[]? WorldTransform);
 public sealed record ItemSceneMaterial(string Path, int Index, int? SourceId, string? Name, ItemSceneState State, string Representation,
-    string? GameMaterialName = null, string? GameMaterialLink = null);
+    string? GameMaterialName = null, string? GameMaterialLink = null, int[]? Color = null,
+    IReadOnlyDictionary<string, string>? TexturePaths = null);
 public sealed record ItemSceneMapping(string Path, string SolidPath, int VisualIndex, int MaterialIndex,
     int LodMask, ItemSceneState State);
 public sealed record ItemSceneSolid(string Path, int SourceId, float[]? LodDistances, int VisualCount,
@@ -35,7 +36,13 @@ public sealed record ItemSceneCollision(string Path, string? EntityPath, string 
 public sealed record ItemSceneGeometry(string Path, string? EntityPath, int SourceId, bool IsCollision,
     float[] LocalPositions, float[] Positions, int[] Indices, float[]? LocalNormals, float[]? Normals,
     IReadOnlyDictionary<int, float[]> UVs, float[] BoundsMin, float[] BoundsMax,
-    int? GeometryId = null, float[]? WorldTransform = null);
+    int? GeometryId = null, float[]? WorldTransform = null,
+    // A recognised non-kinematic cloth visual stores all baked frames in one
+    // buffer. The base geometry remains the first frame; these optional arrays
+    // are preview-only and never participate in GBX writes.
+    float[]? AnimationLocalPositions = null, float[]? AnimationPositions = null,
+    float[]? AnimationLocalNormals = null, float[]? AnimationNormals = null,
+    int AnimationFrameCount = 0, float AnimationPeriodSeconds = 12f);
 
 /// <summary>Only this DTO crosses the JS/JSON boundary. It contains no GBX object handles.</summary>
 public sealed record ItemScenePreview(IReadOnlyList<ItemSceneNode> Nodes, IReadOnlyList<ItemSceneGeometry> Geometry,
@@ -75,11 +82,11 @@ public static partial class ItemScene
     /// must select its original slot. External slots are inventoried without invoking resolving getters.
     /// </summary>
     public static ItemSceneResult Build(CMwNod? selectedRoot, int documentOrdinal, int? variantOrdinal = null,
-        ItemSceneGeometryCache? geometryCache = null)
+        ItemSceneGeometryCache? geometryCache = null, bool resolveExternal = false)
     {
         if (documentOrdinal < 0) throw new ArgumentOutOfRangeException(nameof(documentOrdinal));
         if (variantOrdinal < 0) throw new ArgumentOutOfRangeException(nameof(variantOrdinal));
-        var builder = new Builder(variantOrdinal, geometryCache);
+        var builder = new Builder(variantOrdinal, geometryCache, resolveExternal);
         builder.Visit(selectedRoot, $"doc:{documentOrdinal}/variant:{variantOrdinal?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "none"}/root",
             null, Matrix4x4.Identity, Matrix4x4.Identity, null, 0);
         return builder.Result();

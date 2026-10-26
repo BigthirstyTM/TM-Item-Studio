@@ -1,0 +1,69 @@
+[
+  {
+    "name": "TMIS_Export.Item.Gbx",
+    "inputs": [
+      "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\Tests\\Browser\\Fixtures\\Approved\\TM2020\\SupportConnectorX6.Item.Gbx"
+    ],
+    "bytes": 57747,
+    "sha256": "cd9cca17f90caf8810a8e32cc9dcb45543d3241c60717c4e000c8ed35c31b9de"
+  },
+  {
+    "name": "TMIS_Pair.Macroblock.Gbx",
+    "inputs": [
+      "TMIS_Export.Item.Gbx"
+    ],
+    "bytes": 307,
+    "sha256": "01bd2c55201bbafff2ab39ea4e9ac03b82070deacfdbbd22cd0afe976a952219"
+  },
+  {
+    "name": "TMIS_Multi.Item.Gbx",
+    "inputs": [
+      "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\Tests\\Browser\\Fixtures\\Approved\\TM2020\\SupportConnectorX6.Item.Gbx"
+    ],
+    "bytes": 64032,
+    "sha256": "3e73d0cca77f442ef2c98809e4c05d2b91d27cac2ef4cb4b3bed66ba24cdf126"
+  },
+  {
+    "name": "TMIS_Variants.Item.Gbx",
+    "inputs": [
+      "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\Tests\\Browser\\Fixtures\\Approved\\TM2020\\SupportConnectorX6.Item.Gbx",
+      "ObstaclePusher4mLevel1"
+    ],
+    "bytes": 168079,
+    "sha256": "871cd20ed1900a9fc5e5c983f39da2adff488d6c992f9b931a1801b84a0bfc3b"
+  },
+  {
+    "name": "TMIS_Merged.Item.Gbx",
+    "inputs": [
+      "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\Tests\\Browser\\Fixtures\\Approved\\TM2020\\SupportConnectorX6.Item.Gbx",
+      "ObstaclePusher4mLevel1"
+    ],
+    "bytes": 164920,
+    "sha256": "a501143aa4ddfcd9e383fded996c4f3f5297bc874e3efe7f2f88d8174049b844"
+  },
+  {
+    "name": "TMIS_Motion.Item.Gbx",
+    "inputs": [
+      "ObstaclePusher4mLevel1"
+    ],
+    "bytes": 111130,
+    "sha256": "d5302105b9e42409b7d98334781a0427fdd40abe42e49dc4df8393cb526aaf45"
+  },
+  {
+    "name": "TMIS_Icon.Item.Gbx",
+    "inputs": [
+      "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\Tests\\Browser\\Fixtures\\Approved\\TM2020\\SupportConnectorX6.Item.Gbx",
+      "quadrants.png"
+    ],
+    "bytes": 56512,
+    "sha256": "91feeeecc8dcdbf7719e57b579b74cf4c05dd80654a75bb1e7f5c351aacaefa1"
+  },
+  {
+    "name": "TMIS_Flag.Item.Gbx",
+    "inputs": [
+      "C:\\Users\\PC\\.copilot\\repos\\TM-Item-Studio\\Tests\\Browser\\Fixtures\\Approved\\TM2020\\SupportConnectorX6.Item.Gbx"
+    ],
+    "bytes": 58166,
+    "sha256": "dbb801aa45fef1bbbecfb7c7ec6b17528509cf108744fa89d89aa50c4e88bae8"
+  }
+]

@@ -1,0 +1,9 @@
+[meta]
+name = "TMIS FX embedded placement"
+author = "TM Item Studio"
+category = "Developer"
+version = "1.0.0"
+
+[script]
+defines = ["DEV"]
+dependencies = ["Editor"]

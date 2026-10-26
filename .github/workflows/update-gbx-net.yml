@@ -1,0 +1,57 @@
+name: Update GBX.NET
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * 1'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Item Studio
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore Item Studio dependencies
+        run: dotnet restore
+
+      - name: Update the patched GBX.NET assembly
+        shell: pwsh
+        run: ./eng/Update-GbxNet.ps1
+
+      - name: Verify the null-reference compatibility contract
+        run: dotnet run --project Tests/ParserSentinels
+
+      - name: Verify supported surfaces and skin weights
+        run: |
+          dotnet run --project Tests/ParserSurfaces
+          dotnet run --project Tests/ItemScene
+
+      - name: Verify the Studio build
+        run: dotnet build TM-Item-Studio.csproj --no-restore --nologo
+
+      - name: Open an update pull request when needed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'Update GBX.NET parser'
+          title: 'Update GBX.NET parser'
+          body: |
+            Updates the patched GBX.NET assembly and provenance manifest to the newest stable upstream release.
+
+            Validation: `Tests/ParserSentinels`, `Tests/ParserSurfaces`, `Tests/ItemScene`, and the Item Studio build.
+          branch: automation/update-gbx-net
+          delete-branch: true
+          add-paths: |
+            lib/GBX.NET.dll
+            lib/GBX.NET.version.json

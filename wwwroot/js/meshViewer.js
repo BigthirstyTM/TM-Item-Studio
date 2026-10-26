@@ -1,12 +1,16 @@
 let scene, camera, renderer, controls, transformControls, gridHelper;
-let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup;
+let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup;
 let dotNetHelper = null, selectedGizmo = null;
-let isWireframe = false, isPlaying = true, animSpeed = 1;
+let isWireframe = false, isPlaying = true, animSpeed = 1, clothAnimationEnabled = true;
 let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler = null;
 let resizeObserver = null;
+let viewKeyHandler = null;
+let activeStudioView = 'perspective';
 let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showWaypoints = true;
 let activeConstraintIndex = 0, activeMeshHelper = null;
 let selectedMeshPath = null, selectedMeshObject = null, selectedMeshHelper = null;
+let flagAnchorObject = null, pendingFlagAnchor = null;
+let viewportSelectionQueue = Promise.resolve();
 let typedMotions = [], typedGroupMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
 let groupMotionContainers = new Map();
 let selectedCompositeSources = new Set(), compositeGroupBySource = new Map(), compositeLeaderSource = null;
@@ -18,14 +22,14 @@ let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
 const pooledGeometry = new WeakSet();
 let sceneFilter = { materialIndex: null, materialPath: null, lodMask: null };
-let textureDirectory = null, textureFiles = new Map(), textureRenderVersion = 0, lastTextureMatches = null;
+let textureDirectory = null, textureFiles = new Map(), textureManifest = null, textureRenderVersion = 0, lastTextureMatches = null;
 const compositeGroupPalette = [0xf43f5e, 0xf59e0b, 0x10b981, 0x22d3ee, 0x6366f1, 0xa855f7, 0xe879f9, 0x84cc16];
 
 function normalizedPath(value) {
     return value.replaceAll('\\', '/').toLowerCase();
 }
 function isPreviewTexture(name) {
-    return /\.(dds|png|jpe?g|webp)$/i.test(name);
+    return /\.(dds|png|jpe?g|webp|tga)$/i.test(name);
 }
 async function indexTextureDirectory(directory, prefix = '') {
     for await (const [name, handle] of directory.entries()) {
@@ -42,41 +46,126 @@ window.selectStudioTextureDirectory = async function () {
     try {
         await indexTextureDirectory(directory);
         textureDirectory = directory;
-        return { name: directory.name, fileCount: textureFiles.size };
+        textureManifest = await readTextureManifest(directory);
+        const selection = { name: directory.name, fileCount: textureFiles.size };
+        if (textureManifest) {
+            const stats = textureManifest.stats ?? {};
+            selection.manifestMaterialCount = stats.materialEntries ?? stats.MaterialEntries ?? 0;
+            selection.manifestTextureCount = stats.textureFiles ?? stats.TextureFiles ?? 0;
+        }
+        return selection;
     } catch (error) {
         textureFiles = previousFiles;
         throw error;
     }
 };
+async function readTextureManifest(directory) {
+    try {
+        if (typeof directory.getFileHandle !== 'function') return null;
+        const handle = await directory.getFileHandle('manifest.json');
+        const file = await handle.getFile();
+        const manifest = JSON.parse(await file.text());
+        if (manifest?.version !== 1 || !Array.isArray(manifest.materials)) return null;
+        return manifest;
+    } catch {
+        // A normal user-selected texture folder does not need a manifest.
+        // Filename matching remains the compatible fallback.
+        return null;
+    }
+}
+function materialTokens(material) {
+    const sources = [material.gameMaterialLink, material.gameMaterialName].filter(Boolean);
+    const tokens = [];
+    const add = value => {
+        const token = value.replace(/_asset(?:\.\d+)?$/i, '').toLowerCase();
+        if (token && !tokens.includes(token)) tokens.push(token);
+    };
+    for (const source of sources) {
+        const last = (source.replaceAll('\\', '/').split('/').pop() || '').replace(/\.material(?:\.gbx)?$/i, '');
+        add(last);
+        const withoutTm = last.replace(/^tm_/i, '').replace(/_asset(?:\.\d+)?$/i, '');
+        add(withoutTm);
+        const parts = withoutTm.split('_').filter(Boolean);
+        for (let i = 1; i < parts.length; i++) add(parts.slice(i).join('_'));
+    }
+    return tokens;
+}
+function materialEnvironment(material) {
+    const source = material.gameMaterialLink || '';
+    if (/^skins[/\\]/i.test(source)) return normalizedPath(source).split('/').slice(0, -1).join('/');
+    return source.replaceAll('/', '\\').split('\\')[0]?.toLowerCase() || '';
+}
+function materialTextureVariants(token) {
+    const variants = [{ token, tails: [] }];
+    const add = (value, tails = []) => {
+        if (!value || variants.some(entry => entry.token === value && entry.tails.join('|') === tails.join('|'))) return;
+        variants.push({ token: value, tails });
+    };
+    const withoutUv = token.replace(/uv$/i, '');
+    if (withoutUv !== token) add(withoutUv);
+    const withoutOff = token.replace(/off$/i, '');
+    if (withoutOff !== token) add(withoutOff);
+    const itemLamp = token.replace(/^itemlamp(?:light)([abc])$/i, 'itemlamp$1');
+    if (itemLamp !== token) add(itemLamp);
+    const obstacle = token.match(/^(.*?)(?:discontinuous)?level([0-2])$/i);
+    if (obstacle) {
+        const base = obstacle[1];
+        const level = obstacle[2];
+        add(base, [`_discontinuouslevel${level}`, `_level${level}`]);
+    }
+    const paint = token.replace(/^decalpaint2?/i, 'decal');
+    if (paint !== token) add(paint);
+    return variants;
+}
 function materialToken(material) {
-    const source = material.gameMaterialLink || material.gameMaterialName || '';
-    const last = source.replaceAll('\\', '/').split('/').pop() || '';
-    return last.replace(/_asset(?:\.\d+)?$/i, '').toLowerCase();
+    return materialTokens(material)[0] ?? '';
 }
 const pbrTextureRoles = {
-    base: ['d', 'diffuse', 'albedo', 'color', ''],
+    // Some Blendermania/game glass materials have no _D map; _T is their
+    // authored glass-colour texture and is the best neutral PBR base fallback.
+    base: ['d', 'b', 'diffuse', 'albedo', 'color', 't', ''],
+    height: ['h', 'height'],
     normal: ['n', 'normal'],
     surface: ['r', 'roughness', 'metallic'],
-    emissive: ['i', 'illum', 'emissive']
+    emissive: ['i', 'illum', 'emissive'],
+    light: ['l', 'light'],
+    overlay: ['o', 'overlay'],
+    mask: ['m', 'mask'],
+    large: ['x2'],
+    hueMask: ['huemask', 'huemask2', 'hueshiftmask']
 };
 function comparePaths(first, second) {
     // Codepoint ordering (not localeCompare) keeps matching identical across
     // browsers, locales and reloads.
     return first < second ? -1 : first > second ? 1 : 0;
 }
-function textureCandidates(token, suffixes) {
+function textureCandidates(token, suffixes, tails = [], environment = '') {
     if (!token) return [];
+    const skinRoot = environment.startsWith('skins/') ? environment.replace(/\/(?:standard|male|female)$/, '') : null;
     const candidates = [...textureFiles.entries()].filter(([path]) => {
+        if (skinRoot && !path.startsWith(skinRoot + '/')) return false;
+        if (skinRoot && ![environment, skinRoot, skinRoot + '/common'].includes(path.slice(0, path.lastIndexOf('/')))) return false;
         const filename = path.split('/').pop(), extension = filename.lastIndexOf('.');
         if (!isPreviewTexture(filename) || extension < 1) return false;
         const stem = filename.slice(0, extension);
-        return suffixes.some(suffix => stem === (suffix ? `${token}_${suffix}` : token));
+        return suffixes.some(suffix => {
+            const base = suffix ? `${token}_${suffix}` : token;
+            // A variant such as ItemObstaclePusherLevel2 must not fall back to
+            // the generic ItemObstaclePusher_D file when the level-specific
+            // texture exists. Otherwise Level1 and Level2 collapse onto the
+            // same candidate set and are incorrectly marked ambiguous.
+            return tails.length
+                ? tails.some(tail => stem === `${base}${tail}`)
+                : stem === base;
+        });
     });
     candidates.sort(([first], [second]) => {
         const rank = path => {
             const filename = path.split('/').pop(), stem = filename.slice(0, filename.lastIndexOf('.'));
             const suffix = stem === token ? '' : stem.slice(token.length + 1);
-            return suffixes.indexOf(suffix);
+            const roleRank = suffixes.indexOf(suffix);
+            const environmentRank = environment && ('/' + path + '/').includes('/' + environment + '/') ? 0 : skinRoot && path.startsWith(skinRoot + '/common/') ? 1 : 2;
+            return environmentRank * 100 + roleRank;
         };
         return rank(first) - rank(second) || comparePaths(first, second);
     });
@@ -93,39 +182,92 @@ function matchTextureFiles(materials) {
         if (!material?.path) continue;
         const identity = material.gameMaterialLink || material.gameMaterialName || '';
         if (!identities.has(identity))
-            identities.set(identity, { token: materialToken(material), key: null, file: null, handle: null, status: 'absent' });
+            identities.set(identity, { tokens: materialTokens(material), environment: materialEnvironment(material), direct: material.texturePaths,
+                manifest: materialManifestEntry(material), token: materialToken(material), key: null, file: null,
+                handle: null, status: 'absent' });
     }
     const shared = new Map();
     for (const [identity, match] of identities) {
-        const textures = Object.fromEntries(Object.entries(pbrTextureRoles).map(([role, suffixes]) => {
-            const [file, handle] = textureCandidates(match.token, suffixes)[0] ?? [];
-            return [role, file ? { file, handle } : null];
-        }));
-        if (!textures.base) continue;
-        match.key = Object.values(textures).flatMap(texture => texture?.file ?? []).join('\n');
-        match.file = textures.base.file; match.handle = textures.base.handle; match.textures = textures; match.status = 'matched';
-        shared.set(match.key, (shared.get(match.key) ?? new Set()).add(identity));
+        if (match.direct && Object.keys(match.direct).length) {
+            const textures = {};
+            for (const [slot, source] of Object.entries(match.direct)) {
+                const slotName = slot.toLowerCase();
+                const role = ({ diffuse: 'base', basetexture: 'base', basecolor: 'base', normal: 'normal', normalmap: 'normal', specular: 'surface', roughness: 'surface', selfillum: 'emissive', illum: 'emissive' })[slotName]
+                    ?? Object.entries(pbrTextureRoles).find(([, suffixes]) => suffixes.includes(slotName))?.[0];
+                if (!role) continue;
+                const key = normalizedPath(source).replace(/^.*?gamedata\//, '');
+                const found = [...textureFiles].find(([path]) => path === key || path.endsWith('/' + key) || key.endsWith('/' + path));
+                if (found) textures[role] = { file: found[0], handle: found[1] };
+            }
+            if (Object.values(textures).some(Boolean)) {
+                match.textures = textures; match.status = 'matched'; match.fromManifest = true;
+                match.colorable = /^custom/i.test(match.token) || /material[_/\\]blockcustom/i.test(identity);
+                match.targetColor = match.manifest?.targetColor ?? null;
+                match.file = (textures.base ?? Object.values(textures)[0]).file;
+                match.handle = (textures.base ?? Object.values(textures)[0]).handle;
+                continue;
+            }
+        }
+        const manifestTexturesForMaterial = manifestTextures(match.manifest);
+        if (manifestTexturesForMaterial) {
+            match.key = Object.values(manifestTexturesForMaterial).flatMap(texture => texture?.file ?? []).join('\n');
+            const primary = manifestTexturesForMaterial.base ?? Object.values(manifestTexturesForMaterial).find(Boolean);
+            match.token = match.manifest.token || materialToken({ gameMaterialLink: match.manifest.link, gameMaterialName: '' });
+            match.file = primary.file; match.handle = primary.handle;
+            match.textures = manifestTexturesForMaterial;
+            // TargetColor is also present on ordinary hue-mask materials. Only
+            // the dedicated custom-material family uses the green base-color
+            // marker that this preview shader converts to a color mask.
+            match.colorable = /^custom/i.test(match.token) || /material[_/\\]blockcustom/i.test(identity);
+            match.targetColor = match.manifest.targetColor ?? null;
+            match.status = 'matched';
+            match.fromManifest = true;
+            continue;
+        }
+        for (const token of match.tokens) {
+            if (match.status === 'matched') break;
+            for (const variant of materialTextureVariants(token)) {
+                const textures = Object.fromEntries(Object.entries(pbrTextureRoles).map(([role, suffixes]) => {
+                    const [file, handle] = textureCandidates(variant.token, suffixes, variant.tails, match.environment)[0] ?? [];
+                    return [role, file ? { file, handle } : null];
+                }));
+                if (!Object.values(textures).some(Boolean)) continue;
+                match.token = variant.token;
+                match.key = Object.values(textures).flatMap(texture => texture?.file ?? []).join('\n');
+                const primary = textures.base ?? Object.values(textures).find(Boolean);
+                match.file = primary.file; match.handle = primary.handle; match.textures = textures;
+                match.colorable = /^custom/i.test(match.token) || /material[_/\\]blockcustom/i.test(identity);
+                match.targetColor = null;
+                match.status = 'matched';
+                if (identity.toLowerCase().startsWith('skins/')) match.fromManifest = true;
+                shared.set(match.key, (shared.get(match.key) ?? new Set()).add(identity));
+                break;
+            }
+        }
     }
     for (const match of identities.values())
-        if (match.key != null && shared.get(match.key).size > 1) {
+        if (!match.fromManifest && match.key != null && shared.get(match.key).size > 1) {
             match.status = 'ambiguous'; match.file = match.handle = null; match.textures = null;
         }
     const matches = new Map();
     for (const material of materials) {
         if (!material?.path) continue;
         const match = identities.get(material.gameMaterialLink || material.gameMaterialName || '');
-        matches.set(material.path, { token: match.token, status: match.status, file: match.file, handle: match.handle, textures: match.textures ?? null });
+            matches.set(material.path, { token: match.token, status: match.status, file: match.file, handle: match.handle,
+                color: material.color ?? null, colorable: Boolean(match.colorable), targetColor: match.targetColor ?? null,
+                textures: match.textures ?? null });
     }
     return matches;
 }
 let ddsLoaderPromise = null;
+let tgaLoaderPromise = null;
 function ensureDdsLoader() {
     if (typeof THREE.DDSLoader === 'function') return Promise.resolve();
     // three r128 ships DDSLoader as a separate examples module; fetch it once,
     // on demand, pinned to the same revision as the page's three.js build.
     ddsLoaderPromise ??= new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DDSLoader.js';
+        script.src = 'vendor/three/DDSLoader.js';
         script.onload = () => resolve();
         script.onerror = () => { ddsLoaderPromise = null; script.remove(); reject(new Error('The DDS preview loader could not be downloaded.')); };
         document.head.appendChild(script);
@@ -137,6 +279,8 @@ async function loadDdsTexture(file, path) {
     const buffer = await file.arrayBuffer();
     if (buffer.byteLength < 20 || String.fromCharCode(...new Uint8Array(buffer, 0, 4)) !== 'DDS ')
         throw new Error(`${path} is not a readable DDS file.`);
+    const trackmaniaDds = decodeTrackmaniaBcDds(buffer);
+    if (trackmaniaDds) return makeRgbaDdsTexture(trackmaniaDds);
     // CompressedTextureLoader.load() runs parse() uncaught inside the fetch
     // callback (three r128), so parse here where malformed files reject
     // cleanly and the viewer keeps its neutral material.
@@ -149,6 +293,136 @@ async function loadDdsTexture(file, path) {
     texture.needsUpdate = true;
     return texture;
 }
+function ensureTgaLoader() {
+    if (typeof THREE.TGALoader === 'function') return Promise.resolve();
+    tgaLoaderPromise ??= new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'vendor/three/TGALoader.js';
+        script.onload = () => resolve();
+        script.onerror = () => { tgaLoaderPromise = null; script.remove(); reject(new Error('The TGA preview loader could not be downloaded.')); };
+        document.head.appendChild(script);
+    });
+    return tgaLoaderPromise;
+}
+async function loadTgaTexture(file, path) {
+    await ensureTgaLoader();
+    const parsed = new THREE.TGALoader().parse(await file.arrayBuffer());
+    if (!parsed?.data || !parsed.width || !parsed.height)
+        throw new Error(`${path} uses an unsupported TGA layout.`);
+    const texture = new THREE.DataTexture(parsed.data, parsed.width, parsed.height, THREE.RGBAFormat, THREE.UnsignedByteType);
+    texture.flipY = parsed.flipY ?? false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    texture.needsUpdate = true;
+    return texture;
+}
+function normalizedMaterialKey(value) {
+    return normalizedPath(value || '').replace(/^\/+|\/+$/g, '');
+}
+function materialManifestEntry(material) {
+    if (!textureManifest?.materials?.length) return null;
+    const link = material.gameMaterialLink || '';
+    const name = material.gameMaterialName || material.name || '';
+    const linkKey = normalizedMaterialKey(link);
+    const exact = textureManifest.materials.find(entry => normalizedMaterialKey(entry.link) === linkKey && linkKey);
+    if (exact) return exact;
+    const keys = new Set([link, name]);
+    const last = value => normalizedMaterialKey(value).split('/').pop() || '';
+    if (link) keys.add(last(link));
+    if (name) keys.add(last(name));
+    const wanted = [...keys].map(normalizedMaterialKey).filter(Boolean);
+    let candidates = textureManifest.materials.filter(entry =>
+        (entry.aliases ?? []).some(alias => wanted.includes(normalizedMaterialKey(alias))));
+    const environment = materialEnvironment(material);
+    if (environment) {
+        const inEnvironment = candidates.filter(entry => (entry.environment || '').toLowerCase() === environment);
+        if (inEnvironment.length) candidates = inEnvironment;
+    }
+    return candidates.length === 1 ? candidates[0] : null;
+}
+function manifestTextures(entry) {
+    if (!entry?.textures) return null;
+    const textures = Object.fromEntries(Object.keys(pbrTextureRoles).map(role => {
+        const file = entry.textures[role];
+        const handle = file ? textureFiles.get(normalizedPath(file)) : null;
+        return [role, file && handle ? { file, handle } : null];
+    }));
+    return Object.values(textures).some(Boolean) ? textures : null;
+}
+function decodeBc4Block(bytes, offset) {
+    const first = bytes[offset], second = bytes[offset + 1];
+    const palette = [first, second];
+    if (first > second) {
+        for (let i = 1; i <= 6; i++) palette.push(Math.round(((7 - i) * first + i * second) / 7));
+    } else {
+        for (let i = 1; i <= 4; i++) palette.push(Math.round(((5 - i) * first + i * second) / 5));
+        palette.push(0, 255);
+    }
+    // The BC4 index field is 48 little-endian bits. It is below Number's
+    // exact-integer limit, so arithmetic avoids JavaScript's 32-bit shifts.
+    let indices = 0;
+    for (let i = 0; i < 6; i++) indices += bytes[offset + 2 + i] * 2 ** (8 * i);
+    const values = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) values[i] = palette[Math.floor(indices / 2 ** (3 * i)) % 8];
+    return values;
+}
+function decodeTrackmaniaBcDds(buffer) {
+    if (buffer.byteLength < 128) return null;
+    const bytes = new Uint8Array(buffer), view = new DataView(buffer);
+    const fourCC = String.fromCharCode(bytes[84], bytes[85], bytes[86], bytes[87]);
+    const channels = fourCC === 'ATI1' ? 1 : fourCC === 'ATI2' ? 2 : 0;
+    if (!channels) return null;
+    const width = view.getUint32(16, true), height = view.getUint32(12, true);
+    const mipmapCount = Math.max(1, Math.min(16, view.getUint32(28, true) || 1));
+    if (!width || !height) throw new Error(`${fourCC} texture has invalid dimensions.`);
+    let offset = view.getUint32(4, true) + 4;
+    const mipmaps = [];
+    for (let level = 0; level < mipmapCount; level++) {
+        const mipWidth = Math.max(1, width >> level), mipHeight = Math.max(1, height >> level);
+        const blocksWide = Math.ceil(mipWidth / 4), blocksHigh = Math.ceil(mipHeight / 4);
+        const blockBytes = channels === 2 ? 16 : 8, dataLength = blocksWide * blocksHigh * blockBytes;
+        if (offset + dataLength > buffer.byteLength) throw new Error(`${fourCC} texture has truncated mip data.`);
+        const data = new Uint8Array(mipWidth * mipHeight * 4);
+        for (let blockY = 0; blockY < blocksHigh; blockY++) {
+            for (let blockX = 0; blockX < blocksWide; blockX++) {
+                const blockOffset = offset + (blockY * blocksWide + blockX) * blockBytes;
+                const red = decodeBc4Block(bytes, blockOffset);
+                const green = channels === 2 ? decodeBc4Block(bytes, blockOffset + 8) : red;
+                for (let y = 0; y < 4; y++) {
+                    for (let x = 0; x < 4; x++) {
+                        const px = blockX * 4 + x, py = blockY * 4 + y;
+                        if (px >= mipWidth || py >= mipHeight) continue;
+                        const sourceIndex = y * 4 + x, targetIndex = (py * mipWidth + px) * 4;
+                        const r = red[sourceIndex], g = green[sourceIndex];
+                        // ATI2/BC5 is the two-channel X/Y form used by Trackmania
+                        // normal and packed surface maps. Reconstruct Z so a decoded
+                        // normal map behaves like the original three-channel input.
+                        const nx = r / 127.5 - 1, ny = g / 127.5 - 1;
+                        const nz = channels === 2 ? Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny)) : g / 255;
+                        data[targetIndex] = r;
+                        data[targetIndex + 1] = g;
+                        data[targetIndex + 2] = Math.round((nz * .5 + .5) * 255);
+                        data[targetIndex + 3] = 255;
+                    }
+                }
+            }
+        }
+        mipmaps.push({ data, width: mipWidth, height: mipHeight });
+        offset += dataLength;
+    }
+    return { width, height, mipmaps };
+}
+function makeRgbaDdsTexture(dds) {
+    const mip = dds.mipmaps[0];
+    const texture = new THREE.DataTexture(mip.data, mip.width, mip.height, THREE.RGBAFormat, THREE.UnsignedByteType);
+    texture.flipY = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    texture.needsUpdate = true;
+    return texture;
+}
 function loadImageTexture(file) {
     return new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
@@ -157,23 +431,53 @@ function loadImageTexture(file) {
     });
 }
 function loadTexture(handle, path) {
-    return handle.getFile().then(file => /\.dds$/i.test(path) ? loadDdsTexture(file, path) : loadImageTexture(file));
+    return handle.getFile().then(file => /\.dds$/i.test(path)
+        ? loadDdsTexture(file, path)
+        : /\.tga$/i.test(path) ? loadTgaTexture(file, path) : loadImageTexture(file));
 }
 function configureTexture(texture, color) {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     if (color) texture.encoding = THREE.sRGBEncoding;
     texture.needsUpdate = true;
     return texture;
 }
-function applyTrackmaniaPbr(material, textures) {
+function configureAnimatedTexture(texture) {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.needsUpdate = true;
+    return texture;
+}
+function applyTrackmaniaPbr(material, textures, color, colorable = false, targetColor = null) {
+    const hasItemColor = Array.isArray(color) && color.length >= 3 && color.slice(0, 3).every(value => Number.isFinite(value));
+    const hasTargetColor = Array.isArray(targetColor) && targetColor.length >= 3 && targetColor.slice(0, 3).every(value => Number.isFinite(value));
+    if (colorable && textures.base) {
+        // Trackmania custom maps use green as a visible color-mask marker. The
+        // marker is not the material's final color: reduce it to a grayscale
+        // mask in the shader and let the authored item color tint that mask.
+        const values = hasItemColor ? color.slice(0, 3).map(value => Math.max(0, Math.min(255, value)) / 255)
+            : hasTargetColor ? targetColor.slice(0, 3).map(value => Math.max(0, Math.min(1, value)))
+            : [1, 1, 1];
+        material.color.setRGB(values[0], values[1], values[2]);
+    } else if (textures.base) {
+        // Ordinary PBR maps already contain their final RGB values.
+        material.color.setHex(0xffffff);
+    } else if (hasItemColor) {
+        material.color.setRGB(Math.max(0, Math.min(255, color[0])) / 255, Math.max(0, Math.min(255, color[1])) / 255, Math.max(0, Math.min(255, color[2])) / 255);
+    }
     material.map = textures.base ? configureTexture(textures.base, true) : null;
+    material.bumpMap = textures.height ? configureTexture(textures.height, false) : null;
+    material.bumpScale = textures.height ? .04 : 0;
     material.normalMap = textures.normal ? configureTexture(textures.normal, false) : null;
     material.roughnessMap = textures.surface ? configureTexture(textures.surface, false) : null;
     material.metalnessMap = textures.surface ? configureTexture(textures.surface, false) : null;
-    material.emissiveMap = textures.emissive ? configureTexture(textures.emissive, true) : null;
-    material.emissive.setHex(textures.emissive ? 0xffffff : 0x000000);
+    const emissive = textures.emissive ?? textures.light ?? null;
+    material.emissiveMap = emissive ? configureTexture(emissive, true) : null;
+    material.emissive.setHex(emissive ? 0xffffff : 0x000000);
     // Trackmania's _R map uses red for roughness and green for metallic,
     // whereas Three.js MeshStandardMaterial normally reads green and blue.
     material.onBeforeCompile = shader => {
+        if (colorable && textures.base)
+            shader.fragmentShader = shader.fragmentShader.replace('diffuseColor *= texelColor;', 'diffuseColor *= vec4(vec3(texelColor.g), texelColor.a);');
         shader.fragmentShader = shader.fragmentShader
             .replace('roughnessFactor *= texelRoughness.g;', 'roughnessFactor *= texelRoughness.r;')
             .replace('metalnessFactor *= texelMetalness.b;', 'metalnessFactor *= texelMetalness.g;');
@@ -194,16 +498,32 @@ async function applyLocalTextures(data, renderVersion) {
         if (!mapping || requested.has(mapping.materialPath)) return;
         const match = matches.get(mapping.materialPath);
         if (match.status !== 'matched') return;
-        requested.set(mapping.materialPath, Promise.all(Object.entries(match.textures).filter(([, texture]) => texture).map(async ([role, texture]) =>
-            [role, await loadTexture(texture.handle, texture.file)])));
+        requested.set(mapping.materialPath, Promise.all(Object.entries(match.textures).filter(([, texture]) => texture).map(async ([role, texture]) => {
+            try {
+                return [role, await loadTexture(texture.handle, texture.file)];
+            } catch (error) {
+                // Keep a usable diffuse map when a normal, roughness or emissive
+                // companion is malformed/unsupported. One bad channel must not
+                // turn the entire material neutral or black.
+                console.warn(`Could not load ${role} texture ${texture.file} for ${mapping.materialPath}.`, error);
+                return null;
+            }
+        })));
     });
     for (const [materialPath, texturePromise] of requested) {
         try {
-            const textures = Object.fromEntries(await texturePromise);
+            const textures = Object.fromEntries((await texturePromise).filter(entry => entry));
             if (renderVersion !== textureRenderVersion) { Object.values(textures).forEach(texture => texture.dispose()); continue; }
+            const match = matches.get(materialPath);
             for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
                 if (!mesh.isMesh || !mesh.userData.mappings?.some(mapping => mapping.materialPath === materialPath)) return;
-                applyTrackmaniaPbr(mesh.material, textures);
+                applyTrackmaniaPbr(mesh.material, textures, match.color, match.colorable, match.targetColor);
+                if (/glass/i.test(match.token)) { mesh.material.transparent = true; mesh.material.depthWrite = false; }
+                const animated = /(?:water|waterfall|glasswaterwall)/i.test(match.token);
+                mesh.userData.textureAnimation = animated;
+                if (animated)
+                    for (const texture of [mesh.material.map, mesh.material.normalMap, mesh.material.roughnessMap, mesh.material.emissiveMap])
+                        if (texture) configureAnimatedTexture(texture);
             });
         } catch (error) {
             console.warn(`Could not load local texture for ${materialPath}.`, error);
@@ -212,20 +532,30 @@ async function applyLocalTextures(data, renderVersion) {
 }
 window.getStudioTexturePreviewInfo = function () {
     return { directory: textureDirectory?.name ?? null, fileCount: textureFiles.size,
-        renderVersion: textureRenderVersion, matches: lastTextureMatches ?? [] };
+        manifest: textureManifest?.stats ?? null, renderVersion: textureRenderVersion, matches: lastTextureMatches ?? [] };
 }
 
 window.getStudioViewerDebugInfo = function () {
     let meshes = 0;
     const colors = new Set();
+    const meshBounds = new THREE.Box3();
     for (const group of [staticGroup, movingGroup]) group?.traverse(node => {
         if (!node.isMesh) return;
         meshes++;
+        meshBounds.expandByObject(node);
         for (const material of (Array.isArray(node.material) ? node.material : [node.material]))
             if (material?.color) colors.add(material.color.getHexString());
     });
+    const fxEmitters = [];
+    pivotsGroup?.traverse(node => {
+        if (node.userData?.type === 'fx-emitter')
+            fxEmitters.push({ index: node.userData.index, itemPosition: node.getWorldPosition(new THREE.Vector3()).toArray(),
+                editable: node.userData.editable });
+    });
     return {
         initialized: Boolean(renderer?.domElement.isConnected), meshes,
+        meshBounds: meshBounds.isEmpty() ? null : { min: meshBounds.min.toArray(), max: meshBounds.max.toArray() },
+        fxEmitters,
         materialColors: [...colors].slice(0, 128),
         cameraPosition: camera?.position.toArray() ?? null,
         cameraTarget: controls?.target.toArray() ?? null,
@@ -234,22 +564,66 @@ window.getStudioViewerDebugInfo = function () {
     };
 };
 
-window.normalizeIcon = async function (bytes, size) {
-    const bitmap = await createImageBitmap(new Blob([bytes])), canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    const scale = Math.max(size / bitmap.width, size / bitmap.height);
-    context.drawImage(bitmap, (size - bitmap.width * scale) / 2, (size - bitmap.height * scale) / 2, bitmap.width * scale, bitmap.height * scale);
-    const pixels = context.getImageData(0, 0, size, size).data;
-    bitmap.close();
-    return { pixels: Array.from(pixels), webPBase64: canvas.toDataURL('image/webp', .9).split(',')[1] };
-};
-window.renderIconPreview = function (canvasId, pixels, width, height) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    canvas.width = width; canvas.height = height;
-    const context = canvas.getContext('2d'), image = context.createImageData(width, height);
-    image.data.set(new Uint8ClampedArray(pixels)); context.putImageData(image, 0, 0);
+let studioHelperMode = false, studioHelperTooltip = null, studioHelperBound = false, studioHelperTarget = null;
+function helperDescription(element) {
+    return window.studioHelp?.describe(element) || '';
+}
+function helperTarget(element) {
+    for (let target = element; target instanceof Element && target !== document.body; target = target.parentElement) {
+        if (helperDescription(target)) return target;
+    }
+    return null;
+}
+function hideStudioHelper() {
+    studioHelperTooltip?.classList.remove('studio-helper-tooltip-visible');
+    if (studioHelperTarget) {
+        const ids = (studioHelperTarget.getAttribute('aria-describedby') || '').split(/\s+/).filter(id => id && id !== 'studio-helper-tooltip');
+        if (ids.length) studioHelperTarget.setAttribute('aria-describedby', ids.join(' '));
+        else studioHelperTarget.removeAttribute('aria-describedby');
+    }
+    studioHelperTarget = null;
+}
+function showStudioHelper(element) {
+    if (!studioHelperMode || !element) { hideStudioHelper(); return; }
+    const text = helperDescription(element);
+    if (!text) { hideStudioHelper(); return; }
+    hideStudioHelper();
+    studioHelperTooltip ??= Object.assign(document.createElement('div'), { id: 'studio-helper-tooltip', className: 'studio-helper-tooltip' });
+    studioHelperTooltip.setAttribute('role', 'tooltip');
+    studioHelperTooltip.textContent = text;
+    if (!studioHelperTooltip.isConnected) document.body.appendChild(studioHelperTooltip);
+    studioHelperTarget = element;
+    const describedBy = (element.getAttribute('aria-describedby') || '').trim();
+    element.setAttribute('aria-describedby', `${describedBy} studio-helper-tooltip`.trim());
+    const rect = element.getBoundingClientRect();
+    const width = Math.min(360, window.innerWidth - 24);
+    studioHelperTooltip.style.width = `${width}px`;
+    studioHelperTooltip.style.left = `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`;
+    studioHelperTooltip.classList.add('studio-helper-tooltip-visible');
+    const height = studioHelperTooltip.offsetHeight;
+    const below = rect.bottom + 8;
+    studioHelperTooltip.style.top = `${Math.max(12, below + height <= innerHeight - 12 ? below : rect.top - height - 8)}px`;
+}
+window.setStudioHelperMode = function (enabled) {
+    studioHelperMode = Boolean(enabled);
+    window.studioHelp?.bind();
+    document.body.classList.toggle('studio-helper-mode', studioHelperMode);
+    if (!studioHelperBound) {
+        studioHelperBound = true;
+        document.addEventListener('pointerover', event => {
+            if (studioHelperMode) showStudioHelper(helperTarget(event.target));
+        });
+        document.addEventListener('pointerout', event => {
+            if (helperTarget(event.target) !== helperTarget(event.relatedTarget)) hideStudioHelper();
+        });
+        document.addEventListener('focusin', event => {
+            if (studioHelperMode) showStudioHelper(helperTarget(event.target));
+        });
+        document.addEventListener('focusout', hideStudioHelper);
+        document.addEventListener('keydown', event => { if (event.key === 'Escape') hideStudioHelper(); });
+        document.addEventListener('scroll', hideStudioHelper, true);
+    }
+    if (!studioHelperMode) hideStudioHelper();
 };
 function finite(value, name) {
     if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${name} must be finite.`);
@@ -540,7 +914,7 @@ function clearSelectedMeshHighlight() {
         group.traverse(child => {
             if (!child?.isMesh || !child?.material) return;
             const material = child.material;
-            if (material.emissive && child.userData?.__baseEmissive) {
+            if (material.emissive && typeof child.userData?.__baseEmissive === 'number') {
                 material.emissive.setHex(child.userData.__baseEmissive);
             }
             if (typeof child.userData?.__baseEmissiveIntensity === 'number') {
@@ -614,18 +988,85 @@ function renderDrawPathVisual() {
 }
 function pickDrawPoint(raycaster) {
     const meshGroups = [staticGroup, movingGroup].filter(g => g && g.visible);
-    const meshHit = raycaster.intersectObjects(meshGroups.flatMap(g => g.children), true).find(hit => hit.object?.isMesh);
+    const meshHit = raycaster.intersectObjects(meshGroups.flatMap(g => g.children), true).find(hit => isSelectableMesh(hit.object));
     if (meshHit?.point) return meshHit.point.clone();
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -drawPathPlaneY);
     const point = new THREE.Vector3();
     return raycaster.ray.intersectPlane(plane, point) ? point : null;
 }
+function isVisibleInScene(object) {
+    for (let current = object; current; current = current.parent) {
+        if (!current.visible) return false;
+    }
+    return true;
+}
+function isSelectableMesh(object) {
+    return Boolean(object?.isMesh && object.userData?.path && isVisibleInScene(object));
+}
+function ensureFlagAnchorObject() {
+    if (!flagAnchorGroup) return null;
+    if (!flagAnchorObject) {
+        flagAnchorObject = new THREE.Group();
+        flagAnchorObject.name = 'flagConversionAnchor';
+        const marker = new THREE.Mesh(new THREE.SphereGeometry(.18, 16, 12),
+            new THREE.MeshBasicMaterial({ color: 0xfacc15, depthTest: false }));
+        marker.renderOrder = 100;
+        flagAnchorObject.add(marker);
+        const axes = new THREE.AxesHelper(1.1);
+        axes.renderOrder = 99;
+        flagAnchorObject.add(axes);
+        flagAnchorObject.userData = { type: 'flag-anchor', index: 0, editable: true };
+        flagAnchorGroup.add(flagAnchorObject);
+    }
+    return flagAnchorObject;
+}
+function flagAnchorMotionOwner() {
+    if (!selectedMeshObject || !motionGroups?.size) return motionGroups?.values?.().next?.().value?.[0] ?? null;
+    for (const pair of motionGroups.values()) {
+        const owner = pair?.[0];
+        if (!owner) continue;
+        for (let current = selectedMeshObject; current; current = current.parent)
+            if (current === owner) return owner;
+    }
+    return null;
+}
+function syncFlagAnchorObject() {
+    if (!flagAnchorObject || !pendingFlagAnchor) return;
+    const local = new THREE.Vector3(...pendingFlagAnchor);
+    const owner = flagAnchorMotionOwner();
+    if (owner) {
+        owner.updateMatrixWorld(true);
+        flagAnchorObject.position.copy(local).applyMatrix4(owner.matrixWorld);
+        flagAnchorObject.quaternion.setFromRotationMatrix(owner.matrixWorld);
+    } else {
+        flagAnchorObject.position.copy(local);
+        flagAnchorObject.quaternion.identity();
+    }
+}
+window.setFlagConversionAnchor = function (x, y, z, visible = true) {
+    const values = [Number(x), Number(y), Number(z)];
+    if (values.some(value => !Number.isFinite(value))) return;
+    pendingFlagAnchor = values;
+    const object = ensureFlagAnchorObject();
+    if (!object) return;
+    syncFlagAnchorObject();
+    object.visible = Boolean(visible);
+};
 function selectMeshObject(mesh, notify = true, additive = false, range = false) {
     selectedMeshObject = mesh ?? null;
     selectedMeshPath = mesh?.userData?.path ?? null;
     updateSelectedMeshHighlight();
-    if (notify && dotNetHelper && selectedMeshPath) {
-        dotNetHelper.invokeMethodAsync('OnMeshPartSelectedWithModifiers', selectedMeshPath, Boolean(additive), Boolean(range));
+    if (!mesh && selectedCompositeSources.size) {
+        selectedCompositeSources.clear();
+        applyCompositeVisualState();
+    }
+    if (notify && dotNetHelper) {
+        const helper = dotNetHelper, path = selectedMeshPath;
+        const sourceIndex = Number.isInteger(mesh?.userData?.sourceIndex) ? mesh.userData.sourceIndex : null;
+        // Source switching rebuilds the payload asynchronously. Keep selection and clearing in
+        // pointer order so a late source-switch render cannot restore an old selection.
+        viewportSelectionQueue = viewportSelectionQueue.catch(() => {}).then(() =>
+            helper === dotNetHelper && helper.invokeMethodAsync('OnViewportMeshSelected', path, sourceIndex, Boolean(additive), Boolean(range)));
     }
 }
 function applyLegacyMotion() {
@@ -640,6 +1081,16 @@ function applyLegacyMotion() {
     movingGroup.position.set(0, 0, 0);
     if (m.translation) movingGroup.position[m.translation] = distance;
 }
+function applyAnimatedMaterialTextures() {
+    const phase = ((animTime / 1000) * .035) % 1;
+    for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
+        if (!mesh.isMesh || !mesh.userData.textureAnimation) return;
+        for (const texture of [mesh.material.map, mesh.material.normalMap, mesh.material.roughnessMap, mesh.material.emissiveMap]) {
+            if (!texture) continue;
+            texture.offset.set(phase, (phase * .42) % 1);
+        }
+    });
+}
 window.init3DViewer = function (containerId, dotNetRef) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -649,7 +1100,26 @@ window.init3DViewer = function (containerId, dotNetRef) {
     camera = new THREE.PerspectiveCamera(45, width / height, .1, 2000); camera.position.set(12, 10, 12);
     renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(width, height); renderer.outputEncoding = THREE.sRGBEncoding; renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
+    renderer.domElement.tabIndex = 0;
+    renderer.domElement.setAttribute('aria-label', '3D item viewport');
     controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = .05;
+    controls.addEventListener('start', () => {
+        if (activeStudioView === 'top' && camera) {
+            // Top view needs a Z up-vector to stay square, but orbiting should use
+            // the normal world Y-up orientation so the grid never rolls with the camera.
+            camera.up.set(0, 1, 0);
+            activeStudioView = 'perspective';
+        }
+    });
+    viewKeyHandler = event => {
+        if (event.altKey || (event.target instanceof HTMLElement && event.target.closest('input, select, textarea, [contenteditable]:not([contenteditable="false"]), [role="textbox"]'))) return;
+        const views = { Numpad7: 'top', Numpad1: 'front', Numpad3: 'right', Numpad5: 'perspective', 'Home:3': 'top', 'End:3': 'front', 'PageDown:3': 'right', 'Clear:3': 'perspective', '7:3': 'top', '1:3': 'front', '3:3': 'right', '5:3': 'perspective' };
+        const view = views[event.code] || views[`${event.key}:${event.location}`];
+        if (!view) return;
+        event.preventDefault();
+        window.setStudioView(view, event.ctrlKey || event.metaKey);
+    };
+    window.addEventListener('keydown', viewKeyHandler, true);
     transformControls = new THREE.TransformControls(camera, renderer.domElement); transformControls.size = .75; scene.add(transformControls);
     transformControls.addEventListener('dragging-changed', event => {
         if (controls) controls.enabled = !event.value;
@@ -681,6 +1151,15 @@ window.init3DViewer = function (containerId, dotNetRef) {
                     THREE.MathUtils.radToDeg(selectedGizmo.rotation.x),
                     THREE.MathUtils.radToDeg(selectedGizmo.rotation.y),
                     THREE.MathUtils.radToDeg(selectedGizmo.rotation.z));
+            } else if (d.type === 'flag-anchor') {
+                const local = p.clone(), owner = flagAnchorMotionOwner();
+                if (owner) {
+                    owner.updateMatrixWorld(true);
+                    local.applyMatrix4(owner.matrixWorld.clone().invert());
+                }
+                dotNetHelper.invokeMethodAsync('OnFlagAnchorMoved', local.x, local.y, local.z);
+            } else if (d.type === 'fx-emitter') {
+                dotNetHelper.invokeMethodAsync('OnFxEmitterPointMoved', p.x, p.y, p.z);
             } else {
                 dotNetHelper.invokeMethodAsync('OnGizmoMoved', d.type, d.index, p.x, p.y, p.z);
             }
@@ -688,6 +1167,8 @@ window.init3DViewer = function (containerId, dotNetRef) {
     });
     const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
     renderer.domElement.addEventListener('pointerdown', event => {
+        if (event.button !== 0) return;
+        renderer.domElement.focus({ preventScroll: true });
         if (transformControls.dragging) return;
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
@@ -700,8 +1181,8 @@ window.init3DViewer = function (containerId, dotNetRef) {
             }
             return;
         }
-        const groups = [pivotsGroup, lightsGroup, waypointsGroup].filter(g => g && g.visible);
-        const hits = raycaster.intersectObjects(groups.flatMap(g => g.children), true);
+        const groups = [pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup].filter(g => g && g.visible);
+        const hits = raycaster.intersectObjects(groups.flatMap(g => g.children), true).filter(hit => isVisibleInScene(hit.object));
         if (hits.length) {
             let obj = hits[0].object;
             while (obj.parent && !groups.includes(obj.parent)) obj = obj.parent;
@@ -710,34 +1191,59 @@ window.init3DViewer = function (containerId, dotNetRef) {
         }
         const meshGroups = [staticGroup, movingGroup].filter(g => g && g.visible);
         const meshHits = raycaster.intersectObjects(meshGroups.flatMap(g => g.children), true)
-            .find(hit => hit.object?.isMesh);
+            .find(hit => isSelectableMesh(hit.object));
         const additive = event.ctrlKey || event.metaKey;
         const range = event.shiftKey;
         if (meshHits?.object?.isMesh) {
             selectMeshObject(meshHits.object, true, additive, range);
             return;
         }
-        // Fallback: pick any visible mesh in scene if grouped lookup missed.
-        const fallback = raycaster.intersectObjects(scene.children, true).find(hit => hit.object?.isMesh && hit.object.visible);
-        if (fallback?.object?.isMesh) selectMeshObject(fallback.object, true, additive, range);
+        // Only item groups are selectable; transform-control pickers are not items.
+        selectGizmo(null);
+        selectMeshObject(null, true, false, false);
     });
-    scene.add(new THREE.AmbientLight(0xffffff, .5));
-    const light = new THREE.DirectionalLight(0xffffff, .7); light.position.set(30, 50, 30); scene.add(light);
-    gridHelper = new THREE.GridHelper(50, 50, 0x38bdf8, 0x27272a); scene.add(gridHelper, new THREE.AxesHelper(4));
-    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup] = Array.from({ length: 6 }, () => new THREE.Group());
-    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup); applyLayerVisibility();
+    const ambient = new THREE.AmbientLight(0xffffff, .5); ambient.userData.studioDefaultLight = true; scene.add(ambient);
+    const light = new THREE.DirectionalLight(0xffffff, .7); light.userData.studioDefaultLight = true; light.position.set(30, 50, 30); scene.add(light);
+    const gridGroup = new THREE.Group();
+    // Stadium uses 48 Trackmania blocks across the editor floor; each block is 32 m.
+    gridGroup.add(new THREE.GridHelper(64, 64, 0x536277, 0x303d4d));
+    gridGroup.add(new THREE.GridHelper(512, 64, 0x657b96, 0x34465c));
+    gridGroup.add(new THREE.GridHelper(1536, 48, 0x6b8bb5, 0x34465c));
+    // Short line segments also render correctly when the camera is inside a
+    // large grid (some WebGL drivers clip long lines at the near plane).
+    for (const grid of gridGroup.children) {
+        const positions = grid.geometry.attributes.position, colors = grid.geometry.attributes.color;
+        const points = [], vertexColors = [];
+        for (let i = 0; i < positions.count; i += 2) {
+            const a = new THREE.Vector3().fromBufferAttribute(positions, i), b = new THREE.Vector3().fromBufferAttribute(positions, i + 1);
+            const steps = Math.ceil(a.distanceTo(b) / (a.distanceTo(b) <= 64 ? 16 : 64));
+            for (let step = 0; step < steps; step++) {
+                points.push(...a.clone().lerp(b, step / steps).toArray(), ...a.clone().lerp(b, (step + 1) / steps).toArray());
+                const color = [colors.getX(i), colors.getY(i), colors.getZ(i)]; vertexColors.push(...color, ...color);
+            }
+        }
+        grid.geometry.dispose(); grid.geometry = new THREE.BufferGeometry();
+        grid.geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+        grid.geometry.setAttribute('color', new THREE.Float32BufferAttribute(vertexColors, 3));
+    }
+    gridHelper = gridGroup; scene.add(gridHelper, new THREE.AxesHelper(4));
+    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup] = Array.from({ length: 7 }, () => new THREE.Group());
+    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup); applyLayerVisibility();
+    if (pendingFlagAnchor) window.setFlagConversionAnchor(...pendingFlagAnchor, true);
     function animate(timestamp) {
         if (!renderer) return;
         animationFrameId = requestAnimationFrame(animate);
+        if (lastFrameTime !== null && timestamp - lastFrameTime < 1000 / 30) return;
         const delta = lastFrameTime === null ? 0 : Math.min(Math.max(timestamp - lastFrameTime, 0), 50);
         lastFrameTime = timestamp;
         if (isPlaying) animTime += delta * animSpeed;
-        applyTypedMotion(); applyLegacyMotion();
+        applyAnimatedCloth(); applyTypedMotion(); applyLegacyMotion(); applyAnimatedMaterialTextures(); syncFlagAnchorObject();
         if (activeMeshHelper) activeMeshHelper.update();
         if (selectedMeshHelper) selectedMeshHelper.update();
         controls.update(); renderer.render(scene, camera);
     }
     animationFrameId = requestAnimationFrame(animate);
+    if (typeof studioMoodName !== 'undefined' && studioMoodName !== 'neutral') void window.setStudioMood(studioMoodName);
     resizeHandler = () => {
         if (!container.isConnected || !renderer || !camera) return;
         const w = container.clientWidth || 1, h = container.clientHeight || 1;
@@ -747,6 +1253,46 @@ window.init3DViewer = function (containerId, dotNetRef) {
     resizeObserver = new ResizeObserver(resizeHandler);
     resizeObserver.observe(container);
 };
+function applyAnimatedCloth() {
+    if (!clothAnimationEnabled) return;
+    const geometries = new Set();
+    for (const group of [staticGroup, movingGroup]) {
+        group?.traverse(child => { if (child.isMesh && child.geometry?.userData?.clothAnimation) geometries.add(child.geometry); });
+    }
+    for (const geometry of geometries) {
+        const animation = geometry.userData.clothAnimation;
+        const positions = geometry.attributes.position;
+        if (!animation || !positions || animation.vertexCount <= 0) continue;
+        const phase = ((animTime / 1000) / animation.periodSeconds) % 1;
+        const frame = phase * (animation.frameCount - 1);
+        const first = Math.floor(frame);
+        const second = (first + 1) % animation.frameCount;
+        const blend = frame - first;
+        const firstOffset = first * animation.vertexCount * 3;
+        const secondOffset = second * animation.vertexCount * 3;
+        for (let i = 0; i < animation.vertexCount; i++) {
+            const offset = i * 3;
+            for (let axis = 0; axis < 3; axis++) {
+                const a = animation.positions[firstOffset + offset + axis];
+                const b = animation.positions[secondOffset + offset + axis];
+                positions.array[offset + axis] = a + (b - a) * blend;
+            }
+        }
+        positions.needsUpdate = true;
+        const normals = geometry.attributes.normal;
+        if (animation.normals && normals) {
+            for (let i = 0; i < animation.vertexCount; i++) {
+                const offset = i * 3;
+                const a0 = animation.normals[firstOffset + offset], a1 = animation.normals[firstOffset + offset + 1], a2 = animation.normals[firstOffset + offset + 2];
+                const b0 = animation.normals[secondOffset + offset], b1 = animation.normals[secondOffset + offset + 1], b2 = animation.normals[secondOffset + offset + 2];
+                let x = a0 + (b0 - a0) * blend, y = a1 + (b1 - a1) * blend, z = a2 + (b2 - a2) * blend;
+                const length = Math.hypot(x, y, z) || 1;
+                normals.array[offset] = x / length; normals.array[offset + 1] = y / length; normals.array[offset + 2] = z / length;
+            }
+            normals.needsUpdate = true;
+        }
+    }
+}
 function disposeObjectResources(root) {
     const geometries = new Set(), materials = new Set(), textures = new Set();
     root.traverse(child => {
@@ -762,12 +1308,17 @@ function disposeObjectResources(root) {
     textures.forEach(texture => texture.dispose());
 }
 window.dispose3DViewer = function () {
+    viewportSelectionQueue = Promise.resolve();
+    window.disposeStudioMood?.();
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
     animationFrameId = null; selectedGizmo = dotNetHelper = null;
     selectedMeshObject = null; selectedMeshPath = null; clearSelectedMeshHighlight();
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+    if (viewKeyHandler) window.removeEventListener('keydown', viewKeyHandler, true);
     resizeObserver?.disconnect(); resizeObserver = null;
     resizeHandler = null;
+    viewKeyHandler = null;
+    activeStudioView = 'perspective';
     if (activeMeshHelper) { scene?.remove(activeMeshHelper); activeMeshHelper.dispose?.(); activeMeshHelper = null; }
     if (transformControls) { transformControls.detach(); transformControls.dispose(); scene?.remove(transformControls); }
     controls?.dispose(); if (scene) disposeObjectResources(scene);
@@ -775,7 +1326,8 @@ window.dispose3DViewer = function () {
     releaseGeometryPool();
     if (renderer) { renderer.dispose(); renderer.domElement.remove(); }
     renderer = scene = camera = controls = transformControls = null;
-    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = waypointsGroup = gridHelper = null;
+    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = waypointsGroup = flagAnchorGroup = gridHelper = null;
+    flagAnchorObject = null;
     typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); groupMotionContainers = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
     selectedCompositeSources = new Set(); compositeGroupBySource = new Map(); compositeLeaderSource = null;
     hasAutoFramedScene = false;
@@ -794,8 +1346,9 @@ function selectGizmo(obj) {
     }
 }
 window.scrollSelectedVariantIntoView = function () {
-    document.querySelector('.studio-variant-buttons button[aria-pressed="true"]')
-        ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const selected = document.querySelector('.studio-item-variant[aria-pressed="true"]')
+        ?? document.querySelector('.studio-item-tab[aria-pressed="true"]');
+    selected?.closest('.studio-item-switcher-row')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 };
 
 window.selectGizmoFromUI = function (type, index) {
@@ -843,14 +1396,38 @@ function buildGeometry(part) {
     const positions = buffer(part.positionsBytes == null ? part.positions ?? part.Positions : geometryWords(part.positionsBytes), 'Positions', 3);
     const indices = part.indicesBytes == null ? part.indices ?? part.Indices : geometryWords(part.indicesBytes, true);
     const normals = part.normalsBytes == null ? part.normals : geometryWords(part.normalsBytes);
+    const uvs = part.uvsBytes == null ? part.uvs : geometryWords(part.uvsBytes);
+    const animationPositions = part.animationPositionsBytes == null
+        ? (part.animationPositions ?? null) : geometryWords(part.animationPositionsBytes);
+    const animationNormals = part.animationNormalsBytes == null
+        ? (part.animationNormals ?? null) : geometryWords(part.animationNormalsBytes);
+    const animationFrameCount = Number(part.animationFrameCount ?? 0);
+    const animationPeriodSeconds = Number(part.animationPeriodSeconds ?? 12);
     if (!(Array.isArray(indices) || indices instanceof Int32Array) || indices.length % 3 || indices.some(x => !Number.isInteger(x) || x < 0 || x >= positions.length / 3)) throw new Error('Invalid triangle indices.');
-    for (const [value, key, stride] of [[normals, 'normals', 3], [part.uvs, 'uvs', 2]])
+    for (const [value, key, stride] of [[normals, 'normals', 3], [uvs, 'uvs', 2]])
         if (value != null && buffer(value, key, stride).length / stride !== positions.length / 3) throw new Error(`${key} count does not match vertices.`);
+    if (animationPositions != null) {
+        if (!Number.isInteger(animationFrameCount) || animationFrameCount < 2 || animationFrameCount > 256
+            || animationPositions.length !== positions.length * animationFrameCount
+            || !Number.isFinite(animationPeriodSeconds) || animationPeriodSeconds <= 0)
+            throw new Error('Invalid baked cloth animation.');
+        if (animationNormals != null && animationNormals.length !== animationPositions.length)
+            throw new Error('Animation normal count does not match animation positions.');
+    }
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setIndex(indices instanceof Int32Array ? new THREE.BufferAttribute(new Uint32Array(indices), 1) : indices);
     if (normals != null) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); else geometry.computeVertexNormals();
-    if (part.uvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(part.uvs, 2));
+    if (uvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     if (geometry.attributes.normal.array.some(x => !Number.isFinite(x))) { geometry.dispose(); throw new Error('Normals overflow geometry.'); }
+    if (animationPositions != null) {
+        geometry.userData.clothAnimation = {
+            positions: animationPositions instanceof Float32Array ? animationPositions : new Float32Array(animationPositions),
+            normals: animationNormals == null ? null : (animationNormals instanceof Float32Array ? animationNormals : new Float32Array(animationNormals)),
+            frameCount: animationFrameCount,
+            vertexCount: positions.length / 3,
+            periodSeconds: animationPeriodSeconds
+        };
+    }
     geometry.computeBoundingBox();
     return geometry;
 }
@@ -898,7 +1475,12 @@ function makePart(part, owner, bounds, pool) {
     };
     return mesh;
 }
-function makeGizmo(data, index, type) {
+function markerScaleForBounds(bounds) {
+    if (!bounds || bounds.isEmpty()) return 0.35;
+    const diagonal = bounds.getSize(new THREE.Vector3()).length();
+    return THREE.MathUtils.clamp(diagonal * 0.04, 0.12, 0.9);
+}
+function makeGizmo(data, index, type, markerScale = 1) {
     const position = ['x', 'y', 'z'].map(key => finite(data[key], `${type} ${key}`));
     const rotation = ['rotX', 'rotY', 'rotZ'].map(key => Number.isFinite(data[key]) ? Number(data[key]) : 0);
     if (data.index != null && (!Number.isInteger(data.index) || data.index < 0)) throw new Error('Invalid gizmo index.');
@@ -912,22 +1494,32 @@ function makeGizmo(data, index, type) {
         if (!Number.isInteger(color) || color < 0 || color > 0xffffff) throw new Error('Light color must be RGB24.');
         nonnegative(intensity, 'Light intensity'); nonnegative(radius, 'Light radius');
         const point = new THREE.PointLight(color, intensity, radius); point.name = 'realLight'; group.add(point);
-        const bulb = new THREE.Mesh(new THREE.SphereGeometry(.28, 16, 16), new THREE.MeshBasicMaterial({ color })); bulb.name = 'bulb'; group.add(bulb);
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(.28 * markerScale, 16, 16), new THREE.MeshBasicMaterial({ color })); bulb.name = 'bulb'; group.add(bulb);
         const wire = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 12), new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: .15 }));
         wire.name = 'radiusWire'; wire.scale.setScalar(radius); group.add(wire);
     } else if (type === 'pivot') {
-        group.add(new THREE.Mesh(new THREE.SphereGeometry(.22, 16, 16), new THREE.MeshBasicMaterial({ color: 0xfacc15 })), new THREE.AxesHelper(.9));
+        group.add(new THREE.Mesh(new THREE.SphereGeometry(.22 * markerScale, 16, 16), new THREE.MeshBasicMaterial({ color: 0xfacc15 })), new THREE.AxesHelper(.9 * markerScale));
     } else if (type === 'composite-offset') {
-        group.add(new THREE.Mesh(new THREE.BoxGeometry(.35, .35, .35), new THREE.MeshBasicMaterial({ color: 0x00ffff })), new THREE.AxesHelper(1.1));
+        group.add(new THREE.Mesh(new THREE.BoxGeometry(.35 * markerScale, .35 * markerScale, .35 * markerScale), new THREE.MeshBasicMaterial({ color: 0x00ffff })), new THREE.AxesHelper(1.1 * markerScale));
     } else if (type === 'composite-group') {
         const groupColor = compositeGroupColor(data.index ?? index);
-        group.add(new THREE.Mesh(new THREE.BoxGeometry(.42, .42, .42), new THREE.MeshBasicMaterial({ color: groupColor })), new THREE.AxesHelper(1.25));
+        group.add(new THREE.Mesh(new THREE.BoxGeometry(.42 * markerScale, .42 * markerScale, .42 * markerScale), new THREE.MeshBasicMaterial({ color: groupColor })), new THREE.AxesHelper(1.25 * markerScale));
+    } else if (type === 'fx-emitter') {
+        // The payload supplies the primary emitter in item-space metres;
+        // native export converts it through the FX owner's prefab transform.
+        const color = 0x22d3ee;
+        group.add(new THREE.Mesh(new THREE.SphereGeometry(.27 * markerScale, 16, 12), new THREE.MeshBasicMaterial({ color })), new THREE.AxesHelper(1.15 * markerScale));
+        const arrow = new THREE.Mesh(new THREE.ConeGeometry(.12 * markerScale, .42 * markerScale, 12), new THREE.MeshBasicMaterial({ color }));
+        arrow.position.y = .38 * markerScale;
+        group.add(arrow);
     }
     else throw new Error('Unknown gizmo type.');
     return group;
 }
 function frameCamera(bounds) {
     if (bounds.isEmpty()) return;
+    camera.up.set(0, 1, 0);
+    activeStudioView = 'perspective';
     const center = bounds.getCenter(new THREE.Vector3()), radius = Math.max(bounds.getSize(new THREE.Vector3()).length() / 2, 1);
     const vertical = THREE.MathUtils.degToRad(camera.fov), horizontal = 2 * Math.atan(Math.tan(vertical / 2) * camera.aspect);
     const distance = radius / Math.sin(Math.min(vertical, horizontal) / 2) * 1.2;
@@ -950,7 +1542,7 @@ function getMotionBaseMatrix(motion) {
     return parentWorldAtB.multiply(motion.inverseParent).multiply(motion.childRest);
 }
 
-function makeTextSprite(text, bgColor = '#22c55e', textColor = '#ffffff') {
+function makeTextSprite(text, bgColor = '#22c55e', textColor = '#ffffff', markerScale = 1) {
     if (typeof document === 'undefined' || !document.createElement) return new THREE.Group();
     const canvas = document.createElement('canvas');
     canvas.width = 128;
@@ -987,11 +1579,11 @@ function makeTextSprite(text, bgColor = '#22c55e', textColor = '#ffffff') {
     const texture = new THREE.CanvasTexture(canvas);
     const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false, depthWrite: false });
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(1.2, 0.6, 1);
+    sprite.scale.set(1.2 * markerScale, 0.6 * markerScale, 1);
     return sprite;
 }
 
-function makeWaypointHandle(pos, label, isPointB, constraintIndex, motion) {
+function makeWaypointHandle(pos, label, isPointB, constraintIndex, motion, markerScale = 1) {
     const group = new THREE.Group();
     group.position.copy(pos);
     group.userData = {
@@ -1005,29 +1597,29 @@ function makeWaypointHandle(pos, label, isPointB, constraintIndex, motion) {
 
     const color = isPointB ? 0xf97316 : 0x22c55e;
     const sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.32, 16, 16),
+        new THREE.SphereGeometry(0.32 * markerScale, 16, 16),
         new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.2, emissive: color, emissiveIntensity: 0.25 })
     );
     sphere.name = 'handleSphere';
     group.add(sphere);
 
     const halo = new THREE.Mesh(
-        new THREE.RingGeometry(0.42, 0.55, 24),
+        new THREE.RingGeometry(0.42 * markerScale, 0.55 * markerScale, 24),
         new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
     );
     halo.name = 'handleHalo';
     halo.rotation.x = Math.PI / 2;
     group.add(halo);
 
-    const sprite = makeTextSprite(label, isPointB ? '#ea580c' : '#16a34a', '#ffffff');
-    sprite.position.set(0, 0.7, 0);
+    const sprite = makeTextSprite(label, isPointB ? '#ea580c' : '#16a34a', '#ffffff', markerScale);
+    sprite.position.set(0, 0.7 * markerScale, 0);
     sprite.name = 'handleSprite';
     group.add(sprite);
 
     return group;
 }
 
-function makePathLine(worldA, worldB, constraintIndex) {
+function makePathLine(worldA, worldB, constraintIndex, markerScale = 1) {
     const group = new THREE.Group();
     group.name = `pathLineGroup_${constraintIndex}`;
     group.userData = { constraintIndex };
@@ -1045,10 +1637,10 @@ function makePathLine(worldA, worldB, constraintIndex) {
 
     const dir = new THREE.Vector3().subVectors(worldB, worldA);
     const len = dir.length();
-    if (len > 0.05) {
+    if (len > 0.05 * markerScale) {
         dir.normalize();
         const arrow = new THREE.Mesh(
-            new THREE.ConeGeometry(0.2, 0.5, 12),
+            new THREE.ConeGeometry(0.2 * markerScale, 0.5 * markerScale, 12),
             new THREE.MeshBasicMaterial({ color: 0x06b6d4 })
         );
         arrow.name = 'pathArrow';
@@ -1063,6 +1655,7 @@ function makePathLine(worldA, worldB, constraintIndex) {
 
 function buildWaypoints(motions, stagedGroup, bounds) {
     if (!motions || motions.length === 0) return;
+    const markerScale = markerScaleForBounds(bounds);
     for (let i = 0; i < motions.length; i++) {
         const motion = motions[i];
         const constraintIndex = motion.constraintIndex ?? i;
@@ -1081,13 +1674,13 @@ function buildWaypoints(motions, stagedGroup, bounds) {
         const labelA = `${prefix}A`;
         const labelB = `${prefix}B`;
 
-        const handleA = makeWaypointHandle(worldA, labelA, false, constraintIndex, motion);
-        const handleB = makeWaypointHandle(worldB, labelB, true, constraintIndex, motion);
+        const handleA = makeWaypointHandle(worldA, labelA, false, constraintIndex, motion, markerScale);
+        const handleB = makeWaypointHandle(worldB, labelB, true, constraintIndex, motion, markerScale);
 
         stagedGroup.add(handleA);
         stagedGroup.add(handleB);
 
-        const pathLine = makePathLine(worldA, worldB, constraintIndex);
+        const pathLine = makePathLine(worldA, worldB, constraintIndex, markerScale);
         stagedGroup.add(pathLine);
 
         if (motion.parentMotion) {
@@ -1319,19 +1912,14 @@ function renderPayload(input, preserveCamera) {
             }
         }
         for (const [property, type, target] of [['pivots', 'pivot', 3], ['compositeOffsets', 'composite-offset', 3], ['compositeGroups', 'composite-group', 3], ['lights', 'light', 4]])
-            (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type); staged[target].add(group); bounds.expandByPoint(group.position); });
+            (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type, markerScaleForBounds(bounds)); staged[target].add(group); bounds.expandByPoint(group.position); });
+        if (data.fxEmitter && typeof data.fxEmitter === 'object') {
+            const group = makeGizmo(data.fxEmitter, 0, 'fx-emitter', markerScaleForBounds(bounds));
+            staged[3].add(group); bounds.expandByPoint(group.position);
+        }
         if (data.activeConstraintIndex != null) {
             activeConstraintIndex = data.activeConstraintIndex;
         }
-        selectedMeshPath = typeof data.selectedMeshPath === 'string' && data.selectedMeshPath.length > 0 ? data.selectedMeshPath : null;
-        selectedCompositeSources = new Set((compositeSelection.selectedSourceIndices ?? []).filter(Number.isInteger));
-        compositeLeaderSource = Number.isInteger(compositeSelection.leaderSourceIndex) && compositeSelection.leaderSourceIndex >= 0
-            ? compositeSelection.leaderSourceIndex
-            : null;
-        compositeGroupBySource = new Map(
-            (compositeSelection.sourceGroups ?? [])
-                .filter(entry => Number.isInteger(entry?.sourceIndex) && Number.isInteger(entry?.groupId))
-                .map(entry => [entry.sourceIndex, entry.groupId]));
         buildWaypoints(motions, staged[5], bounds);
     } catch (error) { staged.forEach(disposeObjectResources); added.forEach(g => g.dispose()); throw error; }
     window.clearViewerScene(true);
@@ -1339,6 +1927,14 @@ function renderPayload(input, preserveCamera) {
     sharedGeometry = pool; geometryEpoch = epoch;
     const destinations = [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup];
     staged.forEach((group, index) => { while (group.children.length) destinations[index].add(group.children[0]); });
+    // clearViewerScene retires the old selection. Apply the new payload only afterwards.
+    selectedMeshPath = typeof data.selectedMeshPath === 'string' && data.selectedMeshPath.length > 0 ? data.selectedMeshPath : null;
+    selectedCompositeSources = new Set((compositeSelection.selectedSourceIndices ?? []).filter(Number.isInteger));
+    compositeLeaderSource = Number.isInteger(compositeSelection.leaderSourceIndex) && compositeSelection.leaderSourceIndex >= 0
+        ? compositeSelection.leaderSourceIndex : null;
+    compositeGroupBySource = new Map((compositeSelection.sourceGroups ?? [])
+        .filter(entry => Number.isInteger(entry?.sourceIndex) && Number.isInteger(entry?.groupId))
+        .map(entry => [entry.sourceIndex, entry.groupId]));
     isPlaying = data.playing !== false; legacyMotion = nextLegacyMotion;
     typedMotions = motions; typedGroupMotions = groupMotions; motionGroups = groups; groupMotionContainers = localGroupMotionContainers; previewPhase01 = offset;
     currentPayload = { ...data, geometryDefinitions: [] };
@@ -1354,8 +1950,10 @@ function renderPayload(input, preserveCamera) {
     void applyLocalTextures(data, renderVersion);
 }
 window.renderStudioScene = payload => {
-    renderPayload(payload, hasAutoFramedScene);
-    hasAutoFramedScene = true;
+    // Scene edits/variant switches retain the view. A new viewer or an explicit
+    // frameCamera request frames the authored bounds without moving any geometry.
+    renderPayload(payload, hasAutoFramedScene && payload.frameCamera !== true);
+    hasAutoFramedScene = Boolean(payload.parts?.length);
 };
 window.setTransformMode = mode => {
     if (!transformControls) return;
@@ -1385,8 +1983,10 @@ window.clearViewerScene = function (keepGeometry = false) {
     }
     typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); groupMotionContainers = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
     selectedCompositeSources = new Set(); compositeGroupBySource = new Map(); compositeLeaderSource = null;
-    hasAutoFramedScene = false;
-    if (!keepGeometry) releaseGeometryPool();
+    if (!keepGeometry) {
+        hasAutoFramedScene = false; animTime = 0; lastFrameTime = null;
+        releaseGeometryPool();
+    }
 };
 window.setDrawPathMode = function (enabled, planeY) {
     drawPathEnabled = Boolean(enabled);
@@ -1405,6 +2005,7 @@ window.setMotionPreview = value => { if (value?.motions) window.setTypedMotionPr
 window.setAnimationAxis = function () {};
 window.setAnimationPlaying = playing => { isPlaying = Boolean(playing); };
 window.setAnimationSpeed = speed => { animSpeed = nonnegative(Number(speed), 'Playback speed'); };
+window.setClothAnimationPreview = enabled => { clothAnimationEnabled = Boolean(enabled); };
 function applyLayerVisibility() {
     if (!staticGroup) return;
     staticGroup.visible = movingGroup.visible = showMeshes; collisionGroup.visible = showCollision;
@@ -1425,12 +2026,17 @@ window.toggleLayer = function (name) {
     applyLayerVisibility(); return value;
 };
 function applySceneFilter() {
+    const skinPreview = currentPayload?.materials?.some(material => /^skins\//i.test(material.gameMaterialLink || ''));
+    const nativePreview = skinPreview || currentPayload?.materials?.some(material => /^material[/\\]/i.test(material.gameMaterialLink || ''));
+    const lod = sceneFilter.lodMask ?? (nativePreview ? 1 : null);
+    const damageLayers = new Set((currentPayload?.materials ?? []).filter(material => /DmgDecal_/i.test(material.gameMaterialName || '')).map(material => material.path));
     for (const group of [staticGroup, movingGroup]) group?.traverse(child => {
         if (!child.isMesh) return;
-        child.visible = sceneFilter.materialIndex === null && sceneFilter.materialPath === null && sceneFilter.lodMask === null || child.userData.mappings.some(map =>
+        child.visible = sceneFilter.materialIndex === null && sceneFilter.materialPath === null && lod === null || child.userData.mappings.some(map =>
             (sceneFilter.materialIndex === null || map.materialIndex === sceneFilter.materialIndex)
             && (sceneFilter.materialPath === null || map.materialPath === sceneFilter.materialPath)
-            && (sceneFilter.lodMask === null || map.lodMask !== null && (map.lodMask & sceneFilter.lodMask) !== 0));
+            && !damageLayers.has(map.materialPath)
+            && (lod === null || map.lodMask !== null && (map.lodMask & lod) !== 0));
     });
     applyCompositeVisualState();
 }
@@ -1455,7 +2061,43 @@ window.toggleWireframe = function () {
     isWireframe = !isWireframe;
     for (const group of [staticGroup, movingGroup]) group?.traverse(child => { if (child.isMesh) child.material.wireframe = isWireframe; });
 };
-window.resetCamera = () => controls?.reset();
+window.resetCamera = function () {
+    if (!camera || !controls) return;
+    const bounds = new THREE.Box3();
+    for (const group of [staticGroup, movingGroup, collisionGroup]) group?.traverse(mesh => {
+        if (isSelectableMesh(mesh)) bounds.expandByObject(mesh);
+    });
+    frameCamera(bounds);
+};
+window.setStudioView = function (view, reverse = false) {
+    if (!camera || !controls) return;
+    const target = controls.target.clone();
+    const distance = Math.max(camera.position.distanceTo(target), 1);
+    let direction;
+    let up = new THREE.Vector3(0, 1, 0);
+    switch ((view ?? '').toLowerCase()) {
+        case 'top':
+            direction = new THREE.Vector3(0, 1, 0);
+            up.set(0, 0, -1);
+            break;
+        case 'front':
+            direction = new THREE.Vector3(0, 0, 1);
+            break;
+        case 'right':
+            direction = new THREE.Vector3(1, 0, 0);
+            break;
+        default:
+            direction = new THREE.Vector3(1, .8, 1).normalize();
+            break;
+    }
+    if (reverse) direction.negate();
+    const requested = (view ?? '').toLowerCase();
+    activeStudioView = ['top', 'front', 'right'].includes(requested) ? requested : 'perspective';
+    camera.up.copy(up);
+    camera.position.copy(target).add(direction.multiplyScalar(distance));
+    camera.lookAt(target);
+    controls.update();
+};
 window.downloadObjFile = function (filename, content) {
     const url = URL.createObjectURL(new Blob([content], { type: 'text/plain' })), link = document.createElement('a');
     link.href = url; link.download = filename; link.click(); URL.revokeObjectURL(url);

@@ -1,0 +1,1296 @@
+{
+  "schemaVersion": 1,
+  "root": "C:\\Users\\PC\\OpenplanetNext\\Extract\\GameData",
+  "generatedAtUtc": "2026-10-25T22:13:55.2447184+00:00",
+  "particleModelCount": 83,
+  "parsedCount": 61,
+  "rows": [
+    {
+      "path": "Effects/Particles/FlyingLeaves_BaseModel.ParticleModel.Gbx",
+      "bytes": 1831,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\Confettis.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1814,
+      "roundtripExact": false,
+      "sourceSha256": "3464EA37CD850823FDFA29C7A79AA616B988E2806849A0DD05CB7666655588D8",
+      "roundtripSha256": "03F871227C6A11BF0687262CE8946E2E0FD42D0C8254FE5924DC8ABCBFA07E26",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Effects/Particles/InFogEmitter.ParticleModel.Gbx",
+      "bytes": 1947,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Vehicles\\Media\\Material\\ParticleSmokeAsphalt.Material.Gbx",
+        "ShootMania\\Media\\Texture\\LightGreySmoke.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1915,
+      "roundtripExact": false,
+      "sourceSha256": "A14D1BCE594C9BB2D83F7038418FCC234242F2FFCDD2FED8138A6E88D42EC3B8",
+      "roundtripSha256": "D0DFF7A3A6967080CFC3897AC1DBCCB9C2BAAE8A70389B02255030000F193832",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/Arrow.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ArrowExplosion.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ArrowExplosionWater.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/BulletBall1.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/BulletBall1Explosion.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/BulletBall1ExplosionPlayer.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/BulletExplosionOffzone.ParticleModel.Gbx",
+      "bytes": 5081,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\ParticleTeamFireBall.Texture.gbx",
+        "Media\\Texture\\ParticleTeamBallsTest.Texture.gbx",
+        "Media\\Texture\\ParticleDistor.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 5047,
+      "roundtripExact": false,
+      "sourceSha256": "0EF9DC0C90D26EC46E2ED47C29CC7ACB3FED75AE152678D8C3A5E98E8508B00C",
+      "roundtripSha256": "9CB79C29E6B756124A9F048A2268F1B758878C0171CDD97685275F252858C596",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ExplosionOnDirtBig.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ExplosionOnGrassBig.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ExplosionOnMetalBig.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ExplosionOnRockBig.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ExplosionOnStoneBig.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ExplosionOnWaterBig.ParticleModel.Gbx",
+      "bytes": 3459,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\Water2x2.Texture.gbx",
+        "Media\\Texture\\WaterDrop1.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3425,
+      "roundtripExact": false,
+      "sourceSha256": "87579BE82DD024C8E5530B7CE504C5BD8721F86C9AF055F70C0BCE003A46ECD4",
+      "roundtripSha256": "1D021B19EC471122BB4240B992A61E7E91F819219955A8919665921DD7D33BF6",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/ExplosionOnWoodBig.ParticleModel.Gbx",
+      "bytes": 5064,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\ParticleWoodShards.Texture.gbx",
+        "Media\\Texture\\ParticleDirtClouds.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 5030,
+      "roundtripExact": false,
+      "sourceSha256": "1718936CA62137E9868A88F42A7D5D0422A20027BED1F34E213C1EEAE57B6046",
+      "roundtripSha256": "ACB4CCA1BF0F609FBF054E3EC9727C75023EA357AA05E726C0AAD2228329E9EB",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/GoldenlaserExplo.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/Hunter.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/MissileThickTrail.ParticleModel.Gbx",
+      "bytes": 3547,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Effects\\Media\\Texture\\RADIAL.Texture.gbx",
+        "ShootMania\\Media\\Texture\\WhiteSmoke.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3513,
+      "roundtripExact": false,
+      "sourceSha256": "31B954B984658BA18965D2B4F96A342776508F5A1D9794E47877B31F4D40427E",
+      "roundtripSha256": "749877E080AB985D5BC1137371FFA208983CCBEFAB081DA0E45DF4206313F6B3",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/MuzzleFlash.ParticleModel.Gbx",
+      "bytes": 2027,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\BulletBall1.Material.Gbx",
+        "Media\\Solid\\MuzzleFlash.Solid2.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1993,
+      "roundtripExact": false,
+      "sourceSha256": "AB659FC8A5ADEAE088A797552727BA5A692D835E7FE562D504C1DC317E41B8A9",
+      "roundtripSha256": "2BDE331A2FD48D791C81EED33A1DCE34C9E4005991AAB38DF18B0EA1AFC44C5E",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/Nucleus2.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/NucleusExplosion.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/PlayerDeactivated.ParticleModel.Gbx",
+      "bytes": 1837,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\ParticleFireSparks.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1803,
+      "roundtripExact": false,
+      "sourceSha256": "B3BDCF34B4073780BADE638228A4C7387FFA8C9DE506C63C73ACE46CF68FE8B6",
+      "roundtripSha256": "46B03D45D17C1C671A5F71222A650102D9D0F6749D4E11E5DD2AF6DECB98800D",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/PlayerDeactivatedShot.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/PlayerTeleport.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/Rail1Hit.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/Rail1HitPlayer.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/Rail1ImpactSnow.ParticleModel.Gbx",
+      "bytes": 2151,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\BulletRail1AnimExplosion.Material.Gbx",
+        "Media\\Particles\\RailImpactSnow.ParticleEmitterSubModel.Gbx",
+        "Media\\Particles\\RailImpactSnowSmoke.ParticleEmitterSubModel.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 2117,
+      "roundtripExact": false,
+      "sourceSha256": "6418EF998B02E6FB3DAFAC84A117962BAA9780FEE4D0B22E12F77CEAC43284D9",
+      "roundtripSha256": "7B421C302BF0DA4B18E6FA444284D241BF60B974E3034938DDC8238E080201AC",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/RocketExplosionDeny.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "ShootMania/MotionParticleEmitterModel/Scout.ParticleModel.Gbx",
+      "bytes": 3613,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Effects\\Media\\Texture\\RADIAL.Texture.gbx",
+        "ShootMania\\Media\\Mesh\\Scout.Mesh.gbx",
+        "ShootMania\\Media\\Texture\\ParticleTeamFireBall.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3579,
+      "roundtripExact": false,
+      "sourceSha256": "2B5F301EC10AB5D86327389EDB4A600771C1EEEE2DA684C91745C2CCA04574F5",
+      "roundtripSha256": "EADBA3A6A9C6BA371CF231D08E1F8C1FEB79FB7ECFE22AF28A693C1237242194",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/Fogger16M.ParticleModel.Gbx",
+      "bytes": 1847,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\FoggerSmoke.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1813,
+      "roundtripExact": false,
+      "sourceSha256": "A37E3A5D8272D24E3FA49ED067D2378343913624628C59D402E65C6AB9064669",
+      "roundtripSha256": "D1B0847499C255BE7026AA0EFAAA5B9FF4AB2A978F96A528032B323F6360182E",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/Fogger8M.ParticleModel.Gbx",
+      "bytes": 1846,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\FoggerSmoke.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1812,
+      "roundtripExact": false,
+      "sourceSha256": "A7F74AAF3742E17823201C43841722FCEE54E49B60737BCF006DE6582AD92BB7",
+      "roundtripSha256": "A4C8BFFFB653A716B2A097531B4EA2D0066D59B5F8FDB10C082CE7326C65B08F",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/PodiumSparkler.ParticleModel.Gbx",
+      "bytes": 1884,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\Sparkler_D.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1850,
+      "roundtripExact": false,
+      "sourceSha256": "AD313BE5DCC5AF7985AB8CE45A6215A9ED703A71872AADD07466DCC384178F5A",
+      "roundtripSha256": "77FDF6A96AF6B076AC5218A541064C622B85C6484B10D8C8EC63AD9033687FBB",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/PodiumSparklerEnd.ParticleModel.Gbx",
+      "bytes": 1873,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\SparklerEnd_D.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1839,
+      "roundtripExact": false,
+      "sourceSha256": "FA237ACAB3386ED67758BC7CBD670E36B3BAF614C8A5DFAD501585158EE05DFB",
+      "roundtripSha256": "DC133E31A472BBEC62164562DCF391010029E8C2ABAE98259895F4F14F47BC3C",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/Sparkler16m.ParticleModel.Gbx",
+      "bytes": 1864,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\Sparkler_D.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1830,
+      "roundtripExact": false,
+      "sourceSha256": "466D22C09FD047E7E4552658041C36A236F3E6394E377A939B324B68FEEC022F",
+      "roundtripSha256": "3CEF08C03EEB2618F09E73367E7233D21526C3A2A2069CFEEBE3609B1AE73987",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/Sparkler8m.ParticleModel.Gbx",
+      "bytes": 1863,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\Sparkler_D.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1829,
+      "roundtripExact": false,
+      "sourceSha256": "09B61A3F43E1F96B13E8AF06B068B95C2F177F03849614F696D0A4979903F79A",
+      "roundtripSha256": "28F8670EF7BD4F31F97122ED2D9785B803EA5465F2A621EECAF1E3F50A2809C2",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/SparklerEnd16m.ParticleModel.Gbx",
+      "bytes": 1867,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\SparklerEnd_D.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1833,
+      "roundtripExact": false,
+      "sourceSha256": "E48BC9DF5BCBFC752416AB2B913ADB244395C5554FB838363E80CE9671A15186",
+      "roundtripSha256": "6D5F00C7F47BF45456A1E5092F7B89523FE49CC49F0777BE5FF0A8F52B08F33A",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/SparklerEnd8m.ParticleModel.Gbx",
+      "bytes": 1883,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\SparklerEnd_D.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1849,
+      "roundtripExact": false,
+      "sourceSha256": "16DEA2873C4525D9B66141E4695D63251DAF55FAD97F9725508417E665AB0C8E",
+      "roundtripSha256": "D2E14204EB8C72A8048911D202DB5A10AD026C3E101B267ADB4BBA1E50B2876A",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Stadium/MotionParticleEmitterModel/TorchSmoke.ParticleModel.Gbx",
+      "bytes": 1848,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\FoggerSmoke.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1814,
+      "roundtripExact": false,
+      "sourceSha256": "E6AE5B22A119D3A75589AD1454E895B08139879376149F5F1D92C37503D583E3",
+      "roundtripSha256": "BEC853E0AA6150D57BF8DDDA740B2FC1394633EFFD2E945B7A15EF69BDAEF228",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/AsphaltMarks.ParticleModel.Gbx",
+      "bytes": 1822,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\WheelMarksAsphalt.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1788,
+      "roundtripExact": false,
+      "sourceSha256": "3B209D0C274DBBF61C9308002822F018E081A108524735578A5B51F29A6FB42B",
+      "roundtripSha256": "830703C3B6A989EFA2724CB77A9366127FEB5A82B10EDD1B900B6BC01DF51523",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/AsphaltSmoke_Stronger.ParticleModel.Gbx",
+      "bytes": 1937,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeAsphalt.Material.Gbx",
+        "Media\\Texture\\SmokeWLightmap_D.Texture.gbx",
+        "Media\\Texture\\SmokeWLightmap_LM.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1903,
+      "roundtripExact": false,
+      "sourceSha256": "E6E896F0C93CFDE782D97448E1066266C409786EB3C81F18FFC95B878CEE4872",
+      "roundtripSha256": "F00AB3E48A9388FC39EED56DFE641BE9403045B053D5D61495E89903636B27E0",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/BackWaterWake.ParticleModel.Gbx",
+      "bytes": 1856,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Effects\\Media\\Shader\\Stem.Shader.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1806,
+      "roundtripExact": false,
+      "sourceSha256": "BC0603F43E66925C9312AE7EAA6A3F6770894FF22721EBF77D50532B6B6ECFD1",
+      "roundtripSha256": "AB4854E535F0C67F014B591DC14266E6B60451448EC052D0CFB2C42AB1A4BBF7",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Boost_Basic.ParticleModel.Gbx",
+      "bytes": 3580,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Solid\\ExhaustBoost.Mesh.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3546,
+      "roundtripExact": false,
+      "sourceSha256": "EA058CFDB274E3F97CA7983034434E38F5710B07428A5125BD4F8849358A2803",
+      "roundtripSha256": "ED3466FCCC57788B5576EC4554DABB7F783D37C02E8A29242E46B61073E9567A",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Boost_Turbo.ParticleModel.Gbx",
+      "bytes": 3561,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Solid\\Boost_Turbo.Mesh.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3527,
+      "roundtripExact": false,
+      "sourceSha256": "1310C3BDFC31F96E49296D9ACED410662223C185249B6DDEC29B27DB5596BCD9",
+      "roundtripSha256": "1BE1AA599EC91E043FFC9B001D081969F8B5D000480411380AA85DA976B2CE86",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Boost_Turbo2.ParticleModel.Gbx",
+      "bytes": 3562,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Solid\\Boost_Turbo2.Mesh.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3528,
+      "roundtripExact": false,
+      "sourceSha256": "8CDCD612F96086EAD9D99331E00A4B675CC84616E0D174219FF3027E2CE536FD",
+      "roundtripSha256": "0CDB7CD440DA78468D2F937E8ED29B8F3C319C4342641FF34F78E7E647DA93E6",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Boost_TurboRoulette2.ParticleModel.Gbx",
+      "bytes": 3570,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Solid\\Boost_TurboRoulette2.Mesh.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3536,
+      "roundtripExact": false,
+      "sourceSha256": "F1466B28A0DA8FDE9DED4D7A7229884F8EAFE0C74D909B7BA0977C90AC0A4CC5",
+      "roundtripSha256": "557CE54531C4D7F0B298D08B181E12C4B6CFC48F980B634A8D733132019862B5",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Boost_TurboRoulette3.ParticleModel.Gbx",
+      "bytes": 3570,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Solid\\Boost_TurboRoulette3.Mesh.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3536,
+      "roundtripExact": false,
+      "sourceSha256": "4D317E272FD20D3C68B971310E343BF6DDE7048ABCF1E763824A992085A0CFA5",
+      "roundtripSha256": "310006D9A9DF2F41E3F6B51E6215764FE553AB68442FC836BA502996A1D5C81E",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/CarReactorDirtSmoke.ParticleModel.Gbx",
+      "bytes": 1830,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeDirtHovering.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1796,
+      "roundtripExact": false,
+      "sourceSha256": "4E44EE0D7AB8AC324EB0C3656682F9E37F4F9EE70E6A92402A6B76061AB00E6F",
+      "roundtripSha256": "9ABB799DED6EFD066AB0AB3FE9AAE41BFEDDD7F7DA3B9094C49B250778780DA5",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/CarReactorSandSmoke.ParticleModel.Gbx",
+      "bytes": 1822,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeSand.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1788,
+      "roundtripExact": false,
+      "sourceSha256": "C8E046C1EF83E0B0B39C5092FFD8361B372733155083C2573B40F4108946C448",
+      "roundtripSha256": "34AB7FBDF010019D517B57265B5E65589C6B3C6929CA989D333715CCE458A73B",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/CarReactorSnowSmoke.ParticleModel.Gbx",
+      "bytes": 1822,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeSnow.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1788,
+      "roundtripExact": false,
+      "sourceSha256": "B09A5D3BBC3222E08296F01265656C358C49163E199CD7C7F5CAB282779F90F8",
+      "roundtripSha256": "E53AACF2D55401BB60B86AC5ADE0848AC4CEABBF25E9BC7AB03F49B0FEEB5A44",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/DirtMarks.ParticleModel.Gbx",
+      "bytes": 1795,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\WheelMarksDirt.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1761,
+      "roundtripExact": false,
+      "sourceSha256": "1BE155AF6C876372C205855BC2E95A9481331E73BB31A85932E65B12AE32FF23",
+      "roundtripSha256": "953596EA562BC52A5F7840A4D747A25E56F4E64352A4AACE4FDD472B8064723D",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/DirtSmoke.ParticleModel.Gbx",
+      "bytes": 3437,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeDirt.Material.Gbx",
+        "Media\\Material\\ParticleChunksDirt.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3403,
+      "roundtripExact": false,
+      "sourceSha256": "EA4B076BE9DC5122F5CD99644B2A55046F05E81E8FE98D5C113A7C1CF91B314F",
+      "roundtripSha256": "FD74D1458DC2D388553197E7C5F8E7F958417F884C2E50589BFECFA49B963011",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/DirtSmokeHigh.ParticleModel.Gbx",
+      "bytes": 3437,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeDirt.Material.Gbx",
+        "Media\\Material\\ParticleChunksDirt.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3403,
+      "roundtripExact": false,
+      "sourceSha256": "5795D23C8544F511EB06228DC6BAF06642B2A9BFB9089A346AA0BB4AA3CE36BC",
+      "roundtripSha256": "6947D1D3F08940D0489A2F80AE1D06F306A0D5C81241BFF8F84D04774426A3FA",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/EngineDistortion.ParticleModel.Gbx",
+      "bytes": 1901,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "ShootMania\\Media\\Texture\\ParticleDistor.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1851,
+      "roundtripExact": false,
+      "sourceSha256": "A3AAB1B58331E24E69DCE87040B7602C807D63E5EBBCDCB8608DAB8688AF8714",
+      "roundtripSha256": "BD5C5A5E71ED13187172704884363641E58C1EB77305529337DB2F32B7EAA072",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/ExhaustFlame.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/ExhaustNitro.ParticleModel.Gbx",
+      "parsed": false,
+      "error": "Unable to read beyond the end of the stream."
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/GlassSmash.ParticleModel.Gbx",
+      "bytes": 1800,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\Tech3_ParticleGlass.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1766,
+      "roundtripExact": false,
+      "sourceSha256": "0A937F67C26926E13B3B9F5DB15738E4E8508DFCF8A60BF01EB2836D37C95D5E",
+      "roundtripSha256": "DA79E4854A99E806A99EFCAA2FA43C9BF2E37A159FE17524611379E504CFEB2C",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/HelicoWaterWake.ParticleModel.Gbx",
+      "bytes": 1856,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Effects\\Media\\Shader\\Stem.Shader.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1806,
+      "roundtripExact": false,
+      "sourceSha256": "6C5D6B006503A896F3653AF48AACBE0E4D4ABB89F32BF11AF669D06583DB2098",
+      "roundtripSha256": "8973309326A97CBABB6F3C7C4CC7D61C4FC5EAF912E57F014D679D83A2979C93",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/IceMarks.ParticleModel.Gbx",
+      "bytes": 1818,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\WheelMarksIce.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1784,
+      "roundtripExact": false,
+      "sourceSha256": "9876AA728664A9AEEED55D8A59169F1F5286C4D3AB50B4AFF63371917D3C123B",
+      "roundtripSha256": "4EF86E30E4DCC2C0DF11FA11FCE0C8C4B33EB2825FADFDBA4F6D8A3B0AAB3967",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/IceSmoke.ParticleModel.Gbx",
+      "bytes": 1825,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeAsphalt.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1791,
+      "roundtripExact": false,
+      "sourceSha256": "A1A4280FCCCC97C9D24F2213D08967103D94AADE5215E82061616E0DD2045ECE",
+      "roundtripSha256": "E6330916E6587F4F96ED28867A27FE9EB8FBDFEB06DF70270CC4D164A1E68B50",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/LightTrail.ParticleModel.Gbx",
+      "bytes": 1846,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Effects\\Media\\Material\\LightTrail.Material.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1796,
+      "roundtripExact": false,
+      "sourceSha256": "3A42CACCB1574A6F8FBD696237826E8F49279F8A774495FB5117F3685A2F6A82",
+      "roundtripSha256": "17766EF777166C3D769028A45851F52CBACEF77CA464CFBFE58DEBBAB9B4535F",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/SandMarks.ParticleModel.Gbx",
+      "bytes": 1819,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\WheelMarksSand.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1785,
+      "roundtripExact": false,
+      "sourceSha256": "6423EBA0A792732B6ACCD182B34D22D872D00CBC474DB299DAB5AB7C390067E6",
+      "roundtripSha256": "A32A6CDE8439FF6471C998EFA7B3B76C5EE8D381E5A2A721DEF94653AD9EF116",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/SandProjections.ParticleModel.Gbx",
+      "bytes": 3437,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeSand.Material.Gbx",
+        "Media\\Material\\ParticleChunksSand.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3403,
+      "roundtripExact": false,
+      "sourceSha256": "E526686384708F8BA655280C12A4578247475F5E4A6DBE18ED59054571668BFE",
+      "roundtripSha256": "6E1FCC3F19E4A3D6D28C47CBDC1649FAABA995296C02196887D2907EBBEBB01E",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/SnowMarks.ParticleModel.Gbx",
+      "bytes": 1819,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\WheelMarksSnow.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1785,
+      "roundtripExact": false,
+      "sourceSha256": "4AAFC7AD497986BA74A8D58611EE4C3BD02FAA0D8DD8906F023CF6D37F623270",
+      "roundtripSha256": "6093FC39466FF267ABFCFA62715BCD53E012A080881364CB0745DC5A79531760",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/SnowProjections.ParticleModel.Gbx",
+      "bytes": 3437,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\ParticleSmokeSnow.Material.Gbx",
+        "Media\\Material\\ParticleChunksSnow.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3403,
+      "roundtripExact": false,
+      "sourceSha256": "3B42222DA1ED3BAC5B725A98511600BF175D02D2B7B7D4A7B402BFCE06CB821E",
+      "roundtripSha256": "CD28CAB1727F698BB0F0BE249664CB27D58588D00D308A1D4021302D0420F404",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Sparkles.ParticleModel.Gbx",
+      "bytes": 1846,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\Sparkle.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1812,
+      "roundtripExact": false,
+      "sourceSha256": "7DF325ECDD2FCDE05E1A4A43559068946B0526D8112F6D448DADB3BDB5B8E74E",
+      "roundtripSha256": "1EB64242E24ACE9498BDFE8A148DFE7A083590992A6ED0432FD1CBDE7EF32205",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/VehicleOnFire.ParticleModel.Gbx",
+      "bytes": 1913,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "ShootMania\\Media\\Texture\\ParticleSmokeClouds.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1863,
+      "roundtripExact": false,
+      "sourceSha256": "C1C68EBA32B957FB4BCDED3F252B9F4EF4339A06702FE371EFD5E39A0E91F6C8",
+      "roundtripSha256": "37901DE409B1BBC24F4A33F1A97B5270D7DB14A66BBE554CE7F9E2C556453B6A",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/VehicleSmokeTrail.ParticleModel.Gbx",
+      "bytes": 1882,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "ShootMania\\Media\\Texture\\GreySmoke2.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1832,
+      "roundtripExact": false,
+      "sourceSha256": "7A5F7273B839205791C9EC52537226643BA9D91365D8BF0405DCE41874A2A4FB",
+      "roundtripSha256": "39879F666BE17F7DC2DD1A15455595ABA19390637490F19AC8F3FE255C7E2E3B",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/WaterSplashMesh.ParticleModel.Gbx",
+      "bytes": 6710,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\WaterSplash.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 6676,
+      "roundtripExact": false,
+      "sourceSha256": "4FF1BAF7699F185B131387C38ABA57D3743E3A16C7A7BF070C6539F5AA8A567E",
+      "roundtripSha256": "44BF60F16E890B5BA73FB54804DF31CCD1883644F165710A8303FF35339DAF4E",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/WaterWake.ParticleModel.Gbx",
+      "bytes": 1856,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Effects\\Media\\Shader\\Stem.Shader.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1806,
+      "roundtripExact": false,
+      "sourceSha256": "DE864B989535C8ECC430ABAF330ED2E8823C965AC19CBC2A72039E1C615DA16A",
+      "roundtripSha256": "15F510A3D2EAF3DFE58B4580515E925530B1EDC28FBD3F4BA3E83AF0EBED69F6",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/CameraWaterDroplets.ParticleModel.Gbx",
+      "bytes": 1705,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [],
+      "parsed": true,
+      "roundtripBytes": 1705,
+      "roundtripExact": true,
+      "sourceSha256": "21934D9D45D72BE00E2F20779C0E2ECFE13FAF2D4932A30F0C618809026BA509",
+      "roundtripSha256": "21934D9D45D72BE00E2F20779C0E2ECFE13FAF2D4932A30F0C618809026BA509",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/UnderWaterBubbles_Medium.ParticleModel.Gbx",
+      "bytes": 1898,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\AirBubble_Medium.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1851,
+      "roundtripExact": false,
+      "sourceSha256": "FE64C03604FFBC991B4CE44AEC5B8DB829F7E51FACDBFA7643A3C6D748300A80",
+      "roundtripSha256": "04EA5B3CBC5CD63BF7FE8F5F4F278518461FE0EDE7F269BD2EEFB19F9F006904",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/UnderWaterBubbles_Small.ParticleModel.Gbx",
+      "bytes": 1897,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\AirBubble_Small.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1850,
+      "roundtripExact": false,
+      "sourceSha256": "D562C58ED3C025D50BACCD32553DCE734A66F622708CAC7C7F6D821858D00127",
+      "roundtripSha256": "7D9CC9448295EBEF6DF6419898659D66A6DF5520489F37F5F882686FB6732764",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/UnderWaterBubbles_Spray.ParticleModel.Gbx",
+      "bytes": 1879,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\AirBubble_Medium.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1832,
+      "roundtripExact": false,
+      "sourceSha256": "117BC4BFA06BBF0185C888C436363E2B7405F104B1A3C08287728460F1932AC3",
+      "roundtripSha256": "6197CD1453D347F6FD6A0327DA711A870DE80A4A1D63E531FBA0073ACC26C020",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/WaterSplash.ParticleModel.Gbx",
+      "bytes": 1863,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\WaterSplash.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1816,
+      "roundtripExact": false,
+      "sourceSha256": "21BD56A064EB4EF62704B17DC1A2265A11B291CB715FDC8A4E85CC3259A8352A",
+      "roundtripSha256": "3C803BA6DC2586B599525B661AF8238365648A8EB8533EB3E1BB8A648910CB2F",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/WaterSplashBig.ParticleModel.Gbx",
+      "bytes": 1863,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\WaterSplash.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1816,
+      "roundtripExact": false,
+      "sourceSha256": "AA1EC25FC220581C965FA21433B4F090588C05FACBF6C377EB4E4BE340AF2A24",
+      "roundtripSha256": "2D74320B5F2712265AFA350784EA5D908ED07F7F8C92789AE633D06A9EDF7702",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/WaterSpray.ParticleModel.Gbx",
+      "bytes": 3447,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\WaterSplash.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3400,
+      "roundtripExact": false,
+      "sourceSha256": "F8853AC8DC883C01306D2553DBBF698B5239AAD7EFCC0448977080238769FABE",
+      "roundtripSha256": "EBCEA61F2FA84F0AC5771CB297C8906E5E51008B3800DBC7B1A855C614517851",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/WaterSprayAndSteam.ParticleModel.Gbx",
+      "bytes": 3590,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Vehicles\\Media\\Texture\\WaterSplash.Texture.gbx",
+        "Effects\\Media\\Texture\\WHITE_SMOKE_2.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3543,
+      "roundtripExact": false,
+      "sourceSha256": "B9A18D07381DD3C13755F9C5BE8FBE7CE6FD265FAEE4996D34D524F2B0575FF2",
+      "roundtripSha256": "F7BA92C21D9A35E22EA0CFF264979F29786FB583153F62229418937BBEAAAB13",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/WaterSprayThin.ParticleModel.Gbx",
+      "bytes": 1876,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Texture\\WaterSplash.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1829,
+      "roundtripExact": false,
+      "sourceSha256": "4608E7D82C8CD113474AF61CC0F2116A47AE5F1BF3FF2187EA9DBCB2C2355BE5",
+      "roundtripSha256": "12F5F3A395171EE8014AC9DC714756D6930EFF49765C05D686BF929D2482B7C7",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/Water/WaterWakeWNormals.ParticleModel.Gbx",
+      "bytes": 3503,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Vehicles\\Media\\Shader\\WaterWake_Normal.Shader.Gbx",
+        "Effects\\Media\\Shader\\Stem.Shader.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3456,
+      "roundtripExact": false,
+      "sourceSha256": "C6E2337B51DA288CCF138BCAF6D56BA2C971D91F183471AF93304B153F9FAC8D",
+      "roundtripSha256": "7121F5054C921F912030FC5A9C6CD4F9994CB247BB3E012549AB086E6CA894DB",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/WetWheelsMarks.ParticleModel.Gbx",
+      "bytes": 1818,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Media\\Material\\WheelMarksWet.Material.Gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1784,
+      "roundtripExact": false,
+      "sourceSha256": "5EA61B262B02D4ED6318A23C1E9FF831E25C7D7AE3CC8231F283FF93E51CAD04",
+      "roundtripSha256": "AF2893EBB306EE8BA19FB6BAEE502D095E876ECF192168087FE5C099CA7EE68E",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/WheelGrassMark.ParticleModel.Gbx",
+      "bytes": 3497,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "Effects\\Media\\Material\\GrassMarkFenceIntens.Material.gbx",
+        "Vehicles\\Media\\Material\\GrassMarkGround.Material.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 3463,
+      "roundtripExact": false,
+      "sourceSha256": "2CEC56FFD369903AA6E092071985C4E2F1BADABA4F56B1CC65E35BFD4AB2E7DE",
+      "roundtripSha256": "E3DEE00749804BC117F4697395AA1117747AB1BD76CAC2120F0D95FFBBF5E0D1",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    },
+    {
+      "path": "Vehicles/MotionParticleEmitterModel/WingTipVortices.ParticleModel.Gbx",
+      "bytes": 1880,
+      "className": "CPlugParticleEmitterModel",
+      "subModelCount": 0,
+      "refs": [
+        "ShootMania\\Media\\Texture\\WhiteSmoke.Texture.gbx"
+      ],
+      "parsed": true,
+      "roundtripBytes": 1830,
+      "roundtripExact": false,
+      "sourceSha256": "76A2ED3B9BE42CB92E0183504E972E4FCC432D395C7EA174062BC36821963180",
+      "roundtripSha256": "50321BFEA68C560D6FAF52EA51FD7E056B6B9345D5BEAD9ADDA53C1F3F0B7E27",
+      "publicFields": {
+        "IsSplashMode": false,
+        "ShadowMapTexelSize": 0,
+        "GameVersion": 0
+      }
+    }
+  ]
+}

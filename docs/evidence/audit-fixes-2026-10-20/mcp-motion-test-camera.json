@@ -1,0 +1,188 @@
+{
+  "id": null,
+  "ok": true,
+  "error": "",
+  "route": "call",
+  "data": {
+    "result": {
+      "output": {
+        "before": {
+          "free": {
+            "available": false,
+            "reason": "the free camera is not the active camera (set_mode mode=free first)"
+          },
+          "activeControl": {
+            "class": "CGameControlCameraTrackManiaRace2",
+            "pos": [
+              784,
+              11.314,
+              811
+            ],
+            "available": true
+          },
+          "hasGameTerminal": true,
+          "mode": "MapEditor_Test",
+          "nextToggleCamType": {
+            "value": 0,
+            "name": "none",
+            "hex": "0x00"
+          },
+          "drivableFreeCam": false,
+          "spectator": {
+            "apiAvailable": true,
+            "uiSequence": "Playing",
+            "forceSpectator": false,
+            "uiAllAvailable": true,
+            "uiAllUISequence": "None",
+            "isSpectator": false,
+            "playerDisableFreeCam": false,
+            "terminalWantedCameraType": "free",
+            "forceCameraType": 15,
+            "forced": false,
+            "isSpectatorClient": false
+          },
+          "altCam": false,
+          "render": {
+            "farZ": 50000,
+            "fov": 75,
+            "position": [
+              784,
+              11.314,
+              811
+            ],
+            "nearZ": 0.05
+          },
+          "hasGameCamera": true,
+          "camType": {
+            "value": 18,
+            "name": "cam1",
+            "hex": "0x12"
+          },
+          "gameCamera": {
+            "altPerCam": {
+              "cam3": 0,
+              "note": "1 = normal, 2 = alt",
+              "cam1": 1,
+              "cam2": 0
+            },
+            "cameraPos": [
+              784,
+              11.314,
+              811
+            ],
+            "chosenCamera": {
+              "value": 18,
+              "name": "cam1",
+              "hex": "0x12"
+            },
+            "nbTogglesSameCamera": 0
+          }
+        },
+        "after": {
+          "free": {
+            "farZ": 50000,
+            "fov": 75,
+            "targetEnabled": true,
+            "rollDeg": 0,
+            "pitchDeg": 23.3891,
+            "yawRad": 0.614663,
+            "enginePos": [
+              756,
+              19,
+              799
+            ],
+            "position": [
+              756,
+              19,
+              799
+            ],
+            "available": true,
+            "pitchRad": 0.408216,
+            "targetPos": [
+              768,
+              10,
+              816
+            ],
+            "radius": 22.6716,
+            "nearZ": 0.05,
+            "yawDeg": 35.2176,
+            "rollRad": 0
+          },
+          "activeControl": {
+            "class": "CGameControlCameraFree",
+            "pos": [
+              756,
+              19,
+              799
+            ],
+            "available": true
+          },
+          "hasGameTerminal": true,
+          "mode": "MapEditor_Test",
+          "nextToggleCamType": {
+            "value": 0,
+            "name": "none",
+            "hex": "0x00"
+          },
+          "drivableFreeCam": false,
+          "spectator": {
+            "apiAvailable": true,
+            "uiSequence": "Playing",
+            "forceSpectator": false,
+            "uiAllAvailable": true,
+            "uiAllUISequence": "None",
+            "isSpectator": false,
+            "playerDisableFreeCam": false,
+            "terminalWantedCameraType": "free",
+            "forceCameraType": 15,
+            "forced": false,
+            "isSpectatorClient": false
+          },
+          "altCam": false,
+          "render": {
+            "farZ": 50000,
+            "fov": 75,
+            "position": [
+              756,
+              19,
+              799
+            ],
+            "nearZ": 0.05
+          },
+          "hasGameCamera": true,
+          "camType": {
+            "value": 2,
+            "name": "free",
+            "hex": "0x02"
+          },
+          "gameCamera": {
+            "altPerCam": {
+              "cam3": 0,
+              "note": "1 = normal, 2 = alt",
+              "cam1": 1,
+              "cam2": 0
+            },
+            "cameraPos": [
+              756,
+              19,
+              799
+            ],
+            "chosenCamera": {
+              "value": 2,
+              "name": "free",
+              "hex": "0x02"
+            },
+            "nbTogglesSameCamera": 0
+          }
+        },
+        "steps": [
+          "terminal.setCamNod=free (ensureFreeCam)",
+          "lookAt: radius=22.672 yawDeg=35.218 pitchDeg=23.389"
+        ],
+        "action": "set_position"
+      },
+      "success": true
+    },
+    "tool": "ControlPlayCamera"
+  }
+}
