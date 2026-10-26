@@ -1,0 +1,59 @@
+<section class="card mt-3" aria-label="Hidden FX catalog routes">
+    <div class="card-header py-1 fw-bold text-info">Hidden FX catalog and carrier routes</div>
+    <div class="card-body py-2">
+        <p class="small mb-2">
+            This catalog exposes the native routes found during the FX inventory pass.
+            A <strong>preload</strong> result means the game can decode the resource; it does
+            not make a particle model a portable item. Promotion to an item requires native
+            preload, placement, visible play, map save/reopen and a cold restart.
+        </p>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-2">
+                <thead>
+                    <tr>
+                        <th scope="col">Route / candidate</th>
+                        <th scope="col">Native evidence</th>
+                        <th scope="col">Studio use</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var route in Routes)
+                    {
+                        <tr>
+                            <th scope="row" class="small">
+                                <span class="badge @route.TierBadge me-1">@route.Tier</span>
+                                @route.Name
+                            </th>
+                            <td class="small">@route.Evidence</td>
+                            <td class="small"><span class="badge @route.StatusBadge">@route.Status</span><span class="ms-1">@route.Scope</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <details class="small">
+            <summary class="text-info">What the hidden inventory contains</summary>
+            <p class="mt-2 mb-1">The complete 83-model inventory contains leaves, fog, vehicle smoke/fire/boost, sparkles, light trails, water spray/splash, bubbles, wakes and ShootMania effects. The read-only native pass recorded 54 preloads, 7 null-node failures and 22 parser skips. Context-bound assets or models without an item wrapper remain discovery candidates.</p>
+            <p class="mb-0">The safe authoring route is an existing embedded carrier. Studio currently edits its validated emitter origin and preserves the complete opaque graph; it does not invent graph nodes or dependencies.</p>
+        </details>
+    </div>
+</section>
+
+@code {
+    private sealed record FxRoute(string Tier, string TierBadge, string Name, string Evidence, string Status, string StatusBadge, string Scope);
+
+    private static readonly IReadOnlyList<FxRoute> Routes =
+    [
+        new("Carrier", "text-bg-success", "Embedded Sparkler (8 m / 16 m)", "Preload, custom mesh, native emitter-origin edit, map package and save/reopen", "Supported", "text-bg-success", "Editable origin; graph preserved"),
+        new("Carrier", "text-bg-success", "Embedded Fogger (8 m / 16 m)", "Preload, custom mesh, native emitter-origin edit, map package and save/reopen", "Supported", "text-bg-success", "Editable origin; GPU fields preserved"),
+        new("Carrier", "text-bg-info", "Fogger with light (8 m / 16 m)", "Both stock roots preload; 8 m placement, visible fog/light and map save/reopen pass", "Template", "text-bg-info", "Custom clone still needs dependency proof"),
+        new("Carrier", "text-bg-info", "Torch / small Torch", "Stock preload, placement, visible flame screenshot and save/reopen", "Stock only", "text-bg-warning", "Identity-only clones fail portable preload"),
+        new("Particle", "text-bg-info", "PodiumSparkler / PodiumSparklerEnd", "Both particle models preload; no direct item root", "Candidate", "text-bg-warning", "Needs a native item wrapper"),
+        new("Particle", "text-bg-info", "WaterSpray / Thin / AndSteam", "Particle models preload from the vehicle archive; no item wrapper or sprinkler playback", "Candidate", "text-bg-warning", "Best sprinkler route; needs wrapper"),
+        new("Particle", "text-bg-info", "WaterSplash / bubbles / wakes", "Selected models preload; context and item attachment are unresolved", "Candidate", "text-bg-warning", "Needs water-context carrier"),
+        new("Particle", "text-bg-secondary", "Leaves, fog, smoke, fire, boost, sparks and light trails", "Complete audit: 54 preload passes; most are Unassigned/context-bound", "Discovery only", "text-bg-secondary", "No portable item route"),
+        new("Graph", "text-bg-warning", "Add FX / mixed graph", "No native graph merge and save/reopen proof", "Unavailable", "text-bg-warning", "Button remains disabled"),
+        new("Motion", "text-bg-warning", "Kinematic FX carrier", "Current converter rejects opaque FX without a static object model", "Unavailable", "text-bg-warning", "Requires a native moving carrier"),
+        new("Bitmap", "text-bg-warning", "Custom image / emoji particle", "Bitmap/material experiments do not prove a persistent particle graph", "Unavailable", "text-bg-warning", "Requires a native material graph")
+    ];
+}

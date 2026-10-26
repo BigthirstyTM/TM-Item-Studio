@@ -5,7 +5,7 @@
     <Version>0.4.3</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <DefaultItemExcludes>$(DefaultItemExcludes);Tests/**;artifacts/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Tests/**;artifacts/**;windinspect/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +13,7 @@
     <Content Remove="Tests/**" />
     <None Remove="Tests/**" />
     <EmbeddedResource Include="Resources\MovingItemTemplate.Item.Gbx" />
+    <EmbeddedResource Include="Resources\Flags\*.Gbx" />
   </ItemGroup>
 
   <ItemGroup>

@@ -36,7 +36,13 @@ public sealed record ItemSceneCollision(string Path, string? EntityPath, string 
 public sealed record ItemSceneGeometry(string Path, string? EntityPath, int SourceId, bool IsCollision,
     float[] LocalPositions, float[] Positions, int[] Indices, float[]? LocalNormals, float[]? Normals,
     IReadOnlyDictionary<int, float[]> UVs, float[] BoundsMin, float[] BoundsMax,
-    int? GeometryId = null, float[]? WorldTransform = null);
+    int? GeometryId = null, float[]? WorldTransform = null,
+    // A recognised non-kinematic cloth visual stores all baked frames in one
+    // buffer. The base geometry remains the first frame; these optional arrays
+    // are preview-only and never participate in GBX writes.
+    float[]? AnimationLocalPositions = null, float[]? AnimationPositions = null,
+    float[]? AnimationLocalNormals = null, float[]? AnimationNormals = null,
+    int AnimationFrameCount = 0, float AnimationPeriodSeconds = 12f);
 
 /// <summary>Only this DTO crosses the JS/JSON boundary. It contains no GBX object handles.</summary>
 public sealed record ItemScenePreview(IReadOnlyList<ItemSceneNode> Nodes, IReadOnlyList<ItemSceneGeometry> Geometry,

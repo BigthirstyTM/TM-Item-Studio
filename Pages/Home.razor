@@ -66,7 +66,6 @@
         <span class="studio-helper-banner-hint">Hover a highlighted control for details. Turn Helper off to return to the normal interface.</span>
     </section>
 }
-
 @if (isLoading)
 {
     <div class="alert alert-info py-2">
@@ -172,12 +171,12 @@
 
                     <!-- Animation and general controls -->
                     <div class="studio-view-controls">
-                        @if (isMovingItem)
+                        @if (isMovingItem || hasBakedAnimation)
                         {
                             <button class="btn btn-sm @(isPlaying ? "btn-warning" : "btn-success")" aria-label="Play or pause viewport animation" data-helper="Pause or resume the viewport animation without changing its serialized motion timeline." @onclick="ToggleAnimation">
                                 @(isPlaying ? "⏸" : "▶")
                             </button>
-                            @if (authoredConstraints.Count == 0)
+                            @if (isMovingItem && authoredConstraints.Count == 0)
                             {
                                 <select class="form-select form-select-sm" style="width: auto;" aria-label="Legacy preview axis" data-help-key="axis" value="@detectedAxis" @onchange="OnAxisChanged">
                                     <option value="y">Y Axis</option>
@@ -318,6 +317,10 @@
                 @if (SelectedSource?.IsReadOnly == true)
                 {
                     <div class="alert alert-info small" role="status"><strong>Vanilla asset preview</strong><p class="mb-0 text-break">@SelectedSource.PreviewDescription</p><p class="mb-0">Mesh parts: @modelParts.Count · Materials: @detectedMaterials.Count. Original file retained unchanged.</p></div>
+                }
+                @if (IsOpaqueFxCarrier && SelectedSource?.PreviewOverride is CPlugPrefab)
+                {
+                    <div class="alert alert-info small" role="status"><strong>Embedded FX mesh</strong><p class="mb-0">Showing this item's actual embedded mesh. FX origin and identity changes are exported; mesh and material controls affect the preview only.</p></div>
                 }
                 
                 @if (activeTab == "general" && SelectedSource?.IsReadOnly != true)
@@ -620,7 +623,9 @@
 
                 @if (activeTab == "flag")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">Flag item (measured from the vanilla flags) <span class="text-muted" title="A flag is an item whose model variant carries the tag Type=Flag and whose placement class keeps it upright and aligned to the world direction.">?</span></h6>
+                    <WavingFlagPanel Source="@(variantSources.Count > activeVariantIndex ? variantSources[activeVariantIndex].GbxFile : gbxFile)" PreferredId="@identId" PrepareSource="PrepareWavingFlagSource" SelectedPartPath="@selectedMeshPartPath" ClearSelectionRequested="ClearFlagViewportSelection" Anchor="@flagConversionAnchor" />
+
+                    <h6 class="border-bottom pb-1 text-primary">Classification and placement only <span class="text-muted" title="A flag is an item whose model variant carries the tag Type=Flag and whose placement class keeps it upright and aligned to the world direction.">?</span></h6>
                     <small class="d-block text-muted mb-2">
                         Measured on <code>Stadium/Items/Flag16m.Item.Gbx</code>, <code>Flag8m.Item.Gbx</code> and
                         <code>Stadium/Media/PlaceParam/Flag.PlaceParam.Gbx</code>. Conversion writes the variant tag
@@ -1614,6 +1619,56 @@
                         <div class="list-group-item d-flex justify-content-between"><span>Particle system / CPlugFx</span><strong>@(HasNode("Particle", "CPlugFx") ? "Present" : "Not found")</strong></div>
                         <div class="list-group-item d-flex justify-content-between"><span>CGameCtnZone / MediaClip</span><strong>@(HasNode("CGameCtnZone", "MediaClip") ? "Present" : "Not found")</strong></div>
                     </div>
+                    @if (EffectReferences() is { Count: > 0 } effects)
+                    {
+                        <div class="mt-2">
+                            <strong class="small">Effect carrier references</strong>
+                            <div class="list-group small mt-1">
+                                @foreach (var effect in effects)
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between"><span>@effect.Kind</span><span class="text-muted">@effect.Status</span></div>
+                                        <code class="d-block text-break">@effect.Reference</code>
+                                    </div>
+                                }
+                            </div>
+                            <p class="small text-muted mt-2 mb-0">Studio inventories the carrier and particle dependencies. Supported native emission fields can be edited while the remaining FX graph stays preserved.</p>
+                        </div>
+                        @if (effects.Any(effect => effect.Kind is "CPlugFxSystem" or "ParticleModel"))
+                        {
+                        <div class="card mt-2 border-info">
+                            <div class="card-header py-1 fw-bold text-info">FX emission point</div>
+                            <div class="card-body p-2">
+                                <p class="small mb-2">Edit the particle origin in item coordinates (metres), or move the cyan handle in the viewport. Y is height above the item's origin. All emitters retain their relative spacing.</p>
+                                <div class="row g-1">
+                                    <div class="col-4"><label class="small">X<input type="number" step="0.01" class="form-control form-control-sm" aria-label="FX emission point X" disabled="@(!IsOpaqueFxCarrier)" @bind="fxEmitterX" @bind:event="oninput" @bind:after="OnFxEmitterPointChanged" /></label></div>
+                                    <div class="col-4"><label class="small">Y<input type="number" step="0.01" class="form-control form-control-sm" aria-label="FX emission point Y" disabled="@(!IsOpaqueFxCarrier)" @bind="fxEmitterY" @bind:event="oninput" @bind:after="OnFxEmitterPointChanged" /></label></div>
+                                    <div class="col-4"><label class="small">Z<input type="number" step="0.01" class="form-control form-control-sm" aria-label="FX emission point Z" disabled="@(!IsOpaqueFxCarrier)" @bind="fxEmitterZ" @bind:event="oninput" @bind:after="OnFxEmitterPointChanged" /></label></div>
+                                </div>
+                                @if (IsOpaqueFxCarrier && SelectedSource?.IsReadOnly != true)
+                                {
+                                    <div class="small text-muted mt-2">XYZ changes are written into the item's native emission fields. Test each exported item in Trackmania.</div>
+                                    <div class="small text-success mt-1" role="status">Native status: validated LocalOffsetExpr write (@(fxNativeOffsetWritten ? "written in last export" : "ready to write on export"))</div>
+                                    <label class="small d-block mt-2"><input type="checkbox" aria-label="Include FX diagnostics" @bind="includeFxDiagnostics" /> Include optional FX diagnostics JSON</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" @onclick="ExportOpaqueFxCarrier">
+                                        Export FX item (.Item.Gbx)
+                                    </button>
+                                    <div class="small text-muted mt-1">XYZ is stored in the item. The optional diagnostics JSON is not required by the game.</div>
+                                }
+                                else
+                                {
+                                    <div class="small text-muted mt-2">Native XYZ editing requires a supported embedded FX graph. This effect remains available for inspection.</div>
+                                }
+                            </div>
+                        </div>
+                        }
+                        @if (IsOpaqueFxCarrier)
+                        {
+                            <FxSettingsMatrix />
+                            <FxMapPackagingPanel />
+                        }
+                    }
+                    <FxCatalogRoutes />
                     <p class="small text-muted mt-2">Trigger functions require the corresponding collision or zone node in the GBX file.</p>
                 }
 
@@ -2008,6 +2063,7 @@ else if (itemModel is null)
     private string? statusMessage;
     private bool hasMesh = false;
     private bool isMovingItem = false;
+    private bool hasBakedAnimation = false;
     private bool isPlaying = true;
     private int vertexCount = 0;
     private bool isSelectingVariant;
@@ -2022,6 +2078,8 @@ else if (itemModel is null)
     private int activeVariantIndex;
     private ItemVariantSource? SelectedSource => activeVariantIndex >= 0 && activeVariantIndex < variantSources.Count ? variantSources[activeVariantIndex] : null;
     private bool CanExportSelectedFile => SelectedSource is { IsReadOnly: false };
+    private bool IsOpaqueFxCarrier => FxOpaqueExport.IsOpaqueFxCarrier(gbxFile);
+    private bool HasFxCarrier => EffectReferences().Any(effect => effect.Kind is "CPlugFxSystem" or "ParticleModel");
     private bool CanExportCombinedFiles => CanCombineFiles;
     private bool CanExportCompositeMerged => CompositeViewportSources().Count >= 2;
     private string? iconFileName;
@@ -2383,6 +2441,7 @@ else if (itemModel is null)
         itemModel = null;
         hasMesh = false;
         isMovingItem = false;
+        hasBakedAnimation = false;
         modelParts.Clear();
         detectedMaterials = Array.Empty<ItemSceneMaterial>();
         detectedPivots.Clear();
@@ -2399,6 +2458,7 @@ else if (itemModel is null)
         animationPeriodSeconds = 2;
         animationPhaseSeconds = 0;
         pivotOffsetX = pivotOffsetY = pivotOffsetZ = 0;
+        fxEmitterX = fxEmitterY = fxEmitterZ = 0;
         harmonicEasing = false;
         invertMotion = false;
         hasTranslationMotion = false;
@@ -2443,17 +2503,39 @@ else if (itemModel is null)
                 }
 
                 Gbx parsedDocument;
+                Gbx<CGameItemModel>? opaqueFxDocument = null;
                 string? previewReason = null;
                 try { parsedDocument = Gbx.Parse(new MemoryStream(originalBytes), new GbxReadSettings { SafeSkippableChunks = true }); }
                 catch (Exception parseError)
                 {
                     // Preserve unsupported native records and still expose their declared skin model.
-                    try { parsedDocument = Gbx.Parse(new MemoryStream(originalBytes), new GbxReadSettings { SafeSkippableChunks = true, IgnoreExceptionsInBody = true }); }
+                    try
+                    {
+                        // An embedded CPlugFxSystem is an unknown body node in the
+                        // bundled parser, but the item root and raw body can still
+                        // be edited safely through FxOpaqueExport.
+                        opaqueFxDocument = FxOpaqueExport.Parse(originalBytes);
+                        parsedDocument = opaqueFxDocument;
+                    }
                     catch { parsedDocument = Gbx.ParseHeader(new MemoryStream(originalBytes)); }
                     previewReason = $"Native model parser: {parseError.Message}. Header and referenced skin preview.";
                 }
                 var parsedGbx = parsedDocument as Gbx<CGameItemModel>;
-                var previewOnly = parsedGbx is null || parsedGbx.Node.EntityModel is CGameVehicleModel || previewReason is not null;
+                // Keep the exact uploaded bytes for native FX editing even when
+                // GBX.NET returned a partial CGameItemModel without throwing.
+                if (parsedGbx is not null && parsedGbx.Node.EntityModel is null)
+                {
+                    try
+                    {
+                        opaqueFxDocument = FxOpaqueExport.Parse(originalBytes);
+                        parsedGbx = opaqueFxDocument;
+                        parsedDocument = opaqueFxDocument;
+                    }
+                    catch { /* the normal preview path below remains read-only */ }
+                }
+                var opaqueFx = opaqueFxDocument is not null && FxOpaqueExport.IsOpaqueFxCarrier(opaqueFxDocument);
+                var previewOnly = parsedGbx is null || parsedGbx.Node.EntityModel is CGameVehicleModel
+                    || (previewReason is not null && !opaqueFx);
 
                 var dependencies = await GbxDependencyLoader.HydrateAsync(parsedDocument, async referencePath =>
                 {
@@ -2478,7 +2560,13 @@ else if (itemModel is null)
                     await PrepareAssetPreview(asset);
                     variantSources.Add(asset);
                 }
-                else variantSources.AddRange(ItemVariantSource.FromFile(Path.GetFileNameWithoutExtension(file.Name), parsedGbx!, originalBytes));
+                else
+                {
+                    var sources = ItemVariantSource.FromFile(Path.GetFileNameWithoutExtension(file.Name), parsedGbx!, originalBytes);
+                    if (opaqueFx && FxMeshPreview.TryRead(originalBytes, out var meshPreview, out _) && meshPreview is not null)
+                        foreach (var source in sources) source.PreviewOverride = meshPreview.PreviewRoot;
+                    variantSources.AddRange(sources);
+                }
                 }
                 catch (Exception fileError) { assetLoadErrors.Add($"{file.Name}: {fileError.Message}"); }
             }
@@ -2586,11 +2674,19 @@ else if (itemModel is null)
         }
         itemModel = source.Model;
         gbxFile = source.GbxFile;
+        fxNativeOffsetWritten = false;
+        if (FxOpaqueExport.TryReadEmissionPoint(gbxFile, out var nativeEmission) && nativeEmission is not null)
+        {
+            fxEmitterX = nativeEmission.X;
+            fxEmitterY = nativeEmission.Y;
+            fxEmitterZ = nativeEmission.Z;
+        }
         if (source.IsReadOnly) activeTab = "model";
         if (string.IsNullOrWhiteSpace(macroblockName))
             macroblockName = ItemMacroblock.DefaultName(itemModel);
         hasMesh = false;
         isMovingItem = false;
+        hasBakedAnimation = false;
         modelParts.Clear();
         detectedPivots.Clear();
         detectedLights.Clear();
@@ -2604,6 +2700,8 @@ else if (itemModel is null)
         animationPeriodSeconds = 2;
         animationPhaseSeconds = 0;
         pivotOffsetX = pivotOffsetY = pivotOffsetZ = 0;
+        if (!FxOpaqueExport.TryReadEmissionPoint(gbxFile, out _))
+            fxEmitterX = fxEmitterY = fxEmitterZ = 0;
         harmonicEasing = false;
         invertMotion = false;
         hasTranslationMotion = false;
@@ -2619,6 +2717,7 @@ else if (itemModel is null)
         identAuthor = itemModel.Ident?.Author ?? "";
         identCollection = itemModel.Ident?.Collection.ToString() ?? "";
         authoredMotionScene = ReadSelectedScene();
+        hasBakedAnimation = authoredMotionScene.Preview.Geometry.Any(geometry => geometry.AnimationFrameCount > 1);
         detectedMaterials = authoredMotionScene.Preview.Materials;
         authoredConstraints.Clear();
         authoredConstraints.AddRange(authoredMotionScene.Handles.Sources.Values.OfType<NPlugDyna_SKinematicConstraint>());
@@ -3531,7 +3630,11 @@ else if (itemModel is null)
                     positionsBytes = ViewerBuffers.Pack(g.LocalPositions),
                     indicesBytes = ViewerBuffers.Pack(g.Indices),
                     normalsBytes = g.LocalNormals is null ? null : ViewerBuffers.Pack(g.LocalNormals),
-                    uvsBytes = PrimaryUvBytes(g)
+                    uvsBytes = PrimaryUvBytes(g),
+                    animationPositionsBytes = g.AnimationLocalPositions is null ? null : ViewerBuffers.Pack(g.AnimationLocalPositions),
+                    animationNormalsBytes = g.AnimationLocalNormals is null ? null : ViewerBuffers.Pack(g.AnimationLocalNormals),
+                    animationFrameCount = g.AnimationFrameCount,
+                    animationPeriodSeconds = g.AnimationPeriodSeconds
                 }),
                 parts = allParts.Select(part => (object)new
                 {
@@ -3547,6 +3650,10 @@ else if (itemModel is null)
                      indicesBytes = part.geometry.GeometryId.HasValue ? null : ViewerBuffers.Pack(part.geometry.Indices),
                      normalsBytes = part.geometry.GeometryId.HasValue || part.geometry.Normals is null ? null : ViewerBuffers.Pack(part.geometry.Normals),
                      uvsBytes = part.geometry.GeometryId.HasValue ? null : PrimaryUvBytes(part.geometry),
+                     animationPositionsBytes = part.geometry.GeometryId.HasValue || part.geometry.AnimationPositions is null ? null : ViewerBuffers.Pack(part.geometry.AnimationPositions),
+                     animationNormalsBytes = part.geometry.GeometryId.HasValue || part.geometry.AnimationNormals is null ? null : ViewerBuffers.Pack(part.geometry.AnimationNormals),
+                     animationFrameCount = part.geometry.AnimationFrameCount,
+                     animationPeriodSeconds = part.geometry.AnimationPeriodSeconds,
                      isCollision = part.geometry.IsCollision && !forcedRenderableGeometryPaths.Contains(part.geometry.Path),
                     meshMode = GetMeshPartMode(part.geometry.Path),
                     enabled = GetMeshPartConfig(part.geometry.Path).Enabled,
@@ -3612,6 +3719,9 @@ else if (itemModel is null)
                     }
                     : null,
                 pivots = detectedPivots, lights = detectedLights,
+                fxEmitter = HasFxCarrier
+                    ? new { index = 0, x = fxEmitterX, y = fxEmitterY, z = fxEmitterZ, editable = IsOpaqueFxCarrier }
+                    : null,
                 playing = isPlaying
             });
             if (geometryCache.Epoch == epoch)
@@ -3639,6 +3749,9 @@ else if (itemModel is null)
             selectedMeshPath = selectedMeshPartPath,
             pivots = detectedPivots,
             lights = detectedLights,
+            fxEmitter = HasFxCarrier
+                ? new { index = 0, x = fxEmitterX, y = fxEmitterY, z = fxEmitterZ, editable = IsOpaqueFxCarrier }
+                : null,
             animAxis = detectedAxis,
             isOscillating = isOscillating,
             minAngle = minAngle,
@@ -3743,7 +3856,7 @@ else if (itemModel is null)
 
     private void ToggleTab(string tab)
     {
-        if (SelectedSource?.IsReadOnly == true && tab is not ("model" or "general" or "visual")) return;
+        if (SelectedSource?.IsReadOnly == true && tab is not ("model" or "general" or "visual" or "extras")) return;
         activeTab = activeTab == tab ? string.Empty : tab;
     }
 
@@ -3760,7 +3873,11 @@ else if (itemModel is null)
 
     private bool HasNode(params string[] names)
     {
-        return detectedNodeTypes.Any(found => names.Any(name => found.Contains(name, StringComparison.OrdinalIgnoreCase)));
+        if (detectedNodeTypes.Any(found => names.Any(name => found.Contains(name, StringComparison.OrdinalIgnoreCase))))
+            return true;
+        return names.Any(name => name.Contains("particle", StringComparison.OrdinalIgnoreCase)
+                || name.Contains("cplugfx", StringComparison.OrdinalIgnoreCase))
+            && EffectReferences().Any(effect => effect.Kind is "CPlugFxSystem" or "ParticleModel");
     }
 
     private async Task UploadIcon(InputFileChangeEventArgs e)
@@ -3867,6 +3984,40 @@ else if (itemModel is null)
         }
     }
 
+    private ItemWavingFlagExport.AnchorPoint flagConversionAnchor = ItemWavingFlagExport.AnchorPoint.Origin;
+    // Item-space metres. FxOpaqueExport converts through the actual prefab
+    // FX owner's transform before writing native LocalOffsetExpr fields.
+    private float fxEmitterX, fxEmitterY, fxEmitterZ;
+    private bool includeFxDiagnostics, fxNativeOffsetWritten;
+
+    private async Task OnFxEmitterPointChanged()
+    {
+        if (!IsOpaqueFxCarrier) return;
+        fxNativeOffsetWritten = false;
+        fxEmitterX = Math.Clamp(float.IsFinite(fxEmitterX) ? fxEmitterX : 0, -10000, 10000);
+        fxEmitterY = Math.Clamp(float.IsFinite(fxEmitterY) ? fxEmitterY : 0, -10000, 10000);
+        fxEmitterZ = Math.Clamp(float.IsFinite(fxEmitterZ) ? fxEmitterZ : 0, -10000, 10000);
+        await UpdateScenePayload(authoredMotionScene);
+    }
+
+    [JSInvokable]
+    public void OnFxEmitterPointMoved(float x, float y, float z)
+    {
+        if (!IsOpaqueFxCarrier) return;
+        fxNativeOffsetWritten = false;
+        fxEmitterX = (float)Math.Round(Math.Clamp(x, -10000, 10000), 3);
+        fxEmitterY = (float)Math.Round(Math.Clamp(y, -10000, 10000), 3);
+        fxEmitterZ = (float)Math.Round(Math.Clamp(z, -10000, 10000), 3);
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnFlagAnchorMoved(float x, float y, float z)
+    {
+        flagConversionAnchor = new ItemWavingFlagExport.AnchorPoint((float)Math.Round(x, 3), (float)Math.Round(y, 3), (float)Math.Round(z, 3));
+        StateHasChanged();
+    }
+
     [JSInvokable]
     public void OnGizmoMoved(string type, int index, float x, float y, float z)
     {
@@ -3921,6 +4072,7 @@ else if (itemModel is null)
     {
         if (type == "pivot") activeTab = "placement";
         else if (type == "light") activeTab = "lights";
+        else if (type == "fx-emitter") activeTab = "extras";
         else if (type == "composite-offset" || type == "composite-group") activeTab = "composite";
         StateHasChanged();
     }
@@ -3996,8 +4148,16 @@ else if (itemModel is null)
         selectedMeshPartPath = string.IsNullOrWhiteSpace(path) ? null : path;
         if (selectedMeshPartPath is null)
             compositeSelectionOrder.Clear();
-        else
+        else if (activeTab != "flag")
             activeTab = "visual";
+        StateHasChanged();
+    }
+
+    private async Task ClearFlagViewportSelection()
+    {
+        selectedMeshPartPath = null;
+        compositeSelectionOrder.Clear();
+        await JS.InvokeVoidAsync("selectMeshPartFromUI", (object?)null);
         StateHasChanged();
     }
 
@@ -5459,12 +5619,48 @@ else if (itemModel is null)
         }
     }
 
+    private Task<Gbx<CGameItemModel>> PrepareWavingFlagSource()
+    {
+        if (itemModel is null || gbxFile is null || variantSources.Count <= activeVariantIndex)
+            throw new InvalidOperationException("Open an item before exporting a waving flag.");
+        // Only flush geometry choices: the waving exporter supplies its own host and metadata.
+        // Ordinary export normalization fills ArchetypeRef, which is forbidden on this input.
+        ApplyMeshPartConfigurationToVariant();
+        return Task.FromResult(variantSources[activeVariantIndex].GbxFile);
+    }
+
+    private async Task ExportOpaqueFxCarrier()
+    {
+        if (gbxFile is null || itemModel is null || !IsOpaqueFxCarrier)
+            return;
+
+        try
+        {
+            var export = FxOpaqueExport.Export(gbxFile, identId, itemModel.Name, identAuthor,
+                new FxOpaqueExport.EmissionPoint(fxEmitterX, fxEmitterY, fxEmitterZ));
+            await JS.InvokeVoidAsync("downloadBinaryGbx", export.ItemFileName, Convert.ToBase64String(export.ItemBytes));
+            if (includeFxDiagnostics)
+                await JS.InvokeVoidAsync("downloadBinaryGbx", export.SettingsFileName, Convert.ToBase64String(export.SettingsBytes));
+            fxNativeOffsetWritten = export.NativeOffsetWritten;
+            statusMessage = $"Exported {export.ItemFileName}; validated native FX fields written ({export.OpaqueBodyBytes:N0} body bytes, opaque remainder preserved).";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error while exporting the opaque FX carrier: " + ex.Message;
+        }
+    }
+
     private async Task ExportGbx(bool combineFiles = false)
     {
         if (gbxFile != null && itemModel != null)
         {
             try
             {
+                if (!combineFiles && IsOpaqueFxCarrier)
+                {
+                    await ExportOpaqueFxCarrier();
+                    return;
+                }
                 UpdateIdent();
                 ItemExportValidator.EnsureGameReady(combineFiles ? variantSources[0].Model : itemModel, identId);
                 SyncPivotsToGbx();

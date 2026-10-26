@@ -1,0 +1,52 @@
+<section class="card mt-3" aria-label="FX settings capability matrix">
+    <div class="card-header py-1 fw-bold text-info">FX settings and authoring status</div>
+    <div class="card-body py-2">
+        <p class="small mb-2">The editor exposes only settings with a validated native writer. Other carrier fields remain preserved so an export cannot silently damage the effect. The local corpus audit found 83 particle models (61 readable, 22 unsupported); nested model fields are therefore shown as read-only until a native one-variable probe passes.</p>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-2">
+                <thead>
+                    <tr><th scope="col">Setting</th><th scope="col">Status</th><th scope="col">Scope</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Rows)
+                    {
+                        <tr>
+                            <th scope="row" class="small">@row.Name</th>
+                            <td><span class="badge @row.Badge">@row.Status</span></td>
+                            <td class="small text-muted">@row.Scope</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-label="Add FX (native carrier authoring pending)">
+            Add FX
+        </button>
+        <span class="small text-muted ms-2">Requires a native-tested carrier template and dependency graph.</span>
+        <p class="small text-muted mt-2 mb-0">Read-only discovery fields: <code>IsSplashMode</code>, <code>ShadowMapTexelSize</code> and <code>GameVersion</code>. They are retained from the source and are not written by Studio.</p>
+    </div>
+</section>
+
+@code {
+    private sealed record FxRow(string Name, string Status, string Scope, string Badge);
+
+    private static readonly IReadOnlyList<FxRow> Rows =
+    [
+        new("Emission point X / Y / Z", "Editable", "Existing embedded emitters; local metres", "text-bg-success"),
+        new("Existing emitter count and relative offsets", "Preserved", "Carrier graph; translated as one group", "text-bg-info"),
+        new("Spawn, frequency and particle count", "Preserved / read-only", "Native probe required", "text-bg-secondary"),
+        new("Lifetime, size and spread", "Preserved / read-only", "Native probe required", "text-bg-secondary"),
+        new("Colour, hue, alpha and fade curves", "Preserved / read-only", "Native probe required", "text-bg-secondary"),
+        new("Gravity, weight, friction and particle collision", "Preserved / read-only", "Native probe required", "text-bg-secondary"),
+        new("Render mode, atlas, mesh and texture slots", "Preserved / read-only", "Dependency graph + native probe", "text-bg-secondary"),
+        new("Fog/smoke GPU rate and simulated smoke", "Preserved / read-only", "Native probe required", "text-bg-secondary"),
+        new("IsSplashMode / ShadowMapTexelSize / GameVersion", "Read-only discovery", "Corpus audit; no safe writer", "text-bg-secondary"),
+        new("Multiple existing emitters", "Preserved", "Sparkler carrier has 2; relative spacing survives", "text-bg-info"),
+        new("Add or combine a second/different FX graph", "Unavailable", "No native graph merge/save proof", "text-bg-warning"),
+        new("Kinematic FX (move while emitting)", "Unavailable", "Opaque FX has no static model for current converter", "text-bg-warning"),
+        new("Torch / hidden carrier clone", "Stock only", "ShowTorch preload passes; identity-only user clone fails dependency resolution", "text-bg-warning"),
+        new("Fogger-with-light carrier", "Stock template", "ShowFoggerWithLight8m preload, visible fog/light and save/reopen pass; custom clone dependency proof pending", "text-bg-info"),
+        new("Sprinkler / water carrier", "Candidate only", "WaterSpray assets found; item carrier and native playback unproven", "text-bg-warning"),
+        new("Custom image/emoji particle", "Unavailable", "Valid bitmap/material graph required", "text-bg-warning")
+    ];
+}

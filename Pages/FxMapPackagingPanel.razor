@@ -1,0 +1,124 @@
+@using TM_Item_Studio.Models
+@inject IJSRuntime JS
+
+<section class="card mt-3" aria-label="FX map packaging">
+    <div class="card-header py-1 fw-bold text-info">Keep FX in a saved map</div>
+    <div class="card-body py-2">
+        <p class="small mb-2">Trackmania's editor can omit these FX items when saving. After each editor save, select the exported FX item and your saved map here. Download the packaged map for playing or sharing.</p>
+        <p class="small text-muted mb-2">The item must already be placed in the map. Use the exact exported item file. Packaging runs locally and creates a new map; the result needs no FX plugin or loose custom textures.</p>
+        <label class="form-label small" for="fxPackageItem">Exported FX item (.Item.Gbx)</label>
+        <InputFile id="fxPackageItem" aria-label="FX item for map packaging" accept=".gbx" class="form-control form-control-sm mb-2" OnChange="LoadItem" disabled="@busy" />
+        <label class="form-label small" for="fxPackageMap">Saved map (.Map.Gbx)</label>
+        <InputFile id="fxPackageMap" aria-label="Saved map for FX packaging" accept=".gbx" class="form-control form-control-sm mb-2" OnChange="LoadMap" disabled="@busy" />
+        @if (targets.Count > 0)
+        {
+            <label class="form-label small" for="fxPackageTarget">Placed item</label>
+            <select id="fxPackageTarget" aria-label="Placed FX item to package" class="form-select form-select-sm mb-2" @bind="targetPath" disabled="@busy">
+                @foreach (var target in targets)
+                {
+                    <option value="@target.ItemRelativePath">@target.ItemRelativePath (@target.Placements placed)</option>
+                }
+            </select>
+        }
+        <button type="button" class="btn btn-sm btn-outline-primary" disabled="@(busy || targets.Count == 0 || string.IsNullOrEmpty(targetPath))" @onclick="PackageMap">@(busy ? "Packaging…" : "Download packaged FX map (.Map.Gbx)")</button>
+        @if (report is not null)
+        {
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" @onclick="DownloadReport">Download FX map report (.json)</button>
+        }
+        @if (!string.IsNullOrEmpty(status)) { <p class="small text-info mt-2 mb-0" role="status">@status</p> }
+        @if (!string.IsNullOrEmpty(error)) { <p class="small text-danger mt-2 mb-0" role="alert">@error</p> }
+    </div>
+</section>
+
+@code {
+    private byte[]? itemBytes, mapBytes;
+    private string? itemName, mapName, targetPath, report, reportName, status, error;
+    private IReadOnlyList<FxMapPackagingTarget> targets = Array.Empty<FxMapPackagingTarget>();
+    private bool packaging;
+    private int pendingReads, itemGeneration, mapGeneration;
+    private bool busy => packaging || pendingReads > 0;
+
+    private void ClearResult()
+    {
+        targets = Array.Empty<FxMapPackagingTarget>();
+        targetPath = report = reportName = status = error = null;
+    }
+
+    private async Task LoadItem(InputFileChangeEventArgs args)
+    {
+        if (packaging) return;
+        var generation = ++itemGeneration;
+        pendingReads++;
+        ClearResult(); itemBytes = null; itemName = null;
+        try
+        {
+            var selectedName = args.File.Name;
+            var bytes = await Read(args.File, 32 * 1024 * 1024);
+            if (generation != itemGeneration) return;
+            itemBytes = bytes; itemName = selectedName;
+        }
+        catch (Exception ex) { if (generation == itemGeneration) error = "Cannot prepare FX item: " + ex.Message; }
+        finally { pendingReads--; if (pendingReads == 0) FindTargets(); }
+    }
+
+    private async Task LoadMap(InputFileChangeEventArgs args)
+    {
+        if (packaging) return;
+        var generation = ++mapGeneration;
+        pendingReads++;
+        ClearResult(); mapBytes = null; mapName = null;
+        try
+        {
+            var selectedName = args.File.Name;
+            var bytes = await Read(args.File, 128 * 1024 * 1024);
+            if (generation != mapGeneration) return;
+            mapBytes = bytes; mapName = selectedName;
+        }
+        catch (Exception ex) { if (generation == mapGeneration) error = "Cannot prepare saved map: " + ex.Message; }
+        finally { pendingReads--; if (pendingReads == 0) FindTargets(); }
+    }
+
+    private void FindTargets()
+    {
+        if (mapBytes is null || itemBytes is null || itemName is null) return;
+        try
+        {
+            targets = FxMapPackaging.FindTargets(mapBytes, itemBytes, itemName);
+            targetPath = targets.FirstOrDefault()?.ItemRelativePath;
+            if (targets.Count == 0)
+                error = "No placed item matches this file's name and author. Select the exact exported FX item used in the saved map.";
+            else
+                status = $"Found {targets.Sum(target => target.Placements)} matching placement(s).";
+        }
+        catch (Exception ex) { error = "Cannot match FX item to map: " + ex.Message; }
+    }
+
+    private async Task PackageMap()
+    {
+        if (busy || mapBytes is null || itemBytes is null || string.IsNullOrEmpty(targetPath)) return;
+        packaging = true; status = error = report = reportName = null;
+        var selectedMap = mapBytes; var selectedItem = itemBytes;
+        var selectedTarget = targetPath; var selectedMapName = mapName;
+        await Task.Yield();
+        try
+        {
+            var result = FxMapPackaging.Repair(selectedMap, selectedItem, selectedTarget, selectedMapName);
+            await JS.InvokeVoidAsync("downloadBinaryGbx", result.FileName, Convert.ToBase64String(result.Bytes));
+            report = result.ReportJson; reportName = result.FileName + ".packaging.json";
+            status = $"Exported {result.FileName}. Test this map in Trackmania. Package again after any further editor save.";
+        }
+        catch (Exception ex) { error = "FX map packaging refused: " + ex.Message; }
+        finally { packaging = false; }
+    }
+
+    private Task DownloadReport() => JS.InvokeVoidAsync("downloadBinaryGbx", reportName,
+        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(report!))).AsTask();
+
+    private static async Task<byte[]> Read(IBrowserFile file, long maxBytes)
+    {
+        using var stream = file.OpenReadStream(maxBytes);
+        using var memory = new MemoryStream();
+        await stream.CopyToAsync(memory);
+        return memory.ToArray();
+    }
+}

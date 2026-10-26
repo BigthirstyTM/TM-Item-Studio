@@ -1,7 +1,7 @@
 let scene, camera, renderer, controls, transformControls, gridHelper;
-let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup;
+let staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup;
 let dotNetHelper = null, selectedGizmo = null;
-let isWireframe = false, isPlaying = true, animSpeed = 1;
+let isWireframe = false, isPlaying = true, animSpeed = 1, clothAnimationEnabled = true;
 let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler = null;
 let resizeObserver = null;
 let viewKeyHandler = null;
@@ -9,6 +9,7 @@ let activeStudioView = 'perspective';
 let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showWaypoints = true;
 let activeConstraintIndex = 0, activeMeshHelper = null;
 let selectedMeshPath = null, selectedMeshObject = null, selectedMeshHelper = null;
+let flagAnchorObject = null, pendingFlagAnchor = null;
 let viewportSelectionQueue = Promise.resolve();
 let typedMotions = [], typedGroupMotions = [], motionGroups = new Map(), previewPhase01 = 0, currentPayload = null;
 let groupMotionContainers = new Map();
@@ -537,14 +538,24 @@ window.getStudioTexturePreviewInfo = function () {
 window.getStudioViewerDebugInfo = function () {
     let meshes = 0;
     const colors = new Set();
+    const meshBounds = new THREE.Box3();
     for (const group of [staticGroup, movingGroup]) group?.traverse(node => {
         if (!node.isMesh) return;
         meshes++;
+        meshBounds.expandByObject(node);
         for (const material of (Array.isArray(node.material) ? node.material : [node.material]))
             if (material?.color) colors.add(material.color.getHexString());
     });
+    const fxEmitters = [];
+    pivotsGroup?.traverse(node => {
+        if (node.userData?.type === 'fx-emitter')
+            fxEmitters.push({ index: node.userData.index, itemPosition: node.getWorldPosition(new THREE.Vector3()).toArray(),
+                editable: node.userData.editable });
+    });
     return {
         initialized: Boolean(renderer?.domElement.isConnected), meshes,
+        meshBounds: meshBounds.isEmpty() ? null : { min: meshBounds.min.toArray(), max: meshBounds.max.toArray() },
+        fxEmitters,
         materialColors: [...colors].slice(0, 128),
         cameraPosition: camera?.position.toArray() ?? null,
         cameraTarget: controls?.target.toArray() ?? null,
@@ -992,6 +1003,55 @@ function isVisibleInScene(object) {
 function isSelectableMesh(object) {
     return Boolean(object?.isMesh && object.userData?.path && isVisibleInScene(object));
 }
+function ensureFlagAnchorObject() {
+    if (!flagAnchorGroup) return null;
+    if (!flagAnchorObject) {
+        flagAnchorObject = new THREE.Group();
+        flagAnchorObject.name = 'flagConversionAnchor';
+        const marker = new THREE.Mesh(new THREE.SphereGeometry(.18, 16, 12),
+            new THREE.MeshBasicMaterial({ color: 0xfacc15, depthTest: false }));
+        marker.renderOrder = 100;
+        flagAnchorObject.add(marker);
+        const axes = new THREE.AxesHelper(1.1);
+        axes.renderOrder = 99;
+        flagAnchorObject.add(axes);
+        flagAnchorObject.userData = { type: 'flag-anchor', index: 0, editable: true };
+        flagAnchorGroup.add(flagAnchorObject);
+    }
+    return flagAnchorObject;
+}
+function flagAnchorMotionOwner() {
+    if (!selectedMeshObject || !motionGroups?.size) return motionGroups?.values?.().next?.().value?.[0] ?? null;
+    for (const pair of motionGroups.values()) {
+        const owner = pair?.[0];
+        if (!owner) continue;
+        for (let current = selectedMeshObject; current; current = current.parent)
+            if (current === owner) return owner;
+    }
+    return null;
+}
+function syncFlagAnchorObject() {
+    if (!flagAnchorObject || !pendingFlagAnchor) return;
+    const local = new THREE.Vector3(...pendingFlagAnchor);
+    const owner = flagAnchorMotionOwner();
+    if (owner) {
+        owner.updateMatrixWorld(true);
+        flagAnchorObject.position.copy(local).applyMatrix4(owner.matrixWorld);
+        flagAnchorObject.quaternion.setFromRotationMatrix(owner.matrixWorld);
+    } else {
+        flagAnchorObject.position.copy(local);
+        flagAnchorObject.quaternion.identity();
+    }
+}
+window.setFlagConversionAnchor = function (x, y, z, visible = true) {
+    const values = [Number(x), Number(y), Number(z)];
+    if (values.some(value => !Number.isFinite(value))) return;
+    pendingFlagAnchor = values;
+    const object = ensureFlagAnchorObject();
+    if (!object) return;
+    syncFlagAnchorObject();
+    object.visible = Boolean(visible);
+};
 function selectMeshObject(mesh, notify = true, additive = false, range = false) {
     selectedMeshObject = mesh ?? null;
     selectedMeshPath = mesh?.userData?.path ?? null;
@@ -1091,6 +1151,15 @@ window.init3DViewer = function (containerId, dotNetRef) {
                     THREE.MathUtils.radToDeg(selectedGizmo.rotation.x),
                     THREE.MathUtils.radToDeg(selectedGizmo.rotation.y),
                     THREE.MathUtils.radToDeg(selectedGizmo.rotation.z));
+            } else if (d.type === 'flag-anchor') {
+                const local = p.clone(), owner = flagAnchorMotionOwner();
+                if (owner) {
+                    owner.updateMatrixWorld(true);
+                    local.applyMatrix4(owner.matrixWorld.clone().invert());
+                }
+                dotNetHelper.invokeMethodAsync('OnFlagAnchorMoved', local.x, local.y, local.z);
+            } else if (d.type === 'fx-emitter') {
+                dotNetHelper.invokeMethodAsync('OnFxEmitterPointMoved', p.x, p.y, p.z);
             } else {
                 dotNetHelper.invokeMethodAsync('OnGizmoMoved', d.type, d.index, p.x, p.y, p.z);
             }
@@ -1112,7 +1181,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
             }
             return;
         }
-        const groups = [pivotsGroup, lightsGroup, waypointsGroup].filter(g => g && g.visible);
+        const groups = [pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup].filter(g => g && g.visible);
         const hits = raycaster.intersectObjects(groups.flatMap(g => g.children), true).filter(hit => isVisibleInScene(hit.object));
         if (hits.length) {
             let obj = hits[0].object;
@@ -1158,8 +1227,9 @@ window.init3DViewer = function (containerId, dotNetRef) {
         grid.geometry.setAttribute('color', new THREE.Float32BufferAttribute(vertexColors, 3));
     }
     gridHelper = gridGroup; scene.add(gridHelper, new THREE.AxesHelper(4));
-    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup] = Array.from({ length: 6 }, () => new THREE.Group());
-    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup); applyLayerVisibility();
+    [staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup] = Array.from({ length: 7 }, () => new THREE.Group());
+    scene.add(staticGroup, movingGroup, collisionGroup, pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup); applyLayerVisibility();
+    if (pendingFlagAnchor) window.setFlagConversionAnchor(...pendingFlagAnchor, true);
     function animate(timestamp) {
         if (!renderer) return;
         animationFrameId = requestAnimationFrame(animate);
@@ -1167,7 +1237,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
         const delta = lastFrameTime === null ? 0 : Math.min(Math.max(timestamp - lastFrameTime, 0), 50);
         lastFrameTime = timestamp;
         if (isPlaying) animTime += delta * animSpeed;
-        applyTypedMotion(); applyLegacyMotion(); applyAnimatedMaterialTextures();
+        applyAnimatedCloth(); applyTypedMotion(); applyLegacyMotion(); applyAnimatedMaterialTextures(); syncFlagAnchorObject();
         if (activeMeshHelper) activeMeshHelper.update();
         if (selectedMeshHelper) selectedMeshHelper.update();
         controls.update(); renderer.render(scene, camera);
@@ -1183,6 +1253,46 @@ window.init3DViewer = function (containerId, dotNetRef) {
     resizeObserver = new ResizeObserver(resizeHandler);
     resizeObserver.observe(container);
 };
+function applyAnimatedCloth() {
+    if (!clothAnimationEnabled) return;
+    const geometries = new Set();
+    for (const group of [staticGroup, movingGroup]) {
+        group?.traverse(child => { if (child.isMesh && child.geometry?.userData?.clothAnimation) geometries.add(child.geometry); });
+    }
+    for (const geometry of geometries) {
+        const animation = geometry.userData.clothAnimation;
+        const positions = geometry.attributes.position;
+        if (!animation || !positions || animation.vertexCount <= 0) continue;
+        const phase = ((animTime / 1000) / animation.periodSeconds) % 1;
+        const frame = phase * (animation.frameCount - 1);
+        const first = Math.floor(frame);
+        const second = (first + 1) % animation.frameCount;
+        const blend = frame - first;
+        const firstOffset = first * animation.vertexCount * 3;
+        const secondOffset = second * animation.vertexCount * 3;
+        for (let i = 0; i < animation.vertexCount; i++) {
+            const offset = i * 3;
+            for (let axis = 0; axis < 3; axis++) {
+                const a = animation.positions[firstOffset + offset + axis];
+                const b = animation.positions[secondOffset + offset + axis];
+                positions.array[offset + axis] = a + (b - a) * blend;
+            }
+        }
+        positions.needsUpdate = true;
+        const normals = geometry.attributes.normal;
+        if (animation.normals && normals) {
+            for (let i = 0; i < animation.vertexCount; i++) {
+                const offset = i * 3;
+                const a0 = animation.normals[firstOffset + offset], a1 = animation.normals[firstOffset + offset + 1], a2 = animation.normals[firstOffset + offset + 2];
+                const b0 = animation.normals[secondOffset + offset], b1 = animation.normals[secondOffset + offset + 1], b2 = animation.normals[secondOffset + offset + 2];
+                let x = a0 + (b0 - a0) * blend, y = a1 + (b1 - a1) * blend, z = a2 + (b2 - a2) * blend;
+                const length = Math.hypot(x, y, z) || 1;
+                normals.array[offset] = x / length; normals.array[offset + 1] = y / length; normals.array[offset + 2] = z / length;
+            }
+            normals.needsUpdate = true;
+        }
+    }
+}
 function disposeObjectResources(root) {
     const geometries = new Set(), materials = new Set(), textures = new Set();
     root.traverse(child => {
@@ -1216,7 +1326,8 @@ window.dispose3DViewer = function () {
     releaseGeometryPool();
     if (renderer) { renderer.dispose(); renderer.domElement.remove(); }
     renderer = scene = camera = controls = transformControls = null;
-    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = waypointsGroup = gridHelper = null;
+    staticGroup = movingGroup = collisionGroup = pivotsGroup = lightsGroup = waypointsGroup = flagAnchorGroup = gridHelper = null;
+    flagAnchorObject = null;
     typedMotions = []; typedGroupMotions = []; motionGroups = new Map(); groupMotionContainers = new Map(); currentPayload = null; animTime = 0; lastFrameTime = null;
     selectedCompositeSources = new Set(); compositeGroupBySource = new Map(); compositeLeaderSource = null;
     hasAutoFramedScene = false;
@@ -1286,14 +1397,37 @@ function buildGeometry(part) {
     const indices = part.indicesBytes == null ? part.indices ?? part.Indices : geometryWords(part.indicesBytes, true);
     const normals = part.normalsBytes == null ? part.normals : geometryWords(part.normalsBytes);
     const uvs = part.uvsBytes == null ? part.uvs : geometryWords(part.uvsBytes);
+    const animationPositions = part.animationPositionsBytes == null
+        ? (part.animationPositions ?? null) : geometryWords(part.animationPositionsBytes);
+    const animationNormals = part.animationNormalsBytes == null
+        ? (part.animationNormals ?? null) : geometryWords(part.animationNormalsBytes);
+    const animationFrameCount = Number(part.animationFrameCount ?? 0);
+    const animationPeriodSeconds = Number(part.animationPeriodSeconds ?? 12);
     if (!(Array.isArray(indices) || indices instanceof Int32Array) || indices.length % 3 || indices.some(x => !Number.isInteger(x) || x < 0 || x >= positions.length / 3)) throw new Error('Invalid triangle indices.');
     for (const [value, key, stride] of [[normals, 'normals', 3], [uvs, 'uvs', 2]])
         if (value != null && buffer(value, key, stride).length / stride !== positions.length / 3) throw new Error(`${key} count does not match vertices.`);
+    if (animationPositions != null) {
+        if (!Number.isInteger(animationFrameCount) || animationFrameCount < 2 || animationFrameCount > 256
+            || animationPositions.length !== positions.length * animationFrameCount
+            || !Number.isFinite(animationPeriodSeconds) || animationPeriodSeconds <= 0)
+            throw new Error('Invalid baked cloth animation.');
+        if (animationNormals != null && animationNormals.length !== animationPositions.length)
+            throw new Error('Animation normal count does not match animation positions.');
+    }
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setIndex(indices instanceof Int32Array ? new THREE.BufferAttribute(new Uint32Array(indices), 1) : indices);
     if (normals != null) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); else geometry.computeVertexNormals();
     if (uvs != null) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     if (geometry.attributes.normal.array.some(x => !Number.isFinite(x))) { geometry.dispose(); throw new Error('Normals overflow geometry.'); }
+    if (animationPositions != null) {
+        geometry.userData.clothAnimation = {
+            positions: animationPositions instanceof Float32Array ? animationPositions : new Float32Array(animationPositions),
+            normals: animationNormals == null ? null : (animationNormals instanceof Float32Array ? animationNormals : new Float32Array(animationNormals)),
+            frameCount: animationFrameCount,
+            vertexCount: positions.length / 3,
+            periodSeconds: animationPeriodSeconds
+        };
+    }
     geometry.computeBoundingBox();
     return geometry;
 }
@@ -1370,6 +1504,14 @@ function makeGizmo(data, index, type, markerScale = 1) {
     } else if (type === 'composite-group') {
         const groupColor = compositeGroupColor(data.index ?? index);
         group.add(new THREE.Mesh(new THREE.BoxGeometry(.42 * markerScale, .42 * markerScale, .42 * markerScale), new THREE.MeshBasicMaterial({ color: groupColor })), new THREE.AxesHelper(1.25 * markerScale));
+    } else if (type === 'fx-emitter') {
+        // The payload supplies the primary emitter in item-space metres;
+        // native export converts it through the FX owner's prefab transform.
+        const color = 0x22d3ee;
+        group.add(new THREE.Mesh(new THREE.SphereGeometry(.27 * markerScale, 16, 12), new THREE.MeshBasicMaterial({ color })), new THREE.AxesHelper(1.15 * markerScale));
+        const arrow = new THREE.Mesh(new THREE.ConeGeometry(.12 * markerScale, .42 * markerScale, 12), new THREE.MeshBasicMaterial({ color }));
+        arrow.position.y = .38 * markerScale;
+        group.add(arrow);
     }
     else throw new Error('Unknown gizmo type.');
     return group;
@@ -1771,6 +1913,10 @@ function renderPayload(input, preserveCamera) {
         }
         for (const [property, type, target] of [['pivots', 'pivot', 3], ['compositeOffsets', 'composite-offset', 3], ['compositeGroups', 'composite-group', 3], ['lights', 'light', 4]])
             (data[property] ?? []).forEach((gizmo, index) => { const group = makeGizmo(gizmo, index, type, markerScaleForBounds(bounds)); staged[target].add(group); bounds.expandByPoint(group.position); });
+        if (data.fxEmitter && typeof data.fxEmitter === 'object') {
+            const group = makeGizmo(data.fxEmitter, 0, 'fx-emitter', markerScaleForBounds(bounds));
+            staged[3].add(group); bounds.expandByPoint(group.position);
+        }
         if (data.activeConstraintIndex != null) {
             activeConstraintIndex = data.activeConstraintIndex;
         }
@@ -1859,6 +2005,7 @@ window.setMotionPreview = value => { if (value?.motions) window.setTypedMotionPr
 window.setAnimationAxis = function () {};
 window.setAnimationPlaying = playing => { isPlaying = Boolean(playing); };
 window.setAnimationSpeed = speed => { animSpeed = nonnegative(Number(speed), 'Playback speed'); };
+window.setClothAnimationPreview = enabled => { clothAnimationEnabled = Boolean(enabled); };
 function applyLayerVisibility() {
     if (!staticGroup) return;
     staticGroup.visible = movingGroup.visible = showMeshes; collisionGroup.visible = showCollision;

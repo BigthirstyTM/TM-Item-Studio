@@ -22,6 +22,9 @@ public static partial class ItemScene
             var vertices = visual3D.Vertices ?? Array.Empty<CPlugVisual3D.Vertex>();
             Vec3[]? positions = null;
             Vec3[]? normals = null;
+            Vec3[]? animationPositions = null;
+            Vec3[]? animationNormals = null;
+            var animationFrameCount = 0;
             var uvs = new Dictionary<int, Vec2[]>();
             var ambiguous = false;
             for (var i = 0; i < streams.Length; i++)
@@ -57,8 +60,26 @@ public static partial class ItemScene
             }
             else
             {
-                positions = vertices.Select(x => x.Position).ToArray();
-                if (vertices.Any(x => x.Normal.HasValue))
+                // Native waving flags use one indexed vertex buffer containing
+                // complete baked frames and a SubVisuals table that points at
+                // each frame. Expose those frames to the browser preview while
+                // retaining only frame zero as the ordinary geometry payload.
+                var indexedVisual = (CPlugVisualIndexedTriangles)visual;
+                if (TryReadBakedAnimation(indexedVisual, vertices, out animationFrameCount, out var bakedFrameVertexCount))
+                {
+                    animationPositions = vertices.Select(x => x.Position).ToArray();
+                    positions = animationPositions.Take(bakedFrameVertexCount).ToArray();
+                    if (vertices.All(x => x.Normal.HasValue))
+                    {
+                        animationNormals = vertices.Select(x => x.Normal!.Value).ToArray();
+                        normals = animationNormals.Take(bakedFrameVertexCount).ToArray();
+                    }
+                }
+                else
+                {
+                    positions = vertices.Select(x => x.Position).ToArray();
+                }
+                if (vertices.Any(x => x.Normal.HasValue) && normals is null)
                 {
                     if (vertices.Any(x => !x.Normal.HasValue))
                     { Issue(path, "partial-normals", ItemSceneState.Invalid, "CPU normals are present for only some vertices."); }
@@ -66,7 +87,12 @@ public static partial class ItemScene
                 }
                 for (var channel = 0; channel < visual.TexCoords.Length; channel++)
                     if (visual.TexCoords[channel] is not null)
-                        uvs[channel] = visual.TexCoords[channel].TexCoords.Select(x => x.UV).ToArray();
+                    {
+                        var values = visual.TexCoords[channel].TexCoords.Select(x => x.UV).ToArray();
+                        var uvFrameVertexCount = positions.Length;
+                        uvs[channel] = values.Length >= uvFrameVertexCount
+                            ? values.Take(uvFrameVertexCount).ToArray() : values;
+                    }
             }
             if (ambiguous)
             { Issue(path, "ambiguous-attributes", ItemSceneState.Unsupported, "Duplicate attributes, mixed CPU/stream data or opaque stream; no buffer concatenation inferred."); return; }
@@ -80,17 +106,21 @@ public static partial class ItemScene
                 { Issue(path, "missing-index-buffer", ItemSceneState.Absent, "Indexed triangles have no index buffer."); return; }
             }
             else indices = Enumerable.Range(0, positions.Length).ToArray();
-            if (visual.SkinData is not null || visual.MorphCount != 0 || visual.SubVisuals is { Length: > 0 } || visual.Splits is { Length: > 0 })
+            if (visual.SkinData is not null || visual.MorphCount != 0
+                || (visual.SubVisuals is { Length: > 0 } && animationFrameCount == 0)
+                || visual.Splits is { Length: > 0 })
                 Issue(path, "visual-animation-layout", ItemSceneState.Unsupported, "Skin/morph/subvisual/split metadata retained; only decoded base geometry is exposed.");
-            EmitGeometry(path, entry?.Path, visual, false, positions, normals, uvs, indices, world);
+            EmitGeometry(path, entry?.Path, visual, false, positions, normals, uvs, indices, world,
+                animationPositions, animationNormals, animationFrameCount);
         }
 
         private void EmitGeometry(string path, string? entityPath, object source, bool collision, Vec3[] positions,
-            Vec3[]? normals, Dictionary<int, Vec2[]> uvs, int[] indices, Matrix4x4? world)
+            Vec3[]? normals, Dictionary<int, Vec2[]> uvs, int[] indices, Matrix4x4? world,
+            Vec3[]? animationLocalPositions = null, Vec3[]? animationLocalNormals = null, int animationFrameCount = 0)
         {
             if (!world.HasValue || !ValidTransform(world.Value))
             { Issue(path, "invalid-geometry-transform", ItemSceneState.Invalid, "Geometry has no finite invertible world transform."); return; }
-            if (geometryCache?.Find(source, world.Value) is { } cached)
+            if (animationLocalPositions is null && geometryCache?.Find(source, world.Value) is { } cached)
             {
                 geometry.Add(cached with { Path = path, EntityPath = entityPath, SourceId = Id(source) });
                 return;
@@ -143,16 +173,65 @@ public static partial class ItemScene
             }
             var min = transformed.Aggregate(Vector3.Min);
             var max = transformed.Aggregate(Vector3.Max);
+            float[]? animationWorldPositions = null;
+            float[]? animationWorldNormals = null;
+            if (animationLocalPositions is not null && animationFrameCount > 1)
+            {
+                if (animationLocalPositions.Length % animationFrameCount != 0)
+                { Issue(path, "animation-frame-layout", ItemSceneState.Invalid, "Baked animation frames do not divide the vertex buffer evenly."); return; }
+                var frameWorld = new Vector3[animationLocalPositions.Length];
+                for (var i = 0; i < animationLocalPositions.Length; i++)
+                    frameWorld[i] = Vector3.Transform(V(animationLocalPositions[i]), world.Value);
+                if (frameWorld.Any(p => !Finite(p)))
+                { Issue(path, "animation-frame-position", ItemSceneState.Invalid, "Baked animation contains a nonfinite position."); return; }
+                animationWorldPositions = Pack(frameWorld);
+                if (animationLocalNormals is not null)
+                {
+                    if (animationLocalNormals.Length != animationLocalPositions.Length)
+                    { Issue(path, "animation-frame-normal-layout", ItemSceneState.Invalid, "Baked animation normals do not match positions."); return; }
+                    var normalMatrix = Matrix4x4.Transpose(Matrix4x4.Invert(world.Value, out var inverse) ? inverse : Matrix4x4.Identity);
+                    var frameNormals = new Vector3[animationLocalNormals.Length];
+                    for (var i = 0; i < animationLocalNormals.Length; i++)
+                        if (!TryNormal(V(animationLocalNormals[i]), normalMatrix, out frameNormals[i]))
+                        { Issue(path, "animation-frame-normal", ItemSceneState.Invalid, "Baked animation contains an invalid normal."); return; }
+                    animationWorldNormals = Pack(frameNormals);
+                }
+            }
             var result = new ItemSceneGeometry(path, entityPath, Id(source), collision, Pack(local), Pack(transformed), indices.ToArray(),
-                localNormals, worldNormals, channels, Pack(min), Pack(max), WorldTransform: Pack(world.Value));
+                localNormals, worldNormals, channels, Pack(min), Pack(max), WorldTransform: Pack(world.Value),
+                AnimationLocalPositions: animationLocalPositions is null ? null : Pack(animationLocalPositions.Select(V)),
+                AnimationPositions: animationWorldPositions,
+                AnimationLocalNormals: animationLocalNormals is null ? null : Pack(animationLocalNormals.Select(V)),
+                AnimationNormals: animationWorldNormals,
+                AnimationFrameCount: animationFrameCount);
             if (indices.Length == 0) Issue(path, "empty-indices", ItemSceneState.Absent, "No triangles in the index buffer.");
             else if (Enumerable.Range(0, indices.Length / 3).Any(i => indices[3 * i] == indices[3 * i + 1]
                 || indices[3 * i] == indices[3 * i + 2] || indices[3 * i + 1] == indices[3 * i + 2]))
                 Issue(path, "degenerate-triangle", ItemSceneState.Invalid, "At least one triangle repeats a vertex index.");
             // Invalid channels can depend on the occurrence transform. Do not pool partial geometry.
-            if (geometryCache is not null && diagnostics.Count == diagnosticStart)
+            if (animationLocalPositions is null && geometryCache is not null && diagnostics.Count == diagnosticStart)
                 result = geometryCache.Add(source, world.Value, result);
             geometry.Add(result);
+        }
+
+        private static bool TryReadBakedAnimation(CPlugVisualIndexedTriangles visual,
+            CPlugVisual3D.Vertex[] vertices, out int frameCount, out int frameVertexCount)
+        {
+            frameCount = 0; frameVertexCount = 0;
+            var frames = visual.SubVisuals;
+            var indices = visual.IndexBuffer?.Indices;
+            if (frames is not { Length: > 1 and <= 256 } || indices is not { Length: > 0 }
+                || vertices.Length == 0 || vertices.Length % frames.Length != 0)
+                return false;
+            frameVertexCount = vertices.Length / frames.Length;
+            for (var frame = 0; frame < frames.Length; frame++)
+            {
+                var sub = frames[frame];
+                if (sub.X != frame * frameVertexCount || sub.Y != 0 || sub.Z != indices.Length)
+                { frameVertexCount = 0; return false; }
+            }
+            frameCount = frames.Length;
+            return true;
         }
 
         private void Surface(CPlugSurface surface, string path, Matrix4x4? world, ItemSceneEntryHandle? entry,
