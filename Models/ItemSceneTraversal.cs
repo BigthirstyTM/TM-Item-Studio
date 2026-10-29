@@ -25,6 +25,11 @@ public static partial class ItemScene
         private readonly Dictionary<object, int> sourceIds = new(ReferenceEqualityComparer.Instance);
         private readonly HashSet<object> ancestors = new(ReferenceEqualityComparer.Instance);
 
+        // Mesh Modeler stores authored geometry in an inline edition crystal instead of
+        // CGameItemModel.EntityModel. Keep a distinct cache key for each generated material
+        // part so one material group cannot reuse another group's geometry.
+        private sealed record CrystalGeometryKey(CPlugCrystal.Crystal Crystal, int LayerIndex, int MaterialIndex);
+
         internal ItemSceneResult Result() => new(new(nodes, geometry, mappings, materials, solids, lights, collisions, diagnostics), handles);
         private int Id(object source)
         {
@@ -121,8 +126,15 @@ public static partial class ItemScene
                             Edge(item.EntityModelEditionFile, () => null, path + "/entityModelEdition", path, world, entry, depth);
                         else if (item.EntityModelEdition is not null)
                         {
-                            Node(path + "/entityModelEdition", path, item.EntityModelEdition, ItemSceneKind.Other, ItemSceneState.Unsupported, Matrix4x4.Identity, world);
-                            Issue(path + "/entityModelEdition", "edition-model", ItemSceneState.Unsupported, "Authoring representation retained; not rendered as runtime geometry.");
+                            var editionPath = path + "/entityModelEdition";
+                            Node(editionPath, path, item.EntityModelEdition, ItemSceneKind.Entity,
+                                world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid,
+                                Matrix4x4.Identity, world);
+                            if (item.EntityModelEdition is CGameCommonItemEntityModelEdition edition)
+                                Edition(edition, editionPath, world, entry, depth + 1);
+                            else
+                                Issue(editionPath, "edition-model-type", ItemSceneState.Unsupported,
+                                    $"Unsupported item edition type: {item.EntityModelEdition.GetType().Name}.");
                         }
                         break;
                     case NPlugItem_SVariantList variants:
