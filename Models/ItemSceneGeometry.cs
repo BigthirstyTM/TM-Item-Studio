@@ -1,5 +1,6 @@
 using System.Numerics;
 using GBX.NET;
+using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
 
 namespace TM_Item_Studio.Models;
@@ -8,6 +9,149 @@ public static partial class ItemScene
 {
     private sealed partial class Builder
     {
+        /// <summary>
+        /// Mesh Modeler items keep their authored mesh in CPlugCrystal under
+        /// CGameCommonItemEntityModelEdition. A crystal face stores references into a
+        /// shared position table, so it is converted to ordinary indexed triangle buffers
+        /// for the read-only viewport preview. The source GBX graph is never replaced.
+        /// </summary>
+        private void Edition(CGameCommonItemEntityModelEdition edition, string path, Matrix4x4? world,
+            ItemSceneEntryHandle? entry, int depth)
+        {
+            var crystal = edition.MeshCrystal;
+            var crystalPath = path + "/meshCrystal";
+            if (crystal is null)
+            {
+                Node(crystalPath, path, null, ItemSceneKind.Visual, ItemSceneState.Absent, Matrix4x4.Identity, world);
+                Issue(crystalPath, "edition-mesh-missing", ItemSceneState.Absent,
+                    "Mesh Modeler edition has no embedded crystal mesh.");
+                return;
+            }
+
+            Node(crystalPath, path, crystal, ItemSceneKind.Visual,
+                world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid,
+                Matrix4x4.Identity, world);
+
+            var layers = crystal.Layers ?? [];
+            var geometryLayerIndex = 0;
+            foreach (var layer in layers)
+            {
+                if (layer is not CPlugCrystal.GeometryLayer geometryLayer)
+                {
+                    Issue($"{crystalPath}/layer:{geometryLayerIndex}", "edition-layer",
+                        ItemSceneState.Unsupported, "Mesh Modeler layer is not a decoded geometry layer.");
+                    geometryLayerIndex++;
+                    continue;
+                }
+
+                var layerPath = $"{crystalPath}/layer:{geometryLayerIndex}";
+                geometryLayerIndex++;
+                if (!geometryLayer.IsEnabled || !geometryLayer.IsVisible)
+                    continue;
+                if (geometryLayer.Crystal is null)
+                {
+                    Issue(layerPath, "edition-crystal-missing", ItemSceneState.Absent,
+                        "Mesh Modeler geometry layer has no crystal payload.");
+                    continue;
+                }
+
+                EmitCrystalLayer(geometryLayer.Crystal, layerPath, world, entry);
+            }
+        }
+
+        private void EmitCrystalLayer(CPlugCrystal.Crystal crystal, string path, Matrix4x4? world,
+            ItemSceneEntryHandle? entry)
+        {
+            var positions = crystal.Positions ?? [];
+            var faces = crystal.Faces ?? [];
+            if (positions.Length == 0 || faces.Length == 0)
+            {
+                Issue(path, "edition-empty-mesh", ItemSceneState.Absent,
+                    "Mesh Modeler crystal contains no positions or faces.");
+                return;
+            }
+
+            // Crystal materials are authored as object references. Use their position in the
+            // face groups only as a stable preview slot; this avoids relying on a runtime
+            // Solid2 material table that is absent from Mesh Modeler items.
+            var groups = new List<(CPlugCrystal.Material? Material, List<CPlugCrystal.Face> Faces)>();
+            foreach (var face in faces)
+            {
+                var groupIndex = groups.FindIndex(group => ReferenceEquals(group.Material, face.Material));
+                if (groupIndex < 0)
+                {
+                    groups.Add((face.Material, new List<CPlugCrystal.Face>()));
+                    groupIndex = groups.Count - 1;
+                }
+                groups[groupIndex].Faces.Add(face);
+            }
+
+            for (var groupIndex = 0; groupIndex < groups.Count; groupIndex++)
+            {
+                var group = groups[groupIndex];
+                var visualPath = $"{path}/visual:{groupIndex}";
+                var materialPath = $"{path}/material:{groupIndex}";
+                var material = group.Material;
+                var instance = material?.MaterialUserInst;
+                var materialName = instance?.MaterialName ?? material?.MaterialName;
+                materials.Add(new(materialPath, groupIndex, material is null ? null : Id(material),
+                    materialName, material is null ? ItemSceneState.Absent : ItemSceneState.Present,
+                    "CrystalMaterial", materialName, instance?.Link, instance?.Color?.ToArray()));
+                mappings.Add(new(path + $"/shadedGeom:{groupIndex}", path, groupIndex, groupIndex, 1,
+                    material is null ? ItemSceneState.Absent : ItemSceneState.Present));
+
+                var localPositions = new List<Vec3>(group.Faces.Count * 3);
+                var uvValues = new List<Vec2>(group.Faces.Count * 3);
+                var indices = new List<int>(group.Faces.Count * 3);
+                var validUvs = true;
+                foreach (var face in group.Faces)
+                {
+                    var corners = face.Vertices;
+                    if (corners is null || corners.Length < 3)
+                    {
+                        Issue(visualPath, "edition-face", ItemSceneState.Invalid,
+                            "Mesh Modeler face does not contain three corners.");
+                        continue;
+                    }
+                    var baseIndex = localPositions.Count;
+                    var valid = true;
+                    for (var corner = 0; corner < 3; corner++)
+                    {
+                        var vertex = corners[corner];
+                        if (vertex.Index < 0 || vertex.Index >= positions.Length)
+                        {
+                            valid = false;
+                            break;
+                        }
+                        localPositions.Add(positions[vertex.Index]);
+                        uvValues.Add(vertex.TexCoord);
+                        validUvs &= float.IsFinite(vertex.TexCoord.X) && float.IsFinite(vertex.TexCoord.Y);
+                    }
+                    if (!valid)
+                    {
+                        while (localPositions.Count > baseIndex) localPositions.RemoveAt(localPositions.Count - 1);
+                        while (uvValues.Count > baseIndex) uvValues.RemoveAt(uvValues.Count - 1);
+                        Issue(visualPath, "edition-face-index", ItemSceneState.Invalid,
+                            "Mesh Modeler face references a position outside its crystal table.");
+                        continue;
+                    }
+                    indices.Add(baseIndex); indices.Add(baseIndex + 1); indices.Add(baseIndex + 2);
+                }
+
+                if (localPositions.Count == 0)
+                {
+                    Issue(visualPath, "edition-empty-part", ItemSceneState.Absent,
+                        "Mesh Modeler material group contains no valid faces.");
+                    continue;
+                }
+
+                var uvs = validUvs ? new Dictionary<int, Vec2[]> { [0] = uvValues.ToArray() } : new();
+                var source = new CrystalGeometryKey(crystal, groupIndex, groupIndex);
+                EmitGeometry(visualPath, entry?.Path, source, false, localPositions.ToArray(), null,
+                    uvs, indices.ToArray(), world);
+            }
+        }
+
         private void Visual(CPlugVisual visual, string path, Matrix4x4? world, ItemSceneEntryHandle? entry,
             CPlugSolid2Model? solid, int? visualIndex)
         {

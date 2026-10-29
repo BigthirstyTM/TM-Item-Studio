@@ -606,6 +606,40 @@ Check("skin MaterialIds retain authored shaded geometry slots", () =>
     Require(!Has(scene, "mapping-index"), "Valid skin mapping was rejected.");
 });
 
+Check("Mesh Modeler edition crystals produce preview geometry", () =>
+{
+    var material = new CPlugCrystal.Material { MaterialName = "crystal-material" };
+    var crystal = new CPlugCrystal
+    {
+        Materials = [material],
+        Layers = [new CPlugCrystal.GeometryLayer
+        {
+            IsEnabled = true,
+            IsVisible = true,
+            Crystal = new CPlugCrystal.Crystal
+            {
+                Positions = [new(0, 0, 0), new(1, 0, 0), new(0, 1, 0)],
+                Faces = [new CPlugCrystal.Face(
+                    [new CPlugCrystal.Vertex(0, new Vec2(0, 0), new Vec2(0, 0)),
+                     new CPlugCrystal.Vertex(1, new Vec2(1, 0), new Vec2(1, 0)),
+                     new CPlugCrystal.Vertex(2, new Vec2(0, 1), new Vec2(0, 1))],
+                    new CPlugCrystal.Part(), material, null)]
+            }
+        }]
+    };
+    var item = new CGameItemModel
+    {
+        EntityModelEdition = new CGameCommonItemEntityModelEdition { MeshCrystal = crystal }
+    };
+    var result = ItemScene.Build(item, 0).Preview;
+    Require(result.Geometry.Count == 1, "Inline edition crystal did not produce geometry.");
+    Require(result.Geometry[0].Indices.SequenceEqual(new[] { 0, 1, 2 }) && result.Geometry[0].UVs.ContainsKey(0),
+        "Crystal triangle or UV data was not converted.");
+    Require(result.Materials.Single().Representation == "CrystalMaterial" && result.Mappings.Single().VisualIndex == 0,
+        "Crystal material mapping was not exposed.");
+    Require(!result.Diagnostics.Any(d => d.Code == "edition-model"), "Edition preview remained unsupported.");
+});
+
 Console.WriteLine($"{passed} passed, {failed} failed.");
 return failed == 0 ? 0 : 1;
 
