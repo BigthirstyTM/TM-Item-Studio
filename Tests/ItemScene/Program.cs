@@ -644,6 +644,16 @@ Check("Mesh Modeler edition crystals produce preview geometry", () =>
     Require(result.Materials.Single().Representation == "CrystalMaterial" && result.Mappings.Single().VisualIndex == 0,
         "Crystal material mapping was not exposed.");
     Require(!result.Diagnostics.Any(d => d.Code == "edition-model"), "Edition preview remained unsupported.");
+    var before = result.Geometry[0];
+    var deformation = new CPlugCrystal.DeformationLayer { IsEnabled = true,
+        Transforms = [new Iso4(1, 0, 0, 0, 1, 0, 0, 0, 1, 500, 200, -400)] };
+    crystal.Layers.Insert(0, deformation);
+    var withModifier = ItemScene.Build(item, 0).Preview;
+    Require(withModifier.Diagnostics.Any(d => d.Code == "edition-deformation"), "Unverified deformation must be explicit.");
+    Require(withModifier.Geometry[0].WorldTransform!.SequenceEqual(before.WorldTransform!), "Modifier incorrectly transformed the next layer.");
+    deformation.IsEnabled = false;
+    Require(!ItemScene.Build(item, 0).Preview.Diagnostics.Any(d => d.Code == "edition-deformation"), "Disabled deformation must not affect preview.");
+
 });
 
 Console.WriteLine($"{passed} passed, {failed} failed.");

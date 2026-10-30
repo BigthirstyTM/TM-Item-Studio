@@ -20,26 +20,26 @@ internal static class FlagGpuMaterials
             var table = new GbxRefTable { AncestorLevel = 0 };
             GbxRefTableFile Ref(string path, bool use = false) => new(table, 1, use, path.Replace('/', '\\'));
             var mat = Gbx.Parse<CPlugMaterial>(Data + "Stadium/Media/Material/ItemFlag.Material.Gbx").Node;
-            mat.ShaderFile = Ref("GameData/Techno3/Media/Material/Tech3_Warp_TDiffSpec_VertexTween.Material.gbx");
+            mat.References.Shader.Descriptor = Ref("GameData/Techno3/Media/Material/Tech3_Warp_TDiffSpec_VertexTween.Material.gbx");
             foreach (var tex in mat.CustomMaterial!.Textures!)
-                tex.TextureFile = Ref("GameData/" + tex.TextureFile!.FilePath, true);
+                tex.References.Texture.Descriptor = Ref("GameData/" + tex.References.Texture.File!.FilePath, true);
             if (mode != "InlineMaterial")
             {
                 var parent = Gbx.Parse<CPlugMaterial>(Data + "Techno3/Media/Material/Tech3_Warp_TDiffSpec_VertexTween.Material.gbx").Node;
                 foreach (var dev in parent.DeviceMaterials!)
                 {
-                    dev.Shader1File = Ref("GameData/Techno3/Media/Shader/Tech3_Warp_TDiffSpec_VertexTween.Shader.Gbx");
-                    dev.Shader2File = dev.Shader1File; dev.Shader3File = dev.Shader1File;
+                    dev.References.Shader1.Descriptor = Ref("GameData/Techno3/Media/Shader/Tech3_Warp_TDiffSpec_VertexTween.Shader.Gbx");
+                    dev.References.Shader2.Descriptor = dev.References.Shader1.File; dev.References.Shader3.Descriptor = dev.References.Shader1.File;
                     if (mode == "InlineShader")
                     {
                         var shader = Gbx.Parse<CPlugShaderApply>(Data + "Techno3/Media/Shader/Tech3_Warp_TDiffSpec_VertexTween.Shader.Gbx").Node;
                         dev.Shader1 = shader; dev.Shader2 = shader; dev.Shader3 = shader;
-                        dev.Shader1File = null; dev.Shader2File = null; dev.Shader3File = null;
+                        if (dev.References.Shader1.Descriptor is not null) dev.References.Shader1.Clear(); if (dev.References.Shader2.Descriptor is not null) dev.References.Shader2.Clear(); if (dev.References.Shader3.Descriptor is not null) dev.References.Shader3.Clear();
                     }
                 }
-                mat.Shader = parent; mat.ShaderFile = null;
+                mat.Shader = parent; if (mat.References.Shader.Descriptor is not null) mat.References.Shader.Clear();
             }
-            mesh.Materials = [new External<CPlugMaterial>(mat, null)];
+            mesh.Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(mat, null) };
             mesh.CustomMaterials = null; mesh.MaterialInsts = null; mesh.MaterialIds = [];
             if (mode == "MaterialIds")
             {

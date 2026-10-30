@@ -10,6 +10,8 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $patchPath = Join-Path $repoRoot 'patches\gbx-net-null-class-id.patch'
 $skinPatchPath = Join-Path $repoRoot 'patches\gbx-net-skin-weights.patch'
 $deformationPatchPath = Join-Path $repoRoot 'patches\gbx-net-crystal-deformation-layer.patch'
+$vertexBuffersPatchPath = Join-Path $repoRoot 'patches\gbx-net-versioned-vertex-buffers.patch'
+$customModelsPatchPath = Join-Path $repoRoot 'patches\gbx-net-custom-model-references.patch'
 $outputPath = Join-Path $repoRoot 'lib\GBX.NET.dll'
 $manifestPath = Join-Path $repoRoot 'lib\GBX.NET.version.json'
 
@@ -55,7 +57,9 @@ try {
     if ((Test-Path $manifestPath) -and (Test-Path $outputPath)) {
         try {
             $existing = Get-Content -Raw $manifestPath | ConvertFrom-Json
-            if ($existing.skinWeightsPatchSha256 -eq (Get-FileHash $skinPatchPath -Algorithm SHA256).Hash.ToLowerInvariant() -and
+            if ($existing.customModelsPatchSha256 -eq (Get-FileHash $customModelsPatchPath -Algorithm SHA256).Hash.ToLowerInvariant() -and
+                $existing.vertexBuffersPatchSha256 -eq (Get-FileHash $vertexBuffersPatchPath -Algorithm SHA256).Hash.ToLowerInvariant() -and
+                $existing.skinWeightsPatchSha256 -eq (Get-FileHash $skinPatchPath -Algorithm SHA256).Hash.ToLowerInvariant() -and
                 $existing.deformationLayerPatchSha256 -eq (Get-FileHash $deformationPatchPath -Algorithm SHA256).Hash.ToLowerInvariant() -and $existing.version -eq $Version -and
                 $existing.upstreamCommit -eq $commit -and
                 $existing.compatibilityPatchSha256 -eq $patchHash) {
@@ -132,6 +136,18 @@ try {
         Write-Host 'Upstream already contains the Mesh Modeler deformation-layer compatibility behavior.'
     }
 
+    # Version 1 stores one independent buffer per declaration. The older
+    # shared-buffer stride/ordering restrictions apply only to versions <= 0.
+    & git -C $sourcePath apply --check $vertexBuffersPatchPath
+    if ($LASTEXITCODE -ne 0) { throw 'Vertex-buffer compatibility patch requires upstream review.' }
+    & git -C $sourcePath apply $vertexBuffersPatchPath
+    if ($LASTEXITCODE -ne 0) { throw 'Could not apply the versioned vertex-buffer compatibility patch.' }
+
+    & git -C $sourcePath apply --check $customModelsPatchPath
+    if ($LASTEXITCODE -ne 0) { throw 'Custom model reference patch requires upstream review.' }
+    & git -C $sourcePath apply $customModelsPatchPath
+    if ($LASTEXITCODE -ne 0) { throw 'Could not apply custom model reference patch.' }
+
     Write-Host 'Building the patched net8.0 assembly...'
     & dotnet build (Join-Path $sourcePath 'Src\GBX.NET\GBX.NET.csproj') -c Release -f net8.0 --nologo -m:2 -p:GeneratePackageOnBuild=false
     if ($LASTEXITCODE -ne 0) { throw "dotnet build failed with exit code $LASTEXITCODE." }
@@ -151,6 +167,8 @@ try {
         compatibilityPatchSha256 = $patchHash
         skinWeightsPatchSha256 = (Get-FileHash $skinPatchPath -Algorithm SHA256).Hash.ToLowerInvariant()
         deformationLayerPatchSha256 = (Get-FileHash $deformationPatchPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        vertexBuffersPatchSha256 = (Get-FileHash $vertexBuffersPatchPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        customModelsPatchSha256 = (Get-FileHash $customModelsPatchPath -Algorithm SHA256).Hash.ToLowerInvariant()
         updateCommand = 'powershell -NoProfile -ExecutionPolicy Bypass -File eng/Update-GbxNet.ps1'
     }
     $manifest | ConvertTo-Json | Set-Content $manifestPath -Encoding UTF8

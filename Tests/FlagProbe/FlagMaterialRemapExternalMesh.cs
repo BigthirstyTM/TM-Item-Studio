@@ -43,12 +43,12 @@ internal static class FlagMaterialRemapExternalMesh
         var prefab = (CPlugPrefab)variant.EntityModel!;
         var dyna = (CPlugDynaObjectModel)prefab.Ents![1].Model!;
         var mesh = dyna.Mesh ?? throw new InvalidDataException("Expected inline source cloth mesh");
-        Require(dyna.MeshFile is null && variant.EntityModelFile is null && prefab.Ents[1].ModelFile is null,
+        Require(dyna.References.Mesh.File is null && variant.References.EntityModel.File is null && prefab.Ents[1].References.Model.File is null,
             "Expected inline source VariantList/Prefab/Dyna graph");
-        Require(mesh.Materials is { Length: 1 } && mesh.Materials[0].File?.FilePath == Placeholder
-            && mesh.Materials[0].File?.UseFile == false && item.MaterialModifierFile?.FilePath == Modifier
-            && item.MaterialModifierFile.UseFile == false, "Expected accepted early-placeholder material route");
-        Require((mesh.CustomMaterials?.Length ?? 0) == 0 && (mesh.MaterialInsts?.Length ?? 0) == 0,
+        Require(mesh.Materials is { Count: 1 } && mesh.Materials.Get(0).File?.FilePath == Placeholder
+            && mesh.Materials.Get(0).File?.UseFile == false && item.References.MaterialModifier.File?.FilePath == Modifier
+            && item.References.MaterialModifier.File.UseFile == false, "Expected accepted early-placeholder material route");
+        Require((mesh.CustomMaterials?.Length ?? 0) == 0 && (mesh.MaterialInsts?.Count ?? 0) == 0,
             "Unexpected late material route");
         var sourceVisualHashes = VisualHashes(mesh);
         Require(sourceVisualHashes.Length == 5, "Expected five source visuals");
@@ -57,20 +57,20 @@ internal static class FlagMaterialRemapExternalMesh
             files.Add(name, File.ReadAllBytes(Path.Combine(v6Folder, name)));
 
         var meshRefs = new GbxRefTable { AncestorLevel = 0 };
-        mesh.Materials = [new External<CPlugMaterial>(null, new(meshRefs, 1, false, Placeholder))];
+        mesh.Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(null, new(meshRefs, 1, false, Placeholder)) };
         var meshBytes = Save(mesh, meshRefs);
         var meshDoc = Gbx.Parse<CPlugSolid2Model>(new MemoryStream(meshBytes));
         Require(meshDoc.RefTable?.AncestorLevel == 0 && meshDoc.RefTable.Files.Count == 1
-            && meshDoc.RefTable.Resources.Count == 0 && meshDoc.Node.Materials!.Single().File?.FilePath == Placeholder
-            && meshDoc.Node.Materials![0].File?.UseFile == false, "External mesh must have only its sibling placeholder dependency");
+            && meshDoc.RefTable.Resources.Count == 0 && meshDoc.Node.Materials!.Get(0).File?.FilePath == Placeholder
+            && meshDoc.Node.Materials!.Get(0).File?.UseFile == false, "External mesh must have only its sibling placeholder dependency");
         Require(VisualHashes(meshDoc.Node).SequenceEqual(sourceVisualHashes), "Complete visual serialization changed");
         Require(Save(meshDoc.Node, meshDoc.RefTable!).AsSpan().SequenceEqual(meshBytes), "Full mesh archive did not round-trip byte-exactly");
         files.Add(OutputMesh, meshBytes);
 
         var itemRefs = new GbxRefTable { AncestorLevel = 0 };
         dyna.Mesh = null;
-        dyna.MeshFile = new(itemRefs, 1, false, OutputMesh);
-        item.MaterialModifierFile = new(itemRefs, 1, false, Modifier);
+        dyna.References.Mesh.Descriptor = new GBX.NET.Components.GbxRefTableFile(itemRefs, 1, false, OutputMesh);
+        item.References.MaterialModifier.Descriptor = new GBX.NET.Components.GbxRefTableFile(itemRefs, 1, false, Modifier);
         var itemBytes = Save(item, itemRefs);
         var reopened = Gbx.Parse<CGameItemModel>(new MemoryStream(itemBytes));
         var actualVariant = ((NPlugItem_SVariantList)reopened.Node.EntityModel!).Variants!.Single();
@@ -78,12 +78,12 @@ internal static class FlagMaterialRemapExternalMesh
         var actualDyna = (CPlugDynaObjectModel)actualPrefab.Ents![1].Model!;
         Require(reopened.Node.Name == sourceName && reopened.Node.Ident == sourceIdent && reopened.Node.ArchetypeRef == "",
             "Unrequested item name or identity change");
-        Require(actualVariant.EntityModelFile is null && actualPrefab.Ents[1].ModelFile is null
-            && actualDyna.Mesh is null && actualDyna.MeshFile?.FilePath == OutputMesh
-            && actualDyna.MeshFile.UseFile == false, "Only Dyna.Mesh must become external");
+        Require(actualVariant.References.EntityModel.File is null && actualPrefab.Ents[1].References.Model.File is null
+            && actualDyna.Mesh is null && actualDyna.References.Mesh.File?.FilePath == OutputMesh
+            && actualDyna.References.Mesh.File.UseFile == false, "Only Dyna.Mesh must become external");
         Require(reopened.RefTable?.AncestorLevel == 0 && reopened.RefTable.Files.Count == 2
-            && reopened.RefTable.Resources.Count == 0 && reopened.Node.MaterialModifierFile?.FilePath == Modifier
-            && reopened.Node.MaterialModifierFile.UseFile == false, "Item must retain its exact modifier route");
+            && reopened.RefTable.Resources.Count == 0 && reopened.Node.References.MaterialModifier.File?.FilePath == Modifier
+            && reopened.Node.References.MaterialModifier.File.UseFile == false, "Item must retain its exact modifier route");
         Require(reopened.RefTable!.Files.Select(f => f.FilePath).Order().SequenceEqual(new[] { OutputMesh, Modifier }.Order()),
             "Unexpected item dependency");
         files.Add(OutputItem, itemBytes);

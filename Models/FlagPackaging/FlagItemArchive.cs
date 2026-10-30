@@ -18,7 +18,7 @@ internal static class FlagItemArchive
         PackagingGuard.That(sections.Ancestor == 0 && sections.Directories.Count == 0
             && sections.Records.All(r => r.Directory == 0), "Flag package Item must use sibling references");
         var doc = Parse(bytes);
-        PackagingGuard.That(doc.Node.Ident?.Id == "" && doc.Node.ArchetypeRef == "",
+        PackagingGuard.That(ItemStoredIdentity.Read(doc.Node).Id == "" && doc.Node.ArchetypeRef == "",
             "Flag package Item must have an empty stored identity and archetype");
         return doc;
     }

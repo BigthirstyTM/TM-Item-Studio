@@ -39,7 +39,7 @@ static partial class Research
         var rigidHash = NodeHash(prefab.Ents[0].Model!);
         var cloth = (CPlugDynaObjectModel)prefab.Ents[1].Model!;
         var clothMesh = cloth.Mesh!;
-        Require(clothMesh.Visuals is { Length: 5 }, "Expected five cloth LOD visuals");
+        Require(clothMesh.Visuals is { Count: 5 }, "Expected five cloth LOD visuals");
         if (clothKinematic)
         {
             // The earlier kinematic-cloth load boundary used a collisionless
@@ -54,8 +54,8 @@ static partial class Research
             shape.CreateChunk<CPlugSurface.Chunk0900C003>().Version = 2;
             cloth.StaticShape = shape;
             cloth.DynaShape = shape;
-            cloth.StaticShapeFile = null;
-            cloth.DynaShapeFile = null;
+            if (cloth.References.StaticShape.Descriptor is not null) cloth.References.StaticShape.Clear();
+            if (cloth.References.DynaShape.Descriptor is not null) cloth.References.DynaShape.Clear();
         }
         foreach (var visual in clothMesh.Visuals.Cast<CPlugVisualIndexedTriangles>())
         {

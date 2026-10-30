@@ -45,8 +45,8 @@ internal static class FlagMotionResearch
             var cloth = (CPlugDynaObjectModel)clothEntry.Model!;
             var poleBody = TemplateBody(template);
             var clothBody = TemplateBody(template);
-            poleBody.Mesh = pole.Mesh; poleBody.MeshFile = null;
-            clothBody.Mesh = cloth.Mesh; clothBody.MeshFile = null;
+            poleBody.Mesh = pole.Mesh; if (poleBody.References.Mesh.Descriptor is not null) poleBody.References.Mesh.Clear();
+            clothBody.Mesh = cloth.Mesh; if (clothBody.References.Mesh.Descriptor is not null) clothBody.References.Mesh.Clear();
             // Both bodies share a world pivot. Bake the original cloth attachment
             // and a six-metre orbit radius into every frame and every LOD.
             Shift(poleBody.Mesh!, new(6 + poleEntry.Position.X, poleEntry.Position.Y, poleEntry.Position.Z));
@@ -91,7 +91,7 @@ internal static class FlagMotionResearch
             if (p.Ents!.Length != (locAnim ? 2 : 4) || p.Ents.Count(e => e.Model is KC) != (locAnim ? 0 : 2))
                 throw new Exception("Kinematic graph did not survive serialization");
             var mesh = ((CPlugDynaObjectModel)p.Ents[1].Model!).Mesh!;
-            if (mesh.Visuals!.Length != 5 || mesh.Visuals.Any(v => v.SubVisuals?.Length != 86))
+            if (mesh.Visuals!.Count != 5 || mesh.Visuals.Any(v => v.SubVisuals?.Length != 86))
                 throw new Exception("Cloth animation changed");
             rows.Add(new { name, path, sha256 = Hash(path), scope = "Installed visual-motion control; tiny diagnostic collision, not vanilla collision parity" });
         }

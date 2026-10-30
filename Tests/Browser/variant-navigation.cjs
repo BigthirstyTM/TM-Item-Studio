@@ -103,7 +103,7 @@ const fs = require('node:fs');
         await page.getByLabel('Open item files').setInputFiles([fixture, path.join(__dirname, 'Fixtures/Approved/TM2020/Item.Item.Gbx')]);
         const cube = page.getByRole('button', { name: /^Select Item\.Item/ });
         await cube.click();
-        assert.equal(await cube.getAttribute('aria-pressed'), 'true');
+        await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /^Select Item\.Item/.test(b.getAttribute('aria-label') || '') && b.getAttribute('aria-pressed') === 'true'));
         assert.match(await cube.innerText(), /Item/);
         assert.equal(await page.locator('.studio-item-switcher-row').count(), 2);
         assert.equal(await page.getByRole('button', { name: /SnowCarTraffic.*variant 1$/ }).innerText(), '1');

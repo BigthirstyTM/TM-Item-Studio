@@ -45,9 +45,9 @@ internal static class FlagMaterialPlaceholder
         var material = Gbx.Parse<CPlugMaterial>(new MemoryStream(materialBytes)).Node;
         var shaderDocument = Gbx.Parse<CPlugShaderApply>(new MemoryStream(shaderBytes));
         var shader = shaderDocument.Node;
-        Require(material.CustomMaterial is null && material.Shader is null && material.ShaderFile is null,
+        Require(material.CustomMaterial is null && material.Shader is null && material.References.Shader.File is null,
             "Unexpected ordinary native material graph");
-        Require(material.DeviceMaterials?.Length == 1 && shader.Passes?.Length == 1,
+        Require(material.DeviceMaterials?.Length == 1 && shader.Passes?.Count == 1,
             "Expected one native device material and one native shader pass");
         Require(shader.RequirementFlags == 0 && shader.VisibleIdFlags == 0,
             "Ordinary source shader must not request VertexTween structured data");
@@ -56,14 +56,14 @@ internal static class FlagMaterialPlaceholder
             "Unexpected native HLSL reference root");
         ValidateScripts(shaderDocument.RefTable!);
         var pipelines = Pipelines(shader);
-        Require(pipelines.Count(p => p.ScriptFile is not null) == 2,
+        Require(pipelines.Count(p => p.References.FileGpu.File is not null) == 2,
             "Expected exactly the two native HLSL pipeline FIDs");
         if (dependencyFree)
         {
             foreach (var pipeline in pipelines)
             {
                 pipeline.Script = null;
-                pipeline.ScriptFile = null;
+                if (pipeline.References.FileGpu.Descriptor is not null) pipeline.References.FileGpu.Clear();
             }
         }
         if (noPasses) shader.Passes = [];
@@ -76,7 +76,7 @@ internal static class FlagMaterialPlaceholder
             // Null tails serialize -1, valid under both interpretations.
             if (dependencyFree) device.U03 = false;
             device.Shader2 = device.Shader3 = dependencyFree ? null : shader;
-            device.Shader1File = device.Shader2File = device.Shader3File = null;
+            if (device.References.Shader1.Descriptor is not null) device.References.Shader1.Clear(); if (device.References.Shader2.Descriptor is not null) device.References.Shader2.Clear(); if (device.References.Shader3.Descriptor is not null) device.References.Shader3.Clear();
         }
         // v5 keeps shader/pass/pipeline objects with null scripts. v6 keeps
         // ShaderApply metadata while serializing an empty pass array instead.
@@ -97,14 +97,14 @@ internal static class FlagMaterialPlaceholder
             ValidateScripts(reparsed.RefTable!);
         }
         Require(reparsed.Node.DeviceMaterials?.Length == 1 && reparsed.Node.Shader is null
-            && reparsed.Node.ShaderFile is null && reparsed.Node.CustomMaterial is null,
+            && reparsed.Node.References.Shader.File is null && reparsed.Node.CustomMaterial is null,
             "Unexpected reparsed source material graph");
         var deviceParsed = reparsed.Node.DeviceMaterials!.Single();
-        Require(deviceParsed.Shader1File is null && deviceParsed.Shader2File is null && deviceParsed.Shader3File is null,
+        Require(deviceParsed.References.Shader1.File is null && deviceParsed.References.Shader2.File is null && deviceParsed.References.Shader3.File is null,
             "ShaderApply must be inline in all device slots");
         var inline = dependencyFree ? new[] { deviceParsed.Shader1 }
             : new[] { deviceParsed.Shader1, deviceParsed.Shader2, deviceParsed.Shader3 };
-        Require(inline.All(s => s is not null && s.Passes?.Length == (noPasses ? 0 : 1) && s.RequirementFlags == 0),
+        Require(inline.All(s => s is not null && s.Passes?.Count == (noPasses ? 0 : 1) && s.RequirementFlags == 0),
             "An ordinary shader/pass was not preserved in a device slot");
         Require(inline.All(s => ReferenceEquals(s, inline[0])), "Native device slots must share one ShaderApply");
         if (dependencyFree)
@@ -116,7 +116,7 @@ internal static class FlagMaterialPlaceholder
             ValidateOptionalShaderFields(parsedShader);
             var afterPipelines = Pipelines(parsedShader);
             Require(afterPipelines.Count == (noPasses ? 0 : pipelines.Count)
-                && afterPipelines.All(p => p.Script is null && p.ScriptFile is null),
+                && afterPipelines.All(p => p.Script is null && p.References.FileGpu.File is null),
                 "Pipeline objects must remain while all script references are null");
         }
         files[Placeholder] = placeholderBytes;
@@ -201,10 +201,10 @@ internal static class FlagMaterialPlaceholder
     {
         // Native base post-load 1403DB12F has a first-pass access behind an
         // optional legacy field. Native ZOnly keeps both 0900201C refs null.
-        Require(shader.FuncShader is null && shader.FuncShaderFile is null,
+        Require(shader.FuncShader is null && shader.References.FuncShader.File is null,
             "Unexpected optional function shader");
         var chunk = shader.Chunks.OfType<CPlugShader.Chunk0900201C>().Single();
-        Require(chunk.U01 is null && chunk.U01File is null && chunk.U02 is null && chunk.U02File is null,
+        Require(chunk.U01 is null && chunk.References.U01.File is null && shader.GPU is null && shader.References.GPU.File is null,
             "Legacy optional shader fields must stay null for the zero-pass post-load gate");
     }
 
@@ -221,9 +221,9 @@ internal static class FlagMaterialPlaceholder
             Add(pass.PHlsl);
             foreach (var chunk in pass.Chunks.OfType<CPlugShaderPass.Chunk0906700B>())
             {
-                Add(chunk.U01);
-                Add(chunk.U02);
-                Add(chunk.U03);
+                Add(pass.DomainPipeline);
+                Add(pass.HullPipeline);
+                Add(pass.GeometryPipeline);
             }
         }
         return result;

@@ -20,7 +20,7 @@ foreach (var path in args)
             dynaParameters = e.Params is NPlugDynaObjectModel_SInstanceParams ip ? new { ip.Version, ip.PeriodSc, ip.PeriodScMax, ip.Phase01, ip.Phase01Max, ip.IsKinematic, ip.CastStaticShadow, ip.TextureId } : null,
             body = e.Model is CPlugDynaObjectModel d ? new { d.Version, d.IsStatic, d.DynamizeOnSpawn,
                 staticShape = d.StaticShape?.GetType().Name, dynaShape = d.DynaShape?.GetType().Name,
-                staticShapeFile = d.StaticShapeFile?.FilePath, dynaShapeFile = d.DynaShapeFile?.FilePath,
+                staticShapeFile = d.References.StaticShape.File?.FilePath, dynaShapeFile = d.References.DynaShape.File?.FilePath,
                 d.Mass, d.BreakSpeedKmh, d.U01, d.U02, d.U03, d.U04, d.U05, d.U06, d.U07, d.U08, d.U09,
                 meshHash = MeshHash(d.Mesh!), locAnim = d.LocAnim?.GetType().Name } : null,
             staticMeshHash = e.Model is CPlugStaticObjectModel s ? MeshHash(s.Mesh!) : null }) }, json));

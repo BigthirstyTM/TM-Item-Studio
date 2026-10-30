@@ -146,7 +146,9 @@ Check("export refuses an instance that references a different item", () =>
 Check("export refuses an item without an Ident.Id", () =>
 {
     var identityLess = Gbx.Parse<CGameItemModel>(itemPath).Node!;
-    identityLess.Ident = null;
+    // GBX.NET 2.5 requires a non-null Ident and falls back to Name for its Id.
+    identityLess.Ident = Ident.Empty;
+    identityLess.Name = null;
     try
     {
         ItemMacroblock.Save(identityLess, ItemMacroblock.Grid(1, 1, 8, 8), "NoIdent");

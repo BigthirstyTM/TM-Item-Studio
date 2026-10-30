@@ -82,7 +82,7 @@ var source = Parse(sourceBytes, sourcePath);
 var item = source.Node ?? throw new InvalidOperationException("Source has no CGameItemModel node.");
 if (item.EntityModel is not NPlugItem_SVariantList variants || variants.Variants is not { Length: > 0 })
     throw new InvalidOperationException("The source is not a non-empty NPlugItem_SVariantList carrier.");
-if (!variants.Variants.Any(variant => variant.EntityModelFile is not null || variant.EntityModel is CPlugPrefab))
+if (!variants.Variants.Any(variant => variant.References.EntityModel.File is not null || variant.EntityModel is CPlugPrefab))
     throw new InvalidOperationException("The source has no prefab carrier to preserve.");
 if (source.Body?.Exception is not null)
     throw new InvalidOperationException($"The source has an incomplete body parse: {source.Body.Exception.Message}");
@@ -109,7 +109,7 @@ if (!string.IsNullOrWhiteSpace(inlinePrefabPath))
     {
         var variant = ((NPlugItem_SVariantList)item.EntityModel).Variants![0];
         variant.EntityModel = prefab;
-        variant.EntityModelFile = null;
+        if (variant.References.EntityModel.Descriptor is not null) variant.References.EntityModel.Clear();
     }
 }
 
@@ -150,10 +150,10 @@ if (gameFidRefs is not null && source.RefTable is not null)
     if (item.EntityModel is NPlugItem_SVariantList rootedVariants && rootedVariants.Variants is { Length: > 0 })
     {
         var prefabRef = source.RefTable.Files.First(file => file.FilePath.EndsWith("Prefab.Gbx", StringComparison.OrdinalIgnoreCase));
-        rootedVariants.Variants[0].EntityModelFile = new GbxRefTableFile(source.RefTable, prefabRef.NodeIndex, true, prefabRef.FilePath);
+        rootedVariants.Variants[0].References.EntityModel.Descriptor = new GbxRefTableFile(source.RefTable, prefabRef.NodeIndex, true, prefabRef.FilePath);
         var placementRef = source.RefTable.Files.First(file => file.FilePath.EndsWith("PlaceParam.Gbx", StringComparison.OrdinalIgnoreCase));
         item.DefaultPlacement = null;
-        item.DefaultPlacementFile = new GbxRefTableFile(source.RefTable, placementRef.NodeIndex, true, placementRef.FilePath);
+        item.References.DefaultPlacement.Descriptor = new GbxRefTableFile(source.RefTable, placementRef.NodeIndex, true, placementRef.FilePath);
     }
 }
 

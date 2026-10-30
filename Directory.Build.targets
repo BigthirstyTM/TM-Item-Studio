@@ -1,0 +1,13 @@
+<Project>
+  <!-- LZO depends on an older NuGet GBX.NET. Use its compressor assembly only:
+       every app/test project must compile and run against our patched parser. -->
+  <ItemGroup>
+    <PackageReference Update="GBX.NET.LZO" ExcludeAssets="compile;runtime" />
+    <PackageReference Update="System.IO.Hashing" Version="10.0.12" />
+    <Reference Remove="GBX.NET.LZO" />
+    <Reference Include="GBX.NET.LZO" Condition="Exists('$(NuGetPackageRoot)gbx.net.lzo/2.1.6/lib/net8.0/GBX.NET.LZO.dll')">
+      <HintPath>$(NuGetPackageRoot)gbx.net.lzo/2.1.6/lib/net8.0/GBX.NET.LZO.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

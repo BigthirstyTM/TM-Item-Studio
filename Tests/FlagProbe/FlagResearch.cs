@@ -120,7 +120,7 @@ internal static class FlagResearch
                 if (mode == "TallNoAnim") cloth.CustomMaterials![0].MaterialUserInst!.Link = "ItemFlagNoAnim";
                 if (mode == "OffsetCloth") prefab.Ents[1].Position = new Vec3(0, 16, 0.13515112f);
                 if (mode == "TallFreshVisualIds")
-                    for (var i=0; i<cloth.Visuals!.Length; i++)
+                    for (var i=0; i<cloth.Visuals!.Count; i++)
                         cloth.Visuals[i].Chunks.OfType<CPlugVisual.Chunk09006001>().Single().U01 = "TMIS_Tall_20261021_" + i;
                 using var memory = new MemoryStream(); new Gbx<CGameItemModel>(item).Save(memory);
                 Gbx.Parse<CGameItemModel>(new MemoryStream(memory.ToArray()));
@@ -219,7 +219,7 @@ internal static class FlagResearch
                         // each animated LOD its own stream with all of its frames.
                         var seed=Gbx.Parse<CGameItemModel>(Source).Node;
                         var stream=((CPlugDynaObjectModel)Prefab(seed).Ents![1].Model!).Mesh!.Visuals![4].VertexStreams[0];
-                        typeof(CPlugVertexStream).GetField("count",BindingFlags.Instance|BindingFlags.NonPublic)!.SetValue(stream,v.Vertices.Length);
+                        typeof(CPlugVertexStream).GetField("vertexCount",BindingFlags.Instance|BindingFlags.NonPublic)!.SetValue(stream,v.Vertices.Length);
                         stream.Positions=v.Vertices.Select(p=>p.Position).ToArray();
                         stream.Normals=v.Vertices.Select(p=>p.Normal!.Value).ToArray();
                         stream.UVs[0]=v.TexCoords[0].TexCoords.Select(p=>p.UV).ToArray();
@@ -411,7 +411,7 @@ internal static class FlagResearch
                 mesh.Materials = null;
                 mesh.CustomMaterials = dyna.Mesh!.CustomMaterials;
                 dyna.Mesh = mesh;
-                dyna.MeshFile = null;
+                if (dyna.References.Mesh.Descriptor is not null) dyna.References.Mesh.Clear();
             }
             var dest = Path.Combine(args[1], id + ".Item.Gbx");
             using var stream = new MemoryStream();
@@ -485,9 +485,9 @@ internal static class FlagResearch
                 foreach(var chunk in material.Chunks.Where(c=>c.Ignore).ToArray()) material.Chunks.Remove(chunk);
                 if(root)
                 {
-                    if(material.ShaderFile is {} shader) shader.FilePath="GameData\\"+shader.FilePath;
+                    if(material.References.Shader.File is {} shader) shader.FilePath="GameData\\"+shader.FilePath;
                     foreach(var texture in material.CustomMaterial!.Textures!)
-                        if(texture.TextureFile is {} tex) tex.FilePath="GameData\\"+tex.FilePath;
+                        if(texture.References.Texture.File is {} tex) tex.FilePath="GameData\\"+tex.FilePath;
                 }
                 materials.Add(new External<CPlugMaterial>(material,null));
             }
@@ -676,8 +676,8 @@ internal static class FlagResearch
             Check(Same(cloth.LodMaxDistAtFov90, originalCloth.LodMaxDistAtFov90), "LOD distances unchanged");
             Check(Same(cloth.ShadedGeoms, originalCloth.ShadedGeoms), "LOD and material mapping unchanged");
             Check(Same(cloth.CustomMaterials, originalCloth.CustomMaterials), "game material links unchanged");
-            Check(cloth.Visuals!.Length == 5, "all five cloth LODs");
-            for (var i = 0; i < cloth.Visuals.Length; i++)
+            Check(cloth.Visuals!.Count == 5, "all five cloth LODs");
+            for (var i = 0; i < cloth.Visuals.Count; i++)
             {
                 var visual = (CPlugVisualIndexedTriangles)cloth.Visuals[i];
                 var original = (CPlugVisualIndexedTriangles)originalCloth.Visuals![i];

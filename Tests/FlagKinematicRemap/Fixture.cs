@@ -54,13 +54,13 @@ foreach (var moving in new[] { false, true })
     var clothBody = (CPlugDynaObjectModel)clothEntry.Model!;
     Require(NodeHash(clothBody) == sourceBodyHash, "Cloth body changed before conversion");
     var poleBody = (CPlugDynaObjectModel)Prefab(ParseItem(itemBytes).Node).Ents![1].Model!;
-    poleBody.Mesh = poleMesh; poleBody.MeshFile = null;
+    poleBody.Mesh = poleMesh; if (poleBody.References.Mesh.Descriptor is not null) poleBody.References.Mesh.Clear();
     foreach (var body in new[] { poleBody, clothBody })
     {
         var shape = new CPlugSurface { Surf = new CPlugSurface.Mesh { Version = 6,
             Vertices = [new(0,0,0),new(.02f,0,0),new(0,.02f,0)], Triangles = [new(new Int3(0,1,2),0,0,0)] } };
         shape.CreateChunk<CPlugSurface.Chunk0900C003>().Version = 2;
-        body.StaticShape = shape; body.DynaShape = shape; body.StaticShapeFile = null; body.DynaShapeFile = null;
+        body.StaticShape = shape; body.DynaShape = shape; if (body.References.StaticShape.Descriptor is not null) body.References.StaticShape.Clear(); if (body.References.DynaShape.Descriptor is not null) body.References.DynaShape.Clear();
     }
     // Retain source rest positions and quaternions. Never bake transforms into vertices.
     oldPole.Model = poleBody; oldPole.Params = Parameters(sourceParams, true); clothEntry.Params = Parameters(sourceParams, true);
@@ -157,7 +157,7 @@ static string[] VisualHashes(CPlugSolid2Model mesh)=>mesh.Visuals!.Select(NodeHa
 static string NodeHash<T>(T node) where T:CMwNod {using var memory=new MemoryStream();new Gbx<T>(node).Save(memory);return Hash(memory.ToArray());}
 static string Hash(byte[] bytes)=>Convert.ToHexString(SHA256.HashData(bytes));
 static void Require(bool condition,string message){if(!condition)throw new InvalidDataException(message);}
-static void ValidateReferences(Gbx<CGameItemModel> doc){Require(doc.RefTable!.AncestorLevel==0&&doc.RefTable.Files.Select(f=>f.FilePath).SequenceEqual(new[]{"TMIS_MatRemap_Placeholder.Material.Gbx","TMIS_MatRemap.TerrainModifier.Gbx"})&&doc.RefTable.Files.All(f=>f.Flags==1&&!f.UseFile),"v6 Item references changed");Require(doc.Node.MaterialModifierFile?.FilePath=="TMIS_MatRemap.TerrainModifier.Gbx", "v6 modifier lost");}
+static void ValidateReferences(Gbx<CGameItemModel> doc){Require(doc.RefTable!.AncestorLevel==0&&doc.RefTable.Files.Select(f=>f.FilePath).SequenceEqual(new[]{"TMIS_MatRemap_Placeholder.Material.Gbx","TMIS_MatRemap.TerrainModifier.Gbx"})&&doc.RefTable.Files.All(f=>f.Flags==1&&!f.UseFile),"v6 Item references changed");Require(doc.Node.References.MaterialModifier.File?.FilePath=="TMIS_MatRemap.TerrainModifier.Gbx", "v6 modifier lost");}
 static string FindRoot(){for(var dir=new DirectoryInfo(Environment.CurrentDirectory);dir is not null;dir=dir.Parent)if(File.Exists(Path.Combine(dir.FullName,"TM-Item-Studio.csproj")))return dir.FullName;throw new DirectoryNotFoundException("Run within repository");}
 sealed class ReferenceTableDocument: Gbx<CGameItemModel>{public ReferenceTableDocument(CGameItemModel item,GbxRefTable table):base(item)=>RefTable=table;}
 }

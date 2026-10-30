@@ -20,7 +20,7 @@ static partial class Research
         Require(Hash(sourceBytes)==PlaneHash,"Original source hash changed");
         var source=Parse(sourceBytes);
         var sourceMesh=((CPlugDynaObjectModel)((CPlugPrefab)source.Node.EntityModel!).Ents![0].Model!).Mesh!;
-        Require(sourceMesh.Visuals is {Length:13},"Original visual count changed");
+        Require(sourceMesh.Visuals is {Count:13},"Original visual count changed");
         var parts=sourceMesh.Visuals!.Cast<CPlugVisualIndexedTriangles>().Select(ReadBanner).ToArray();
         var offsets=new int[parts.Length];
         for(var i=1;i<parts.Length;i++)offsets[i]=offsets[i-1]+parts[i-1].Positions.Length;
@@ -42,7 +42,7 @@ static partial class Research
             var doc=Parse(seedBytes);var prefab=FlagPrefab(doc.Node);
             var cloth=prefab.Ents![1];var body=(CPlugDynaObjectModel)cloth.Model!;
             cloth.Position=default;cloth.Rotation=Identity;
-            body.DynaShape=null;body.StaticShape=null;body.DynaShapeFile=null;body.StaticShapeFile=null;body.LocAnim=null;body.LocAnimFile=null;
+            body.DynaShape=null;body.StaticShape=null;if (body.References.DynaShape.Descriptor is not null) body.References.DynaShape.Clear();if (body.References.StaticShape.Descriptor is not null) body.References.StaticShape.Clear();body.LocAnim=null;if (body.References.LocAnim.Descriptor is not null) body.References.LocAnim.Clear();
             var timing=(NPlugDynaObjectModel_SInstanceParams)cloth.Params!;
             timing.IsKinematic=false;timing.PeriodSc=timing.PeriodScMax=FlightPeriod;timing.Phase01=timing.Phase01Max=0;
             prefab.Ents=[cloth];doc.Node.Name="TMIS Skyward "+label;
@@ -69,7 +69,7 @@ static partial class Research
             var bytes=Save(doc);var parsed=Parse(bytes);var checkPrefab=FlagPrefab(parsed.Node);
             Require(checkPrefab.Ents!.Length==1,"Unexpected native motion host");
             var checkedMesh=((CPlugDynaObjectModel)checkPrefab.Ents[0].Model!).Mesh!;
-            Require(checkedMesh.Visuals!.Length==5,"Five LODs required");
+            Require(checkedMesh.Visuals!.Count==5,"Five LODs required");
             Require(checkedMesh.Visuals!.All(v=>ReferenceEquals(v,checkedMesh.Visuals[0])),"Shared LOD node identity lost");
             foreach(var visual in checkedMesh.Visuals!.Cast<CPlugVisualIndexedTriangles>())
             {

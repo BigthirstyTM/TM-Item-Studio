@@ -28,7 +28,7 @@ internal static class FrozenControlsAudit
                 return new{slot=p.i,body.IsStatic,body.DynamizeOnSpawn,bodyLocAnim=body.LocAnim?.GetType().Name,
                     timing.Version,timing.IsKinematic,timing.PeriodSc,timing.PeriodScMax,timing.Phase01,timing.Phase01Max,timing.TextureId,
                     completeMeshSha256=hash,visuals=mesh.Visuals!.Select(v=>new{type=v.GetType().Name,vertexCount=(v as CPlugVisual3D)?.Vertices.Length,frames=v.SubVisuals?.Length,uvChannels=v.TexCoords.Length}),
-                    earlyMaterialCount=mesh.Materials?.Length,customMaterialLinks=mesh.CustomMaterials?.Select(m=>m.MaterialUserInst?.Link),legacyMaterialLinks=mesh.MaterialInsts?.Select(m=>m.Link)};
+                    earlyMaterialCount=mesh.Materials?.Count,customMaterialLinks=mesh.CustomMaterials?.Select(m=>m.MaterialUserInst?.Link),legacyMaterialLinks=mesh.MaterialInsts?.Select(m=>m.Link)};
             }).ToArray();
             meshHashes.Add(hashes.ToArray());
             rows.Add(new{path,itemSha256=Hash(bytes),item.Name,constraintCount=prefab.Ents.Count(e=>e.Model is NPlugDyna_SKinematicConstraint),bodies});

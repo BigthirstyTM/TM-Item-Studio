@@ -1,0 +1,20 @@
+--- a/Src/GBX.NET/Engines/Plug/CPlugVertexStream.cs
++++ b/Src/GBX.NET/Engines/Plug/CPlugVertexStream.cs
+@@ -78,7 +78,7 @@
+                 for (var i = 0; i < declCount; i++)
+                 {
+                     n.dataDecls![i].Legacy = Version < 0;
+-                    ValidateShared(n.dataDecls, i);
++                    if (Version <= 0) ValidateShared(n.dataDecls, i);
+                 }
+                 n.WriteGeometry(Version);
+             }
+@@ -87,7 +87,7 @@
+                 var decl = n.dataDecls![i] ??= new DataDecl();
+                 decl.VertexCount = n.VertexCount;
+                 decl.ReadWrite(rw, Version);
+-                ValidateShared(n.dataDecls, i);
++                if (Version <= 0) ValidateShared(n.dataDecls, i);
+             }
+             if (Version >= 1)
+             {

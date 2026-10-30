@@ -79,20 +79,20 @@ foreach (var materialFile in materialFiles)
         }
         foreach (var textureSlot in material.CustomMaterial?.Textures ?? [])
         {
-            if (textureSlot.Texture is not CPlugBitmap bitmap || bitmap.ImageFile is null
-                || string.IsNullOrWhiteSpace(bitmap.ImageFile.FilePath))
+            if (textureSlot.Texture is not CPlugBitmap bitmap || bitmap.References.Image.File is null
+                || string.IsNullOrWhiteSpace(bitmap.References.Image.File.FilePath))
                 continue;
 
-            var resolved = ResolveTexture(materialRelative, bitmap.ImageFile.FilePath,
-                textureSlot.TextureFile?.FilePath, imagesByRelativePath, imagesByName);
+            var resolved = ResolveTexture(materialRelative, bitmap.References.Image.File.FilePath,
+                textureSlot.References.Texture.File?.FilePath, imagesByRelativePath, imagesByName);
             if (resolved is null)
             {
                 missing.Add(new MissingReference(materialRelative, textureSlot.Name,
-                    bitmap.ImageFile.FilePath, textureSlot.TextureFile?.FilePath));
+                    bitmap.References.Image.File.FilePath, textureSlot.References.Texture.File?.FilePath));
                 continue;
             }
 
-            var role = TextureRole(textureSlot.Name, bitmap.ImageFile.FilePath);
+            var role = TextureRole(textureSlot.Name, bitmap.References.Image.File.FilePath);
             if (role is not null && !entry.Textures.ContainsKey(role))
                 entry.Textures[role] = resolved.Value.Relative;
             else if (!entry.Textures.Values.Contains(resolved.Value.Relative, StringComparer.OrdinalIgnoreCase))

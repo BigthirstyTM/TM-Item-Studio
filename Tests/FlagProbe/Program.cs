@@ -163,7 +163,7 @@ int ScanProfile(string roots)
                     : string.Join("|", variantList.Variants.Select(v => v.Tags is null ? ""
                         : string.Join(",", v.Tags.OrderBy(x => x.Key, StringComparer.Ordinal).Select(x => $"{x.Key}={x.Value}"))));
                 var modelRefs = variantList?.Variants is null ? ""
-                    : string.Join("|", variantList.Variants.Select(v => v.EntityModelFile?.FilePath ?? "inline"));
+                    : string.Join("|", variantList.Variants.Select(v => v.References.EntityModel.File?.FilePath ?? "inline"));
                 var placement = node.DefaultPlacement;
                 var placementClass = placement?.PlacementClass;
                 var u = node.Chunks.Get(0x2E001012);
@@ -182,7 +182,7 @@ int ScanProfile(string roots)
                     (variantList?.Version.ToString() ?? ""),
                     (variantList?.Variants?.Length.ToString() ?? ""),
                     modelRefs,
-                    node.DefaultPlacementFile is not null ? node.DefaultPlacementFile.FilePath
+                    node.References.DefaultPlacement.File is not null ? node.References.DefaultPlacement.File.FilePath
                         : node.DefaultPlacement is not null ? "inline" : "none",
                     (placement?.Flags.ToString() ?? ""),
                     (placement?.PivotSnapDistance.ToString("R", System.Globalization.CultureInfo.InvariantCulture) ?? ""),
@@ -195,7 +195,7 @@ int ScanProfile(string roots)
                     (placementClass?.AlignToWorldDir.ToString() ?? ""),
                     (placementClass is null ? "" : placementClass.WorldDir.ToString()),
                     (placementClass?.PatchLayouts?.Length.ToString() ?? ""),
-                    (node.NadeoSkinFids?.Length.ToString() ?? ""),
+                    (node.NadeoSkinFids?.Count.ToString() ?? ""),
                     (node.Icon is null ? "none" : $"{node.Icon.GetLength(0)}x{node.Icon.GetLength(1)}"),
                     (node.Chunks.Get(0x090F4000) is null ? "no" : "yes"),
                     string.Join(",", uValues),
@@ -241,7 +241,7 @@ int ScanPlacement(string root)
                 ? string.Join("|", list.Variants.Select(v => v.Tags is null ? ""
                     : string.Join(",", v.Tags.OrderBy(x => x.Key, StringComparer.Ordinal).Select(x => $"{x.Key}={x.Value}"))))
                 : "";
-            var source = node.DefaultPlacementFile is not null ? "file:" + node.DefaultPlacementFile.FilePath
+            var source = node.References.DefaultPlacement.File is not null ? "file:" + node.References.DefaultPlacement.File.FilePath
                 : node.DefaultPlacement is not null ? "inline" : "none";
             var placement = node.DefaultPlacement;
             var placementClass = placement?.PlacementClass;
@@ -311,7 +311,7 @@ int ConvertItem(string input, string output, bool keepPlacement, bool clothStati
             Shape = dyna.StaticShape,
             IsMeshCollidable = false,
         };
-        staticCloth.Entry.ModelFile = null;
+        if (staticCloth.Entry.References.Model.Descriptor is not null) staticCloth.Entry.References.Model.Clear();
         staticCloth.Entry.Params = null;
         Console.WriteLine("    applied: cloth rebuilt as a plain static object entry, so no dyna body holds it");
     }
@@ -319,7 +319,7 @@ int ConvertItem(string input, string output, bool keepPlacement, bool clothStati
     {
         var dyna = (CPlugDynaObjectModel)bareCloth.Entry.Model!;
         dyna.Mesh = null;
-        dyna.MeshFile = null;
+        if (dyna.References.Mesh.Descriptor is not null) dyna.References.Mesh.Clear();
         Console.WriteLine("    applied: cloth entry kept with its dyna parameters but without any mesh");
     }
     if (clothExternal && clothEntry is { } externalCloth)
@@ -336,7 +336,7 @@ int ConvertItem(string input, string output, bool keepPlacement, bool clothStati
             File.WriteAllBytes(meshPath, meshStream.ToArray());
         }
         dyna.Mesh = null;
-        dyna.MeshFile = new GbxRefTableFile(references, 0, true, meshName);
+        dyna.References.Mesh.Descriptor = new GbxRefTableFile(references, 0, true, meshName);
         Console.WriteLine($"    applied: cloth mesh written to {meshName} and referenced instead of embedded");
     }
 
@@ -475,7 +475,7 @@ int ScanLodStats(string root)
                 var distances = solid.LodMaxDistAtFov90 ?? [];
                 var masks = (solid.ShadedGeoms ?? []).Where(m => m is not null).Select(m => m.LodMask).ToArray();
                 var levels = masks.Where(m => m > 0).Select(m => System.Numerics.BitOperations.Log2((uint)m) + 1).DefaultIfEmpty(0).Max();
-                var geometry = (solid.Visuals ?? []).Length;
+                var geometry = (solid.Visuals ?? []).Count;
                 total++;
                 var match = levels <= distances.Length ? "yes" : "NO";
                 if (match == "NO")
@@ -817,7 +817,7 @@ int DescribeItems(List<string> files)
                     : string.Join(", ", variant.Tags.OrderBy(x => x.Key, StringComparer.Ordinal).Select(x => $"{x.Key}={x.Value}"));
                 Console.WriteLine($"    [{i}] tags: {tags}");
                 Console.WriteLine($"        inline model : {variant.EntityModel?.GetType().Name ?? "(none)"}");
-                Console.WriteLine($"        model file   : {FileOf(variant.EntityModelFile) ?? "(none)"}");
+                Console.WriteLine($"        model file   : {FileOf(variant.References.EntityModel.File) ?? "(none)"}");
                 Console.WriteLine($"        hidden in manual cycle: {variant.HiddenInManualCycle}");
             }
         }
@@ -848,7 +848,7 @@ int DescribeItems(List<string> files)
             }
         }
         Console.WriteLine($"  default placement inline: {node.DefaultPlacement?.GetType().Name ?? "(none)"}");
-        Console.WriteLine($"  default placement file  : {FileOf(node.DefaultPlacementFile) ?? "(none)"}");
+        Console.WriteLine($"  default placement file  : {FileOf(node.References.DefaultPlacement.File) ?? "(none)"}");
         Console.WriteLine($"  game skin               : {node.GameSkin?.GetType().Name ?? "(none)"}");
 
         // Every remaining array/collection slot that stores external references is printed with

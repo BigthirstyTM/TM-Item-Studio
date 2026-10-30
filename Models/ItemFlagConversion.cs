@@ -293,7 +293,6 @@ public static class ItemFlagConversion
 
         placement.CreateChunk<CGameItemPlacementParam.Chunk2E020005>();
         placement.PlacementClass = CreatePlacementClass();
-        placement.References.PlacementClass.Clear();
         applied.Add($"placement class set to AlwaysUp + AlignToWorldDir with {CreatePatchLayouts().Length} patch layouts");
     }
 

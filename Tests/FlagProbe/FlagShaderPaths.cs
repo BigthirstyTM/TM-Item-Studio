@@ -31,9 +31,9 @@ internal static class FlagShaderPaths
             var parent=Gbx.Parse<CPlugMaterial>(Data+"Techno3/Media/Material/Tech3_Warp_TDiffSpec_VertexTween.Material.gbx").Node;
             foreach(var c in parent.Chunks.Where(c=>c.Ignore).ToArray()) parent.Chunks.Remove(c);
             var reference=new GbxRefTableFile(table,flags,true,path.Replace('/','\\'));
-            foreach(var dev in parent.DeviceMaterials!) dev.Shader1File=dev.Shader2File=dev.Shader3File=reference;
-            mat.Shader=parent;mat.ShaderFile=null;
-            mesh.Materials=[new External<CPlugMaterial>(mat,null)];
+            foreach(var dev in parent.DeviceMaterials!) dev.References.Shader1.Descriptor=dev.References.Shader2.Descriptor=dev.References.Shader3.Descriptor=reference;
+            mat.Shader=parent;if (mat.References.Shader.Descriptor is not null) mat.References.Shader.Clear();
+            mesh.Materials=new External<CPlugMaterial>[] { new External<CPlugMaterial>(mat,null) };
             mesh.CustomMaterials=null;mesh.MaterialInsts=null;mesh.MaterialIds=[];
             var file=Path.Combine(folder,"TMIS_Path_"+mode+".Item.Gbx");
             new ReferenceTableDocument(item,table).Save(file);

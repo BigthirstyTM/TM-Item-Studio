@@ -30,13 +30,9 @@ jobs:
         shell: pwsh
         run: ./eng/Update-GbxNet.ps1
 
-      - name: Verify the null-reference compatibility contract
-        run: dotnet run --project Tests/ParserSentinels
-
-      - name: Verify supported surfaces and skin weights
-        run: |
-          dotnet run --project Tests/ParserSurfaces
-          dotnet run --project Tests/ItemScene
+      - name: Verify all regression suites
+        shell: bash
+        run: ./Tests/run-all.sh
 
       - name: Verify the Studio build
         run: dotnet build TM-Item-Studio.csproj --no-restore --nologo
@@ -49,7 +45,7 @@ jobs:
           body: |
             Updates the patched GBX.NET assembly and provenance manifest to the newest stable upstream release.
 
-            Validation: `Tests/ParserSentinels`, `Tests/ParserSurfaces`, `Tests/ItemScene`, and the Item Studio build.
+            Validation: all suites in `Tests/run-all.sh` and the Item Studio build.
           branch: automation/update-gbx-net
           delete-branch: true
           add-paths: |

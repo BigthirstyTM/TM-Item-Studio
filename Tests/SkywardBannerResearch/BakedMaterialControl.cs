@@ -63,7 +63,7 @@ static partial class Research
         mesh.ShadedGeoms=sourceMesh.ShadedGeoms;
         var bytes=Save(item);
         var parsed=Parse(bytes);var pm=FlagPrefab(parsed);var checkedMesh=((CPlugDynaObjectModel)pm.Ents![0].Model!).Mesh!;
-        Require(checkedMesh.Visuals!.Length==parts.Length&&checkedMesh.CustomMaterials!.Length==sourceMesh.CustomMaterials!.Length,"Material split layout did not survive");
+        Require(checkedMesh.Visuals!.Count==parts.Length&&checkedMesh.CustomMaterials!.Length==sourceMesh.CustomMaterials!.Length,"Material split layout did not survive");
         Require(pm.Ents![0].Position==(moveAnchor?attachment:default),"Animated entity anchor changed unexpectedly");
         Require(checkedMesh.ShadedGeoms!.Select(g=>g.VisualIndex).SequenceEqual(sourceMesh.ShadedGeoms!.Select(g=>g.VisualIndex)),"Source visual/material mapping changed");
         for(var p=0;p<parts.Length;p++)

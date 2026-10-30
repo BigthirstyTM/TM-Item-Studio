@@ -116,7 +116,7 @@ static partial class Research
         var two=Parse(originalTwo);var one=Parse(originalOne);
         var twoCloth=((CPlugDynaObjectModel)FlagPrefab(two.Node).Ents![1].Model!).Mesh!;
         var oneCloth=((CPlugDynaObjectModel)FlagPrefab(one.Node).Ents![1].Model!).Mesh!;
-        Require(twoCloth.Visuals is {Length:5}&&oneCloth.Visuals is {Length:5},"Expected all five cloth LODs");
+        Require(twoCloth.Visuals is {Count:5}&&oneCloth.Visuals is {Count:5},"Expected all five cloth LODs");
         Require(twoCloth.Visuals!.All(v=>v.TexCoords.Length==2)&&oneCloth.Visuals!.All(v=>v.TexCoords.Length==1),"Expected two-UV/one-UV pair");
         one.Node.Name=two.Node.Name;
         foreach(var visual in twoCloth.Visuals)visual.TexCoords=visual.TexCoords.Take(1).ToArray();
@@ -201,7 +201,7 @@ static partial class Research
         Require(sourcePrefab.Ents is { Length: 2 } && sourcePrefab.Ents[0].Model is CPlugDynaObjectModel && sourcePrefab.Ents[1].Model is NPlugDyna_SKinematicConstraint,"Source flight graph changed");
         Require(sourcePrefab.Ents![0].Position==default && sourcePrefab.Ents[0].Rotation==Identity,"Source rest transform changed");
         var sourceMesh = ((CPlugDynaObjectModel)sourcePrefab.Ents[0].Model!).Mesh!;
-        Require(sourceMesh.Visuals is {Length:13} && sourceMesh.CustomMaterials is {Length:13},"Source mesh changed");
+        Require(sourceMesh.Visuals is {Count:13} && sourceMesh.CustomMaterials is {Length:13},"Source mesh changed");
         Require(sourceMesh.ShadedGeoms is {Length:13} && sourceMesh.ShadedGeoms.Select((g,i)=>g.VisualIndex==i&&g.MaterialIndex==i&&g.LodMask==1).All(x=>x),"Source mapping changed");
         var sourceBanner = ReadBanner((CPlugVisualIndexedTriangles)sourceMesh.Visuals[BannerIndex]);
         Require(sourceBanner.Positions.Length==2576 && sourceBanner.Indices.Length==7341,"Banner source topology changed");
@@ -266,7 +266,7 @@ static partial class Research
                 clothEntry.Position=default;clothEntry.Rotation=Identity;
                 var timing=(NPlugDynaObjectModel_SInstanceParams)clothEntry.Params!;
                 timing.IsKinematic=false;timing.PeriodSc=timing.PeriodScMax=flight?FlightPeriod:Period;timing.Phase01=timing.Phase01Max=0;
-                clothBody.DynaShape=null;clothBody.StaticShape=null;clothBody.LocAnim=null;clothBody.LocAnimFile=null;
+                clothBody.DynaShape=null;clothBody.StaticShape=null;clothBody.LocAnim=null;if (clothBody.References.LocAnim.Descriptor is not null) clothBody.References.LocAnim.Clear();
                 Bake(clothBody.Mesh!,banner,amplitude,flight,moving);
                 expectedClothHashes=clothBody.Mesh!.Visuals!.Select(NodeHash).ToArray();
                 prefab.Ents=flight?[planeEntry,clothEntry,sourceEntries[1]]:[planeEntry,clothEntry];
@@ -372,7 +372,7 @@ static partial class Research
             v.VertexStreams[0].Positions=v.VertexStreams[0].Positions!.Select(Shift).ToArray();
             var b=v.BoundingBox;v.BoundingBox=new(b.X+FlightShiftX,b.Y,b.Z,b.X2,b.Y2,b.Z2);
         }
-        Require(body.StaticShapeFile is null&&body.DynaShapeFile is null,"Unsupported external source collision graph");
+        Require(body.References.StaticShape.File is null&&body.References.DynaShape.File is null,"Unsupported external source collision graph");
         foreach(var shape in new[]{body.StaticShape,body.DynaShape}.Where(s=>s is not null).Distinct())
         {
             Require(shape is {Surf:CPlugSurface.Mesh},"Expected inline source collision mesh");
@@ -382,7 +382,7 @@ static partial class Research
     }
     static void VerifyRigid(CPlugSolid2Model source,CPlugSolid2Model target)
     {
-        Require(target.Visuals!.Length==12&&target.CustomMaterials!.Length==source.CustomMaterials!.Length,"Rigid shape/material layout changed");
+        Require(target.Visuals!.Count==12&&target.CustomMaterials!.Length==source.CustomMaterials!.Length,"Rigid shape/material layout changed");
         Require(target.CustomMaterials.Select(m=>NodeHash(m.MaterialUserInst!)).SequenceEqual(source.CustomMaterials.Select(m=>NodeHash(m.MaterialUserInst!))),"Original rigid material serialization changed");
         var original=source.Visuals!.Where((_,i)=>i!=BannerIndex).Cast<CPlugVisualIndexedTriangles>().ToArray();
         for(var i=0;i<original.Length;i++)
@@ -458,7 +458,7 @@ static partial class Research
     }
     static void Verify(CPlugSolid2Model mesh,Banner source,float amplitude,bool flight=false,bool moving=false)
     {
-        Require(mesh.Visuals is {Length:5},"Expected complete five LODs");
+        Require(mesh.Visuals is {Count:5},"Expected complete five LODs");
         var count=source.Positions.Length;
         foreach(var v in mesh.Visuals.Cast<CPlugVisualIndexedTriangles>())
         {

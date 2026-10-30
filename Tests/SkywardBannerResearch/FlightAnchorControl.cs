@@ -42,7 +42,7 @@ static partial class Research
         var rigidBefore = NodeHash(prefab.Ents[0].Model!);
         var cloth = (CPlugDynaObjectModel)prefab.Ents[1].Model!;
         var clothMesh = cloth.Mesh!;
-        Require(clothMesh.Visuals is { Length: 5 }, "Expected five cloth LOD visuals");
+        Require(clothMesh.Visuals is { Count: 5 }, "Expected five cloth LOD visuals");
         Require(clothMesh.Visuals.All(v => v is CPlugVisualIndexedTriangles), "Unexpected cloth visual class");
         foreach (var visual in clothMesh.Visuals.Cast<CPlugVisualIndexedTriangles>())
         {

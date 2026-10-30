@@ -172,7 +172,7 @@ if (args.Contains("--summary"))
             var e = pf.Ents[i];
             if (e.Model is CPlugDynaObjectModel d)
             {
-                var vis = d.Mesh?.Visuals?.Length ?? -1;
+                var vis = d.Mesh?.Visuals?.Count ?? -1;
                 var mats = d.Mesh?.CustomMaterials?.Length ?? -1;
                 var sg = d.Mesh?.ShadedGeoms?.Length ?? -1;
                 var mver = d.Mesh is null ? "null" : (d.Mesh.Chunks.Get(0x090BB000)?.GetType().GetProperty("Version")?.GetValue(d.Mesh.Chunks.Get(0x090BB000))?.ToString() ?? "?");
@@ -191,7 +191,7 @@ if (args.Contains("--summary"))
             }
             else
             {
-                Console.WriteLine($"  ent{i} OTHER {e.Model?.GetType().Name ?? (e.ModelFile != null ? "external" : "null")}");
+                Console.WriteLine($"  ent{i} OTHER {e.Model?.GetType().Name ?? (e.References.Model.File != null ? "external" : "null")}");
             }
         }
     }

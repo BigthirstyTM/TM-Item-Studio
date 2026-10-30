@@ -28,7 +28,7 @@ public static class ItemFlagExport
     /// True to also write the placement-parameter values the vanilla flag sets (flags, cube,
     /// snapping, fly steps); false to apply only the flag's placement class.
     /// </param>
-    /// <param name="preferredId">Id to use when the item has no id of its own.</param>
+    /// <param name="preferredId">Explicit export id, or null to derive it from the source.</param>
     public static Result Export(Gbx<CGameItemModel> gbx, bool normalizePlacement = true, string? preferredId = null)
     {
         ArgumentNullException.ThrowIfNull(gbx);
@@ -40,7 +40,8 @@ public static class ItemFlagExport
         var item = working.Node ?? throw new InvalidOperationException("The item could not be reopened for export.");
 
         var existingId = item.Ident?.Id;
-        var id = FlagId(!string.IsNullOrWhiteSpace(existingId) ? existingId : preferredId ?? item.Name);
+        var id = FlagId(!string.IsNullOrWhiteSpace(preferredId) ? preferredId
+            : !string.IsNullOrWhiteSpace(existingId) ? existingId : item.Name);
 
         // The conversion refuses rather than guesses, so this may throw; nothing has been written
         // at that point and the caller keeps its document untouched.

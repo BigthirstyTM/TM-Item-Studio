@@ -1,0 +1,17 @@
+--- a/Src/GBX.NET/Engines/GameData/CGameItemModel.chunkl
++++ b/Src/GBX.NET/Engines/GameData/CGameItemModel.chunkl
+@@ -113,12 +113,12 @@
+   v3+
+     id DefaultWeaponName
+   v4+
+-    if n.References.PhyModelCustom.Kind != NodeRefKind.None
++    if (((ItemType == EItemType.Ornament || ItemType == EItemType.PickUp || ItemType == EItemType.Spot) && Version <= 8) || (ItemType == EItemType.Vehicle && Version <= 9) || (ItemType != EItemType.Ornament && ItemType != EItemType.PickUp && ItemType != EItemType.Spot && ItemType != EItemType.Vehicle && ItemType != EItemType.Block && Version <= 11)) && n.References.PhyModelCustom.Kind != NodeRefKind.None
+       int PhyModelCustomIndex (local, write: -1)
+     else
+       CMwNod PhyModelCustom
+   v5+
+-    if n.References.VisModelCustom.Kind != NodeRefKind.None
++    if (((ItemType == EItemType.Ornament || ItemType == EItemType.PickUp || ItemType == EItemType.Spot) && Version <= 8) || (ItemType == EItemType.Vehicle && Version <= 9) || (ItemType != EItemType.Ornament && ItemType != EItemType.PickUp && ItemType != EItemType.Spot && ItemType != EItemType.Vehicle && ItemType != EItemType.Block && Version <= 11)) && n.References.VisModelCustom.Kind != NodeRefKind.None
+       int VisModelCustomIndex (local, write: -1)
+     else
+       CMwNod VisModelCustom

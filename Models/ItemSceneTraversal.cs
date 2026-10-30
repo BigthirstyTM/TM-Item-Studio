@@ -130,9 +130,9 @@ public static partial class ItemScene
                             Node(editionPath, path, item.EntityModelEdition, ItemSceneKind.Entity,
                                 world.HasValue ? ItemSceneState.Present : ItemSceneState.Invalid,
                                 Matrix4x4.Identity, world);
-                            if (item.EntityModelEdition is CGameCommonItemEntityModelEdition edition)
+                            if (item.EntityModelEdition is CGameCommonItemEntityModelEdition edition && item.EntityModel is null)
                                 Edition(edition, editionPath, world, entry, depth + 1);
-                            else
+                            else if (item.EntityModelEdition is not CGameCommonItemEntityModelEdition)
                                 Issue(editionPath, "edition-model-type", ItemSceneState.Unsupported,
                                     $"Unsupported item edition type: {item.EntityModelEdition.GetType().Name}.");
                         }

@@ -29,7 +29,7 @@ internal static class FlagMaterialIsolation
             var matChunk = mat.Chunks.OfType<CPlugMaterial.Chunk09079015>().SingleOrDefault();
             if (matChunk is not null) { matChunk.U03 = []; matChunk.U04 = null; }
             if (mode == "NativeNullShader")
-            { mat.ShaderFile = null; mat.Shader = null; mat.DeviceMaterials = []; }
+            { if (mat.References.Shader.Descriptor is not null) mat.References.Shader.Clear(); mat.Shader = null; mat.DeviceMaterials = []; }
             if (mode is "ParentNullShaders" or "CurrentNativeParent" or "CurrentNativeShader")
             {
                 var parent = Gbx.Parse<CPlugMaterial>(Data + "Techno3/Media/Material/Tech3_Warp_TDiffSpec_VertexTween.Material.gbx").Node;
@@ -37,20 +37,20 @@ internal static class FlagMaterialIsolation
                 parent.CustomMaterial = null;
                 foreach (var dev in parent.DeviceMaterials!)
                 {
-                    dev.Shader1File = null; dev.Shader2File = null; dev.Shader3File = null;
+                    if (dev.References.Shader1.Descriptor is not null) dev.References.Shader1.Clear(); if (dev.References.Shader2.Descriptor is not null) dev.References.Shader2.Clear(); if (dev.References.Shader3.Descriptor is not null) dev.References.Shader3.Clear();
                     if (mode != "ParentNullShaders")
                     {
                         var shader = Gbx.Parse<CPlugShaderApply>(Data + "Techno3/Media/Shader/Tech3_Warp_TDiffSpec_VertexTween.Shader.Gbx").Node;
                         if (mode == "CurrentNativeParent")
-                            dev.Shader1File = dev.Shader2File = dev.Shader3File = Ref("GameData/Techno3/Media/Shader/Tech3_Warp_TDiffSpec_VertexTween.Shader.Gbx");
+                            dev.References.Shader1.Descriptor = dev.References.Shader2.Descriptor = dev.References.Shader3.Descriptor = Ref("GameData/Techno3/Media/Shader/Tech3_Warp_TDiffSpec_VertexTween.Shader.Gbx");
                         else dev.Shader1 = dev.Shader2 = dev.Shader3 = shader;
                     }
                 }
-                mat.Shader = parent; mat.ShaderFile = null;
+                mat.Shader = parent; if (mat.References.Shader.Descriptor is not null) mat.References.Shader.Clear();
             }
             if (mode == "CurrentNativeMaterial")
-                mat.ShaderFile = Ref("GameData/Techno3/Media/Material/Tech3_Warp_TDiffSpec_VertexTween.Material.gbx");
-            mesh.Materials = [new External<CPlugMaterial>(mat, null)];
+                mat.References.Shader.Descriptor = Ref("GameData/Techno3/Media/Material/Tech3_Warp_TDiffSpec_VertexTween.Material.gbx");
+            mesh.Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(mat, null) };
             mesh.CustomMaterials = null; mesh.MaterialInsts = null; mesh.MaterialIds = [];
             var path = Path.Combine(folder, "TMIS_Isolate_" + mode + ".Item.Gbx");
             new ReferenceTableDocument(item, table).Save(path);

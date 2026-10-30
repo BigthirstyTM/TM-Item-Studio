@@ -15,7 +15,10 @@
     "test:helper-coverage": "node helper-coverage.cjs",
     "test:icon-pipeline": "node icon-pipeline.cjs",
     "test:native-fixtures": "node native-export-fixtures.cjs",
-    "test:fx-visibility": "node fx-visibility.cjs"
+    "test:fx-visibility": "node fx-visibility.cjs",
+    "test:searchable-materials": "node searchable-materials.cjs"
   },
-  "devDependencies": { "playwright": "1.61.1" }
+  "devDependencies": {
+    "playwright": "1.61.1"
+  }
 }

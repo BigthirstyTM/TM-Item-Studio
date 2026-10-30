@@ -377,7 +377,7 @@ internal static class FlagMaterialRemapShapes
             var sourceBytes = File.ReadAllBytes(Path.Combine(shapeFolder, source));
             var sourceItem = Gbx.Parse<CGameItemModel>(new MemoryStream(sourceBytes)).Node;
             var sourceVisuals = Mesh(sourceItem).Visuals!;
-            Require(sourceVisuals.Length == 5, "Expected five source shape visuals");
+            Require(sourceVisuals.Count == 5, "Expected five source shape visuals");
             var sourceVisualHashes = VisualHashes(Mesh(sourceItem));
             var doc = Gbx.Parse<CGameItemModel>(new MemoryStream(candidateBytes));
             var item = doc.Node;
@@ -505,10 +505,10 @@ internal static class FlagMaterialRemapShapes
     {
         Require(doc.RefTable?.AncestorLevel == 0 && doc.RefTable.Files.Count == 2 && doc.RefTable.Resources.Count == 0,
             "Expected the unchanged v6 sibling dependency graph");
-        Require(Mesh(doc.Node).Materials is { Length: 1 } && Mesh(doc.Node).Materials![0].File?.FilePath == Placeholder
-            && Mesh(doc.Node).Materials![0].File?.UseFile == false && doc.Node.MaterialModifierFile?.FilePath == Modifier
-            && doc.Node.MaterialModifierFile?.UseFile == false, "v6 material/modifier references changed");
-        Require((Mesh(doc.Node).CustomMaterials?.Length ?? 0) == 0 && (Mesh(doc.Node).MaterialInsts?.Length ?? 0) == 0,
+        Require(Mesh(doc.Node).Materials is { Count: 1 } && Mesh(doc.Node).Materials!.Get(0).File?.FilePath == Placeholder
+            && Mesh(doc.Node).Materials!.Get(0).File?.UseFile == false && doc.Node.References.MaterialModifier.File?.FilePath == Modifier
+            && doc.Node.References.MaterialModifier.File?.UseFile == false, "v6 material/modifier references changed");
+        Require((Mesh(doc.Node).CustomMaterials?.Length ?? 0) == 0 && (Mesh(doc.Node).MaterialInsts?.Count ?? 0) == 0,
             "Unexpected late material route");
     }
     static object Quality(CPlugVisualIndexedTriangles v, int lod)

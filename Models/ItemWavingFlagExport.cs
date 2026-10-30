@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Reflection;
@@ -517,7 +517,7 @@ public static class ItemWavingFlagExport
                 var ix = v.IndexBuffer?.Indices;
                 if (count < 3 || ix is not { Length: > 0 } || ix.Length % 3 != 0 || ix.Any(i => i < 0 || i >= count)) throw new NotSupportedException("Source triangle indices are missing, incomplete or outside the vertex buffer.");
                 if (positions.Count + count > MaximumSourceVertices || indices.Count / 3 + ix.Length / 3 > MaximumSourceTriangles) throw new NotSupportedException($"Source exceeds the {MaximumSourceVertices}-vertex/{MaximumSourceTriangles}-triangle animation budget.");
-                if (v.Vertices.Any(p => !Finite(V(p.Position)) || p.U02 is not null || p.U03 is not null || p.U08 is not null || p.U09 is not null)) throw new NotSupportedException("Source positions or optional vertex attributes are unsupported/nonfinite.");
+                if (v.Vertices.Any(p => !Finite(V(p.Position)) || (p.Color is {} color && (!float.IsFinite(color.X) || !float.IsFinite(color.Y) || !float.IsFinite(color.Z) || !float.IsFinite(color.W))) || p.U08 is not null || p.U09 is not null)) throw new NotSupportedException("Source positions or optional vertex attributes are unsupported/nonfinite.");
                 if (v.TexCoords.Length is < 1 or > 4 || v.TexCoords.Any(c => c is null || c.TexCoords.Length != count || c.U01 is { Length: > 0 }
                     || c.TexCoords.Any(t => !float.IsFinite(t.UV.X) || !float.IsFinite(t.UV.Y) || t.U01 is not null || t.U02 is not null)))
                     throw new NotSupportedException("Source requires one to four complete finite UV channels without auxiliary UV payloads.");
@@ -616,7 +616,7 @@ public static class ItemWavingFlagExport
     }
     private static void ValidateReferences(Gbx<CGameItemModel> document)
     {
-        Require(document.Node.Ident?.Id == "" && document.Node.ArchetypeRef == "" && document.RefTable?.AncestorLevel == 0
+        Require(ItemStoredIdentity.Read(document.Node).Id == "" && document.Node.ArchetypeRef == "" && document.RefTable?.AncestorLevel == 0
             && document.RefTable.Files.Select(f => f.FilePath).SequenceEqual(new[] { Placeholder, Modifier })
             && document.RefTable.Files.All(f => f.Flags == 1 && !f.UseFile) && document.Node.References.MaterialModifier.File?.FilePath == Modifier,
             "The sibling-node material/modifier references or ordinary user identity changed.");
@@ -704,3 +704,18 @@ public static class ItemWavingFlagExport
 
 
 
+
+/// <summary>Read serialized identity without GBX.NET 2.5's display-name fallback.</summary>
+public static class ItemStoredIdentity
+{
+    public static Ident Read(CGameItemModel item)
+    {
+        using var output = new MemoryStream();
+        using (var writer = new GBX.NET.Serialization.GbxWriter(output))
+        using (var rw = new GBX.NET.Serialization.GbxReaderWriter(writer))
+            new CGameCtnCollector.Chunk2E00100B().ReadWrite(item, rw);
+        using var input = new MemoryStream(output.ToArray());
+        using var reader = new GBX.NET.Serialization.GbxReader(input);
+        return reader.ReadIdent();
+    }
+}

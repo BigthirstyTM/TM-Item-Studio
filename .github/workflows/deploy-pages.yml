@@ -16,7 +16,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate:
+    uses: ./.github/workflows/tests.yml
+
   build:
+    needs: validate
     runs-on: ubuntu-latest
 
     steps:
@@ -42,7 +46,7 @@ jobs:
           cp -r publish/wwwroot/. site
           sed -i 's|<base href="/" />|<base href="/TM-Item-Studio/" />|g' site/index.html
           sed -i 's|_framework/blazor.webassembly.js|_framework/blazor.webassembly.js?v=${{ github.sha }}|g' site/index.html
-          sed -i 's|js/meshViewer.js?v=12|js/meshViewer.js?v=${{ github.sha }}|g' site/index.html
+          sed -i -E 's|js/meshViewer.js\?v=[^" ]+|js/meshViewer.js?v=${{ github.sha }}|g' site/index.html
           cp site/index.html site/404.html
           touch site/.nojekyll
 
