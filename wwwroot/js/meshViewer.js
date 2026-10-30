@@ -18,6 +18,7 @@ let hasAutoFramedScene = false;
 let compositeSelectionHelpers = [], compositeGroupHelpers = [];
 let drawPathEnabled = false, drawPathPlaneY = 0, drawPathPoints = [];
 let drawPathLine = null, drawPathPointMarkers = [];
+let drawPathDraft = null, drawPathDragIndex = -1, drawPathRepeat = 'Closed';
 let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
 const pooledGeometry = new WeakSet();
@@ -969,18 +970,21 @@ function clearDrawPathVisual() {
 function renderDrawPathVisual() {
     clearDrawPathVisual();
     if (!waypointsGroup || drawPathPoints.length === 0) return;
+    const pointRadius = Math.max(.12, markerScaleForBounds(new THREE.Box3().setFromPoints(drawPathPoints)) * .5);
     for (let i = 0; i < drawPathPoints.length; i++) {
         const point = drawPathPoints[i];
         const marker = new THREE.Mesh(
-            new THREE.SphereGeometry(i === 0 ? 0.18 : 0.12, 16, 16),
+            new THREE.SphereGeometry(i === 0 ? pointRadius * 1.5 : pointRadius, 16, 16),
             new THREE.MeshBasicMaterial({ color: i === 0 ? 0x16a34a : 0xf97316 }));
         marker.position.copy(point);
+        marker.userData.drawPathIndex = i;
         drawPathPointMarkers.push(marker);
         waypointsGroup.add(marker);
     }
     if (drawPathPoints.length > 1) {
         drawPathLine = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(drawPathPoints),
+            new THREE.BufferGeometry().setFromPoints(drawPathRepeat === 'Closed' && drawPathPoints.length > 2
+                ? [...drawPathPoints, drawPathPoints[0]] : drawPathPoints),
             new THREE.LineBasicMaterial({ color: 0xfb7185 }));
         drawPathLine.name = 'drawPathPreview';
         waypointsGroup.add(drawPathLine);
@@ -1173,8 +1177,14 @@ window.init3DViewer = function (containerId, dotNetRef) {
         mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
         raycaster.setFromCamera(mouse, camera);
         if (drawPathEnabled) {
+            const hit = raycaster.intersectObjects(drawPathPointMarkers, false)[0];
+            if (hit) {
+                drawPathDragIndex = hit.object.userData.drawPathIndex;
+                renderer.domElement.setPointerCapture(event.pointerId);
+                return;
+            }
             const point = pickDrawPoint(raycaster);
-            if (point && point.length() <= 10000 && drawPathPoints.length < 5
+            if (point && point.length() <= 10000 && drawPathPoints.length < 9
                 && (!drawPathPoints.length || point.distanceTo(drawPathPoints.at(-1)) >= .01)) {
                 drawPathPoints.push(point);
                 renderDrawPathVisual();
@@ -1203,6 +1213,21 @@ window.init3DViewer = function (containerId, dotNetRef) {
         selectGizmo(null);
         selectMeshObject(null, true, false, false);
     });
+    renderer.domElement.addEventListener('pointermove', event => {
+        if (drawPathDragIndex < 0) return;
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
+        raycaster.setFromCamera(mouse, camera);
+        const point = pickDrawPoint(raycaster);
+        if (point && point.length() <= 10000) { drawPathPoints[drawPathDragIndex].copy(point); renderDrawPathVisual(); }
+    });
+    const finishPathDrag = () => {
+        if (drawPathDragIndex < 0) return;
+        drawPathDragIndex = -1;
+        dotNetHelper?.invokeMethodAsync('OnDrawPathChanged');
+    };
+    renderer.domElement.addEventListener('pointerup', finishPathDrag);
+    renderer.domElement.addEventListener('pointercancel', finishPathDrag);
     const ambient = new THREE.AmbientLight(0xffffff, .5); ambient.userData.studioDefaultLight = true; scene.add(ambient);
     const light = new THREE.DirectionalLight(0xffffff, .7); light.userData.studioDefaultLight = true; light.position.set(30, 50, 30); scene.add(light);
     const gridGroup = new THREE.Group();
@@ -1239,6 +1264,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
         lastFrameTime = timestamp;
         if (isPlaying) animTime += delta * animSpeed;
         applyAnimatedCloth(); applyTypedMotion(); applyLegacyMotion(); applyAnimatedMaterialTextures(); syncFlagAnchorObject();
+        applyDrawPathPreview(timestamp);
         if (activeMeshHelper) activeMeshHelper.update();
         if (selectedMeshHelper) selectedMeshHelper.update();
         controls.update(); renderer.render(scene, camera);
@@ -1309,8 +1335,10 @@ function disposeObjectResources(root) {
     textures.forEach(texture => texture.dispose());
 }
 window.dispose3DViewer = function () {
+    window.stopDrawPathPreview();
     drawPathEnabled = false;
     drawPathPoints = [];
+    drawPathDragIndex = -1;
     viewportSelectionQueue = Promise.resolve();
     window.disposeStudioMood?.();
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
@@ -1972,6 +2000,7 @@ function releaseGeometryPool() {
     sharedGeometry.forEach(g => g.dispose()); sharedGeometry.clear(); geometryEpoch = null;
 }
 window.clearViewerScene = function (keepGeometry = false) {
+    window.stopDrawPathPreview();
     transformControls?.detach(); selectedGizmo = null;
     selectedMeshObject = null;
     selectedMeshPath = null;
@@ -2003,12 +2032,86 @@ window.setDrawPathMode = function (enabled, planeY, plane = 'XZ') {
     return drawPathEnabled;
 };
 window.undoDrawnPathPoint = function () { drawPathPoints.pop(); renderDrawPathVisual(); };
+window.setDrawPathRepeat = function (repeat) { drawPathRepeat = repeat; renderDrawPathVisual(); };
 window.setDrawnPathPoints = function (points) {
-    if (!Array.isArray(points) || points.length > 5 || points.some(p => ![p.x,p.y,p.z].every(Number.isFinite)
+    if (!Array.isArray(points) || points.length > 9 || points.some(p => ![p.x,p.y,p.z].every(Number.isFinite)
         || Math.hypot(p.x,p.y,p.z) > 10000)) throw new Error('Invalid path coordinates.');
     drawPathPoints = points.map(p => new THREE.Vector3(p.x,p.y,p.z));
     renderDrawPathVisual();
 };
+function drawPathSource() {
+    if (drawPathDraft) return drawPathDraft.source;
+    let best = null, size = 0;
+    for (const motion of typedMotions) {
+        const group = motionGroups.get(motion.childPath)?.[0];
+        if (!group) continue;
+        const box = new THREE.Box3();
+        group.updateWorldMatrix(true, true);
+        const inverse = group.matrixWorld.clone().invert();
+        group.traverse(mesh => {
+            if (mesh.isMesh && mesh.geometry?.boundingBox)
+                box.union(mesh.geometry.boundingBox.clone().applyMatrix4(inverse.clone().multiply(mesh.matrixWorld)));
+        });
+        const diagonal = box.getSize(new THREE.Vector3()).length();
+        if (diagonal > size) { size = diagonal; best = { group, box, rest: motion.childRest.clone() }; }
+    }
+    if (best) return best;
+    const group = staticGroup;
+    group.updateWorldMatrix(true, true);
+    return { group, box: new THREE.Box3().setFromObject(group), rest: new THREE.Matrix4() };
+}
+window.getDrawPathAnchor = function (center) {
+    const point = center ? drawPathSource().box.getCenter(new THREE.Vector3()) : new THREE.Vector3();
+    return { x: point.x, y: point.y, z: point.z };
+};
+window.stopDrawPathPreview = function () {
+    if (!drawPathDraft) return;
+    drawPathDraft.source.group.visible = drawPathDraft.wasVisible;
+    scene?.remove(drawPathDraft.ghost);
+    // Clones share source geometry/materials: never dispose those resources here.
+    drawPathDraft = null;
+};
+window.previewDrawPath = function (plan, center) {
+    const firstPreview = !drawPathDraft;
+    const source = drawPathSource();
+    window.stopDrawPathPreview();
+    const ghost = source.group.clone(true);
+    ghost.matrixAutoUpdate = false;
+    ghost.visible = true;
+    ghost.name = 'drawPathDraft';
+    const rotation = new THREE.Quaternion();
+    source.rest.decompose(new THREE.Vector3(), rotation, new THREE.Vector3());
+    if (plan.obstacle) rotation.setFromUnitVectors(new THREE.Vector3(1,0,0), new THREE.Vector3(...['x','y','z'].map(k=>plan.legs[0].delta[k])).normalize());
+    const anchor = center ? source.box.getCenter(new THREE.Vector3()) : new THREE.Vector3();
+    const wasVisible = source.group.visible;
+    source.group.visible = false;
+    scene.add(ghost);
+    drawPathDraft = { source, ghost, wasVisible, plan, rotation, anchor, started: performance.now() };
+    applyDrawPathPreview(drawPathDraft.started);
+    if (firstPreview) window.fitDrawPath();
+};
+window.fitDrawPath = function () {
+    if (!drawPathPoints.length) return;
+    const bounds = new THREE.Box3().setFromPoints(drawPathPoints);
+    const radius = drawPathSource().box.getSize(new THREE.Vector3()).length() / 2;
+    bounds.expandByScalar(Math.max(radius, 1));
+    frameCamera(bounds);
+};
+function applyDrawPathPreview(timestamp) {
+    if (!drawPathDraft) return;
+    const { ghost, plan, rotation, anchor, started } = drawPathDraft;
+    const t = (timestamp - started) % plan.durationMs;
+    const position = new THREE.Vector3(plan.start.x,plan.start.y,plan.start.z);
+    for (const leg of plan.legs) {
+        const x = Math.max(0,Math.min(1,(t-leg.startMs)/leg.moveMs));
+        const u = plan.ease === 2 ? x*x : plan.ease === 3 ? x*(2-x)
+            : plan.ease === 4 ? (x < .5 ? 2*x*x : 1-2*(1-x)*(1-x)) : x;
+        position.addScaledVector(new THREE.Vector3(leg.delta.x,leg.delta.y,leg.delta.z),u);
+    }
+    position.sub(anchor.clone().applyQuaternion(rotation));
+    ghost.matrix.compose(position,rotation,new THREE.Vector3(1,1,1));
+    ghost.matrixWorldNeedsUpdate = true;
+}
 window.clearDrawnPath = function () {
     drawPathPoints = [];
     renderDrawPathVisual();

@@ -21,7 +21,7 @@ public sealed record MotionPathPlan(Vector3 Start, MotionPathUse Use, MotionPath
 public static class ItemMotionPath
 {
     // A tested product bound, distinct from the engine's FOUR KEYS PER CHANNEL limit.
-    public const int MaxLegs = 4;
+    public const int MaxLegs = 8;
 
     public static ItemMotionResult<MotionPathPlan> Plan(IReadOnlyList<Vector3> points,
         MotionPathUse use, MotionPathRepeat repeat, float speed, KC.AnimEase ease, int pauseMs = 0)
@@ -57,10 +57,10 @@ public static class ItemMotionPath
         return ItemMotionResult<MotionPathPlan>.Ok(new(points[0], use, repeat, ease, legs.AsReadOnly(), (int)elapsed, pauseMs));
     }
 
-    public static ItemMotionResult<CPlugPrefab> Build(CPlugPrefab original, MotionPathPlan plan)
+    public static ItemMotionResult<CPlugPrefab> Build(CPlugPrefab original, MotionPathPlan plan, Vector3 anchor = default)
     {
         ItemMotionResult<CPlugPrefab> Fail(string reason) => ItemMotionResult<CPlugPrefab>.Fail(ItemMotionStatus.Unsupported, reason);
-        if (!Enum.IsDefined(plan.Use) || !Enum.IsDefined(plan.Repeat) || !Finite(plan.Start)
+        if (!Finite(anchor) || anchor.Length() > 10000 || !Enum.IsDefined(plan.Use) || !Enum.IsDefined(plan.Repeat) || !Finite(plan.Start)
             || plan.Start.Length() > 10000 || plan.PauseMs < 0 || plan.PauseMs > 60000
             || plan.Ease is not (KC.AnimEase.Linear or KC.AnimEase.QuadIn or KC.AnimEase.QuadOut or KC.AnimEase.QuadInOut)
             || plan.Legs is null || plan.Legs.Count is < 1 or > MaxLegs || plan.DurationMs <= 0)
@@ -141,6 +141,9 @@ public static class ItemMotionPath
             }
             newEntries.Add(Constraint(plan.Legs.Count, 0, 0, [Key(KC.AnimEase.Constant, plan.DurationMs)], plan.DurationMs, (KC)oldConstraint.Model!));
         }
+        var rotation = body.Rotation;
+        var anchorOffset = Vector3.Transform(anchor, new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
+        body.Position = new(plan.Start.X - anchorOffset.X, plan.Start.Y - anchorOffset.Y, plan.Start.Z - anchorOffset.Z);
         prefab.Ents = newEntries.ToArray();
         return ItemMotionResult<CPlugPrefab>.Ok(prefab);
     }

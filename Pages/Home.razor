@@ -696,31 +696,31 @@
                     <div class="@(authoredConstraints.Count > 0 ? "authored-motion-shell" : "card p-3 bg-light mb-3")">
                         <details class="card p-2 mb-3" data-testid="draw-motion-path">
                             <summary class="fw-bold">Draw motion path</summary>
-                            <p class="small text-muted mt-2">Click points on the selected drawing plane, or enter their coordinates. The first point is the moving body's origin. Right-drag to orbit the camera.</p>
+                            <p class="small text-muted mt-2">Click points on the selected drawing plane, or enter their coordinates. Preview the route before applying it. Choose whether the mesh centre or body origin follows the points. Right-drag to orbit the camera.</p>
                             <div class="row g-2 small">
                                 <div class="col-12"><label class="form-label" for="pathUse">Use</label>
-                                    <select id="pathUse" aria-label="Path use" title="Choose a straight obstacle with driven collision or a scenery polyline." class="form-select form-select-sm" @bind="drawPathUse">
+                                    <select id="pathUse" aria-label="Path use" title="Choose a straight obstacle with driven collision or a scenery polyline." class="form-select form-select-sm" @bind="drawPathUse" @bind:after="RefreshDrawPathPreview">
                                         <option value="@MotionPathUse.Obstacle">Obstacle / platform — straight line</option>
                                         <option value="@MotionPathUse.Scenery">Scenery — polyline, no usable collision</option>
                                     </select>
                                 </div>
                                 <div class="col-6"><label class="form-label" for="pathRepeat">Repeat</label>
-                                    <select id="pathRepeat" aria-label="Path repeat" title="Return along the route, close the loop, or jump to its start." class="form-select form-select-sm" @bind="drawPathRepeat">
+                                    <select id="pathRepeat" aria-label="Path repeat" title="Return along the route, close the loop, or jump to its start." class="form-select form-select-sm" @bind="drawPathRepeat" @bind:after="RefreshDrawPathPreview">
                                         <option value="@MotionPathRepeat.PingPong">Return along path</option>
                                         <option value="@MotionPathRepeat.Closed">Close loop</option>
                                         <option value="@MotionPathRepeat.Reset">Jump to start</option>
                                     </select>
                                 </div>
                                 <div class="col-6"><label class="form-label" for="pathEase">Movement</label>
-                                    <select id="pathEase" aria-label="Path movement" title="Choose the speed profile used separately on each leg." class="form-select form-select-sm" @bind="drawPathEase">
+                                    <select id="pathEase" aria-label="Path movement" title="Choose the speed profile used separately on each leg." class="form-select form-select-sm" @bind="drawPathEase" @bind:after="RefreshDrawPathPreview">
                                         <option value="@KC.AnimEase.Linear">Constant speed</option>
                                         <option value="@KC.AnimEase.QuadInOut">Ease in and out</option>
                                         <option value="@KC.AnimEase.QuadIn">Ease in</option>
                                         <option value="@KC.AnimEase.QuadOut">Ease out</option>
                                     </select>
                                 </div>
-                                <div class="col-6"><label class="form-label" for="pathSpeed">Average speed (m/s)</label><input id="pathSpeed" aria-label="Path average speed" title="Average speed during each moving leg in metres per second." type="number" min="0.1" max="1000" step="0.1" class="form-control form-control-sm" @bind="drawPathMetersPerSecond" /></div>
-                                <div class="col-6"><label class="form-label" for="pathPause">Pause at points (ms)</label><input id="pathPause" aria-label="Path waypoint pause" title="Wait at each waypoint in milliseconds." type="number" min="0" max="60000" step="100" class="form-control form-control-sm" @bind="drawPathPauseMs" /></div>
+                                <div class="col-6"><label class="form-label" for="pathSpeed">Average speed (m/s)</label><input id="pathSpeed" aria-label="Path average speed" title="Average speed during each moving leg in metres per second." type="number" min="0.1" max="1000" step="0.1" class="form-control form-control-sm" @bind="drawPathMetersPerSecond" @bind:after="RefreshDrawPathPreview" /></div>
+                                <div class="col-6"><label class="form-label" for="pathPause">Pause at points (ms)</label><input id="pathPause" aria-label="Path waypoint pause" title="Wait at each waypoint in milliseconds." type="number" min="0" max="60000" step="100" class="form-control form-control-sm" @bind="drawPathPauseMs" @bind:after="RefreshDrawPathPreview" /></div>
                                 <div class="col-6"><label class="form-label" for="pathPlane">Drawing plane</label>
                                     <select id="pathPlane" aria-label="Drawing plane" title="Choose the plane on which mouse clicks place route points." class="form-select form-select-sm" @bind="drawPathPlane" @bind:after="UpdateDrawPlane">
                                         <option value="XZ">XZ — horizontal</option><option value="XY">XY — vertical</option><option value="YZ">YZ — vertical</option>
@@ -730,18 +730,27 @@
                             </div>
                             <p class="small text-warning mt-2 mb-2">@(drawPathUse == MotionPathUse.Obstacle
                                 ? "Exactly two points. Aligns the model's local X axis with the line; this can rotate the model. Collision stays directly driven. Test your exported geometry in Trackmania."
-                                : "Keeps the model orientation. Up to four legs including the return. Removes the moving body?s full-size collider; static parts remain: parent-driven collision does not follow this path in Trackmania.")</p>
+                                : "Keeps the model orientation. Up to eight legs including the return. Removes the moving body's full-size collider; static parts remain: parent-driven collision does not follow this path in Trackmania.")</p>
                             <div class="d-flex flex-wrap gap-1 mb-2">
                                 <button class="btn btn-sm btn-outline-primary" @onclick="ToggleDrawPathCapture" aria-label="@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")" title="Place points by clicking the selected plane. Right-drag orbits the camera.">@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")</button>
                                 <button class="btn btn-sm btn-outline-secondary" @onclick="UndoDrawPath" aria-label="Undo point" title="Remove the last drawn point without changing applied motion.">Undo point</button>
                                 <button class="btn btn-sm btn-outline-secondary" @onclick="ClearDrawPath" aria-label="Clear points" title="Clear route points without changing applied motion.">Clear points</button>
                             </div>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <select class="form-select form-select-sm" aria-label="Path anchor" title="Choose the point of the moving mesh that follows the route." @bind="drawPathAnchorMode" @bind:after="RefreshDrawPathPreview">
+                                    <option value="centre">Mesh centre follows path</option><option value="origin">Body origin follows path</option>
+                                </select>
+                                <button class="btn btn-sm btn-success" aria-label="Preview path" title="Play the route without modifying or converting the item." @onclick="PreviewDrawPath">Preview path</button>
+                                <button class="btn btn-sm btn-outline-secondary" aria-label="Stop path preview" title="Stop the draft animation and restore the item's own motion." @onclick="StopDrawPathPreview">Stop preview</button>
+                                <button class="btn btn-sm btn-outline-secondary" aria-label="Fit path in view" title="Frame the entire drawn route and moving mesh." @onclick="FitDrawPath">Fit path</button>
+                            </div>
+                            <small class="d-block text-muted mb-2">While drawing, drag an orange point to move it. Preview updates when a point or setting changes. The draft does not change the exported item until Apply path.</small>
                             <label class="form-label small" for="pathCoordinates">Points: one X Y Z per line (metres, decimal point)</label>
                             <textarea id="pathCoordinates" aria-label="Path coordinates" title="Enter one X Y Z position per line, then choose Use coordinates." class="form-control form-control-sm font-monospace" rows="4" @bind="drawPathCoordinates" placeholder="X Y Z (one point per line)"></textarea>
                             <div class="d-flex flex-wrap gap-1 mt-2">
                                 <button class="btn btn-sm btn-outline-secondary" @onclick="ApplyPathCoordinates" aria-label="Use coordinates" title="Validate coordinates and replace the drawn points.">Use coordinates</button>
                                 <button class="btn btn-sm btn-primary" @onclick="ConvertDrawnPathToMotion" aria-label="Apply path" title="Compile the route into native item movement." disabled="@compositeViewportMode">Apply path</button>
-                                @if (drawPathOriginal is not null) { <button class="btn btn-sm btn-outline-secondary" @onclick="RestoreMotionBeforePath" aria-label="Restore previous motion" title="Restore the item from before this session?s generated path.">Restore previous motion</button> }
+                                @if (drawPathOriginal is not null) { <button class="btn btn-sm btn-outline-secondary" @onclick="RestoreMotionBeforePath" aria-label="Restore previous motion" title="Restore the item from before this session's generated path.">Restore previous motion</button> }
                             </div>
                             <small class="text-muted mt-1">Apply replaces the previous generated path. Manual coordinates need “Use coordinates” first. Combined-file view is not editable here.</small>
                             @if (!string.IsNullOrWhiteSpace(drawPathStatusMessage)) { <div class="small text-info mt-2">@drawPathStatusMessage</div> }
@@ -2098,9 +2107,11 @@ else if (itemModel is null)
     private bool pathIsPingPong = true;
     private string? pathStatusMessage;
     private bool drawPathCaptureEnabled;
+    private string drawPathAnchorMode = "centre";
+    private bool drawPathPreviewActive;
     private float drawPathMetersPerSecond = 4f;
-    private MotionPathUse drawPathUse = MotionPathUse.Obstacle;
-    private MotionPathRepeat drawPathRepeat = MotionPathRepeat.PingPong;
+    private MotionPathUse drawPathUse = MotionPathUse.Scenery;
+    private MotionPathRepeat drawPathRepeat = MotionPathRepeat.Closed;
     private KC.AnimEase drawPathEase = KC.AnimEase.Linear;
     private int drawPathPauseMs;
     private string drawPathPlane = "XZ";
@@ -2631,6 +2642,7 @@ else if (itemModel is null)
     {
         drawPathOriginal = drawPathGenerated = null;
         drawPathBefore = null;
+        drawPathPreviewActive = false;
         drawPathCaptureEnabled = false;
         drawPathCoordinates = "";
         drawPathStatusMessage = null;
@@ -3076,13 +3088,15 @@ else if (itemModel is null)
     }
     private async Task ClearDrawPath()
     {
+        errorMessage = null;
         await JS.InvokeVoidAsync("clearDrawnPath");
+        await StopDrawPathPreview();
         drawPathCoordinates = "";
         drawPathStatusMessage = "Points cleared; the applied motion is unchanged.";
     }
-    private async Task UndoDrawPath() { await JS.InvokeVoidAsync("undoDrawnPathPoint"); await ReadDrawPathCoordinates(); }
+    private async Task UndoDrawPath() { await JS.InvokeVoidAsync("undoDrawnPathPoint"); await ReadDrawPathCoordinates(); await RefreshDrawPathPreview(); }
     [JSInvokable]
-    public async Task OnDrawPathChanged() { await ReadDrawPathCoordinates(); StateHasChanged(); }
+    public async Task OnDrawPathChanged() { await ReadDrawPathCoordinates(); await RefreshDrawPathPreview(); StateHasChanged(); }
     private async Task ReadDrawPathCoordinates()
     {
         var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
@@ -3101,10 +3115,39 @@ else if (itemModel is null)
             { errorMessage = "Enter finite X Y Z coordinates on each line, using a decimal point, within 10,000 m of the origin."; return; }
             points.Add(new() { X=x, Y=y, Z=z });
         }
-        if (points.Count > ItemMotionPath.MaxLegs + 1) { errorMessage = "Use at most five points."; return; }
+        if (points.Count > ItemMotionPath.MaxLegs + 1) { errorMessage = "Use at most nine points."; return; }
         await JS.InvokeVoidAsync("setDrawnPathPoints", points);
         errorMessage = null;
-        drawPathStatusMessage = $"{points.Count} points ready. Apply path to update the item.";
+        drawPathStatusMessage = $"{points.Count} points ready. Preview or apply the path.";
+        await RefreshDrawPathPreview();
+    }
+    private async Task RefreshDrawPathPreview()
+    {
+        await JS.InvokeVoidAsync("setDrawPathRepeat", drawPathRepeat.ToString());
+        if (drawPathPreviewActive) await PreviewDrawPath();
+    }
+    private Task FitDrawPath() => JS.InvokeVoidAsync("fitDrawPath").AsTask();
+    private async Task StopDrawPathPreview()
+    {
+        drawPathPreviewActive = false;
+        await JS.InvokeVoidAsync("stopDrawPathPreview");
+    }
+    private async Task PreviewDrawPath()
+    {
+        if (itemModel is null || compositeViewportMode) return;
+        var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
+        var planned = ItemMotionPath.Plan(points.Select(p => new Vector3(p.X,p.Y,p.Z)).ToArray(), drawPathUse, drawPathRepeat,
+            drawPathMetersPerSecond, drawPathEase, drawPathPauseMs);
+        if (!planned.Success) { await StopDrawPathPreview(); errorMessage = planned.Reason; return; }
+        var plan = planned.Value!;
+        await JS.InvokeVoidAsync("previewDrawPath", new {
+            start = new { x=plan.Start.X, y=plan.Start.Y, z=plan.Start.Z },
+            legs = plan.Legs.Select(l => new { delta = new { x=l.Delta.X,y=l.Delta.Y,z=l.Delta.Z }, l.StartMs,l.MoveMs }),
+            plan.DurationMs, ease=(int)plan.Ease, obstacle=plan.Use == MotionPathUse.Obstacle
+        }, drawPathAnchorMode == "centre");
+        drawPathPreviewActive = true;
+        errorMessage = null;
+        drawPathStatusMessage = $"Draft preview: {plan.Legs.Count} legs, {plan.DurationMs/1000d:0.###} s. Item unchanged until Apply path.";
     }
     private async Task ConvertDrawnPathToMotion()
     {
@@ -3124,8 +3167,10 @@ else if (itemModel is null)
             candidate = converted.Value!.EntityModel as CPlugPrefab;
         }
         if (candidate is null) { errorMessage = "This item does not expose a supported root prefab."; return; }
-        var built = ItemMotionPath.Build(candidate, planned.Value!);
+        var anchor = await JS.InvokeAsync<DrawPathPointDto>("getDrawPathAnchor", drawPathAnchorMode == "centre");
+        var built = ItemMotionPath.Build(candidate, planned.Value!, new Vector3(anchor.X,anchor.Y,anchor.Z));
         if (!built.Success) { errorMessage = built.Reason; return; }
+        await StopDrawPathPreview();
         if (!ReferenceEquals(itemModel.EntityModel, drawPathGenerated)) drawPathBefore = itemModel.EntityModel;
         drawPathOriginal = candidate;
         drawPathGenerated = built.Value;

@@ -709,7 +709,7 @@ Check("drawn path planner validates shape, repeat budget, speed and finite input
     Vector(plan.Start, new(3,2,5));
     Vector(plan.Legs.Aggregate(Vector3.Zero, (v,l) => v+l.Delta), Vector3.Zero);
     Require(!ItemMotionPath.Plan(points, MotionPathUse.Obstacle, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear).Success, "polyline accepted as obstacle");
-    Require(!ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.PingPong, 4, KC.AnimEase.Linear).Success, "untested six-carrier return accepted");
+    Require(!ItemMotionPath.Plan([..points,new(0,2,21),new(0,2,10)], MotionPathUse.Scenery, MotionPathRepeat.PingPong, 4, KC.AnimEase.Linear).Success, "untested ten-carrier return accepted");
     foreach (var speed in new[] { 0f, -1f, float.NaN, float.PositiveInfinity, 1001f })
         Require(!ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.Reset, speed, KC.AnimEase.Linear).Success, "invalid speed accepted");
     foreach (var point in new[] { new Vector3(float.NaN,0,0), new Vector3(10001,0,0), Vector3.Zero })
@@ -788,6 +788,20 @@ Check("drawn paths preserve static entries and shader animation", () =>
         Require(result.Ents.Single(e=>e.Model is CPlugStaticObjectModel).Position == new Vec3(7,8,9), "static part moved");
         var c = result.Ents.Select(e=>e.Model).OfType<KC>().Single(c=>c.ShaderTcType == KC.EShaderTcType.TransSubTexture);
         Require(c.ShaderTcAnimFunc![0].TextureId == 71 && c.ShaderTcDataTransSub!.NbSubTexture == 8 && c.ShaderTcVersion == 9, "shader animation changed");
+    }
+});
+
+Check("path mesh anchor follows the first point for rotated obstacles and scenery", () =>
+{
+    foreach(var use in Enum.GetValues<MotionPathUse>()) {
+        var original=(CPlugPrefab)KinematicTemplate().EntityModel!;
+        var plan=Value(ItemMotionPath.Plan([new(3,4,5),new(3,12,5)],use,MotionPathRepeat.PingPong,4,KC.AnimEase.Linear));
+        var anchor=new Vector3(2,3,4);
+        var result=Value(ItemMotionPath.Build(original,plan,anchor));
+        var body=result.Ents.First(e=>e.Model is CPlugDynaObjectModel);
+        var q=body.Rotation;
+        Vector(new Vector3(body.Position.X,body.Position.Y,body.Position.Z)+Vector3.Transform(anchor,new Quaternion(q.X,q.Y,q.Z,q.W)),plan.Start);
+        Require(original.Ents[0].Position == default,"source anchor mutated");
     }
 });
 

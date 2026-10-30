@@ -61,6 +61,11 @@ and static conversion/export/reopen. Set `STUDIO_NATIVE_EXPORTS` to preserve
 exports elsewhere. It does not launch Trackmania; native observations and
 limits are in `docs/kinematic-drawn-paths-2026-10-30.md`.
 
+Run `npm --prefix Tests/Browser run test:follow-path-preview` with the same
+`STUDIO_BASE_URL` for non-mutating eight-point playback, visible mesh midpoint
+checks, pointer dragging and the native proof export. See
+`docs/live-follow-path-2026-10-30.md` for the actual ingame video and file hashes.
+
 The desktop and WASM ZIP writers can differ in their Deflate bytes and creator
 OS metadata for newly written records. The independent console verifier checks
 the exact map header, recovery of the original raw body outside the ZIP and
