@@ -16,6 +16,22 @@
         </button>
     </div>
     <p class="small text-muted mb-2">Recognised baked flag frames now animate directly in the viewport. Use the toolbar play/pause button to control the time.</p>
+    <div class="card bg-light border mb-2 p-2" aria-label="Blender baked cloth exporter">
+        <strong class="small">Blender baked cloth exporter</strong>
+        <p class="small text-muted mb-1">Download the English Blender add-on to bake a cloth simulation into a topology-stable mesh sequence for a later Trackmania flag export.</p>
+        <button class="btn btn-sm btn-outline-primary" type="button" @onclick="DownloadBlenderAddon">Download Blender add-on (.zip)</button>
+        <p class="small text-muted mb-0 mt-1">The add-on exports <code>.tmcloth.json</code> plus an optional ZIP. Use the import panel below to turn the sequence into a native flag package.</p>
+    </div>
+    <div class="card bg-light border mb-2 p-2" aria-label="Blender baked cloth import">
+        <strong class="small">Import Blender baked cloth sequence</strong>
+        <p class="small text-muted mb-1">Select the exported <code>.tmcloth.json</code> or ZIP. The rest frame, topology, UV0 and anchor are matched against the selected mesh before a native 86-frame flag package is written.</p>
+        <InputFile id="wavingFlagBlenderSequence" aria-label="Blender baked cloth sequence" accept=".json,.zip,.tmcloth.json" class="form-control form-control-sm mb-2" OnChange="LoadBakedSequence" />
+        @if (bakedSequence is not null)
+        {
+            <p class="small text-success mb-1" role="status">Loaded @bakedSequenceName: @bakedSequence.FrameCount frames, @bakedSequence.VertexCount loop vertices, @bakedSequence.PeriodSeconds.ToString("0.##") s.</p>
+        }
+        <button class="btn btn-sm btn-outline-success" type="button" disabled="@(busy || Source is null || bakedSequence is null || (selectionMode == "selected" && string.IsNullOrWhiteSpace(SelectedPartPath)))" @onclick="ExportBakedSequence">@(busy ? "Converting…" : "Export Blender sequence as waving flag package (.zip)")</button>
+    </div>
     <label class="form-label small" for="wavingFlagMode">Cloth source</label>
     <select id="wavingFlagMode" class="form-select form-select-sm mb-2" data-helper="Choose a tested flag preset or convert the current item's supported static mesh. Presets use the measured native flag package." @bind="mode">
         <option value="@ItemWavingFlagExport.Mode.SourceMesh">Convert this item's mesh (experimental)</option>
@@ -121,6 +137,9 @@
     private float anchorX, anchorY, anchorZ;
     private ItemWavingFlagExport.AnchorPoint lastParameterAnchor = ItemWavingFlagExport.AnchorPoint.Origin;
     private byte[]? packageBytes, mapBytes;
+    private byte[]? bakedSequenceBytes;
+    private string? bakedSequenceName;
+    private BakedClothSequence? bakedSequence;
     private IReadOnlyList<string> warnings = Array.Empty<string>(), mapWarnings = Array.Empty<string>();
 
     protected override void OnParametersSet()
@@ -152,6 +171,40 @@
     {
         previewCloth = !previewCloth;
         await JS.InvokeVoidAsync("setClothAnimationPreview", previewCloth);
+    }
+
+    private async Task DownloadBlenderAddon()
+    {
+        try
+        {
+            var bytes = BlenderAddonDownload.Read();
+            await JS.InvokeVoidAsync("downloadBinaryGbx", BlenderAddonDownload.FileName, Convert.ToBase64String(bytes));
+            status = $"Downloaded {BlenderAddonDownload.FileName}. Install it in Blender via Edit > Preferences > Add-ons > Install.";
+            error = null;
+        }
+        catch (Exception ex)
+        {
+            error = "Blender add-on download failed: " + ex.Message;
+        }
+    }
+
+    private async Task LoadBakedSequence(InputFileChangeEventArgs args)
+    {
+        bakedSequence = null;
+        bakedSequenceBytes = null;
+        bakedSequenceName = null;
+        try
+        {
+            bakedSequenceBytes = await Read(args.File, 128 * 1024 * 1024);
+            bakedSequence = BakedClothSequence.Read(bakedSequenceBytes);
+            bakedSequenceName = args.File.Name;
+            error = null;
+            status = $"Loaded {args.File.Name}. Select the matching mesh part, then export the Blender sequence.";
+        }
+        catch (Exception ex)
+        {
+            error = "Blender sequence refused: " + ex.Message;
+        }
     }
 
     private ItemWavingFlagExport.AnchorPoint CurrentAnchor => new(anchorX, anchorY, anchorZ);
@@ -201,6 +254,32 @@
             status = $"Exported {result.FileName}. This package is also ready for the map packaging step below.";
         }
         catch (Exception ex) { error = "Flag export refused: " + ex.Message; }
+        finally { busy = false; }
+    }
+
+    private async Task ExportBakedSequence()
+    {
+        if (Source is null || bakedSequence is null) return;
+        busy = true; error = status = null; warnings = Array.Empty<string>();
+        await Task.Yield();
+        try
+        {
+            var input = PrepareSource is not null ? await PrepareSource() : Source;
+            var selection = !string.IsNullOrWhiteSpace(SelectedPartPath) && selectionMode == "selected"
+                ? new[] { SelectedPartPath! } : Array.Empty<string>();
+            var result = ItemWavingFlagExport.ExportBakedSequence(input, bakedSequence, new ItemWavingFlagExport.Options
+            {
+                Mode = ItemWavingFlagExport.Mode.SourceMesh,
+                PeriodSeconds = bakedSequence.PeriodSeconds,
+                OutputName = outputName,
+                SelectionPaths = selection
+            }, PreferredId);
+            packageBytes = result.Bytes;
+            await JS.InvokeVoidAsync("downloadBinaryGbx", result.FileName, Convert.ToBase64String(result.Bytes));
+            warnings = result.Warnings;
+            status = $"Exported {result.FileName} from the Blender baked sequence. Test the package in Trackmania.";
+        }
+        catch (Exception ex) { error = "Blender sequence export refused: " + ex.Message; }
         finally { busy = false; }
     }
 

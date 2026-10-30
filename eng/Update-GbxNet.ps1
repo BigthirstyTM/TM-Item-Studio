@@ -77,11 +77,19 @@ try {
         # GBX.NET 2.5.0 fixed the null class-id handling upstream. Accept that
         # equivalent implementation while still failing closed if the behavior
         # is absent or changed in a future release.
-        $readerSource = (& git -C $sourcePath show "HEAD:Src/GBX.NET/Serialization/GbxReader.cs") -join "`n"
-        if ($readerSource -notmatch 'if \(rawClassId == uint\.MaxValue\)') {
+        $readerSource = (& git -C $sourcePath show "HEAD:Src/GBX.NET/Serialization/GbxReader.NodeRef.cs") -join "`n"
+        if ($readerSource -match 'if \(encapsulation is not null && rawClassId == uint\.MaxValue\)') {
+            $readerSource = $readerSource.Replace('if (encapsulation is not null && rawClassId == uint.MaxValue)', 'if (rawClassId == uint.MaxValue)')
+            $readerFile = Join-Path $sourcePath 'Src\GBX.NET\Serialization\GbxReader.NodeRef.cs'
+            Set-Content -LiteralPath $readerFile -Value $readerSource -Encoding UTF8
+            Write-Host 'Applied null class-id compatibility to the GBX.NET 2.5 NodeRef reader.'
+        }
+        elseif ($readerSource -notmatch 'if \(rawClassId == uint\.MaxValue\)') {
             throw "The compatibility patch no longer applies to GBX.NET $Version and the upstream null-reference behavior was not found. Review the upstream change before updating."
         }
-        Write-Host 'Upstream already contains the null class-id compatibility behavior; no local patch applied.'
+        else {
+            Write-Host 'Upstream already contains the null class-id compatibility behavior; no local patch applied.'
+        }
     }
     & git -C $sourcePath apply --check $skinPatchPath
     if ($LASTEXITCODE -eq 0) {
@@ -110,9 +118,19 @@ try {
         }
     }
     & git -C $sourcePath apply --check $deformationPatchPath
-    if ($LASTEXITCODE -ne 0) { throw 'Could not apply the Mesh Modeler deformation-layer compatibility patch.' }
-    & git -C $sourcePath apply $deformationPatchPath
-    if ($LASTEXITCODE -ne 0) { throw 'Could not apply the Mesh Modeler deformation-layer compatibility patch.' }
+    if ($LASTEXITCODE -eq 0) {
+        & git -C $sourcePath apply $deformationPatchPath
+        if ($LASTEXITCODE -ne 0) { throw 'Could not apply the Mesh Modeler deformation-layer compatibility patch.' }
+    }
+    else {
+        $crystalSource = (& git -C $sourcePath show 'HEAD:Src/GBX.NET/Engines/Plug/CPlugCrystal.cs') -join "`n"
+        $crystalLayout = (& git -C $sourcePath show 'HEAD:Src/GBX.NET/Engines/Plug/CPlugCrystal.chunkl') -join "`n"
+        if ($crystalSource -notmatch 'ELayerType\.Deformation => new DeformationLayer\(\)' -or
+            $crystalLayout -notmatch 'iso4\[\] Transforms') {
+            throw 'The Mesh Modeler deformation-layer patch no longer applies and the upstream deformation layout was not found. Review the upstream change before updating.'
+        }
+        Write-Host 'Upstream already contains the Mesh Modeler deformation-layer compatibility behavior.'
+    }
 
     Write-Host 'Building the patched net8.0 assembly...'
     & dotnet build (Join-Path $sourcePath 'Src\GBX.NET\GBX.NET.csproj') -c Release -f net8.0 --nologo -m:2 -p:GeneratePackageOnBuild=false

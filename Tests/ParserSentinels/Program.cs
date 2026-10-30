@@ -52,8 +52,7 @@ static void NullThenMarker(byte[] bytes)
 {
     using var stream = new MemoryStream(bytes);
     using var reader = new GbxReader(stream);
-    Require(reader.ReadNodeRef(out var external) is null, "Expected null node");
-    Require(external is null, "Null sentinel must not return an external reference");
+    Require(reader.ReadNodeRef() is null, "Expected null node");
     Require(stream.Position == bytes.Length - 4, "Incorrect sentinel consumption");
     Require(reader.ReadUInt32() == 0x12345678, "Trailing marker was not preserved");
     Require(stream.Position == stream.Length, "Unexpected trailing bytes");
@@ -73,3 +72,8 @@ static void Rejected(byte[] bytes, Type exceptionType, string? prefix, long posi
     if (trailingMarker)
         Require(reader.ReadUInt32() == 0x12345678, "Rejection consumed trailing marker");
 }
+
+
+
+
+

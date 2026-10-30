@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
@@ -25,7 +25,7 @@ public sealed record ItemMultiInstanceExport(
 /// <remarks>A macroblock cannot embed an item: its <c>ObjectSpawn</c> stores an <c>ident ItemModel</c>
 /// reference only. A prefab entry however holds a node reference plus a rotation and a position,
 /// and GBX.NET writes a repeated node once, so N copies of one mesh are stored as one mesh with N
-/// transforms — the format-level equivalent of embedding the instances.</remarks>
+/// transforms â€” the format-level equivalent of embedding the instances.</remarks>
 public static class ItemMultiInstance
 {
     private const float DegToRad = MathF.PI / 180f;
@@ -135,7 +135,7 @@ public static class ItemMultiInstance
 
             foreach (var source in sourceEnts)
             {
-                var model = source.Model ?? source.GetModel()
+                var model = source.Model ?? source.Model
                     ?? throw new InvalidOperationException(
                         "A prefab entry references an external model that cannot be embedded. " +
                         "Export the source file with its dependencies first.");
@@ -241,3 +241,8 @@ public static class ItemMultiInstance
             throw new InvalidOperationException("A prefab entry lost its model on export.");
     }
 }
+
+
+
+
+

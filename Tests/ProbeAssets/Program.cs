@@ -1,9 +1,11 @@
 using System.Globalization;
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
+using GBX.NET.Serialization.Chunking;
 using TM_Item_Studio.Models;
 
 // Native placement probe assets.
@@ -20,6 +22,9 @@ using TM_Item_Studio.Models;
 //   dotnet run --project Tests/ProbeAssets -- --verify [path]   verify the plugin's result
 //   dotnet run --project Tests/ProbeAssets -- --inspect-map <path> --skip-lightmap-cache
 //     inspect placements while explicitly excluding unsupported native lightmap cache 0304305B
+//   dotnet run --project Tests/ProbeAssets -- --write-map <base.Map.Gbx> --item <ball.Item.Gbx>
+//     --out-name PhysicsBallProbe --skip-lightmap-cache [--embed-item] [--physics-layout]
+//     [--native-anchor]
 
 Gbx.LZO = new GBX.NET.LZO.MiniLZO();
 
@@ -393,7 +398,14 @@ int WriteProbeMap(string? requestedBase, string root)
     ItemExportValidator.EnsureGameReady(item, "TMIS_Probe_Item");
     var itemIdent = item.Ident ?? throw new InvalidOperationException("The item has no Ident.");
 
-    var map = Gbx.Parse<CGameCtnChallenge>(basePath, new GbxReadSettings { SafeSkippableChunks = true }).Node
+    // Recent Trackmania maps may carry the native light-map cache chunk (0x0304305B),
+    // whose payload is not understood by the bundled GBX.NET version.  The cache is
+    // disposable for this probe, so allow the same opt-in skip used by --inspect-map.
+    var mapReadSettings = new GbxReadSettings {
+        SafeSkippableChunks = true,
+        SkipChunkIds = Array.IndexOf(args, "--skip-lightmap-cache") >= 0 ? [0x0304305B] : []
+    };
+    var map = Gbx.Parse<CGameCtnChallenge>(basePath, mapReadSettings).Node
         ?? throw new InvalidOperationException($"Could not parse {basePath}.");
 
     // A map reference to an item is a path-like ident, as the engine itself writes it: a real
@@ -403,13 +415,29 @@ int WriteProbeMap(string? requestedBase, string root)
 
     // The anchored object references the item by path, so that file has to exist where the game
     // resolves it from, otherwise the map points at nothing.
+    byte[] itemBytes;
     using (var itemStream = new MemoryStream())
     {
         new Gbx<CGameItemModel>(item).Save(itemStream);
+        itemBytes = itemStream.ToArray();
         var itemFile = ToDiskPath(root, $"Items/{ProbeFolder}/{itemIdent.Id}.Item.Gbx");
         Directory.CreateDirectory(Path.GetDirectoryName(itemFile)!);
-        File.WriteAllBytes(itemFile, itemStream.ToArray());
+        File.WriteAllBytes(itemFile, itemBytes);
         Console.WriteLine($"Item copied: {itemFile}");
+    }
+
+    // A hand-written map can carry the item in its embedded ZIP even though the current
+    // editor's ItemTypeE embed mask omits 0x0C.  This is an opt-in map-loader experiment;
+    // it does not claim that a later native editor save will preserve the entry.
+    if (Array.IndexOf(args, "--embed-item") >= 0)
+    {
+        var zipPath = "Items/" + referenceId.Replace('\\', '/');
+        map.UpdateEmbeddedZipData(zip =>
+        {
+            using var entry = zip.CreateEntry(zipPath, CompressionLevel.Optimal).Open();
+            entry.Write(itemBytes);
+        });
+        Console.WriteLine($"Embedded item : {zipPath} ({itemBytes.Length} bytes)");
     }
 
     var instances = ProbeInstances();
@@ -437,6 +465,23 @@ int WriteProbeMap(string? requestedBase, string root)
         placed.CreateChunk<CGameCtnAnchoredObject.Chunk03101002>().Version = 8;
         placed.CreateChunk<CGameCtnAnchoredObject.Chunk03101004>().Version = 0;
 
+        // A native map anchor also carries 0x03101005. GBX.NET can preserve that chunk when it
+        // was read from a real map, but its typed writer is intentionally unimplemented. For a
+        // diagnostic A/B only, copy the opaque payload from an existing engine-written anchor;
+        // this never invents a payload and is opt-in so the normal writer remains conservative.
+        if (Array.IndexOf(args, "--native-anchor") >= 0)
+        {
+            var template = map.AnchoredObjects?.FirstOrDefault(anchor =>
+                anchor.Chunks.Get(0x03101005) is ISkippableChunk { Data: not null });
+            var source = template?.Chunks.Get(0x03101005) as ISkippableChunk;
+            if (source?.Data is not { } data)
+                throw new InvalidOperationException(
+                    "--native-anchor needs a base map with a game-written 0x03101005 chunk.");
+
+            placed.Chunks.Add(new SkippableChunk(0x03101005) { Data = data.ToArray() });
+            Console.WriteLine($"Native anchor : copied 0x03101005 opaque payload ({data.Length} bytes)");
+        }
+
         anchored.Add(placed);
     }
     map.AnchoredObjects = anchored;
@@ -451,7 +496,7 @@ int WriteProbeMap(string? requestedBase, string root)
     Directory.CreateDirectory(Path.GetDirectoryName(outFile)!);
     File.WriteAllBytes(outFile, stream.ToArray());
 
-    var reread = Gbx.Parse<CGameCtnChallenge>(new MemoryStream(stream.ToArray())).Node!;
+    var reread = Gbx.Parse<CGameCtnChallenge>(new MemoryStream(stream.ToArray()), mapReadSettings).Node!;
     var stored = (reread.AnchoredObjects ?? []).Skip(baseAnchoredCount).ToList();
     var referencing = stored.Count(a => IdentMatches(a.ItemModel, referenceId));
     Console.WriteLine($"Base map   : {basePath}");
@@ -499,12 +544,15 @@ int WriteProbeMap(string? requestedBase, string root)
 
 static string? JsonStringOrDefault(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
 
-static List<ItemMacroblockInstance> ProbeInstances() =>
-[
-    new() { Label = "Probe A", PosX = 8f, PosY = 0f, PosZ = -16f, YawDeg = 0f, Scale = 1f },
-    new() { Label = "Probe B", PosX = 24f, PosY = 0f, PosZ = -16f, YawDeg = 90f, Scale = 1f },
-    new() { Label = "Probe C", PosX = 40f, PosY = 0f, PosZ = -16f, YawDeg = 180f, Scale = 2f },
-];
+List<ItemMacroblockInstance> ProbeInstances() =>
+    Array.IndexOf(args, "--physics-layout") >= 0
+        ? [new() { Label = "Physics ball", PosX = 768f, PosY = 128f, PosZ = 470f, YawDeg = 0f, Scale = 1f }]
+        :
+        [
+            new() { Label = "Probe A", PosX = 8f, PosY = 0f, PosZ = -16f, YawDeg = 0f, Scale = 1f },
+            new() { Label = "Probe B", PosX = 24f, PosY = 0f, PosZ = -16f, YawDeg = 90f, Scale = 1f },
+            new() { Label = "Probe C", PosX = 40f, PosY = 0f, PosZ = -16f, YawDeg = 180f, Scale = 2f },
+        ];
 
 // ---------------------------------------------------------------------------------------------
 // Saved maps

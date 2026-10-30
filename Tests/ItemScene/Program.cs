@@ -219,17 +219,17 @@ Check("external entity, mesh, shapes, variants and materials never resolve", () 
     var table = new GbxRefTable();
     table.ExternalNodes["external.Gbx"] = () => { calls++; throw new Exception("Unexpected external resolution"); };
     var file = new GbxRefTableFile(table, 0, false, "external.Gbx");
-    var staticModel = new CPlugStaticObjectModel { MeshFile = file, ShapeFile = file };
-    var dynamicModel = new CPlugDynaObjectModel { MeshFile = file, DynaShapeFile = file, StaticShapeFile = file, LocAnimFile = file };
-    var externalEntity = Ent(null); externalEntity.ModelFile = file;
+    var staticModel = new CPlugStaticObjectModel(); staticModel.References.Mesh.Descriptor = file; staticModel.References.Shape.Descriptor = file;
+    var dynamicModel = new CPlugDynaObjectModel(); dynamicModel.References.Mesh.Descriptor = file; dynamicModel.References.DynaShape.Descriptor = file; dynamicModel.References.StaticShape.Descriptor = file; dynamicModel.References.LocAnim.Descriptor = file;
+    var externalEntity = Ent(null); externalEntity.References.Model.Descriptor = file;
     var root = new CPlugPrefab { Ents = new[] { externalEntity, Ent(staticModel), Ent(dynamicModel) } };
     var result = ItemScene.Build(root, 0).Preview;
     Require(result.Diagnostics.Count(x => x.Code == "external-reference") == 7, "External slots not inventoried.");
     Require(result.Collisions.Count(x => x.State == ItemSceneState.Unresolved) == 3, "Unresolved collision reported absent.");
     var solid = Solid(); solid.CustomMaterials = null; solid.Materials = new[] { new External<CPlugMaterial>(null, file) };
     Require(ItemScene.Build(solid, 0).Preview.Materials.Single().State == ItemSceneState.Unresolved, "Material reference not inventoried.");
-    ItemScene.Build(new NPlugItem_SVariant { EntityModelFile = file }, 0, 0);
-    ItemScene.Build(new CGameItemModel { VisModelCustomFile = file, PhyModelCustomFile = file, EntityModelEditionFile = file }, 0);
+    var externalVariant = new NPlugItem_SVariant(); externalVariant.References.EntityModel.Descriptor = file; ItemScene.Build(externalVariant, 0, 0);
+    var externalItem = new CGameItemModel(); externalItem.References.VisModelCustom.Descriptor = file; externalItem.References.PhyModelCustom.Descriptor = file; externalItem.References.EntityModelEdition.Descriptor = file; ItemScene.Build(externalItem, 0);
     Require(calls == 0, "A resolving getter was invoked.");
     // Prove the fixture trap is live; only this explicit control is allowed to invoke the loader.
     try { _ = staticModel.Mesh; } catch (Exception) { }
@@ -239,7 +239,7 @@ Check("external entity, mesh, shapes, variants and materials never resolve", () 
     var resolvedRef = new GbxRefTableFile(resolvedTable, 0, false, "resolved-mesh.Gbx");
     var resolvedSolid = Solid();
     resolvedTable.ExternalNodes[resolvedRef.FilePath] = () => new Gbx<CPlugSolid2Model>(resolvedSolid);
-    var resolvedModel = new CPlugStaticObjectModel { MeshFile = resolvedRef };
+    var resolvedModel = new CPlugStaticObjectModel(); resolvedModel.References.Mesh.Descriptor = resolvedRef;
     var resolvedScene = ItemScene.Build(resolvedModel, 0, null, null, resolveExternal: true).Preview;
     Require(resolvedScene.Geometry.Count == 1 && !Has(resolvedScene, "external-reference"), "Opt-in external mesh resolution did not render the dependency.");
 });
@@ -396,7 +396,7 @@ Check("collision sources classify slots without resolving externals", () =>
     Require(present.Collisions.Single(x => x.Source == ItemSceneCollisionSource.StaticObjectShape).State == ItemSceneState.Present, "Present static shape misclassified.");
     var absent = ItemScene.Build(new CPlugStaticObjectModel(), 0).Preview;
     Require(absent.Collisions.Single(x => x.Source == ItemSceneCollisionSource.StaticObjectShape).State == ItemSceneState.Absent, "Absent static shape misclassified.");
-    var ext = ItemScene.Build(new CPlugStaticObjectModel { ShapeFile = external }, 0).Preview;
+    var extModel = new CPlugStaticObjectModel(); extModel.References.Shape.Descriptor = external; var ext = ItemScene.Build(extModel, 0).Preview;
     Require(ext.Collisions.Single(x => x.Source == ItemSceneCollisionSource.StaticObjectShape).State == ItemSceneState.Unresolved && calls == 0, "External static shape misclassified or resolved.");
     var generated = ItemScene.Build(new CPlugStaticObjectModel { Mesh = Solid(), IsMeshCollidable = true }, 0).Preview;
     Require(generated.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GeneratedMeshCollision).State == ItemSceneState.Unsupported
@@ -414,7 +414,7 @@ Check("collision sources classify slots without resolving externals", () =>
     Require(dyna.Collisions.Single(x => x.Source == ItemSceneCollisionSource.DynamicObjectShape).State == ItemSceneState.Present, "Dynamic shape misclassified.");
     Require(dyna.Collisions.Single(x => x.Source == ItemSceneCollisionSource.DynamicObjectStaticShape).State == ItemSceneState.Absent, "Dynamic static shape misclassified.");
 
-    var phy = new CGameObjectPhyModel { HitShapeFid = mesh, MoveShapeFidFile = external };
+    var phy = new CGameObjectPhyModel { HitShapeFid = mesh }; phy.References.MoveShapeFid.Descriptor = external;
     var phyScene = ItemScene.Build(phy, 0).Preview;
     Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectHitShape).State == ItemSceneState.Present, "Phy hit shape misclassified.");
     Require(phyScene.Collisions.Single(x => x.Source == ItemSceneCollisionSource.GameObjectMoveShape).State == ItemSceneState.Unresolved && calls == 0, "Phy move shape resolved or misclassified.");
@@ -431,7 +431,7 @@ Check("collision sources classify slots without resolving externals", () =>
     var counted = ItemScene.Build(namedPhy, 0).Preview;
     Require(counted.Diagnostics.Any(x => x.Code == "phy-trigger-actions" && x.Message.Contains("2") && x.Path.EndsWith("/triggers")), "Trigger actions not counted.");
 
-    var item = ItemScene.Build(new CGameItemModel { PhyModelCustomFile = external }, 0).Preview;
+    var externalPhyItem = new CGameItemModel(); externalPhyItem.References.PhyModelCustom.Descriptor = external; var item = ItemScene.Build(externalPhyItem, 0).Preview;
     Require(item.Collisions.Single(x => x.Source == ItemSceneCollisionSource.ItemPhyModel).State == ItemSceneState.Unresolved && calls == 0, "Item phy model resolved or misclassified.");
     Require(ItemScene.Build(mesh, 0).Preview.Collisions.Single().Source == ItemSceneCollisionSource.SurfaceSlot, "Plain surface visit misclassified.");
 });
@@ -525,11 +525,11 @@ Check("shared trees, cycles and unsupported subclasses preserve base graph", () 
 {
     var shared = new CPlugTree { Visual = CpuVisual() };
     var root = new CPlugTree { Children = [shared, shared] };
-    shared.Children.Add(root);
+    shared.Children.Add((CPlugTree)root);
     var result = ItemScene.Build(root, 0).Preview;
     Require(result.Geometry.Count == 2 && result.Nodes.Count(n => n.State == ItemSceneState.Cycle) == 2, "Tree traversal globally deduplicated or recursed through cycle.");
     Require(result.Geometry[0].SourceId == result.Geometry[1].SourceId && result.Geometry[0].Path != result.Geometry[1].Path, "Repeated tree occurrence identity lost.");
-    var subclass = ItemScene.Build(new CPlugTreeVisualMip { Visual = CpuVisual(), Children = [new() { Visual = CpuVisual() }] }, 0).Preview;
+    var subclassNode = new CPlugTreeVisualMip { Visual = CpuVisual() }; subclassNode.Children.Add((CPlugTree)new CPlugTree { Visual = CpuVisual() }); var subclass = ItemScene.Build(subclassNode, 0).Preview;
     Require(subclass.Geometry.Count == 2 && Has(subclass, "tree-subclass"), "Unsupported subclass lost supported base visual/children.");
 });
 
@@ -539,12 +539,12 @@ Check("tree external slots never resolve", () =>
     var table = new GbxRefTable();
     table.ExternalNodes["external-tree.Gbx"] = () => { calls++; throw new Exception("Unexpected tree resolution"); };
     var file = new GbxRefTableFile(table, 0, false, "external-tree.Gbx");
-    var solid = new CPlugSolid { TreeFile = file, Tree = new CPlugTree { Visual = CpuVisual() } };
+    var solid = new CPlugSolid { Tree = new CPlugTree { Visual = CpuVisual() } }; solid.References.Tree.Descriptor = file;
     var result = ItemScene.Build(solid, 0).Preview;
     Require(result.Geometry.Count == 0 && result.Nodes.Single(n => n.Path.EndsWith("/tree")).State == ItemSceneState.Unresolved, "External TreeFile was followed or lost.");
-    var treeResult = ItemScene.Build(new CPlugTree { Visual = CpuVisual(), ShaderFile = file, FuncTreeFile = file }, 0).Preview;
+    var externalTree = new CPlugTree { Visual = CpuVisual() }; externalTree.References.Shader.Descriptor = file; externalTree.References.FuncTree.Descriptor = file; var treeResult = ItemScene.Build(externalTree, 0).Preview;
     Require(treeResult.Geometry.Count == 1 && treeResult.Diagnostics.Count(d => d.Code == "external-reference") == 2 && calls == 0, "Tree resolving getter invoked.");
-    try { _ = new CPlugSolid { TreeFile = file }.Tree; } catch (Exception) { }
+    try { var trapSolid = new CPlugSolid(); trapSolid.References.Tree.Descriptor = file; _ = trapSolid.Tree; } catch (Exception) { }
     Require(calls == 1, "External tree trap was not active.");
 });
 
@@ -689,3 +689,9 @@ static CPlugVisualIndexedTriangles Visual() => new() {
 static CPlugSolid2Model Solid() => new() { Visuals = new CPlugVisual[] { Visual() },
     CustomMaterials = new[] { new CPlugSolid2Model.Material { MaterialName = "synthetic" } },
     ShadedGeoms = new[] { new CPlugSolid2Model.ShadedGeom { VisualIndex = 0, MaterialIndex = 0, LodMask = 1 } } };
+
+
+
+
+
+

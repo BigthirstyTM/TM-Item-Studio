@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Reflection;
@@ -53,9 +53,15 @@ public static class ItemWavingFlagExport
     private const string Skin = "TMIS_MatRemap.GameSkin.Gbx";
     private const string Modifier = "TMIS_MatRemap.TerrainModifier.Gbx";
     private const string LongSeed = "TMIS_MatRemap_Long250.Item.Gbx";
+    // This is the same flag graph after Trackmania's native Item save path. It is
+    // intentionally separate from LongSeed: the compact C archive is a good
+    // authoring seed, while this uncompressed U archive preserves native
+    // node/body and sibling-reference metadata for map embedding.
+    private const string NativeSavedLongSeed = "TMIS_MatRemap_NativeSaved_Long250.Item.Gbx";
     private static readonly Dictionary<string, string> ResourceHashes = new(StringComparer.Ordinal)
     {
         [LongSeed] = "D4F44EB23EE07B0C59CC0E9A976EAE05405B4DDE139BB2673C429F327EAFE751",
+        [NativeSavedLongSeed] = "021B11E5B775C73E0FA2EE54625F214AA7ECA464BD10E6A3FFFC7BFBB3508E55",
         ["TMIS_MatRemap_Swallowtail.Item.Gbx"] = "81B749218584A9CB399AF27088E049132C2E06AA029A21E24137298C0138376D",
         ["TMIS_MatRemap_Round.Item.Gbx"] = "C55638E2B2DE29A1A4ABED7994AB613A2B7ACFE850FEEFFF1E30243005E2A14B",
         [Placeholder] = "CB3B703C2B5BED9F359919C59B24A08730EE833FC5E422C40062DA061CDA588A",
@@ -179,6 +185,141 @@ public static class ItemWavingFlagExport
         return new(memory.ToArray(), folder + ".zip", itemFile, warnings.ToArray(), manifest);
     }
 
+    /// <summary>
+    /// Imports the validated Blender mesh sequence and writes it into the same
+    /// audited native flag host used by SourceMesh. The Blender rest frame must
+    /// match the selected Item Studio visual in item-local coordinates.
+    /// </summary>
+    public static Result ExportBakedSequence(Gbx<CGameItemModel> gbx, BakedClothSequence sequence,
+        Options? options = null, string? preferredId = null)
+    {
+        ArgumentNullException.ThrowIfNull(gbx);
+        ArgumentNullException.ThrowIfNull(sequence);
+        options ??= new();
+        if (options.Mode != Mode.SourceMesh) throw new ArgumentException("Baked sequence import uses SourceMesh mode.", nameof(options));
+        ValidateOptions(options);
+        sequence.Validate();
+        var source = ReadSource(gbx, options.SelectionPaths);
+        var sourcePositions = source.Positions;
+        var sourceUvs = source.Uvs[0].Select(uv => new Vector2(uv.X, uv.Y)).ToArray();
+        var geometry = sequence.MatchItemGeometry(sourcePositions, sourceUvs, source.Indices);
+        var anchor = sequence.Anchor?.Position is { Length: 3 } a ? new Vector3(a[0], a[1], a[2]) : Vector3.Zero;
+        var resource = Resources.Value;
+        var working = Parse(resource[NativeSavedLongSeed]);
+        ValidateNativeSavedFlagGraph(working);
+        // The package path supplies the ordinary user identity. Retain the
+        // native-saved body/reference layout while making the downloadable item
+        // safe to install under any chosen filename.
+        working.Node.Ident = working.Node.Ident! with { Id = "" };
+        var prefab = Prefab(working.Node);
+        var cloth = prefab.Ents![1];
+        cloth.Position = G(anchor);
+        cloth.Rotation = Quat.Identity;
+        prefab.Ents = [cloth];
+        var timing = (NPlugDynaObjectModel_SInstanceParams)cloth.Params!;
+        timing.PeriodSc = timing.PeriodScMax = sequence.PeriodSeconds;
+        timing.Phase01 = timing.Phase01Max = 0;
+        var mesh = ((CPlugDynaObjectModel)cloth.Model!).Mesh!;
+        var n = geometry.Positions[0].Length;
+        var expected = new List<CPlugVisual3D.Vertex[]>();
+        for (var lod = 0; lod < mesh.Visuals!.Count; lod++)
+        {
+            var visual = (CPlugVisualIndexedTriangles)mesh.Visuals[lod];
+            var prototype = visual.Vertices[0];
+            var vertices = new CPlugVisual3D.Vertex[n * FrameCount];
+            for (var frame = 0; frame < FrameCount; frame++)
+            for (var i = 0; i < n; i++)
+            {
+                var p = geometry.Positions[frame][i] - anchor;
+                var normal = geometry.Normals[frame][i];
+                vertices[frame * n + i] = prototype with { Position = G(p), Normal = G(normal) };
+            }
+            visual.Vertices = vertices;
+            SetSerializedCount(visual, vertices.Length);
+            visual.IndexBuffer!.Indices = geometry.Indices.ToArray();
+            visual.SubVisuals = Enumerable.Range(0, FrameCount)
+                .Select(frame => new Int3(frame * n, 0, geometry.Indices.Length)).ToArray();
+            var uvPrototype = visual.TexCoords[0];
+            visual.TexCoords = [new CPlugVisual.TexCoordSet
+            {
+                Version = uvPrototype.Version, Flags = uvPrototype.Flags, U01 = uvPrototype.U01?.ToArray(),
+                TexCoords = Enumerable.Range(0, FrameCount)
+                    .SelectMany(_ => source.Uvs[0].Select(uv => new CPlugVisual.TexCoord(uv, null, null))).ToArray()
+            }];
+            visual.BoundingBox = Bounds(vertices.Select(v => v.Position));
+            expected.Add(vertices);
+        }
+        var baseName = SafeName(options.OutputName ?? preferredId ?? gbx.Node.Name ?? "Blender_Baked_Cloth");
+        working.Node.Name = baseName + " - Blender baked cloth";
+        var item = Save(working);
+        ValidateBakedSequenceItem(item, sequence, geometry, expected);
+        var itemFile = baseName + "_WavingFlag.Item.Gbx";
+        var folder = baseName + "_WavingFlag";
+        var warnings = CommonWarnings().ToList();
+        warnings.Add("Imported Blender baked cloth into a native-saved flag archive template; native Trackmania playback of this new sequence still requires a game test.");
+        warnings.Add("The Blender rest frame, topology and UV0 were matched against the selected Item Studio mesh.");
+        warnings.Add("The package uses the audited native flag material dependencies and requires a genuine native Stadium 16 m flag when map-embedded.");
+        var payloads = new Dictionary<string, byte[]>(StringComparer.Ordinal)
+        {
+            [itemFile] = item, [Placeholder] = resource[Placeholder], [Skin] = resource[Skin], [Modifier] = resource[Modifier]
+        };
+        var details = new
+        {
+            source = "Blender .tmcloth.json",
+            sequenceFrames = sequence.FrameCount,
+            sequencePeriodSeconds = sequence.PeriodSeconds,
+            verticesPerFrame = n,
+            trianglesPerFrame = geometry.Indices.Length / 3,
+            lods = mesh.Visuals.Count,
+            selectionPaths = options.SelectionPaths,
+            anchor,
+            topologyAndUvValuesPreserved = true,
+            loopEndpointsBitwiseEqual = expected.All(v => v[0].Position == v[^1].Position && v[0].Normal == v[^1].Normal),
+            status = "Offline sequence import and native-saved archive serialization passed; native game rendering remains to be verified."
+        };
+        var manifest = JsonSerializer.Serialize(new
+        {
+            formatVersion = 1, exporter = "TM Item Studio Blender baked cloth importer", mode = "BlenderBakedSequence",
+            itemFile, storedItemId = "", identity = "Ordinary user-FID path identity; the output file supplies the inventory identity.",
+            requiresNativeFlag16m = true, testedNativeAnchorOrder = "Native flag before custom flags",
+            standaloneSingleItem = false, nativeSavedTemplate = true, nativeSavedMapRepairRequired = true, newSourceMeshNativeVerified = false,
+            geometry = details,
+            referenceLayout = new { ancestorLevel = 0, itemMaterialUseFile = false, itemModifierUseFile = false,
+                gameSkinSourceUseFile = true, modifierSkinUseFile = false, dependencies = "same folder, sibling basenames", archive = "native-saved uncompressed GBX body" },
+            files = payloads.Select(p => new { file = p.Key, bytes = p.Value.Length, sha256 = Hash(p.Value) }), warnings
+        }, Json);
+        using var memory = new MemoryStream();
+        using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, true))
+        {
+            foreach (var (name, bytes) in payloads) Entry(zip, folder + "/" + name, bytes);
+            Entry(zip, folder + "/manifest.json", Encoding.UTF8.GetBytes(manifest));
+            Entry(zip, folder + "/README.md", Encoding.UTF8.GetBytes(Readme(itemFile, Mode.SourceMesh)));
+        }
+        return new(memory.ToArray(), folder + ".zip", itemFile, warnings.ToArray(), manifest);
+    }
+
+    private static void ValidateBakedSequenceItem(byte[] bytes, BakedClothSequence sequence,
+        SequenceGeometry geometry, IReadOnlyList<CPlugVisual3D.Vertex[]> expected)
+    {
+        var parsed = Parse(bytes);
+        ValidateNativeSavedReferences(parsed);
+        var prefab = Prefab(parsed.Node);
+        Require(prefab.Ents is { Length: 1 } && prefab.Ents[0].Model is CPlugDynaObjectModel,
+            "Imported baked cloth has an unexpected entity graph.");
+        var cloth = (CPlugDynaObjectModel)prefab.Ents[0].Model!;
+        var timing = prefab.Ents[0].Params as NPlugDynaObjectModel_SInstanceParams;
+        Require(timing is { IsKinematic: false } && timing.PeriodSc == sequence.PeriodSeconds && timing.PeriodScMax == sequence.PeriodSeconds
+            && timing.Phase01 == 0 && timing.Phase01Max == 0, "Imported baked timing changed during serialization.");
+        Require(cloth.Mesh?.Visuals is { Count: 5 }, "Imported baked cloth lost one or more LODs.");
+        for (var lod = 0; lod < cloth.Mesh!.Visuals!.Count; lod++)
+        {
+            var visual = (CPlugVisualIndexedTriangles)cloth.Mesh.Visuals[lod];
+            Require(visual.Vertices.SequenceEqual(expected[lod]) && visual.IndexBuffer!.Indices.SequenceEqual(geometry.Indices), "Imported baked geometry changed during serialization.");
+            Require(visual.SubVisuals is { Length: FrameCount } && visual.SubVisuals[^1] == new Int3((FrameCount - 1) * geometry.Positions[0].Length, 0, geometry.Indices.Length), "Imported baked frame table changed.");
+            Require(visual.Vertices.Take(geometry.Positions[0].Length).SequenceEqual(visual.Vertices.Skip((FrameCount - 1) * geometry.Positions[0].Length).Take(geometry.Positions[0].Length)), "Imported baked loop is not closed.");
+        }
+    }
+
     private static IReadOnlyList<CPlugVisual3D.Vertex[]> Bake(CPlugSolid2Model mesh, Source source, Options options)
     {
         bool xAxis = options.Edge is AttachmentEdge.MinimumX or AttachmentEdge.MaximumX;
@@ -242,10 +383,10 @@ public static class ItemWavingFlagExport
         var dyna = cloth.Model as CPlugDynaObjectModel ?? throw new InvalidDataException("Converted cloth lost its ordinary Dyna host.");
         var timing = cloth.Params as NPlugDynaObjectModel_SInstanceParams;
         Require(timing is not null && !timing.IsKinematic && timing.PeriodSc == options.PeriodSeconds && timing.PeriodScMax == options.PeriodSeconds
-            && timing.Phase01 == 0 && timing.Phase01Max == 0 && dyna.LocAnim is null && dyna.LocAnimFile is null
+            && timing.Phase01 == 0 && timing.Phase01Max == 0 && dyna.LocAnim is null && dyna.References.LocAnim.File is null
             && dyna.DynaShape is null && dyna.StaticShape is null, "Converted timing/physics graph changed.");
         var mesh = dyna.Mesh!;
-        Require(mesh.Visuals is { Length: 5 }, "Converted cloth lost a LOD.");
+        Require(mesh.Visuals is { Count: 5 }, "Converted cloth lost a LOD.");
         int n = source.Positions.Length;
         for (int lod = 0; lod < 5; lod++)
         {
@@ -276,8 +417,8 @@ public static class ItemWavingFlagExport
     {
         if (gbx.RefTable?.Files.Count > 0) throw new NotSupportedException("Source-mesh conversion requires fully inline geometry and materials; external references are not resolved.");
         var item = gbx.Node ?? throw new NotSupportedException("The source item has no readable node.");
-        if (item.VisModelCustom is not null || item.VisModelCustomFile is not null || item.PhyModelCustom is not null || item.PhyModelCustomFile is not null
-            || item.MaterialModifier is not null || item.MaterialModifierFile is not null || !string.IsNullOrEmpty(item.ArchetypeRef))
+        if (item.VisModelCustom is not null || item.References.VisModelCustom.File is not null || item.PhyModelCustom is not null || item.References.PhyModelCustom.File is not null
+            || item.MaterialModifier is not null || item.References.MaterialModifier.File is not null || !string.IsNullOrEmpty(item.ArchetypeRef))
             throw new NotSupportedException("Custom legacy models, material modifiers, physics overrides and archetypes are outside the bounded source-mesh converter.");
         var builder = new SourceBuilder(selectionPaths);
         builder.Visit(item.EntityModel, Matrix4x4.Identity, 0, "entityModel");
@@ -316,14 +457,14 @@ public static class ItemWavingFlagExport
                     case NPlugItem_SVariantList list:
                         if (list.Variants is not { Length: 1 }) throw new NotSupportedException("Source-mesh conversion requires exactly one concrete variant.");
                         var variant = list.Variants[0];
-                        if (variant.EntityModelFile is not null) throw new NotSupportedException("External variant geometry is not supported.");
+                        if (variant.References.EntityModel.File is not null) throw new NotSupportedException("External variant geometry is not supported.");
                         Visit(variant.EntityModel, transform, depth + 1, path + "/variant:0/entityModel"); break;
                     case CPlugPrefab prefab:
                         if (prefab.Ents is not { Length: > 0 }) throw new NotSupportedException("The source prefab is empty.");
                         for (var i = 0; i < prefab.Ents.Length; i++)
                         {
                             var ent = prefab.Ents[i];
-                            if (ent is null || ent.ModelFile is not null || ent.Params is not null) throw new NotSupportedException("External, parameterized or moving prefab entities are not supported.");
+                            if (ent is null || ent.References.Model.File is not null || ent.Params is not null) throw new NotSupportedException("External, parameterized or moving prefab entities are not supported.");
                             var q = new Quaternion(ent.Rotation.X, ent.Rotation.Y, ent.Rotation.Z, ent.Rotation.W);
                             if (!Finite(V(ent.Position)) || !float.IsFinite(q.LengthSquared()) || Math.Abs(q.LengthSquared() - 1) > .001)
                                 throw new NotSupportedException("Source entity transforms must be finite rigid transforms with unit quaternions.");
@@ -340,7 +481,7 @@ public static class ItemWavingFlagExport
                         else Visit(common.VisModel, transform, depth + 1, path + "/visModel");
                         break;
                     case CPlugStaticObjectModel model:
-                        if (model.MeshFile is not null || model.ShapeFile is not null) throw new NotSupportedException("External static geometry/collision is unsupported.");
+                        if (model.References.Mesh.File is not null || model.References.Shape.File is not null) throw new NotSupportedException("External static geometry/collision is unsupported.");
                         if (model.IsMeshCollidable || model.Shape is not null) warnings.Add("Source static collision is omitted from the cloth package.");
                         Visit(model.Mesh, transform, depth + 1, path + "/mesh"); break;
                     case CPlugSolid2Model solid: Solid(solid, transform, path); break;
@@ -352,18 +493,18 @@ public static class ItemWavingFlagExport
         private void Solid(CPlugSolid2Model solid, Matrix4x4 transform, string path)
         {
             if (solid.Skel is not null || solid.PreLightGenerator is not null || solid.Joints is { Length: > 0 }
-                || solid.Lights is { Length: > 0 } || solid.LightUserModels is { Length: > 0 } || solid.LightInsts is { Length: > 0 }
+                || solid.Lights is { Length: > 0 } || solid.LightUserModels is { Count: > 0 } || solid.LightInsts is { Length: > 0 }
                 || solid.FakeOccProjs is { Length: > 0 }) throw new NotSupportedException("Skinned, generated, lit or effect-bearing source meshes are unsupported.");
-            if (solid.Materials?.Any(m => m?.File is not null) == true) throw new NotSupportedException("External source materials are not resolved.");
-            if (solid.Visuals is not { Length: > 0 }) throw new NotSupportedException("The source mesh contains no visuals.");
+            if (solid.References.Materials?.Any(m => m?.File is not null) == true) throw new NotSupportedException("External source materials are not resolved.");
+            if (solid.Visuals is not { Count: > 0 }) throw new NotSupportedException("The source mesh contains no visuals.");
             if (solid.LodMaxDistAtFov90 is { Length: > 1 }) throw new NotSupportedException("Source meshes with multiple LOD distances are unsupported; select a concrete static mesh first.");
             var shaded = solid.ShadedGeoms ?? [];
-            if (shaded.Length > 0 && (shaded.Length != solid.Visuals.Length || shaded.Any(g => g is null || g.VisualIndex < 0 || g.VisualIndex >= solid.Visuals.Length)
-                || shaded.Select(g => g.VisualIndex).Distinct().Count() != solid.Visuals.Length || shaded.Select(g => g.LodMask).Distinct().Count() != 1))
+            if (shaded.Length > 0 && (shaded.Length != solid.Visuals.Count || shaded.Any(g => g is null || g.VisualIndex < 0 || g.VisualIndex >= solid.Visuals.Count)
+                || shaded.Select(g => g.VisualIndex).Distinct().Count() != solid.Visuals.Count || shaded.Select(g => g.LodMask).Distinct().Count() != 1))
                 throw new NotSupportedException("Ambiguous submesh/LOD mappings are unsupported.");
-            if (shaded.Length == 0 && solid.Visuals.Length != 1) throw new NotSupportedException("Multiple source visuals require one unambiguous common-LOD mapping each.");
+            if (shaded.Length == 0 && solid.Visuals.Count != 1) throw new NotSupportedException("Multiple source visuals require one unambiguous common-LOD mapping each.");
             meshes++;
-            for (var visualIndex = 0; visualIndex < solid.Visuals.Length; visualIndex++)
+            for (var visualIndex = 0; visualIndex < solid.Visuals.Count; visualIndex++)
             {
                 var raw = solid.Visuals[visualIndex];
                 if (!IsSelected(path + $"/visual:{visualIndex}")) continue;
@@ -449,13 +590,22 @@ public static class ItemWavingFlagExport
     private static void ValidateFlagGraph(Gbx<CGameItemModel> document)
     {
         ValidateReferences(document);
+        ValidateClothGraph(document, "The audited flag template graph changed.");
+    }
+    private static void ValidateNativeSavedFlagGraph(Gbx<CGameItemModel> document)
+    {
+        ValidateNativeSavedReferences(document);
+        ValidateClothGraph(document, "The native-saved flag template graph changed.");
+    }
+    private static void ValidateClothGraph(Gbx<CGameItemModel> document, string message)
+    {
         var prefab = Prefab(document.Node);
         Require(prefab.Ents is { Length: 2 } && prefab.Ents[0].Model is CPlugStaticObjectModel && prefab.Ents[1].Model is CPlugDynaObjectModel,
-            "The audited flag template graph changed.");
+            message);
         var d = (CPlugDynaObjectModel)prefab.Ents![1].Model!;
-        Require(d.LocAnim is null && d.LocAnimFile is null && d.DynaShape is null && d.StaticShape is null
+        Require(d.LocAnim is null && d.References.LocAnim.File is null && d.DynaShape is null && d.StaticShape is null
             && prefab.Ents[1].Params is NPlugDynaObjectModel_SInstanceParams { IsKinematic: false }, "The template is not the audited non-kinematic cloth host.");
-        Require(d.Mesh?.Visuals is { Length: 5 } && d.Mesh.Boxes is null, "The audited five-LOD cloth mesh changed.");
+        Require(d.Mesh?.Visuals is { Count: 5 } && d.Mesh.Boxes is null, "The audited five-LOD cloth mesh changed.");
         foreach (var raw in d.Mesh!.Visuals!)
         {
             Require(raw is CPlugVisualIndexedTriangles, "The template visual type changed.");
@@ -468,16 +618,37 @@ public static class ItemWavingFlagExport
     {
         Require(document.Node.Ident?.Id == "" && document.Node.ArchetypeRef == "" && document.RefTable?.AncestorLevel == 0
             && document.RefTable.Files.Select(f => f.FilePath).SequenceEqual(new[] { Placeholder, Modifier })
-            && document.RefTable.Files.All(f => f.Flags == 1 && !f.UseFile) && document.Node.MaterialModifierFile?.FilePath == Modifier,
+            && document.RefTable.Files.All(f => f.Flags == 1 && !f.UseFile) && document.Node.References.MaterialModifier.File?.FilePath == Modifier,
             "The sibling-node material/modifier references or ordinary user identity changed.");
         var mesh = ((CPlugDynaObjectModel)Prefab(document.Node).Ents!.Last().Model!).Mesh!;
-        Require(mesh.Materials is { Length: 1 } && mesh.Materials[0].File?.FilePath == Placeholder
-            && (mesh.CustomMaterials?.Length ?? 0) == 0 && (mesh.MaterialInsts?.Length ?? 0) == 0, "The early placeholder material route changed.");
+        Require(mesh.References.Materials is { Count: 1 } && mesh.References.Materials[0].File?.FilePath == Placeholder
+            && (mesh.CustomMaterials?.Length ?? 0) == 0 && (mesh.MaterialInsts?.Count ?? 0) == 0, "The early placeholder material route changed.");
+    }
+    private static void ValidateNativeSavedReferences(Gbx<CGameItemModel> document)
+    {
+        Require(document.Node.ArchetypeRef == "" && document.RefTable?.AncestorLevel == 0
+            && document.RefTable.Files.Select(f => f.FilePath).SequenceEqual(new[] { Placeholder, Modifier })
+            && document.RefTable.Files.All(f => f.Flags == 1 && !f.UseFile)
+            && document.Node.References.MaterialModifier.File?.FilePath == Modifier,
+            "The native-saved sibling reference layout changed.");
+        var mesh = ((CPlugDynaObjectModel)Prefab(document.Node).Ents!.Last().Model!).Mesh!;
+        Require(mesh.References.Materials is { Count: 1 } && mesh.References.Materials[0].File?.FilePath == Placeholder
+            && (mesh.CustomMaterials?.Length ?? 0) == 0 && (mesh.MaterialInsts?.Count ?? 0) == 0,
+            "The native-saved placeholder material route changed.");
     }
     private static CPlugPrefab Prefab(CGameItemModel item) => item.EntityModel is NPlugItem_SVariantList { Variants.Length: 1 } list && list.Variants[0].EntityModel is CPlugPrefab p
         ? p : throw new InvalidDataException("Expected the audited single-variant prefab.");
     private static Gbx<CGameItemModel> Parse(byte[] bytes) => Gbx.Parse<CGameItemModel>(new MemoryStream(bytes));
-    private static byte[] Save(Gbx<CGameItemModel> document) { using var stream = new MemoryStream(); new ReferenceDocument(document.Node, document.RefTable!).Save(stream); return stream.ToArray(); }
+    private static byte[] Save(Gbx<CGameItemModel> document)
+    {
+        using var stream = new MemoryStream();
+        // Trackmania's native item-save path emits an uncompressed body for the
+        // validated flag graph. Keep that container mode when authoring new
+        // sequence geometry; changing only the vertex data must not fall back
+        // to the compact authoring archive.
+        new ReferenceDocument(document.Node, document.RefTable!) { BodyCompression = GbxCompression.Uncompressed }.Save(stream);
+        return stream.ToArray();
+    }
     private sealed class ReferenceDocument : Gbx<CGameItemModel> { public ReferenceDocument(CGameItemModel node, GbxRefTable table) : base(node) => RefTable = table; }
     [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicProperties, typeof(CPlugVisual))]
     private static void SetSerializedCount(CPlugVisual visual, int count)
@@ -526,3 +697,10 @@ public static class ItemWavingFlagExport
     private static string Hash(byte[] bytes) => Convert.ToHexString(SHA256.HashData(bytes));
     private static void Require(bool condition, string message) { if (!condition) throw new InvalidDataException(message); }
 }
+
+
+
+
+
+
+

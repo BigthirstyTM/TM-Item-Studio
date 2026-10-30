@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Serialization.Chunking;
@@ -189,3 +189,8 @@ public static class ItemPlacementAlternatives
         if (index < 0 || index >= length) throw new ArgumentOutOfRangeException(nameof(index));
     }
 }
+
+
+
+
+

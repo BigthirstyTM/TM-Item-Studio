@@ -9,7 +9,8 @@
     <Reference Include="GBX.NET.LZO"><HintPath>$(NuGetPackageRoot)gbx.net.lzo/2.1.6/lib/net8.0/GBX.NET.LZO.dll</HintPath></Reference>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
-    <PackageReference Include="TmEssentials" Version="2.7.0" />
+    <PackageReference Include="TmEssentials" Version="2.8.0" />
     <Content Include="Fixtures/*.Shape.Gbx" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
+

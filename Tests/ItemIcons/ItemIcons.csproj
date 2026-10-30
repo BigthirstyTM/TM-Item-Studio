@@ -7,6 +7,7 @@
     <PackageReference Include="GBX.NET.LZO" Version="2.1.6" ExcludeAssets="compile;runtime" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
-    <PackageReference Include="TmEssentials" Version="2.7.0" />
+    <PackageReference Include="TmEssentials" Version="2.8.0" />
   </ItemGroup>
 </Project>
+

@@ -89,6 +89,31 @@ function inspectPackage(file, mode) {
     return { mode, file: path.basename(file), zipSha256: sha(fs.readFileSync(file)), itemSha256: sha(item), manifest };
 }
 
+function inspectBakedSequencePackage(file) {
+    const entries = readZip(fs.readFileSync(file));
+    assert.equal(entries.size, 6, 'Baked sequence package must contain the item, three dependencies, manifest and README');
+    const manifestPath = [...entries.keys()].find(name => name.endsWith('/manifest.json'));
+    assert.ok(manifestPath);
+    const folder = manifestPath.slice(0, manifestPath.lastIndexOf('/'));
+    const manifest = JSON.parse(entries.get(manifestPath));
+    assert.equal(manifest.mode, 'BlenderBakedSequence');
+    assert.equal(manifest.geometry.sequenceFrames, 86);
+    assert.equal(manifest.geometry.verticesPerFrame, 12);
+    assert.equal(manifest.geometry.trianglesPerFrame, 12);
+    assert.equal(manifest.geometry.lods, 5);
+    assert.equal(manifest.geometry.topologyAndUvValuesPreserved, true);
+    assert.match(manifest.geometry.status, /native game rendering remains to be verified/i);
+    assert.equal(manifest.newSourceMeshNativeVerified, false);
+    for (const info of manifest.files) {
+        const bytes = entries.get(folder + '/' + info.file);
+        assert.ok(bytes, `Missing ${info.file}`);
+        assert.equal(bytes.length, info.bytes);
+        assert.equal(sha(bytes), info.sha256);
+    }
+    return { mode: manifest.mode, file: path.basename(file), zipSha256: sha(fs.readFileSync(file)),
+        itemSha256: sha(entries.get(folder + '/' + manifest.itemFile)), manifest };
+}
+
 async function checkWavingFlags(baseUrl, work) {
     const fixtureRoot = process.env.STUDIO_WAVING_MAP_FIXTURES;
     assert.ok(fs.existsSync(sourceFixture), `Generate the source fixture first: ${sourceFixture}`);
@@ -136,6 +161,24 @@ async function checkWavingFlags(baseUrl, work) {
             await panel.getByRole('status').filter({ hasText: /Exported .*ready for the map packaging step/ }).waitFor();
         }
         console.log('PASS: three browser preset downloads retain exact Items and audited dependency hashes.');
+
+        // The Blender helper is a real bundled archive, not a link to a local
+        // development file. Inspect the browser download and its two payloads.
+        const blenderDownloadEvent = page.waitForEvent('download');
+        await panel.getByRole('button', { name: 'Download Blender add-on (.zip)', exact: true }).click();
+        const blenderDownload = await blenderDownloadEvent;
+        assert.equal(blenderDownload.suggestedFilename(), 'trackmania_baked_cloth.zip');
+        const blenderArchive = path.join(work, 'trackmania_baked_cloth.zip');
+        await blenderDownload.saveAs(blenderArchive);
+        const blenderEntries = readZip(fs.readFileSync(blenderArchive));
+        assert.deepEqual([...blenderEntries.keys()].sort(), [
+            'trackmania_baked_cloth/README.md', 'trackmania_baked_cloth/__init__.py'
+        ]);
+        assert.match(blenderEntries.get('trackmania_baked_cloth/__init__.py').toString('utf8'), /bl_info/);
+        assert.match(blenderEntries.get('trackmania_baked_cloth/README.md').toString('utf8'), /\.tmcloth\.json/);
+        results.push({ blenderAddonDownload: true, blenderAddonEntries: [...blenderEntries.keys()].sort(),
+            blenderAddonSha256: sha(fs.readFileSync(blenderArchive)) });
+        console.log('PASS: Item Studio downloads the bundled Blender baked-cloth add-on archive.');
 
         await open(sourceFixture);
         panel = page.getByRole('region', { name: 'Waving flag converter', exact: true });
@@ -198,6 +241,28 @@ async function checkWavingFlags(baseUrl, work) {
         await page.screenshot({ path: path.join(work, 'headless-studio-source-mesh-export.png') });
         console.log('PASS: supported inline source uploads and exports an explicitly unverified 86-frame/five-LOD package.');
 
+        // When the Blender headless fixture is supplied, exercise the actual
+        // browser upload path as well as the C# importer. Keeping this opt-in
+        // avoids making published-app checks depend on Blender being installed
+        // on every CI runner.
+        const bakedSequenceFixture = process.env.STUDIO_WAVING_BAKED_SEQUENCE;
+        if (bakedSequenceFixture) {
+            assert.ok(fs.existsSync(bakedSequenceFixture), `Missing baked sequence fixture ${bakedSequenceFixture}`);
+            await open(sourceFixture);
+            panel = page.getByRole('region', { name: 'Waving flag converter', exact: true });
+            const sequenceInput = panel.getByLabel('Blender baked cloth sequence', { exact: true });
+            await sequenceInput.setInputFiles(bakedSequenceFixture);
+            await panel.getByRole('status').filter({ hasText: /Loaded .*86 frames/ }).waitFor();
+            await panel.getByLabel('Export name', { exact: true }).fill('Browser_Blender_Baked_Cloth');
+            const sequenceDownload = page.waitForEvent('download');
+            await panel.getByRole('button', { name: 'Export Blender sequence as waving flag package (.zip)', exact: true }).click();
+            const sequenceFile = path.join(work, 'browser-blender-baked-sequence.zip');
+            await (await sequenceDownload).saveAs(sequenceFile);
+            results.push(inspectBakedSequencePackage(sequenceFile));
+            await panel.getByRole('status').filter({ hasText: /Exported .* from the Blender baked sequence/ }).waitFor();
+            console.log('PASS: browser uploads the Blender baked sequence and exports the native 86-frame package.');
+        }
+
         for (const [name, success] of [['native-saved.Map.Gbx', true], ['no-native.Map.Gbx', false]]) {
             await open(sourceFixture);
             panel = page.getByRole('region', { name: 'Waving flag converter', exact: true });
@@ -255,6 +320,7 @@ async function checkWavingFlags(baseUrl, work) {
         assert.deepEqual(errors, [], 'Real upload/export/map packaging must cause no browser page errors');
         const report = { scope: 'Headless browser authoring workflow only; no native game test',
             checks: { exactThreePresetPayloads: true, supportedSourceMeshDownload: true,
+                blenderBakedSequenceUploadAndExport: Boolean(process.env.STUDIO_WAVING_BAKED_SEQUENCE),
                 unsupportedSourceRefused: true, nativeSavedMapDecodedPayloadsAndRawPreservationMatchBackend: true,
                 noNativeFlagMapRefusedWithoutDownload: true, noPageErrors: true }, results };
         fs.writeFileSync(path.join(work, 'waving-flag-browser-validation.json'), JSON.stringify(report, null, 2) + '\n');

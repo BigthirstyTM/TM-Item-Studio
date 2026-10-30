@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.IO.Hashing;
 using System.Security.Cryptography;
 
@@ -53,3 +53,8 @@ internal static class PackagingGuard
         return result;
     }
 }
+
+
+
+
+

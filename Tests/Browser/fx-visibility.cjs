@@ -33,7 +33,34 @@ assert.ok(item && dependencies, 'Usage: fx-visibility.cjs <embedded Item.Gbx> <e
         await page.getByLabel('FX emission point Z', { exact: true }).waitFor();
         await page.getByText('Native status: validated LocalOffsetExpr write', { exact: false }).waitFor();
         await page.getByLabel('Hidden FX catalog routes', { exact: true }).waitFor();
-        await page.getByText('WaterSpray / Thin / AndSteam', { exact: false }).waitFor();
+        const carrierPreset = page.getByLabel('FX carrier preset', { exact: true });
+        await carrierPreset.waitFor();
+        assert.deepEqual(await carrierPreset.locator('option').allTextContents(), [
+            'Embedded Sparkler (8 m / 16 m)',
+            'Embedded Fogger (8 m / 16 m)',
+            'Fogger with light (8 m / 16 m)',
+            'Torch / small Torch'
+        ]);
+        await carrierPreset.selectOption({ label: 'Embedded Fogger (8 m / 16 m)' });
+        await page.getByRole('status').filter({ hasText: 'Embedded Fogger (8 m / 16 m)' }).waitFor();
+        const particleCandidate = page.getByLabel('Particle model to emit', { exact: true });
+        await particleCandidate.waitFor();
+        assert.deepEqual(await particleCandidate.locator('option').allTextContents(), [
+            'PodiumSparkler / PodiumSparklerEnd',
+            'WaterSpray / Thin / AndSteam',
+            'WaterSplash / bubbles / wakes',
+            'Leaves, fog, smoke, fire, boost, sparks and light trails'
+        ]);
+        await particleCandidate.selectOption({ label: 'WaterSpray / Thin / AndSteam' });
+        await page.getByRole('status').filter({ hasText: 'WaterSpray / Thin / AndSteam' }).waitFor();
+        const exactParticle = page.getByLabel('Exact particle model (83-row native audit)', { exact: true });
+        await exactParticle.waitFor();
+        assert.equal(await exactParticle.locator('option').count(), 83);
+        await exactParticle.selectOption('WaterSprayThin');
+        await page.getByRole('status').filter({ hasText: 'WaterSprayThin' }).first().waitFor();
+        await page.getByLabel('Complete FX particle inventory', { exact: true }).screenshot({
+            path: process.env.STUDIO_FX_CATALOG_SCREENSHOT || path.resolve(__dirname, '../../artifacts/fx-clones/fx-catalog-selector.png')
+        });
         await page.getByText('Add FX / mixed graph', { exact: false }).waitFor();
         const x = page.getByLabel('FX emission point X', { exact: true });
         const y = page.getByLabel('FX emission point Y', { exact: true });

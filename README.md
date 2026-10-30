@@ -1,4 +1,4 @@
-# Trackmania 2020 Item Studio
+﻿# Trackmania 2020 Item Studio
 
 Trackmania 2020 Item Studio is a browser-based editor for `.Item.Gbx` files.
 It provides an interactive 3D viewport and exposes item metadata, placement,
@@ -76,17 +76,25 @@ up in the viewport as soon as the referenced item is open.
 The **Flag item conversion** tab includes a **Waving flag converter**. It exports
 the exact tested swallowtail, long and round shapes, or creates an experimental
 86-frame cloth animation from supported static triangles. The download is a ZIP
-with the Item and three material dependencies. **Package a saved map** embeds the
-complete graph after Trackmania saving. The proven cold-start setup requires a
-genuine native Stadium 16 m flag in the map. New source-mesh conversions and new
-packaged outputs still need native testing. See the
+with the Item and three material dependencies. **Package a saved map** attempts
+to repair the complete graph after Trackmania saving. The proven cold-start setup requires a
+genuine native Stadium 16 m flag in the map. Each newly generated source-mesh
+sequence still needs its own native test. See the
 [technical converter guide](docs/waving-flag-converter.md) and
 [native evidence](docs/custom-flag-embedded-no-openplanet-2026-10-22.md).
 
+The Waving flag converter also downloads the bundled **Trackmania Baked Cloth
+Exporter** Blender add-on. It exports a topology-stable `.tmcloth.json`
+mesh sequence from a baked Blender cloth simulation; Item Studio imports that
+validated sequence and writes the native VertexTween item graph. The resulting
+user-item package has been proven to load, place and animate after a clean
+Trackmania restart. Map embedding remains a separate unproven step. See the
+[Blender exporter guide](docs/blender-baked-cloth-export.md).
+
 The **Flag** tab measures the open item against the settings read out of the game's own flag
 (`Flag16m.Item.Gbx`, its prefab, its place-param and its cloth mesh) and can convert the item into
-a flag. The conversion changes classification and placement only — pivots, geometry, materials and
-metadata stay as authored — and it refuses rather than guesses: an external placement file, an
+a flag. The conversion changes classification and placement only â€” pivots, geometry, materials and
+metadata stay as authored â€” and it refuses rather than guesses: an external placement file, an
 opaque placement-class chunk, a newer variant-list version or an item without an entity model is
 rejected *before* anything is written, so a refused conversion leaves the bytes untouched.
 
@@ -113,13 +121,13 @@ the game's assets (`--tags`, `--placement`, `--profile`, `--describe`, `--lod`, 
 ### Multi-instance item export
 
 **Export multi-instance .Item.Gbx** writes the same copies into one self-contained item instead
-of into a macroblock. A macroblock cannot embed an item — its spawn stores an ident reference —
+of into a macroblock. A macroblock cannot embed an item â€” its spawn stores an ident reference â€”
 but a `CPlugPrefab` entry stores a node reference plus a rotation and a position, and GBX.NET
 writes a repeated node only once. The export therefore builds a root prefab with one entry per
 copy, every entry pointing at the same embedded mesh: one mesh, N transforms.
 
 - Measured on the bundled fixture: the 35 076 byte item becomes 34 911 bytes with one copy and
-  35 052 bytes with twenty — about 7 bytes per extra copy instead of a second copy of the mesh.
+  35 052 bytes with twenty â€” about 7 bytes per extra copy instead of a second copy of the mesh.
 - Every copy keeps its own position and rotation relative to the root, so the copies are placed
   individually inside the item.
 - The export gets its own id (`<id>_x20`) because inventory files are named after the item id;
@@ -324,7 +332,7 @@ The checks load two distinct synthetic items, exercise a failed load and recover
 check recursive gizmo cleanup, and navigate away to verify renderer/listener teardown.
 No Trackmania installation or third-party item files are required.
 
-For the upload → export → reopen collection regression, run
+For the upload â†’ export â†’ reopen collection regression, run
 `npm --prefix Tests/Browser run test:collection-export`. This publishes and serves
 the current checkout automatically; no development server is needed. See
 [collection regression details](Tests/Browser/CollectionArchive/README.md).
@@ -358,16 +366,16 @@ static items, create collision geometry, or author a waypoint chain. Exported fi
 must still be verified after a fresh Trackmania start: inventory discovery, placement,
 and in-map playback are all required checks.
 
-The first `World → driver → visible body` probe established that Trackmania crashes
+The first `World â†’ driver â†’ visible body` probe established that Trackmania crashes
 when loading a model-less, collision-less dyna driver. Studio therefore does not offer
 that authoring action. If such a probe is loaded, its constraint is highlighted in red
-as **INVISIBLE DRIVER — native-unsafe**; do not export it for the game. The separate
+as **INVISIBLE DRIVER â€” native-unsafe**; do not export it for the game. The separate
 blue **VISIBLE PATH PROXY** action uses a complete existing dyna model instead. It
-creates a visible duplicate to test `parent → proxy → original body` safely before an
+creates a visible duplicate to test `parent â†’ proxy â†’ original body` safely before an
 unproven hiding strategy is attempted.
 
 Run `npm --prefix Tests/Browser run test:kinematic-preservation` for the real
-SnowCar upload → variant switching → explicit edit → export → reopen regression.
+SnowCar upload â†’ variant switching â†’ explicit edit â†’ export â†’ reopen regression.
 See [the test contract](Tests/Browser/MotionArchive/README.md) and the
 [additional approved fixtures](Tests/Browser/Fixtures/Approved/additional-items.md).
 
@@ -382,3 +390,6 @@ The assembly is refreshed from the newest stable upstream release by
 after the parser and Studio build checks pass. See
 [docs/gbx-net-updates.md](docs/gbx-net-updates.md) for the updater and the
 separate GBX.NET CLI assessment.
+
+
+The exact 83-row FX selector and browser proof are recorded in [the English catalog UI report](docs/evidence/fx-catalog-ui-2026-10-28.md).
