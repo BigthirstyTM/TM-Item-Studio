@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
@@ -413,7 +413,7 @@ public static partial class ItemScene
                     collisions.Add(new(path, entry?.Path, "Legacy surface geometry", ItemSceneState.Unsupported, source));
             }
             for (var i = 0; i < surface.Materials.Length; i++)
-                if (surface.Materials[i]?.MaterialFile is { } file)
+                if (surface.Materials[i]?.References.Material.File is { } file)
                     Issue(path + $"/material:{i}", "external-reference", ItemSceneState.Unresolved, $"External collision material: {file.FilePath}");
             if (surface.Surf is not null || surface.Geom is null) Surf(surface.Surf, path, world, entry, source, 0);
         }
@@ -505,3 +505,9 @@ public static partial class ItemScene
         }
     }
 }
+
+
+
+
+
+

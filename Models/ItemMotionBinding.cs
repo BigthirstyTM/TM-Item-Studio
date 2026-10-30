@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using GBX.NET.Engines.Meta;
 using GBX.NET.Engines.Plug;
 using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
@@ -52,7 +52,7 @@ public static class ItemMotionBindings
         {
             var entry = owner.Ents[index];
             if (entry is null) { tableError ??= "Null prefab entry prevents reliable slot-table construction."; continue; }
-            if (entry.ModelFile is not null) { tableError ??= "External model prevents reliable slot classification; no resolution was attempted."; continue; }
+            if (entry.References.Model.File is not null) { tableError ??= "External model prevents reliable slot classification; no resolution was attempted."; continue; }
             var model = entry.Model;
             if (model is CPlugPrefab)
             {
@@ -148,7 +148,7 @@ public static class ItemMotionBindings
                     tableError ??= "Null prefab entry prevents reliable slot-table construction.";
                     continue;
                 }
-                if (entry.ModelFile is not null)
+                if (entry.References.Model.File is not null)
                 {
                     tableError ??= "External model prevents reliable slot classification; no resolution was attempted.";
                     continue;
@@ -227,3 +227,8 @@ public static class ItemMotionBindings
 
     private static bool Finite(GBX.NET.Vec3 value) => float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
 }
+
+
+
+
+

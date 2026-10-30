@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -140,3 +140,8 @@ public static class FxIdentity
     static string Hash(byte[] bytes) => Convert.ToHexString(SHA256.HashData(bytes));
     static void Require(bool condition, string message) { if (!condition) throw new InvalidDataException(message); }
 }
+
+
+
+
+

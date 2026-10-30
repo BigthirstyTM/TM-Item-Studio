@@ -1,4 +1,4 @@
-using GBX.NET;
+﻿using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Meta;
 using GBX.NET.Engines.MetaNotPersistent;
@@ -133,7 +133,7 @@ public static class ItemFlagConversion
         {
             if (variants.Version != VariantListVersion)
                 deviations.Add(new("VariantList.Version", VariantListVersion.ToString(), variants.Version.ToString()));
-            var modeled = (variants.Variants ?? []).Where(v => v.EntityModel is not null || v.EntityModelFile is not null).ToArray();
+            var modeled = (variants.Variants ?? []).Where(v => v.EntityModel is not null || v.References.EntityModel.File is not null).ToArray();
             if (modeled.Length == 0)
             {
                 deviations.Add(new("Variants", "at least one variant with a model", "none"));
@@ -195,7 +195,7 @@ public static class ItemFlagConversion
 
             foreach (var variant in existing.Variants)
             {
-                if (variant.EntityModel is null && variant.EntityModelFile is null) continue;
+                if (variant.EntityModel is null && variant.References.EntityModel.File is null) continue;
                 variant.Tags ??= new Dictionary<string, string>();
                 // Type=Flag is the classification; an existing MatModifier is the author's choice and
                 // is preserved, only a missing one is filled in with the vanilla value.
@@ -240,9 +240,9 @@ public static class ItemFlagConversion
     /// </summary>
     private static void EnsurePlacementIsEditable(CGameItemModel item)
     {
-        if (item.DefaultPlacementFile is not null && item.DefaultPlacement is null)
+        if (item.References.DefaultPlacement.File is not null && item.DefaultPlacement is null)
             throw new NotSupportedException(
-                $"The item's placement parameters live in the external file '{item.DefaultPlacementFile.FilePath}'; "
+                $"The item's placement parameters live in the external file '{item.References.DefaultPlacement.File.FilePath}'; "
                 + "its placement class cannot be edited from here. Import the placement parameters into the item first.");
 
         // The placement class is serialized by 2E020005. An opaque payload there is data we cannot
@@ -293,7 +293,7 @@ public static class ItemFlagConversion
 
         placement.CreateChunk<CGameItemPlacementParam.Chunk2E020005>();
         placement.PlacementClass = CreatePlacementClass();
-        placement.PlacementClassFile = null;
+        placement.References.PlacementClass.Clear();
         applied.Add($"placement class set to AlwaysUp + AlignToWorldDir with {CreatePatchLayouts().Length} patch layouts");
     }
 
@@ -322,9 +322,9 @@ public static class ItemFlagConversion
 
     private static void InspectPlacement(CGameItemModel item, List<Deviation> deviations, List<string> notes)
     {
-        if (item.DefaultPlacementFile is not null && item.DefaultPlacement is null)
+        if (item.References.DefaultPlacement.File is not null && item.DefaultPlacement is null)
         {
-            notes.Add($"The placement parameters are external ('{item.DefaultPlacementFile.FilePath}') and were not evaluated.");
+            notes.Add($"The placement parameters are external ('{item.References.DefaultPlacement.File.FilePath}') and were not evaluated.");
             return;
         }
         var placement = item.DefaultPlacement;
@@ -344,8 +344,8 @@ public static class ItemFlagConversion
         var placementClass = placement.PlacementClass;
         if (placementClass is null)
         {
-            if (placement.PlacementClassFile is not null)
-                notes.Add($"The placement class is external ('{placement.PlacementClassFile.FilePath}') and was not evaluated.");
+            if (placement.References.PlacementClass.File is not null)
+                notes.Add($"The placement class is external ('{placement.References.PlacementClass.File.FilePath}') and was not evaluated.");
             else
                 deviations.Add(new("PlacementClass", "the flag placement class", "absent"));
             return;
@@ -382,3 +382,9 @@ public static class ItemFlagConversion
         }
     }
 }
+
+
+
+
+
+

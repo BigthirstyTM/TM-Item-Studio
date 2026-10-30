@@ -1,4 +1,4 @@
-using GBX.NET;
+﻿using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Meta;
 using GBX.NET.Engines.MetaNotPersistent;
@@ -200,3 +200,8 @@ public static class ItemEdits
         if (index < 0 || index >= length) throw new ArgumentOutOfRangeException(nameof(index));
     }
 }
+
+
+
+
+

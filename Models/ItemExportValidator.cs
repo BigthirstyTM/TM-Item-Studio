@@ -1,4 +1,4 @@
-using GBX.NET;
+﻿using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.MwFoundations;
 using GBX.NET.Engines.Plug;
@@ -86,3 +86,8 @@ public static class ItemExportValidator
         return new Quat(rotation.X * inv, rotation.Y * inv, rotation.Z * inv, rotation.W * inv);
     }
 }
+
+
+
+
+

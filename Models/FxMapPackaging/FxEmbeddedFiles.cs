@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Text;
 using TM_Item_Studio.Models.FlagPackaging;
 
@@ -114,3 +114,8 @@ internal sealed class FxEmbeddedFiles
     static void Definition(Stream stream, string value)
     { var bytes = Utf8.GetBytes(value); Write(stream, 0x40000000); Write(stream, checked((uint)bytes.Length)); stream.Write(bytes); }
 }
+
+
+
+
+

@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace TM_Item_Studio.Models;
 
@@ -72,3 +72,8 @@ public sealed class ItemSceneGeometryCache
         return geometry;
     }
 }
+
+
+
+
+

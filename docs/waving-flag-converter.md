@@ -17,11 +17,19 @@ anchor remained in that map. See the
 [English runtime evidence report](custom-flag-embedded-no-openplanet-2026-10-22.md).
 
 **SourceMesh** creates new animation from supported static item geometry. Its
-serialization and geometry are checked offline. Newly converted arbitrary
-geometry has **not** yet been loaded/rendered in Trackmania. Game automation is
-paused at the user's request. The new browser packaging workflow is also an
-offline implementation of the measured repair route; native acceptance must be
-checked for each new output. No second-machine or multiplayer claim is made.
+serialization and geometry are checked offline. The Blender baked-sequence
+route has now also been exercised natively: after a fresh Trackmania process,
+the generated `BlenderGridImported_WavingFlag.Item.Gbx` was discovered in the
+user Items folder, placed, rendered and observed to change silhouette across
+successive native screenshots. This is an item-folder/session proof for the
+new sequence, not a recipient or map-embedding proof. The browser packaging
+workflow remains an offline implementation of the measured repair route.
+
+The native editor save path still reports `Error while saving items into the map
+file` for this new package, and the raw embedded-map control did not expose the
+custom anchors through the game editor. Those results keep map embedding and
+recipient independence explicitly unverified; do not call the new item a
+portable single-file map asset yet.
 
 The portable unit for players is a **complete embedded map with a native flag**.
 The authoring export is a ZIP with **one Item plus three sibling dependencies**.

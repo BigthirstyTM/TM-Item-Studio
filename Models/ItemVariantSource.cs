@@ -1,4 +1,4 @@
-using GBX.NET;
+﻿using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Meta;
@@ -83,7 +83,7 @@ public sealed class ItemVariantSource
         var model = new CGameItemModel { EntityModel = document.Node,
             Ident = new Ident(name, "Stadium2020", "Nadeo") };
         return new ItemVariantSource(name, new Gbx<CGameItemModel>(model), null, null, null)
-        { assetDocument = document, assetBytes = originalBytes, PreviewDescription = description ?? $"{document.Node?.GetType().Name} — read-only asset preview" };
+        { assetDocument = document, assetBytes = originalBytes, PreviewDescription = description ?? $"{document.Node?.GetType().Name} â€” read-only asset preview" };
     }
 
     /// <summary>Combines documents using the first file's item-level metadata.</summary>
@@ -109,7 +109,6 @@ public sealed class ItemVariantSource
                     Tags = new Dictionary<string, string>(variant.Tags),
                     HiddenInManualCycle = variant.HiddenInManualCycle,
                     EntityModel = variant.EntityModel,
-                    EntityModelFile = variant.EntityModelFile
                 });
             }
             else if (source.Model.EntityModel is { } entity)
@@ -601,7 +600,7 @@ public sealed class ItemVariantSource
 
     /// <summary>
     /// Refuses more than the engine's segment limit instead of truncating: a longer timeline is a
-    /// real edit that the game cannot load (docs/item-gbx-chunks.md §16), so it must not be written.
+    /// real edit that the game cannot load (docs/item-gbx-chunks.md Â§16), so it must not be written.
     /// </summary>
     private static void EnsureSegmentLimit(IReadOnlyList<GroupAnimKey> keys, string channel)
     {
@@ -753,3 +752,10 @@ public sealed class ItemVariantSource
             : "Saving this item re-encodes native GBX data before edits. Some items are valid after re-encoding, but Trackmania compatibility must be verified for this source.";
     }
 }
+
+
+
+
+
+
+

@@ -165,9 +165,9 @@ Check(Reopen(variants).Version == 0 && Reopen(variants).Variants![0].Tags["weath
 // Metadata edits do not resolve or replace external entity references.
 var refTable = new GbxRefTable();
 var external = new GbxRefTableFile(refTable, 0, true, "Includes/Unresolved.Gbx");
-variant.EntityModelFile = external;
+variant.References.EntityModel.Descriptor = external;
 ItemEdits.EditVariant(variants, variant, new Dictionary<string, string?> { ["external"] = "kept" });
-Check(ReferenceEquals(variant.EntityModelFile, external), "External reference replaced");
+Check(ReferenceEquals(variant.References.EntityModel.File, external), "External reference replaced");
 variants.Version = 1;
 var item = new CGameItemModel { EntityModel = variants, Name = "synthetic edits", ItemType = CGameItemModel.EItemType.Ornament, DefaultPlacement = placement };
 item.CreateChunk<CGameItemModel.HeaderChunk2E002000>();
@@ -180,7 +180,7 @@ documentBytes.Position = 0;
 var savedItem = Gbx.Parse<CGameItemModel>(documentBytes).Node;
 var externalVariant = ((NPlugItem_SVariantList)savedItem.EntityModel!).Variants![0];
 Check(savedItem.Name == "synthetic edits" && savedItem.DefaultPlacement!.PivotPositions![1] == new Vec3(8, 0, 0), "Full item did not retain edited placement/metadata");
-Check(externalVariant.EntityModelFile?.FilePath.Replace('\\', '/') == "Includes/Unresolved.Gbx" && externalVariant.Tags["external"] == "kept" && externalVariant.HiddenInManualCycle, "External variant metadata/reference did not round-trip");
+Check(externalVariant.References.EntityModel.File?.FilePath.Replace('\\', '/') == "Includes/Unresolved.Gbx" && externalVariant.Tags["external"] == "kept" && externalVariant.HiddenInManualCycle, "External variant metadata/reference did not round-trip");
 Console.WriteLine($"PASS: {checks} edit checks, including binary save/reparse and rejected-write byte equality.");
 Console.WriteLine($"Bundled GBX.NET SHA256: {Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant()}");
 
@@ -188,3 +188,4 @@ sealed class ReferencedDocument : Gbx<CGameItemModel>
 {
     public ReferencedDocument(CGameItemModel item, GbxRefTable references) : base(item) { RefTable = references; }
 }
+

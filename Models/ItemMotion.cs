@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using GBX.NET.Engines.Meta;
 using TmEssentials;
 using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
@@ -34,7 +34,7 @@ public static class ItemMotion
     /// four 8-byte entries, and GBX.NET writes the array as a plain length-prefixed list. Measured
     /// in game: four segments load, five are refused by the native loader, and eight or more end
     /// the process when the item is loaded through the item pipeline.
-    /// See docs/item-gbx-chunks.md §16.
+    /// See docs/item-gbx-chunks.md Â§16.
     /// </summary>
     public const int MaxSegments = 4;
 
@@ -222,3 +222,8 @@ public static class ItemMotion
     { KC.EAxis.X => Vector3.UnitX, KC.EAxis.Y => Vector3.UnitY, KC.EAxis.Z => Vector3.UnitZ,
         _ => throw new ArgumentOutOfRangeException(nameof(axis)) };
 }
+
+
+
+
+

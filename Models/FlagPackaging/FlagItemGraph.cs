@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text.Json;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
@@ -15,18 +15,18 @@ internal sealed record FlagItemGraph(string StructureHash, string[] VisualHashes
     {
         var item = document.Node;
         PackagingGuard.That(FlagItemArchive.IsStadium(item), "Flag Item must belong to Stadium");
-        PackagingGuard.That(item.VisModelCustom is null && item.VisModelCustomFile is null
-            && item.PhyModelCustom is null && item.PhyModelCustomFile is null && item.ArchetypeRef == "",
+        PackagingGuard.That(item.VisModelCustom is null && item.References.VisModelCustom.File is null
+            && item.PhyModelCustom is null && item.References.PhyModelCustom.File is null && item.ArchetypeRef == "",
             "Alternate root visual/physics models and archetype routing are unsupported");
         PackagingGuard.That(item.EntityModel is NPlugItem_SVariantList { Variants.Length: 1 },
             "Expected one inline flag variant");
         var variants = (NPlugItem_SVariantList)item.EntityModel!;
         var variant = variants.Variants![0];
-        PackagingGuard.That(variant.EntityModelFile is null && variant.EntityModel is CPlugPrefab { Ents.Length: 1 or 2 }
+        PackagingGuard.That(variant.References.EntityModel.File is null && variant.EntityModel is CPlugPrefab { Ents.Length: 1 or 2 }
             && variant.Tags?.GetValueOrDefault("Type") == "Flag", "Expected the supported inline non-kinematic flag prefab");
         var prefab = (CPlugPrefab)variant.EntityModel!;
         var entities = prefab.Ents!;
-        PackagingGuard.That(entities.All(e => e.ModelFile is null)
+        PackagingGuard.That(entities.All(e => e.References.Model.File is null)
             && entities[^1].Model is CPlugDynaObjectModel
             && (entities.Length == 1 || entities[0].Model is CPlugStaticObjectModel && entities[0].Params is null),
             "Only a cloth Dyna, optionally preceded by the static pole, is supported");
@@ -39,20 +39,20 @@ internal sealed record FlagItemGraph(string StructureHash, string[] VisualHashes
             && float.IsFinite(parameters.Phase01) && parameters.Phase01 is >= 0 and <= 1
             && float.IsFinite(parameters.Phase01Max) && parameters.Phase01Max >= parameters.Phase01 && parameters.Phase01Max <= 1,
             "Cloth timing is outside the supported template range");
-        PackagingGuard.That(!cloth.IsStatic && !cloth.DynamizeOnSpawn && cloth.LocAnim is null && cloth.LocAnimFile is null
-            && cloth.DynaShape is null && cloth.DynaShapeFile is null && cloth.StaticShape is null && cloth.StaticShapeFile is null
-            && cloth.WaterModel is null && cloth.MeshFile is null && cloth.Mesh?.Visuals?.Length == 5,
+        PackagingGuard.That(!cloth.IsStatic && !cloth.DynamizeOnSpawn && cloth.LocAnim is null && cloth.References.LocAnim.File is null
+            && cloth.DynaShape is null && cloth.References.DynaShape.File is null && cloth.StaticShape is null && cloth.References.StaticShape.File is null
+            && cloth.WaterModel is null && cloth.References.Mesh.File is null && cloth.Mesh?.Visuals?.Count == 5,
             "Cloth must retain the inline five-LOD non-kinematic template without shapes or local animation");
         var mesh = cloth.Mesh!;
         PackagingGuard.That(mesh.Skel is null && mesh.PreLightGenerator is null && (mesh.Joints?.Length ?? 0) == 0
-            && (mesh.Lights?.Length ?? 0) == 0 && (mesh.LightUserModels?.Length ?? 0) == 0
+            && (mesh.Lights?.Length ?? 0) == 0 && (mesh.LightUserModels?.Count ?? 0) == 0
             && (mesh.LightInsts?.Length ?? 0) == 0 && (mesh.FakeOccProjs?.Length ?? 0) == 0,
             "Skinned, generated, lit or effect-bearing cloth meshes are unsupported");
-        PackagingGuard.That(mesh.Materials is { Length: 1 } && mesh.Materials[0].File is {} material
+        PackagingGuard.That(mesh.References.Materials is { Count: 1 } && mesh.References.Materials[0].File is {} material
             && !material.UseFile && BaseName(material.FilePath) == FlagItemArchive.Placeholder
-            && item.MaterialModifier is null && item.MaterialModifierFile is {} modifier
+            && item.MaterialModifier is null && item.References.MaterialModifier.File is {} modifier
             && !modifier.UseFile && BaseName(modifier.FilePath) == FlagItemArchive.Modifier
-            && (mesh.CustomMaterials?.Length ?? 0) == 0 && (mesh.MaterialInsts?.Length ?? 0) == 0,
+            && (mesh.CustomMaterials?.Length ?? 0) == 0 && (mesh.MaterialInsts?.Count ?? 0) == 0,
             "Flag Item does not use the supported placeholder and modifier route");
 
         var hashes = new List<string>(); var counts = new List<int>(); var triangles = new List<int>();
@@ -115,3 +115,10 @@ internal sealed record FlagItemGraph(string StructureHash, string[] VisualHashes
         return PackagingGuard.Hash(stream.ToArray());
     }
 }
+
+
+
+
+
+
+

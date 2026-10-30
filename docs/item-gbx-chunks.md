@@ -1,6 +1,6 @@
 # Chunk reference for `.Item.Gbx` (TM2020 items)
 
-**Date:** 2026-10-08 (translated to English; content unchanged)
+**Date:** 2026-10-28 (original corpus scan 2026-10-08; updated with vanilla cross-check and native FX findings)
 **Corpus:** 7,454 `.Item.Gbx` files under `C:\Users\PC\Documents\Trackmania` (7,301 parsed successfully, 153 failed).
 **Distinct chunk ids found:** 86 (0 completely unknown ids — though there are 6 chunks whose *content* nobody decodes, see §6).
 **Basis:** our own measurements (scanner + dumps), the decompiled source of the bundled `lib/GBX.NET.dll`, and community sources (Mania Tech Wiki / ManiaPlanet Wiki / GBX.NET repo).
@@ -8,6 +8,20 @@
 > Scope: only the chunks that occur in `.Item.Gbx` files. Chunks of maps/replays/media etc. are out of scope.
 
 ---
+
+## 14. October 2026 native-test additions
+
+The corpus tables above remain the authoritative inventory of parsed item chunks. Native tests added after the original scan established several important class and preservation boundaries:
+
+| Class/chunk | Native finding | Editing status |
+|---|---|---|
+| `0x0915C000` `CPlugFxSystem` | Existing Sparkler and Fogger carriers load, place, remain visible in the editor, and survive native map save/reopen. | Preserve opaque graph; only the tested emitter origin (`LocalOffsetExpr`) is writable. |
+| `0x090B3000` particle emitter model | Existing carrier emitters and their relative spacing survive the validated origin edit. | Preserve; no add/remove emitter writer. |
+| `0x090B5000` particle submodel | Candidate particle replacement data is opaque to the public parser and cannot yet be safely transplanted. | Read-only; no portable replacement export. |
+| VertexTween/cloth graph and native flag material chain | Swallowtail, Long250 and Round custom flag shapes, plus the baked-cloth export route, load and animate under their proven native-primer conditions. | Use the tested graph/material/dependency chain; do not infer universal standalone support. |
+| `0x2F0CA000`, `0x2F0C8000`, `0x2F0B6000`, `0x09144000`, `0x090F8000` | Kinematic bodies, constraints, instance parameters, dyna object model and simple animation nodes are present in researched motion items. | Keep within the tested topology and four-segment limit; collision and arbitrary constraint parity remain unproven. |
+
+These additions do not increase the 86-ID corpus count: the FX and kinematic classes were already represented in the research material or discovered through native probes. They clarify which opaque classes are safe to preserve and which are unsafe to synthesize.
 
 ## 1. How chunks are stored in an Item.Gbx (format)
 

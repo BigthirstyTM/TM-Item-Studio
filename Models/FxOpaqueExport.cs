@@ -170,3 +170,8 @@ public static class FxOpaqueExport
     static bool Close(EmissionPoint a, EmissionPoint b)
         => Math.Abs(a.X - b.X) <= .001f && Math.Abs(a.Y - b.Y) <= .001f && Math.Abs(a.Z - b.Z) <= .001f;
 }
+
+
+
+
+

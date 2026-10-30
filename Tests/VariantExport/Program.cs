@@ -168,13 +168,13 @@ foreach (var list in new[] { ListOf(Tagged(new CPlugPrefab())), ListOf(), ListOf
 // External references are retained even when the dependency isn't loaded locally.
 var referenceTable = new GbxRefTable { AncestorLevel = 1 };
 var external = Tagged(null);
-external.EntityModelFile = new GbxRefTableFile(referenceTable, 0, true, "Includes/External.Prefab.Gbx");
+external.References.EntityModel.Descriptor = new GbxRefTableFile(referenceTable, 0, true, "Includes/External.Prefab.Gbx");
 var externalDoc = Reopen(SaveDoc(new ReferencedFixture(Document(ListOf(external)).Node, referenceTable)));
 var externalViews = ItemVariantSource.FromFile("external", externalDoc);
 Check(externalViews.Count == 1 && externalViews[0].PreviewRoot is null, "Unresolved reference must still be selectable");
 var externalSaved = Reopen(Save(externalViews[0].Save));
 var externalVariant = ((NPlugItem_SVariantList)externalSaved.Node.EntityModel!).Variants![0];
-Check(externalVariant.EntityModelFile?.FilePath.Replace('\\', '/') == "Includes/External.Prefab.Gbx", "External path must survive export");
+Check(externalVariant.References.EntityModel.File?.FilePath.Replace('\\', '/') == "Includes/External.Prefab.Gbx", "External path must survive export");
 Check(externalVariant.HiddenInManualCycle && externalVariant.Tags["weather"] == "wet", "External variant metadata must survive");
 Check(externalSaved.RefTable?.AncestorLevel == 1, "External reference base must survive export");
 
@@ -409,3 +409,4 @@ sealed class ReferencedFixture : Gbx<CGameItemModel>
 {
     public ReferencedFixture(CGameItemModel item, GbxRefTable references) : base(item) { RefTable = references; }
 }
+
