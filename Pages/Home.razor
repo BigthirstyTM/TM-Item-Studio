@@ -2523,7 +2523,13 @@ else if (itemModel is null)
                 var parsedGbx = parsedDocument as Gbx<CGameItemModel>;
                 // Keep the exact uploaded bytes for native FX editing even when
                 // GBX.NET returned a partial CGameItemModel without throwing.
-                if (parsedGbx is not null && parsedGbx.Node.EntityModel is null)
+                // Mesh Modeler items legitimately have no runtime EntityModel: their authored
+                // mesh lives in EntityModelEdition.MeshCrystal and must stay on the normal
+                // parsed document. Only use the opaque FX fallback when neither representation
+                // is available; FxOpaqueExport.Parse intentionally reads a raw body and does
+                // not expose Mesh Modeler edition data.
+                if (parsedGbx is not null && parsedGbx.Node.EntityModel is null
+                    && parsedGbx.Node.EntityModelEdition is null)
                 {
                     try
                     {
