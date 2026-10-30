@@ -115,7 +115,12 @@ public static partial class ItemScene
                     }
                     var baseIndex = localPositions.Count;
                     var valid = true;
-                    for (var corner = 0; corner < 3; corner++)
+                    // Mesh Modeler stores both triangles and quads (and can retain
+                    // higher-order polygon faces). Emit the complete polygon instead
+                    // of silently dropping every corner after the third one. A fan is
+                    // deterministic for the convex authored faces used by crystals and
+                    // preserves each corner's independent UV.
+                    for (var corner = 0; corner < corners.Length; corner++)
                     {
                         var vertex = corners[corner];
                         if (vertex.Index < 0 || vertex.Index >= positions.Length)
@@ -135,7 +140,12 @@ public static partial class ItemScene
                             "Mesh Modeler face references a position outside its crystal table.");
                         continue;
                     }
-                    indices.Add(baseIndex); indices.Add(baseIndex + 1); indices.Add(baseIndex + 2);
+                    for (var corner = 1; corner < corners.Length - 1; corner++)
+                    {
+                        indices.Add(baseIndex);
+                        indices.Add(baseIndex + corner);
+                        indices.Add(baseIndex + corner + 1);
+                    }
                 }
 
                 if (localPositions.Count == 0)
