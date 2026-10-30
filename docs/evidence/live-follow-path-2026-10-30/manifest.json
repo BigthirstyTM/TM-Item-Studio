@@ -1,0 +1,60 @@
+{
+  "itemSha256": "8bbf07cf2e44714f4d3155b5f0ea28f231822d38904524376da3cbb68506c70e",
+  "videoSha256": "1b4976ecc8da43ec20566e0bbc5bbb35ec95026b1d5551902364374992d6b750",
+  "videoSeconds": 28,
+  "nativeMap": "TMIS_FollowPath_Proof.Map.Gbx",
+  "placement": [
+    800,
+    8,
+    800
+  ],
+  "speedMetresPerSecond": 8,
+  "repeat": "Closed",
+  "easing": "Linear",
+  "pauseMs": 0,
+  "anchor": "mesh centre",
+  "points": [
+    [
+      0,
+      4,
+      0
+    ],
+    [
+      12,
+      4,
+      0
+    ],
+    [
+      20,
+      4,
+      8
+    ],
+    [
+      20,
+      8,
+      20
+    ],
+    [
+      12,
+      8,
+      28
+    ],
+    [
+      0,
+      4,
+      28
+    ],
+    [
+      -8,
+      4,
+      20
+    ],
+    [
+      -8,
+      4,
+      8
+    ]
+  ],
+  "collision": "Scenery; moving full-size collider removed; original static housing preserved",
+  "capture": "Actual Trackmania window, real-time desktop capture; no synthetic motion or interpolated trajectory"
+}

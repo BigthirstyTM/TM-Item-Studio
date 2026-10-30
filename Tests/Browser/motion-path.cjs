@@ -102,6 +102,7 @@ const path = require('node:path');
     await open('getting_over_it_hammer');
     await page.getByRole('button', { name: 'WaypointType, Gameplay & Kinematics', exact: true }).click();
     await panel.locator('summary').click();
+    await page.locator('#pathUse').selectOption('Obstacle');
     assert.equal(await page.evaluate(() => typedMotions.length), 0);
     await coordinates('0 0 0\n16 0 0'); await apply();
     await save('TMIS_Drawn_Static');

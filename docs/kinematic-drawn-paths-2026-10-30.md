@@ -1,5 +1,7 @@
 # Kinematic items and native drawn paths — 30 October 2026
 
+> Follow-up: [live preview, editable points and eight-leg native video proof](live-follow-path-2026-10-30.md). The four-leg cap and origin-only drawing described below document the earlier implementation.
+
 ## Result and evidence boundary
 
 Draw Motion Path now compiles a drawn polyline to native GBX kinematic constraints. The exported item animates inside Trackmania 2020 without an Openplanet plugin or runtime script. Openplanet/Editor++ were used only to arrange and inspect the disposable test map.
