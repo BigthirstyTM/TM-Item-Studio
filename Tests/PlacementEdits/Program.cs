@@ -78,9 +78,14 @@ var removed = ItemPlacementAlternatives.Read(Reopen(reopened));
 Check(removed.Length == 1 && removed[0].RotationDegrees == new Vec3(180, -90, 0), "removal lost the remaining entry");
 
 // ---- the version and count header is what the game reads ----
-var payload = ((ISkippableChunk)reopened.Chunks.Get(ItemPlacementAlternatives.ChunkId)!).Data!;
-Check(BinaryPrimitives.ReadInt32LittleEndian(payload) == 0, "encoded version is not 0");
-Check(BinaryPrimitives.ReadInt32LittleEndian(payload.AsSpan(4)) == 1, "encoded count does not match the list");
+var typed = (CGameItemPlacementParam.Chunk2E020004)reopened.Chunks.Get(ItemPlacementAlternatives.ChunkId)!;
+Check(typed.Version == 0, "encoded version is not 0");
+Check(reopened.MagnetLocs.Length == 1, "encoded count does not match the list");
+var future = new CGameItemPlacementParam();
+future.CreateChunk<CGameItemPlacementParam.Chunk2E020004>().Version = 1;
+Reject(() => ItemPlacementAlternatives.Write(future, []), "unknown typed magnet version was overwritten");
+Check(((CGameItemPlacementParam.Chunk2E020004)future.Chunks.Get(ItemPlacementAlternatives.ChunkId)!).Version == 1,
+    "refused typed edit changed the chunk version");
 
 // ---- rejected edits leave the bytes untouched ----
 var before = Save(reopened);

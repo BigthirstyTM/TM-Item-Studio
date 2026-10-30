@@ -77,7 +77,7 @@ internal static class FlagVanillaSteps
             var read = Gbx.Parse<CGameItemModel>(path).Node;
             if (read.ArchetypeRef != "" || read.Ident!.Id != "") throw new Exception("Unexpected shared identity");
             var originalVisuals = Mesh(item).Visuals!;
-            for (var i = 0; i < originalVisuals.Length; i++)
+            for (var i = 0; i < originalVisuals.Count; i++)
             {
                 var a = (CPlugVisualIndexedTriangles)originalVisuals[i];
                 var b = (CPlugVisualIndexedTriangles)Mesh(read).Visuals![i];

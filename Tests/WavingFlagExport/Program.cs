@@ -38,7 +38,7 @@ Check("86-frame topology/UV/normal/pin round-trip " + edge, () => {
     var prefab = Prefab(output.Node); Req(prefab.Ents!.Length == 1, "Seed pole retained.");
     var e = prefab.Ents[0]; var body = (CPlugDynaObjectModel)e.Model!; var t = (NPlugDynaObjectModel_SInstanceParams)e.Params!;
     Req(e.Position == default && e.Rotation == Quat.Identity && !t.IsKinematic && t.PeriodSc == 7 && t.PeriodScMax == 7 && t.Phase01 == 0 && t.Phase01Max == 0, "Wrong host transform/timing.");
-    Req(body.LocAnim is null && body.DynaShape is null && body.StaticShape is null && body.Mesh!.Visuals!.Length == 5, "Wrong motion/physics graph.");
+    Req(body.LocAnim is null && body.DynaShape is null && body.StaticShape is null && body.Mesh!.Visuals!.Count == 5, "Wrong motion/physics graph.");
     bool max = edge is ItemWavingFlagExport.AttachmentEdge.MaximumX or ItemWavingFlagExport.AttachmentEdge.MaximumZ;
     foreach (var v in body.Mesh!.Visuals!.Cast<CPlugVisualIndexedTriangles>()) {
         Req(v.Vertices.Length == 12 * 86 && v.SubVisuals!.Length == 86 && v.IndexBuffer!.Indices.SequenceEqual(input.IndexBuffer!.Indices), "Wrong topology.");
@@ -82,7 +82,7 @@ Refuse("dynamic graph", s => s.Node.EntityModel = new CPlugDynaObjectModel { Mes
 Refuse("source vertex budget", s => Visual(s).Vertices = Enumerable.Repeat(Visual(s).Vertices[0], ItemWavingFlagExport.MaximumSourceVertices + 1).ToArray());
 Refuse("source triangle budget", s => Visual(s).IndexBuffer!.Indices = Enumerable.Range(0, ItemWavingFlagExport.MaximumSourceTriangles + 1).SelectMany(_ => new[] { 0, 1, 4 }).ToArray());
 Refuse("parameterized entity", s => ((CPlugPrefab)s.Node.EntityModel!).Ents![0].Params = new NPlugDynaObjectModel_SInstanceParams { IsKinematic = true });
-Refuse("external mesh", s => ((CPlugStaticObjectModel)((CPlugPrefab)s.Node.EntityModel!).Ents![0].Model!).MeshFile = new(new GbxRefTable(), 1, false, "missing.Mesh.Gbx"));
+Refuse("external mesh", s => ((CPlugStaticObjectModel)((CPlugPrefab)s.Node.EntityModel!).Ents![0].Model!).References.Mesh.Descriptor = new GBX.NET.Components.GbxRefTableFile(new GbxRefTable(), 1, false, "missing.Mesh.Gbx"));
 Refuse("structured stream", s => Visual(s).VertexStreams = [new CPlugVertexStream { Positions = [new(1, 2, 3)] }]);
 Refuse("existing frames", s => Visual(s).SubVisuals = [new(0, 0, 36)]);
 Refuse("morph", s => Visual(s).MorphCount = 1);
@@ -116,7 +116,7 @@ static void VerifyPackage(ItemWavingFlagExport.Result r, Dictionary<string, byte
     Req(json.GetProperty("requiresNativeFlag16m").GetBoolean() && !json.GetProperty("standaloneSingleItem").GetBoolean() && json.GetProperty("nativeSavedMapRepairRequired").GetBoolean(), "Portability qualification missing.");
     foreach (var e in json.GetProperty("files").EnumerateArray()) { var b = files.Single(f => f.Key.EndsWith('/' + e.GetProperty("file").GetString(), StringComparison.Ordinal)).Value; Req(b.Length == e.GetProperty("bytes").GetInt32() && Hash(b) == e.GetProperty("sha256").GetString(), "Hash mismatch."); }
     var item = Gbx.Parse<CGameItemModel>(new MemoryStream(files.Single(p => p.Key.EndsWith(".Item.Gbx")).Value));
-    Req(item.Node.Ident!.Id == "" && item.RefTable!.AncestorLevel == 0 && item.RefTable.Files.Count == 2 && item.RefTable.Files.All(f => !f.UseFile && f.Flags == 1), "Item identity/reference layout mismatch.");
+    Req(ItemStoredIdentity.Read(item.Node).Id == "" && item.RefTable!.AncestorLevel == 0 && item.RefTable.Files.Count == 2 && item.RefTable.Files.All(f => !f.UseFile && f.Flags == 1), "Item identity/reference layout mismatch.");
     var skin = Gbx.ParseHeader(new MemoryStream(files.Single(p => p.Key.EndsWith(".GameSkin.Gbx")).Value));
     Req(skin.RefTable!.AncestorLevel == 0 && skin.RefTable.Files.Single().UseFile && skin.RefTable.Files.Single().FilePath == "TMIS_MatRemap_Placeholder.Material.Gbx", "GameSkin FID lost.");
     var mod = Gbx.ParseHeader(new MemoryStream(files.Single(p => p.Key.EndsWith(".TerrainModifier.Gbx")).Value));
@@ -131,8 +131,8 @@ static Gbx<CGameItemModel> Source(bool z = false) {
     v.Vertices = vertices.ToArray(); v.SubVisuals = []; v.IndexBuffer!.Indices = ix.ToArray(); typeof(CPlugVisual).GetProperty("Count", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(v, vertices.Count);
     v.TexCoords = [new() { Version = 3, Flags = 256, U01 = [], TexCoords = u0.ToArray() }, new() { Version = 3, Flags = 256, U01 = [], TexCoords = u1.ToArray() }];
     mesh.Visuals = [v]; mesh.LodMaxDistAtFov90 = [100]; mesh.Materials = null; mesh.CustomMaterials = [new() { MaterialName = "source" }]; mesh.ShadedGeoms = [new() { VisualIndex = 0, MaterialIndex = 0, LodMask = 1 }];
-    var s = (CPlugStaticObjectModel)p.Ents[0].Model!; s.Mesh = mesh; s.Shape = null; s.ShapeFile = null; s.IsMeshCollidable = false;
-    seed.Node.EntityModel = new CPlugPrefab { Version = 11, Ents = [new() { Model = s, Rotation = Quat.Identity, U01 = "" }] }; seed.Node.MaterialModifier = null; seed.Node.MaterialModifierFile = null; seed.Node.Name = "Inline static cloth source";
+    var s = (CPlugStaticObjectModel)p.Ents[0].Model!; s.Mesh = mesh; s.Shape = null; if (s.References.Shape.Descriptor is not null) s.References.Shape.Clear(); s.IsMeshCollidable = false;
+    seed.Node.EntityModel = new CPlugPrefab { Version = 11, Ents = [new() { Model = s, Rotation = Quat.Identity, U01 = "" }] }; seed.Node.MaterialModifier = null; if (seed.Node.References.MaterialModifier.Descriptor is not null) seed.Node.References.MaterialModifier.Clear(); seed.Node.Name = "Inline static cloth source";
     using var output = new MemoryStream(); new Gbx<CGameItemModel>(seed.Node).Save(output); output.Position = 0; return Gbx.Parse<CGameItemModel>(output);
 }
 static CPlugVisualIndexedTriangles Visual(Gbx<CGameItemModel> s) => (CPlugVisualIndexedTriangles)Mesh(s).Visuals![0];

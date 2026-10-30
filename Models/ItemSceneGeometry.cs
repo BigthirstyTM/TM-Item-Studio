@@ -34,15 +34,14 @@ public static partial class ItemScene
 
             var layers = crystal.Layers ?? [];
             var geometryLayerIndex = 0;
-            Matrix4x4? pendingDeformation = null;
             foreach (var layer in layers)
             {
                 if (layer is CPlugCrystal.DeformationLayer deformationLayer)
                 {
-                    var transforms = deformationLayer.GetType().GetProperty("Transforms")?.GetValue(deformationLayer) as Iso4[];
-                    pendingDeformation = transforms is { Length: > 0 }
-                        ? FromIso4(transforms[0])
-                        : null;
+                    if (deformationLayer.IsEnabled)
+                        Issue($"{crystalPath}/layer:{geometryLayerIndex}", "edition-deformation",
+                            ItemSceneState.Unsupported,
+                            "Deformation masks and control frames are preserved, but their evaluated geometry is not yet supported in the preview.");
                     geometryLayerIndex++;
                     continue;
                 }
@@ -66,11 +65,7 @@ public static partial class ItemScene
                     continue;
                 }
 
-                var layerWorld = world;
-                if (pendingDeformation.HasValue && layerWorld.HasValue)
-                    layerWorld = pendingDeformation.Value * layerWorld.Value;
-                EmitCrystalLayer(geometryLayer.Crystal, layerPath, layerWorld, entry);
-                pendingDeformation = null;
+                EmitCrystalLayer(geometryLayer.Crystal, layerPath, world, entry);
             }
         }
 

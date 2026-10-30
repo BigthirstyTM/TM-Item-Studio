@@ -29,7 +29,7 @@ internal static class FlagInstalledFiles
             var table = new GbxRefTable { AncestorLevel = adjacent?1:4 };
             var reference = new GbxRefTableFile(table, 1, false,
                 adjacent ? "Media\\Material\\ItemFlag.Material.Gbx" : "GameData\\Stadium\\Media\\Material\\ItemFlag.Material.Gbx");
-            mesh.Materials = [new External<CPlugMaterial>(null, reference)];
+            mesh.Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(null, reference) };
             mesh.MaterialIds = []; mesh.MaterialInsts = null; mesh.CustomMaterials = null;
             var path = Path.Combine(output, name + ".Item.Gbx");
             new ReferenceTableDocument(item, table).Save(path);

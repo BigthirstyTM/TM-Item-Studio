@@ -30,15 +30,18 @@ suites=(
     VariantExport
 )
 
-tools=(
-    FlagProbe
-    ItemChunkIndex
-    PathFollowerDiag
-    ProbeAssets
-    TextureLibrary
-    VanillaPreview
-    WriterCompatibility
-)
+# Keep every tracked research/fixture project compiling against the bundled parser.
+mapfile -t projects < <(git ls-files 'Tests/*.csproj' 'Tests/**/*.csproj')
+tools=()
+for project in "${projects[@]}"; do
+    directory="${project%/*}"
+    name="${directory##*/}"
+    is_suite=false
+    for suite in "${suites[@]}"; do
+        if [ "$directory" = "Tests/$suite" ]; then is_suite=true; break; fi
+    done
+    if [ "$is_suite" = false ]; then tools+=("$directory"); fi
+done
 
 if [ "$#" -gt 0 ]; then
     suites=("$@")
@@ -57,9 +60,9 @@ for suite in "${suites[@]}"; do
 done
 
 for tool in "${tools[@]}"; do
-    [ -d "Tests/$tool" ] || continue
+    [ -d "$tool" ] || continue
     printf '== %s (build only)\n' "$tool"
-    if dotnet build "Tests/$tool" -v q --nologo; then
+    if dotnet build "$tool" -v q --nologo; then
         printf '   ok\n'
     else
         printf '   FAILED\n'

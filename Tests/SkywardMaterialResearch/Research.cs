@@ -40,16 +40,16 @@ static class Research
    var material=Gbx.Parse<CPlugMaterial>(new MemoryStream(nativeBytes)).Node;
    var refs=new GbxRefTable{AncestorLevel=0};
    GbxRefTableFile R(string p,bool use)=>new(refs,1,use,"GameData\\"+p.TrimStart('\\'));
-   material.ShaderFile=R(material.ShaderFile!.FilePath,false);
+   material.References.Shader.Descriptor=R(material.References.Shader.File!.FilePath,false);
    foreach(var t in material.CustomMaterial!.Textures!)
    {
-    var p=t.TextureFile!.FilePath;
+    var p=t.References.Texture.File!.FilePath;
     if(mode!="NativeClone"&&t.Name=="Diffuse")p="Stadium\\Media\\Texture\\ItemSpectator_D.Texture.gbx";
     if(mode!="NativeClone"&&t.Name=="RoughMetal")p="Stadium\\Media\\Texture\\ItemSpectator_R.Texture.gbx";
-    t.TextureFile=R(p,true);
+    t.References.Texture.Descriptor=R(p,true);
    }
    var c=material.Chunks.OfType<CPlugMaterial.Chunk09079015>().Single();
-   for(var i=0;i<c.U03!.Length;i++){var e=c.U03[i];c.U03[i]=new(e.Node,e.File is null?null:R(e.File.FilePath,e.File.UseFile));}
+   for(var i=0;i<c.U03!.Count;i++){var e=c.U03.Get(i);if(e.File is {} file)e.Descriptor=R(file.FilePath,file.UseFile);}
    if(mode.StartsWith("PaletteNeutral"))
    {
     material.CustomMaterial.Textures=material.CustomMaterial.Textures!.Where(t=>t.Name!="BaseColorHueMask").ToArray();
@@ -59,7 +59,7 @@ static class Research
    if(mode=="PaletteNeutralFlip0")material.CustomMaterial.GpuFxs2!.Single(f=>f.U01=="BackSide_FlipU").U03![0][0]=0;
    var materialBytes=Save(new RefDoc<CPlugMaterial>(material,refs));
    var checkMaterial=Gbx.Parse<CPlugMaterial>(new MemoryStream(materialBytes));
-   Require(checkMaterial.Node.ShaderFile!.FilePath=="GameData\\Techno3\\Media\\Material\\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx","VertexTween shader lost");
+   Require(checkMaterial.Node.References.Shader.File!.FilePath=="GameData\\Techno3\\Media\\Material\\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx","VertexTween shader lost");
    Require(checkMaterial.RefTable!.AncestorLevel==0&&checkMaterial.RefTable.Files.All(f=>f.FilePath.StartsWith("GameData\\")),"Material refs not rooted");
    var files=new Dictionary<string,byte[]>{
     [Placeholder]=File.ReadAllBytes(Path.Combine(sourceDir,"files",Placeholder)),
@@ -88,13 +88,13 @@ static class Research
   File.WriteAllText(Path.Combine(output,"README.md"),Report);
   Console.WriteLine(JsonSerializer.Serialize(new{output,offlineChecksPassed=true,runtimeTested=false,rows},Json));
  }
- static object Describe(Gbx<CPlugMaterial> doc){var m=doc.Node;return new{doc.RefTable?.AncestorLevel,references=doc.RefTable?.Files.Select(f=>new{f.FilePath,f.Flags,f.UseFile,f.NodeIndex}),shaderFile=m.ShaderFile?.FilePath,textures=m.CustomMaterial?.Textures?.Select(t=>new{t.Name,t.TextureFile?.FilePath,t.TextureFile?.UseFile}),gpuFx1=m.CustomMaterial?.GpuFxs1,gpuFx2=m.CustomMaterial?.GpuFxs2};}
+ static object Describe(Gbx<CPlugMaterial> doc){var m=doc.Node;return new{doc.RefTable?.AncestorLevel,references=doc.RefTable?.Files.Select(f=>new{f.FilePath,f.Flags,f.UseFile,f.NodeIndex}),shaderFile=m.References.Shader.File?.FilePath,textures=m.CustomMaterial?.Textures?.Select(t=>new{t.Name,t.References.Texture.File?.FilePath,t.References.Texture.File?.UseFile}),gpuFx1=m.CustomMaterial?.GpuFxs1,gpuFx2=m.CustomMaterial?.GpuFxs2};}
  public static void GenerateWhitePatch(string output,string sourceMapPath,string sourceItemPath)
  {
   output=Path.GetFullPath(output);Require(!Directory.Exists(output)&&!File.Exists(output),"Choose new evidence directory");
   var sourceItem=File.ReadAllBytes(sourceItemPath);var sourceMap=File.ReadAllBytes(sourceMapPath);
   var doc=Gbx.Parse<CGameItemModel>(new MemoryStream(sourceItem));var cloth=Cloth(doc.Node);
-  Require(cloth.Visuals!.Length==5,"Expected five LODs");
+  Require(cloth.Visuals!.Count==5,"Expected five LODs");
   var sourceHashes=cloth.Visuals.Select(NodeHash).ToArray();
   var oldUvs=new List<CPlugVisual.TexCoord[]>();
   var changed=new List<int>();
@@ -110,7 +110,7 @@ static class Research
   doc.Node.Name="TMIS Skyward OneUV Stable White Patch";var itemBytes=Save(new RefDoc<CGameItemModel>(doc.Node,doc.RefTable!));
   var parsed=Gbx.Parse<CGameItemModel>(new MemoryStream(itemBytes));var roundCloth=Cloth(parsed.Node);
   Require(roundCloth.Visuals!.Select(NodeHash).SequenceEqual(cloth.Visuals.Select(NodeHash)),"White patch serialization changed");
-  for(var i=0;i<roundCloth.Visuals!.Length;i++)
+  for(var i=0;i<roundCloth.Visuals!.Count;i++)
   {
    var v=(CPlugVisualIndexedTriangles)roundCloth.Visuals[i];
    Require(v.TexCoords.Length==1&&v.TexCoords[0].TexCoords.Length==oldUvs[i].Length,"UV layout changed");
@@ -146,7 +146,7 @@ static class Research
   var nativePath="C:/Users/PC/OpenplanetNext/Extract/GameData/Stadium256/Media/Material/WarpFlag.Material.Gbx";var nativeBytes=File.ReadAllBytes(nativePath);
   Require(Hash(nativeBytes)=="E343A879847E7D3321BEDFA962758BC039A0C6CCF5A8751588D781EF9053A858","Native WarpFlag material changed");
   var native=Gbx.Parse<CPlugMaterial>(new MemoryStream(nativeBytes)).Node;
-  Require(native.ShaderFile!.FilePath=="Techno3\\Media\\Material\\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx"&&native.CustomMaterial!.Textures!.All(t=>t.Name!="BaseColorHueMask"),"Native WarpFlag shader/mask changed");
+  Require(native.References.Shader.File!.FilePath=="Techno3\\Media\\Material\\Tech3_Warp_TDiffSpec_VertexTween.Material.gbx"&&native.CustomMaterial!.Textures!.All(t=>t.Name!="BaseColorHueMask"),"Native WarpFlag shader/mask changed");
   var doc=Gbx.Parse<CGameItemModel>(new MemoryStream(sourceItem));var hashes=Cloth(doc.Node).Visuals!.Select(NodeHash).ToArray();var entityGraphHash=NodeHash(doc.Node.EntityModel!);
   Require(Cloth(doc.Node).Visuals!.Cast<CPlugVisualIndexedTriangles>().All(v=>v.TexCoords.Length==1),"One-UV input required");
   var suffix=outputToken??"";Require(suffix.Length<=40&&suffix.All(char.IsAsciiLetterOrDigit),"Output token must be up to 40 ASCII letters/digits");

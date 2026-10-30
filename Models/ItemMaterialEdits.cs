@@ -14,6 +14,23 @@ public sealed record ItemUvEditScope(int VertexCount, IReadOnlyList<string> Occu
 /// <summary>Selected authored-visual UV0 editing. No geometry conversion, external resolution or private-field access.</summary>
 public static class ItemMaterialEdits
 {
+    public static void SetGameMaterialLink(object source, string link)
+    {
+        if (string.IsNullOrWhiteSpace(link)) throw new ArgumentException("Material link cannot be empty.", nameof(link));
+        var instance = source switch
+        {
+            CPlugSolid2Model.Material solid => solid.MaterialUserInst ??= new CPlugMaterialUserInst(),
+            CPlugCrystal.Material crystal => crystal.MaterialUserInst ??= new CPlugMaterialUserInst(),
+            _ => throw new NotSupportedException("This material slot has no editable authored material.")
+        };
+        // A named crystal material serializes the name instead of its instance.
+        if (source is CPlugCrystal.Material crystalMaterial) crystalMaterial.MaterialName = null;
+        if (instance.GetChunk<CPlugMaterialUserInst.Chunk090FD000>() is null)
+            instance.CreateChunk<CPlugMaterialUserInst.Chunk090FD000>().Version = 11;
+        instance.IsUsingGameMaterial = true;
+        instance.Link = link.Trim();
+    }
+
     /// <summary>Inspect all original variant slots, including hidden variants, before displaying edit scope.</summary>
     public static ItemUvEditScope InspectUv0(Gbx<CGameItemModel> document, int documentOrdinal, string visualPath)
     {

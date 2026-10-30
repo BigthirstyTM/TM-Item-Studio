@@ -20,7 +20,7 @@ foreach(var path in args) {
  Console.WriteLine(JsonSerializer.Serialize(new{path,doc.RefTable?.AncestorLevel,
  references=doc.RefTable?.Files.Select(f=>new{f.FilePath,f.Flags,f.UseFile,f.NodeIndex}),
  chunks=m.Chunks.Select(c=>new{id=c.Id.ToString("X8"),c.Ignore,chunk=c.GetType().GetFields().ToDictionary(p=>p.Name,p=>p.GetValue(c))}),
- shader=m.Shader?.GetType().Name,shaderFile=m.ShaderFile?.FilePath,customChunks=m.CustomMaterial?.Chunks.Select(c=>new{id=c.Id.ToString("X8"),c.Ignore,fields=c.GetType().GetFields().ToDictionary(p=>p.Name,p=>p.GetValue(c))}),
- textures=m.CustomMaterial?.Textures?.Select(t=>new{t.Name,t.U01,t.U02,t.U03,t.TextureFile?.FilePath,t.TextureFile?.UseFile,t.Texture}),
+ shader=m.Shader?.GetType().Name,shaderFile=m.References.Shader.File?.FilePath,customChunks=m.CustomMaterial?.Chunks.Select(c=>new{id=c.Id.ToString("X8"),c.Ignore,fields=c.GetType().GetFields().ToDictionary(p=>p.Name,p=>p.GetValue(c))}),
+ textures=m.CustomMaterial?.Textures?.Select(t=>new{t.Name,t.U01,t.U02,t.U03,t.References.Texture.File?.FilePath,t.References.Texture.File?.UseFile,t.Texture}),
  gpuFx1=m.CustomMaterial?.GpuFxs1,gpuFx2=m.CustomMaterial?.GpuFxs2},json));
 }

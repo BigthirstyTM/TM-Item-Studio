@@ -123,7 +123,7 @@ static CPlugSolid2Model Solid()
     typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
         (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
     typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
-    typeof(CPlugVertexStream).GetField("count", flags)!.SetValue(stream, 3);
+    typeof(CPlugVertexStream).GetField("vertexCount", flags)!.SetValue(stream, 3);
     stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
     var indexBuffer = new CPlugIndexBuffer { Indices = [0, 1, 2] };
     indexBuffer.CreateChunk<CPlugIndexBuffer.Chunk09057000>();

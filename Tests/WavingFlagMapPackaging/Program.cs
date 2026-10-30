@@ -78,8 +78,8 @@ Check("generic SourceMesh compressed Item and variable node count accepted again
     const string folder = "OfflineSynthetic"; var id = folder + "\\" + exported.ItemFileName;
     item.Ident = item.Ident! with { Id = id };
     var table = new GbxRefTable { AncestorLevel = 3 };
-    Cloth(item).Mesh!.Materials = [new External<CPlugMaterial>(null, new GbxRefTableFile(table, 1, false, "ContentLoaded\\Items\\" + folder + "\\TMIS_MatRemap_Placeholder.Material.Gbx"))];
-    item.MaterialModifierFile = new GbxRefTableFile(table, 1, false, "ContentLoaded\\Items\\" + folder + "\\TMIS_MatRemap.TerrainModifier.Gbx");
+    Cloth(item).Mesh!.Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(null, new GbxRefTableFile(table, 1, false, "ContentLoaded\\Items\\" + folder + "\\TMIS_MatRemap_Placeholder.Material.Gbx")) };
+    item.References.MaterialModifier.Descriptor = new GbxRefTableFile(table, 1, false, "ContentLoaded\\Items\\" + folder + "\\TMIS_MatRemap.TerrainModifier.Gbx");
     using var saved = new MemoryStream(); new ReferenceDocument(item, table).Save(saved); var savedBytes = saved.ToArray();
     // Compress the body to exercise the saved Item C mode without changing its graph.
     savedBytes = CompressItem(savedBytes);
@@ -159,8 +159,8 @@ static Gbx<CGameItemModel> Source() {
     v.Vertices = vertices.ToArray(); v.SubVisuals = []; v.IndexBuffer!.Indices = indices.ToArray(); typeof(CPlugVisual).GetProperty("Count", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(v, vertices.Count);
     v.TexCoords = [new() { Version = 3, Flags = 256, U01 = [], TexCoords = uv.ToArray() }];
     mesh.Visuals = [v]; mesh.LodMaxDistAtFov90 = [100]; mesh.Materials = null; mesh.CustomMaterials = [new() { MaterialName = "source" }]; mesh.ShadedGeoms = [new() { VisualIndex = 0, MaterialIndex = 0, LodMask = 1 }];
-    var pole = (CPlugStaticObjectModel)p.Ents![0].Model!; pole.Mesh = mesh; pole.Shape = null; pole.ShapeFile = null; pole.IsMeshCollidable = false;
-    seed.Node.EntityModel = new CPlugPrefab { Version = 11, Ents = [new() { Model = pole, Rotation = Quat.Identity, U01 = "" }] }; seed.Node.MaterialModifier = null; seed.Node.MaterialModifierFile = null;
+    var pole = (CPlugStaticObjectModel)p.Ents![0].Model!; pole.Mesh = mesh; pole.Shape = null; if (pole.References.Shape.Descriptor is not null) pole.References.Shape.Clear(); pole.IsMeshCollidable = false;
+    seed.Node.EntityModel = new CPlugPrefab { Version = 11, Ents = [new() { Model = pole, Rotation = Quat.Identity, U01 = "" }] }; seed.Node.MaterialModifier = null; if (seed.Node.References.MaterialModifier.Descriptor is not null) seed.Node.References.MaterialModifier.Clear();
     using var output = new MemoryStream(); new Gbx<CGameItemModel>(seed.Node).Save(output); output.Position = 0; return Gbx.Parse<CGameItemModel>(output);
 }
 static byte[] CompressItem(byte[] bytes) {

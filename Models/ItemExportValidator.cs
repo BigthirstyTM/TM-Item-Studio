@@ -12,7 +12,8 @@ public static class ItemExportValidator
     {
         ArgumentNullException.ThrowIfNull(item);
 
-        if (item.EntityModel is null)
+        if (item.EntityModel is null
+            && item.EntityModelEdition is not CGameCommonItemEntityModelEdition { MeshCrystal: not null })
             throw new InvalidOperationException("The item has no entity model and cannot be loaded by Trackmania.");
 
         var normalizedId = NormalizeItemId(item.Ident?.Id);

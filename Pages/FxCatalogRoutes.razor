@@ -10,12 +10,8 @@
         <div class="row g-2 align-items-end mb-2" aria-label="Native FX carrier selection">
             <div class="col-md-7">
                 <label class="form-label small mb-1" for="fxCarrierPreset">FX carrier preset</label>
-                <select id="fxCarrierPreset" class="form-select form-select-sm" @bind="selectedCarrierName">
-                    @foreach (var route in ProvenCarrierRoutes)
-                    {
-                        <option value="@route.Name">@route.Name</option>
-                    }
-                </select>
+                <SearchableSelect Id="fxCarrierPreset" Label="FX carrier preset" Options="@ProvenCarrierRoutes.Select(x => x.Name)"
+                    Value="@selectedCarrierName" ValueChanged="@(e => { if (!string.IsNullOrWhiteSpace(e.Value?.ToString())) selectedCarrierName = e.Value!.ToString()!; })" />
             </div>
             <div class="col-md-5 small text-muted" role="status">
                 <strong class="text-info">@SelectedCarrier.Name</strong><br />
@@ -32,12 +28,8 @@
         <div class="row g-2 align-items-end mb-2" aria-label="Particle model candidate selection">
             <div class="col-md-7">
                 <label class="form-label small mb-1" for="fxParticleCandidate">Particle model to emit</label>
-                <select id="fxParticleCandidate" class="form-select form-select-sm" @bind="selectedParticleCandidate">
-                    @foreach (var route in ParticleCandidateRoutes)
-                    {
-                        <option value="@route.Name">@route.Name</option>
-                    }
-                </select>
+                <SearchableSelect Id="fxParticleCandidate" Label="Particle model to emit" Options="@ParticleCandidateRoutes.Select(x => x.Name)"
+                    Value="@selectedParticleCandidate" ValueChanged="@(e => { if (!string.IsNullOrWhiteSpace(e.Value?.ToString())) selectedParticleCandidate = e.Value!.ToString()!; })" />
             </div>
             <div class="col-md-5 small text-muted" role="status">
                 <strong class="text-info">@SelectedParticleCandidate.Name</strong><br />
@@ -48,12 +40,8 @@
         <div class="row g-2 align-items-end mb-2" aria-label="Complete FX particle inventory">
             <div class="col-md-7">
                 <label class="form-label small mb-1" for="fxParticleAudit">Exact particle model (83-row native audit)</label>
-                <select id="fxParticleAudit" class="form-select form-select-sm" @bind="selectedParticleAudit">
-                    @foreach (var particle in ParticleAuditRoutes)
-                    {
-                        <option value="@particle.Name">@particle.Name — @particle.Status</option>
-                    }
-                </select>
+                <SearchableSelect Id="fxParticleAudit" Label="Exact particle model (83-row native audit)" Options="@ParticleAuditRoutes.Select(x => x.Name)"
+                    Value="@selectedParticleAudit" ValueChanged="@(e => { if (!string.IsNullOrWhiteSpace(e.Value?.ToString())) selectedParticleAudit = e.Value!.ToString()!; })" />
             </div>
             <div class="col-md-5 small text-muted" role="status">
                 <strong class="text-info">@SelectedParticleAudit.Name</strong><br />

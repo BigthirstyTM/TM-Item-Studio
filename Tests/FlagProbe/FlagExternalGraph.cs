@@ -39,13 +39,13 @@ internal static class FlagExternalGraph
         }
         Save(mesh, new(), ".Mesh.Gbx");
         var dynaRefs = new GbxRefTable { AncestorLevel = 0 };
-        dyna.Mesh = null; dyna.MeshFile = new(dynaRefs, 1, false, name + ".Mesh.Gbx");
+        dyna.Mesh = null; dyna.References.Mesh.Descriptor = new GBX.NET.Components.GbxRefTableFile(dynaRefs, 1, false, name + ".Mesh.Gbx");
         Save(dyna, dynaRefs, ".DynaObject.Gbx");
         var prefabRefs = new GbxRefTable { AncestorLevel = 0 };
-        prefab.Ents[1].Model = null; prefab.Ents[1].ModelFile = new(prefabRefs, 1, false, name + ".DynaObject.Gbx");
+        prefab.Ents[1].Model = null; prefab.Ents[1].References.Model.Descriptor = new GBX.NET.Components.GbxRefTableFile(prefabRefs, 1, false, name + ".DynaObject.Gbx");
         Save(prefab, prefabRefs, ".Prefab.Gbx");
         var itemRefs = new GbxRefTable { AncestorLevel = 0 };
-        variant.EntityModel = null; variant.EntityModelFile = new(itemRefs, 1, false, name + ".Prefab.Gbx");
+        variant.EntityModel = null; variant.References.EntityModel.Descriptor = new GBX.NET.Components.GbxRefTableFile(itemRefs, 1, false, name + ".Prefab.Gbx");
         Save(item, itemRefs, ".Item.Gbx");
         foreach (var (file, bytes) in files) File.WriteAllBytes(Path.Combine(output, file), bytes);
         var map = Gbx.Parse<CGameCtnChallenge>(mapSource, new GbxReadSettings { SkipChunkIds = [0x0304305B] });

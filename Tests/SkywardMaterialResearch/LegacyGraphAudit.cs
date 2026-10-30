@@ -34,7 +34,7 @@ internal static class LegacyGraphAudit
             scope="In-memory serialization only. No GBX candidate emitted or game operation performed.",
             sourcePath=Path.GetFullPath(sourcePath),sourceSha256=Hash(bytes),
             sourceItemType=doc.Node.ItemType.ToString(),sourceItemChunkVersion=itemChunk.Version,
-            sourceEntityModel=prefab.GetType().Name,sourceVisualCount=mesh.Visuals!.Length,
+            sourceEntityModel=prefab.GetType().Name,sourceVisualCount=mesh.Visuals!.Count,
             sourceMaterialCount=mesh.CustomMaterials!.Length,
             remainingRigidVisualCount=mesh.ShadedGeoms!.Count(g=>g.VisualIndex!=9),
             rigidMaterialIndices=mesh.ShadedGeoms!.Where(g=>g.VisualIndex!=9).Select(g=>g.MaterialIndex).Distinct().ToArray(),

@@ -1,4 +1,4 @@
-{
+﻿{
     "package":  "GBX.NET",
     "version":  "2.5.0",
     "upstreamRepository":  "https://github.com/BigBang1112/gbx-net",
@@ -8,7 +8,8 @@
     "compatibilityPatch":  "patches/gbx-net-null-class-id.patch",
     "compatibilityPatchSha256":  "5ec5c4ff4d26f2e5d70e2147a8f4f9a8299a7663c723c16dd8df2722920aba61",
     "skinWeightsPatchSha256":  "1ceed94db46b8b71a35a699b25adc609d9789fdea386685f683eb0ddeb695568",
-    "deformationLayerPatchSha256":  "7e14d48155fd78cf450d7e80618c538a0864ea7ef5cc3c9d709fff89af0361c4",
+    "deformationLayerPatchSha256":  "8c3fb90434e0a1b8974b1aa915fb3dce6802f5838cf71101691c42812053f9e6",
+    "vertexBuffersPatchSha256":  "7d8615039363088ea5434db61157a3e984be96905a9e0fad8e8eba8d50ebb9d0",
+    "customModelsPatchSha256":  "e8e04720cc0d83e94a636b959d714394f761f1d5d19c3f25d78e92a2faa58da6",
     "updateCommand":  "powershell -NoProfile -ExecutionPolicy Bypass -File eng/Update-GbxNet.ps1"
 }
-

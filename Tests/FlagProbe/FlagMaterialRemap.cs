@@ -32,11 +32,11 @@ internal static class FlagMaterialRemap
         var seedBytes = File.ReadAllBytes(fullSeed);
         var original = ParseItem(seedBytes);
         var originalMesh = Mesh(original);
-        Require(originalMesh.Materials?.Length == 1
-            && originalMesh.Materials[0].File?.FilePath.EndsWith("ItemFlag.Material.Gbx", StringComparison.OrdinalIgnoreCase) == true,
+        Require(originalMesh.Materials?.Count == 1
+            && originalMesh.Materials.Get(0).File?.FilePath.EndsWith("ItemFlag.Material.Gbx", StringComparison.OrdinalIgnoreCase) == true,
             "Expected the accepted adjacent seed with one early native ItemFlag material reference");
         Require((originalMesh.CustomMaterials?.Length ?? 0) == 0
-            && (originalMesh.MaterialInsts?.Length ?? 0) == 0,
+            && (originalMesh.MaterialInsts?.Count ?? 0) == 0,
             "The adjacent seed must not use late custom/UserInst materials");
         Require(original.Chunks.OfType<CGameItemModel.Chunk2E002019>().Single().Version >= 15,
             "The item chunk must serialize MaterialModifier");
@@ -51,7 +51,7 @@ internal static class FlagMaterialRemap
             placeholder.Chunks.Remove(chunk);
         placeholder.CustomMaterial = null;
         placeholder.Shader = null;
-        placeholder.ShaderFile = null;
+        if (placeholder.References.Shader.Descriptor is not null) placeholder.References.Shader.Clear();
         placeholder.DeviceMaterials = [];
         var materialChunk = placeholder.Chunks.OfType<CPlugMaterial.Chunk09079015>().Single();
         materialChunk.U03 = [];
@@ -99,18 +99,18 @@ internal static class FlagMaterialRemap
             // A native-style fixed ID needs a catalog entry and is not portable.
             item.Ident = item.Ident! with { Id = userIdentity ? "" : name };
             var table = new GbxRefTable { AncestorLevel = 0 };
-            Mesh(item).Materials = [new External<CPlugMaterial>(null, new(table, 1, false, Placeholder))];
+            Mesh(item).Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(null, new(table, 1, false, Placeholder)) };
             item.MaterialModifier = null;
-            item.MaterialModifierFile = remap ? new(table, 1, false, Modifier) : null;
+            item.References.MaterialModifier.Descriptor = remap ? new GBX.NET.Components.GbxRefTableFile(table, 1, false, Modifier) : null;
             var bytes = Save(new ReferenceTableDocument(item, table));
             var parsed = Gbx.Parse<CGameItemModel>(new MemoryStream(bytes));
             Require(parsed.RefTable?.AncestorLevel == 0, "Item references must stay in the fixture folder");
             Require(parsed.RefTable!.Files.Count == (remap ? 2 : 1), "Unexpected item dependency count");
-            Require(Mesh(parsed.Node).Materials!.Single().File!.FilePath == Placeholder, "Placeholder reference lost");
-            Require(parsed.Node.MaterialModifierFile?.FilePath == (remap ? Modifier : null), "Modifier reference lost");
+            Require(Mesh(parsed.Node).Materials!.Get(0).File!.FilePath == Placeholder, "Placeholder reference lost");
+            Require(parsed.Node.References.MaterialModifier.File?.FilePath == (remap ? Modifier : null), "Modifier reference lost");
             Require(VisualHashes(Mesh(parsed.Node)).SequenceEqual(visualHashes), "Serialized visual data/topology changed");
             Require((Mesh(parsed.Node).CustomMaterials?.Length ?? 0) == 0
-                && (Mesh(parsed.Node).MaterialInsts?.Length ?? 0) == 0, "Late materials unexpectedly introduced");
+                && (Mesh(parsed.Node).MaterialInsts?.Count ?? 0) == 0, "Late materials unexpectedly introduced");
             return bytes;
         }
         var files = new Dictionary<string, byte[]> {
@@ -238,7 +238,7 @@ internal static class FlagMaterialRemap
         Require(parsed.RefTable?.Files.Count == 1 && parsed.RefTable.Files.Single().FilePath == Placeholder
             && parsed.RefTable.Files.Single().UseFile, "GameSkin ref-table parse differs");
         var fid = parsed.Node.CustomizableFids!.Single();
-        Require(fid.ClassId == MaterialClass && fid.Name == "ItemFlag" && fid.NodeFile?.FilePath == Placeholder,
+        Require(fid.ClassId == MaterialClass && fid.Name == "ItemFlag" && fid.References.Node.File?.FilePath == Placeholder,
             "Supported GameSkin body parse did not preserve the external source reference");
         return new { bodyOffset, trueBooleanOffset, sourceFidIndex = 1, bodyChunk = "0x090F4004", version = 3,
             trueBooleanHex = Convert.ToHexString(bytes.AsSpan((int)trueBooleanOffset, 12)) };
@@ -264,7 +264,7 @@ internal static class FlagMaterialRemap
         var parsed = Gbx.Parse<CPlugMaterial>(new MemoryStream(bytes));
         Require((parsed.RefTable?.Files.Count ?? 0) == 0 && (parsed.RefTable?.Resources.Count ?? 0) == 0,
             "Placeholder must not carry external references");
-        Require(parsed.Node.ShaderFile is null && parsed.Node.Shader is null && parsed.Node.CustomMaterial is null
+        Require(parsed.Node.References.Shader.File is null && parsed.Node.Shader is null && parsed.Node.CustomMaterial is null
             && (parsed.Node.DeviceMaterials?.Length ?? 0) == 0, "Placeholder must not carry a shader/custom material");
     }
 }

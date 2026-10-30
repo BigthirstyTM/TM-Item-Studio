@@ -176,11 +176,11 @@ var external = CustomItem();
 var externalTable = new GbxRefTable();
 var externalPlacement = external.DefaultPlacement;
 external.DefaultPlacement = null;
-external.DefaultPlacementFile = new GbxRefTableFile(externalTable, 0, true, "Media/PlaceParam/Flag.PlaceParam.Gbx");
+external.References.DefaultPlacement.Descriptor = new GbxRefTableFile(externalTable, 0, true, "Media/PlaceParam/Flag.PlaceParam.Gbx");
 external.CreateChunk<CGameItemModel.Chunk2E00201C>().Version = 5;
 var externalBytes = Save(external);
 Reject(() => ItemFlagConversion.Convert(external), "an external placement parameter was edited through a file reference");
-Check(ReferenceEquals(external.DefaultPlacementFile, external.DefaultPlacementFile)
+Check(ReferenceEquals(external.References.DefaultPlacement.File, external.References.DefaultPlacement.File)
     && externalPlacement is not null, "the refused external edit changed the reference");
 _ = externalBytes;
 

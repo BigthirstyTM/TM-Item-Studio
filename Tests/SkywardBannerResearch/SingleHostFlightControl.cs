@@ -31,8 +31,8 @@ static partial class Research
         var clothBody = (CPlugDynaObjectModel)clothEntry.Model!;
         var planeMesh = planeBody.Mesh!;
         var clothMesh = clothBody.Mesh!;
-        Require(planeMesh.Visuals is { Length: 12 } && planeMesh.CustomMaterials is { Length: 13 } && planeMesh.ShadedGeoms is { Length: 12 }, "Unexpected textured plane layout");
-        Require(clothMesh.Visuals is { Length: 5 } && clothMesh.ShadedGeoms is { Length: 5 }, "Unexpected animated cloth layout");
+        Require(planeMesh.Visuals is { Count: 12 } && planeMesh.CustomMaterials is { Length: 13 } && planeMesh.ShadedGeoms is { Length: 12 }, "Unexpected textured plane layout");
+        Require(clothMesh.Visuals is { Count: 5 } && clothMesh.ShadedGeoms is { Length: 5 }, "Unexpected animated cloth layout");
         var rigidHash = NodeHash(planeBody);
 
         // The split flight bake contains the rigid flight rotation in every
@@ -106,7 +106,7 @@ static partial class Research
         var checkedPrefab = FlagPrefab(check.Node);
         Require(checkedPrefab.Ents!.Length == 2 && checkedPrefab.Ents[1].Model is NPlugDyna_SKinematicConstraint, "Single-host graph did not survive save");
         var checkedPlane = (CPlugDynaObjectModel)checkedPrefab.Ents[0].Model!;
-        Require(checkedPlane.Mesh!.Visuals!.Length == 17 && checkedPlane.Mesh.ShadedGeoms!.Length == 17, "Merged visual mapping changed");
+        Require(checkedPlane.Mesh!.Visuals!.Count == 17 && checkedPlane.Mesh.ShadedGeoms!.Length == 17, "Merged visual mapping changed");
         Require(NodeHash(checkedPlane.Mesh.Visuals[0]) == NodeHash(planeMesh.Visuals[0]), "Rigid visual changed during serialization");
         Require(checkedPlane.Mesh.ShadedGeoms[12].VisualIndex == 12 && checkedPlane.Mesh.ShadedGeoms[12].MaterialIndex == 9 && checkedPlane.Mesh.ShadedGeoms[16].LodMask == 16, "Cloth material mapping changed");
 

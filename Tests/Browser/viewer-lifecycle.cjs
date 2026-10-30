@@ -68,7 +68,7 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
 
         // A failed parse must retire the old viewer, and a later good file must recover.
         await input.setInputFiles({ name: 'bad.Gbx', mimeType: 'application/octet-stream', buffer: Buffer.from('not a GBX') });
-        await page.getByText('Error while processing the file:', { exact: false }).waitFor();
+        await page.getByText('bad.Gbx:', { exact: false }).waitFor();
         assert.equal(await page.evaluate(() => renderer), null);
         assert.equal(await page.evaluate(() => testResizeHandlers.size), baselineHandlers);
         await input.setInputFiles({ name: 'third.Item.Gbx', mimeType: 'application/octet-stream', buffer: syntheticItem });

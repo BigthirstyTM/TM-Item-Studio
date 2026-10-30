@@ -27,13 +27,13 @@ internal static class FlagNativePackage
             var name="TMIS_NativePackage_"+mode;
             var item=Gbx.Parse<CGameItemModel>(Path.Combine(Data,@"Items\Flag16m.Item.Gbx"));
             item.Node.Ident=item.Node.Ident! with {Id=name};item.Node.Name=name;
-            ((NPlugItem_SVariantList)item.Node.EntityModel!).Variants![0].EntityModelFile!.FilePath=@"Media\Prefab\Items\Flag\"+name+".Prefab.Gbx";
+            ((NPlugItem_SVariantList)item.Node.EntityModel!).Variants![0].References.EntityModel.File!.FilePath=@"Media\Prefab\Items\Flag\"+name+".Prefab.Gbx";
             Save(item,"GameData/Stadium/Items/"+name+".Item.Gbx",mode);
             var prefab=Gbx.Parse<CPlugPrefab>(Path.Combine(Data,@"Media\Prefab\Items\Flag\Flag16m.Prefab.Gbx"));
-            prefab.Node.Ents![1].ModelFile!.FilePath=@"Dyna\Flag\"+name+".DynaObject.Gbx";
+            prefab.Node.Ents![1].References.Model.File!.FilePath=@"Dyna\Flag\"+name+".DynaObject.Gbx";
             Save(prefab,"GameData/Stadium/Media/Prefab/Items/Flag/"+name+".Prefab.Gbx",mode);
             var dyna=Gbx.Parse<CPlugDynaObjectModel>(Path.Combine(Data,@"Media\Dyna\Flag\Flag.DynaObject.Gbx"));
-            dyna.Node.MeshFile!.FilePath=name+".Mesh.Gbx";
+            dyna.Node.References.Mesh.File!.FilePath=name+".Mesh.Gbx";
             Save(dyna,"GameData/Stadium/Media/Dyna/Flag/"+name+".DynaObject.Gbx",mode);
             var mesh=Gbx.Parse<CPlugSolid2Model>(Path.Combine(Data,@"Media\Dyna\Flag\Flag.Mesh.Gbx"));
             foreach(var v in mesh.Node.Visuals!.OfType<CPlugVisualIndexedTriangles>())

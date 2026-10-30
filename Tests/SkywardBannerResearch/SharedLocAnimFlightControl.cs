@@ -36,7 +36,7 @@ static partial class Research
         var clothBody = (CPlugDynaObjectModel)prefab.Ents[1].Model!;
         var rigidMeshHash = NodeHash(planeBody.Mesh!);
         var clothMesh = clothBody.Mesh!;
-        Require(clothMesh.Visuals is { Length: 5 }, "Expected five cloth LOD visuals");
+        Require(clothMesh.Visuals is { Count: 5 }, "Expected five cloth LOD visuals");
         foreach (var visual in clothMesh.Visuals.Cast<CPlugVisualIndexedTriangles>())
         {
             var n = visual.Vertices.Length / Frames;

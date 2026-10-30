@@ -161,7 +161,7 @@ if (args.Length > 1 && args[0] == "--fix-collision")
     var prefab = (CPlugPrefab)item.EntityModel!;
     var dyna0 = (CPlugDynaObjectModel)prefab.Ents[0].Model!;
     var mesh = (CPlugSolid2Model)dyna0.Mesh!;
-    if (mesh.Visuals?.Length > 0 && mesh.Visuals[0] is CPlugVisualIndexedTriangles vit
+    if (mesh.Visuals?.Count > 0 && mesh.Visuals[0] is CPlugVisualIndexedTriangles vit
         && vit.VertexStreams?.Count > 0 && vit.IndexBuffer?.Indices is not null)
     {
         var positions = vit.VertexStreams[0].Positions!;
@@ -193,8 +193,8 @@ if (args.Length > 1 && args[0] == "--inspect-mesh")
     var prefab = (CPlugPrefab)item.EntityModel!;
     var dyna0 = (CPlugDynaObjectModel)prefab.Ents[0].Model!;
     var mesh = (CPlugSolid2Model)dyna0.Mesh!;
-    Console.WriteLine($"Visuals count: {mesh.Visuals?.Length}");
-    if (mesh.Visuals?.Length > 0 && mesh.Visuals[0] is CPlugVisualIndexedTriangles vit)
+    Console.WriteLine($"Visuals count: {mesh.Visuals?.Count}");
+    if (mesh.Visuals?.Count > 0 && mesh.Visuals[0] is CPlugVisualIndexedTriangles vit)
     {
         Console.WriteLine($"Mesh BoundingBox: {vit.BoundingBox}");
         var verts = vit.VertexStreams![0].Positions!;
@@ -306,13 +306,13 @@ if (args.Length > 0 && args[0] == "--generate-letter-b")
                     var dyna = candPrefab.Ents!
                         .Select(e => e.Model as CPlugDynaObjectModel)
                         .Where(d => d?.Mesh is not null)
-                        .OrderByDescending(d => d!.Mesh!.Visuals?.Length ?? 0)
+                        .OrderByDescending(d => d!.Mesh!.Visuals?.Count ?? 0)
                         .FirstOrDefault();
                     if (dyna?.Mesh is not null)
                     {
                         userMesh = dyna.Mesh;
                         userShape = dyna.StaticShape as CPlugSurface ?? ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh);
-                        Console.WriteLine($"Found user mesh from {Path.GetFileName(cand)}: {userMesh.Visuals?.Length} visuals");
+                        Console.WriteLine($"Found user mesh from {Path.GetFileName(cand)}: {userMesh.Visuals?.Count} visuals");
                         break;
                     }
                 }
@@ -789,7 +789,7 @@ if (args.Length > 0 && args[0] == "--create-l-item")
         var largestDyna = existingPrefab.Ents!
             .Select(e => e.Model as CPlugDynaObjectModel)
             .Where(d => d?.Mesh is not null)
-            .OrderByDescending(d => d!.Mesh!.Visuals?.Length ?? 0)
+            .OrderByDescending(d => d!.Mesh!.Visuals?.Count ?? 0)
             .FirstOrDefault();
         userMesh = largestDyna?.Mesh!;
         userShape = ItemKinematicEntityTemplate.GenerateCollisionSurfaceFromMesh(userMesh)
@@ -1456,7 +1456,7 @@ static CPlugSolid2Model Solid()
     typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
         (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
     typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
-    typeof(CPlugVertexStream).GetField("count", flags)!.SetValue(stream, 3);
+    typeof(CPlugVertexStream).GetField("vertexCount", flags)!.SetValue(stream, 3);
     stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
     var indexBuffer = new CPlugIndexBuffer { Indices = [0, 1, 2] };
     indexBuffer.CreateChunk<CPlugIndexBuffer.Chunk09057000>();
@@ -1505,7 +1505,7 @@ static CPlugSolid2Model ProofCubeSolid(float size = 1f)
     typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
         (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
     typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
-    typeof(CPlugVertexStream).GetField("count", flags)!.SetValue(stream, verts.Length);
+    typeof(CPlugVertexStream).GetField("vertexCount", flags)!.SetValue(stream, verts.Length);
     stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
 
     var indexBuffer = new CPlugIndexBuffer { Indices = indices };
@@ -1561,7 +1561,7 @@ static List<(Vector3 Start, KC.EAxis Axis, float Delta)> BuildAxisRelaySegments(
 
 static bool HasGameRenderableMesh(CPlugSolid2Model solid)
 {
-    if ((solid.Visuals?.Length ?? 0) == 0) return false;
+    if ((solid.Visuals?.Count ?? 0) == 0) return false;
     if ((solid.CustomMaterials?.Length ?? 0) == 0) return false;
     if ((solid.ShadedGeoms?.Length ?? 0) == 0) return false;
     return true;
@@ -1606,7 +1606,7 @@ static void VerifyKinematic(CGameItemModel item, float translationMax = 1,
     var prefab = (CPlugPrefab)(item.EntityModel ?? throw new Exception("kinematic archive lost its prefab entity model"));
     Require(prefab.Version == 11 && prefab.Ents!.Length == 2, "prefab envelope changed");
     var body = prefab.Ents[0];
-    Require(body.ModelFile is null && body.Model is CPlugDynaObjectModel, "body entry changed");
+    Require(body.References.Model.File is null && body.Model is CPlugDynaObjectModel, "body entry changed");
     var instance = (NPlugDynaObjectModel_SInstanceParams)body.Params!;
     Require(instance.Version == 2 && instance.PeriodSc == 1 && instance.PeriodScMax == -1 && instance.Phase01 == -1
         && instance.Phase01Max == -1 && instance.TextureId == 0 && instance.IsKinematic && instance.CastStaticShadow,
@@ -1681,7 +1681,7 @@ static void DumpNode(CMwNod? node, string label, HashSet<CMwNod> seen, int depth
             for (int i = 0; i < (prefab.Ents?.Length ?? 0); i++)
             {
                 var e = prefab.Ents![i];
-                Console.WriteLine($"{indent}  ent[{i}]: model={TypeName(e.Model)} external={(e.ModelFile is null ? "null" : e.ModelFile.FilePath)} pos={e.Position} rot={e.Rotation} u01=\"{e.U01 ?? ""}\"");
+                Console.WriteLine($"{indent}  ent[{i}]: model={TypeName(e.Model)} external={(e.References.Model.File is null ? "null" : e.References.Model.File.FilePath)} pos={e.Position} rot={e.Rotation} u01=\"{e.U01 ?? ""}\"");
                 DumpParams(e.Params, indent + "    ", seen);
                 DumpNode(e.Model, "model", seen, depth + 2);
             }
@@ -1698,7 +1698,7 @@ static void DumpNode(CMwNod? node, string label, HashSet<CMwNod> seen, int depth
             for (int i = 0; i < (variants.Variants?.Length ?? 0); i++)
             {
                 var v = variants.Variants![i];
-                Console.WriteLine($"{indent}  variant[{i}]: hidden={v.HiddenInManualCycle} tags={v.Tags?.Count ?? 0} entityModel={TypeName(v.EntityModel)} entityFile={(v.EntityModelFile is null ? "null" : v.EntityModelFile.FilePath)}");
+                Console.WriteLine($"{indent}  variant[{i}]: hidden={v.HiddenInManualCycle} tags={v.Tags?.Count ?? 0} entityModel={TypeName(v.EntityModel)} entityFile={(v.References.EntityModel.File is null ? "null" : v.References.EntityModel.File.FilePath)}");
                 DumpNode(v.EntityModel, $"variant[{i}].entityModel", seen, depth + 2);
             }
             return;

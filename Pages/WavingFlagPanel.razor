@@ -19,13 +19,13 @@
     <div class="card bg-light border mb-2 p-2" aria-label="Blender baked cloth exporter">
         <strong class="small">Blender baked cloth exporter</strong>
         <p class="small text-muted mb-1">Download the English Blender add-on to bake a cloth simulation into a topology-stable mesh sequence for a later Trackmania flag export.</p>
-        <button class="btn btn-sm btn-outline-primary" type="button" @onclick="DownloadBlenderAddon">Download Blender add-on (.zip)</button>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-helper="Download the Blender add-on that bakes cloth simulation into a mesh sequence for the flag importer." @onclick="DownloadBlenderAddon">Download Blender add-on (.zip)</button>
         <p class="small text-muted mb-0 mt-1">The add-on exports <code>.tmcloth.json</code> plus an optional ZIP. Use the import panel below to turn the sequence into a native flag package.</p>
     </div>
     <div class="card bg-light border mb-2 p-2" aria-label="Blender baked cloth import">
         <strong class="small">Import Blender baked cloth sequence</strong>
         <p class="small text-muted mb-1">Select the exported <code>.tmcloth.json</code> or ZIP. The rest frame, topology, UV0 and anchor are matched against the selected mesh before a native 86-frame flag package is written.</p>
-        <InputFile id="wavingFlagBlenderSequence" aria-label="Blender baked cloth sequence" accept=".json,.zip,.tmcloth.json" class="form-control form-control-sm mb-2" OnChange="LoadBakedSequence" />
+        <InputFile data-helper="Import a baked cloth sequence or ZIP package matching the selected mesh topology." id="wavingFlagBlenderSequence" aria-label="Blender baked cloth sequence" accept=".json,.zip,.tmcloth.json" class="form-control form-control-sm mb-2" OnChange="LoadBakedSequence" />
         @if (bakedSequence is not null)
         {
             <p class="small text-success mb-1" role="status">Loaded @bakedSequenceName: @bakedSequence.FrameCount frames, @bakedSequence.VertexCount loop vertices, @bakedSequence.PeriodSeconds.ToString("0.##") s.</p>

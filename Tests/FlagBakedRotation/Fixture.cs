@@ -219,12 +219,12 @@ internal static class Fixture
     {
         Require(doc.Node.Ident?.Id == "" && doc.Node.ArchetypeRef == "", "Expected ordinary v6 user identity");
         Require(doc.RefTable!.AncestorLevel == 0 && doc.RefTable.Files.Select(f => f.FilePath).SequenceEqual(new[] {"TMIS_MatRemap_Placeholder.Material.Gbx", "TMIS_MatRemap.TerrainModifier.Gbx"}) && doc.RefTable.Files.All(f => f.Flags == 1 && !f.UseFile), "v6 sibling reference table changed");
-        Require(doc.Node.MaterialModifierFile?.FilePath == "TMIS_MatRemap.TerrainModifier.Gbx", "v6 modifier changed");
+        Require(doc.Node.References.MaterialModifier.File?.FilePath == "TMIS_MatRemap.TerrainModifier.Gbx", "v6 modifier changed");
         var p = Prefab(doc.Node);
         Require(p.Ents is {Length:2} && p.Ents[0].Model is CPlugStaticObjectModel && p.Ents[1].Model is CPlugDynaObjectModel, "Unknown source graph");
         var d = (CPlugDynaObjectModel)p.Ents![1].Model!;
-        Require(d.LocAnim is null && d.LocAnimFile is null && d.DynaShape is null && d.StaticShape is null && !((NPlugDynaObjectModel_SInstanceParams)p.Ents[1].Params!).IsKinematic, "Unexpected motion or physics graph");
-        Require(d.Mesh?.Visuals?.Length == 5 && d.Mesh.Materials is {Length:1} && d.Mesh.Materials[0].File?.FilePath == "TMIS_MatRemap_Placeholder.Material.Gbx", "Unknown material/visual route");
+        Require(d.LocAnim is null && d.References.LocAnim.File is null && d.DynaShape is null && d.StaticShape is null && !((NPlugDynaObjectModel_SInstanceParams)p.Ents[1].Params!).IsKinematic, "Unexpected motion or physics graph");
+        Require(d.Mesh?.Visuals?.Count == 5 && d.Mesh.Materials is {Count:1} && d.Mesh.Materials.Get(0).File?.FilePath == "TMIS_MatRemap_Placeholder.Material.Gbx", "Unknown material/visual route");
     }
     static void ValidateVisual(CPlugVisualIndexedTriangles v)
     {

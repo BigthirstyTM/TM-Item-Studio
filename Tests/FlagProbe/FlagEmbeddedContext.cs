@@ -34,7 +34,7 @@ internal static class FlagEmbeddedContext
             item.Ident=item.Ident! with {Id=name};
             var mesh=((CPlugDynaObjectModel)((CPlugPrefab)((NPlugItem_SVariantList)item.EntityModel!).Variants![0].EntityModel!).Ents![1].Model!).Mesh!;
             var refs=new GbxRefTable {AncestorLevel=ancestor};
-            mesh.Materials=[new External<CPlugMaterial>(null,new GbxRefTableFile(refs,1,false,path))];
+            mesh.Materials=new External<CPlugMaterial>[] { new External<CPlugMaterial>(null,new GbxRefTableFile(refs,1,false,path)) };
             using var stream=new MemoryStream();
             new ReferenceTableDocument(item,refs).Save(stream);
             var bytes=stream.ToArray();

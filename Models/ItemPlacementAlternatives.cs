@@ -6,8 +6,8 @@ using GBX.NET.Serialization.Chunking;
 namespace TM_Item_Studio.Models;
 
 /// <summary>
-/// The skippable <c>2E020004</c> placement-alternative list. GBX.NET keeps the chunk opaque
-/// (Ignore = true), so the payload is decoded and encoded here instead of by the serializer:
+/// The skippable <c>2E020004</c> magnet-location list. GBX.NET 2.5 exposes MagnetLocs;
+/// raw payloads from older readers or unknown chunks are supported without losing bytes:
 ///
 /// <code>
 /// int32 version (0)   int32 count   count x (Vec3 position, Vec3 rotation in degrees)
@@ -33,9 +33,18 @@ public static class ItemPlacementAlternatives
         ArgumentNullException.ThrowIfNull(placement);
         if (placement.Chunks.Get(ChunkId) is not { } chunk)
             return [];
-        if (chunk is not ISkippableChunk { Data: { } data })
-            throw new NotSupportedException("The 2E020004 chunk carries no payload to read.");
-        return Decode(data);
+        if (chunk is ISkippableChunk { Data: { } data })
+            return Decode(data);
+        if (chunk is CGameItemPlacementParam.Chunk2E020004 typed)
+        {
+            if (typed.Version != 0)
+                throw new NotSupportedException($"Unsupported 2E020004 version {typed.Version}; no edit was applied.");
+            var magnets = placement.MagnetLocs ?? [];
+            if (magnets.Length > MaxEntries)
+                throw new NotSupportedException("Too many magnet locations; no edit was applied.");
+            return magnets.Select(x => new Alternative(x.Position, x.YawPitchRoll)).ToArray();
+        }
+        throw new NotSupportedException("The 2E020004 chunk carries no payload to read.");
     }
 
     /// <summary>
@@ -57,6 +66,14 @@ public static class ItemPlacementAlternatives
         // Never replace a payload we cannot read: an unknown layout is data, not an empty list.
         if (existing?.Data is { } current)
             _ = Decode(current);
+
+        if (existing is CGameItemPlacementParam.Chunk2E020004 { Data: null })
+        {
+            _ = Read(placement);
+            placement.MagnetLocs = alternatives.Select(x => new CGameItemPlacementParam.MagnetLoc
+                { Position = x.Position, YawPitchRoll = x.RotationDegrees }).ToArray();
+            return;
+        }
 
         var payload = Encode(alternatives);
         if (existing is not null)

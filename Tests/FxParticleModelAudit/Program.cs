@@ -24,7 +24,7 @@ foreach (var path in Directory.EnumerateFiles(root, "*.ParticleModel.Gbx", Searc
             path = Path.GetRelativePath(root, path).Replace('\\', '/'),
             bytes = source.Length,
             className = node?.GetType().Name,
-            subModelCount = node?.ParticleEmitterSubModels?.Length ?? 0,
+            subModelCount = node?.ParticleEmitterSubModels?.Count ?? 0,
             refs = document.RefTable?.Files.Select(file => file.FilePath).Where(file => !string.IsNullOrWhiteSpace(file)).ToArray() ?? [],
             parsed = true,
             roundtripBytes = saved.Length,

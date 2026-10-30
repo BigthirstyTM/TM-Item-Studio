@@ -25,11 +25,11 @@ internal static class FlagMaterialBootstrap
             foreach (var c in mat.Chunks.Where(c => c.Ignore).ToArray()) mat.Chunks.Remove(c);
             mat.CustomMaterial = null;
             mat.Shader = null;
-            mat.ShaderFile = null;
+            if (mat.References.Shader.Descriptor is not null) mat.References.Shader.Clear();
             mat.DeviceMaterials = [];
             var materialChunk = mat.Chunks.OfType<CPlugMaterial.Chunk09079015>().Single();
             materialChunk.U03 = []; materialChunk.U04 = null;
-            mesh.Materials = [new External<CPlugMaterial>(mat, null)];
+            mesh.Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(mat, null) };
             mesh.MaterialIds = [];
             mesh.Chunks.OfType<CPlugSolid2Model.Chunk090BB000>().Single().Version = mode == "Custom28" ? 28 : 15;
             mesh.MaterialInsts = mode == "Custom28" ? null : instances;

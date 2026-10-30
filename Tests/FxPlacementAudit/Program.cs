@@ -35,9 +35,9 @@ if (args.Length == 3 && args[0] == "--audit-primer")
     var root = (CPlugPrefab)item.EntityModel!;
     if (root.Ents.Length != 3 || root.Ents[1].Model is not null || root.Ents[2].Model is not CPlugStaticObjectModel model)
         throw new InvalidDataException("Primer prefab topology differs.");
-    var material = model.Mesh!.Materials!.Single().Node!;
+    var material = model.Mesh!.Materials!.Single()!;
     var texture = material.CustomMaterial!.Textures!.Single();
-    Console.WriteLine(JsonSerializer.Serialize(new { source=Path.GetFullPath(args[1]), fx, entityCount=root.Ents.Length, primerPosition=Values(root.Ents[2].Position), meshVertices=model.Mesh.Visuals?.OfType<CPlugVisualIndexedTriangles>().Select(v=>v.VertexStreams?.Sum(s=>s.Positions?.Length??0)), sampler=texture.Name, texture.U01,texture.U02,texture.U03, materialParentFile=material.ShaderFile?.FilePath, sourceFxGraphBytes=graphBytes, sharedBitmapNodeIndex=14, textureReferenceBodyOffset=textureReference, previewBitmapNote="FX archive and its bitmap definition14 were temporarily omitted; shared sampler reference14 temporarily null only for typed topology audit", originalBytesNeverReserialized=true },new JsonSerializerOptions {WriteIndented=true}));
+    Console.WriteLine(JsonSerializer.Serialize(new { source=Path.GetFullPath(args[1]), fx, entityCount=root.Ents.Length, primerPosition=Values(root.Ents[2].Position), meshVertices=model.Mesh.Visuals?.OfType<CPlugVisualIndexedTriangles>().Select(v=>v.VertexStreams?.Sum(s=>s.Positions?.Length??0)), sampler=texture.Name, texture.U01,texture.U02,texture.U03, materialParentFile=material.References.Shader.File?.FilePath, sourceFxGraphBytes=graphBytes, sharedBitmapNodeIndex=14, textureReferenceBodyOffset=textureReference, previewBitmapNote="FX archive and its bitmap definition14 were temporarily omitted; shared sampler reference14 temporarily null only for typed topology audit", originalBytesNeverReserialized=true },new JsonSerializerOptions {WriteIndented=true}));
     return;
 }
 if (args.Length == 3 && args[0] == "--material-primer-donor")
@@ -55,12 +55,12 @@ if (args.Length == 3 && args[0] == "--material-primer-donor")
     var mesh = model.Mesh!;
     var material = Gbx.Parse<CPlugMaterial>(@"C:\Users\PC\OpenplanetNext\Extract\GameData\Stadium\Media\Material_BlockCustom\CustomModAddSelfIllum.Material.Gbx").Node;
     var table = new GbxRefTable { AncestorLevel = 0 };
-    material.ShaderFile = new GbxRefTableFile(table, 1, false, @"GameData\Techno3\Media\Material\Tech3 Block TAddModCV.Material.gbx");
+    material.References.Shader.Descriptor = new GbxRefTableFile(table, 1, false, @"GameData\Techno3\Media\Material\Tech3 Block TAddModCV.Material.gbx");
     var texture = material.CustomMaterial!.Textures!.Single();
     if (texture.Name != "SelfIllum") throw new InvalidDataException("Unexpected native material sampler.");
     texture.Texture = new CPlugBitmap();
-    texture.TextureFile = null;
-    mesh.Materials = [new External<CPlugMaterial>(material, null)];
+    if (texture.References.Texture.Descriptor is not null) texture.References.Texture.Clear();
+    mesh.Materials = new External<CPlugMaterial>[] { new External<CPlugMaterial>(material, null) };
     mesh.CustomMaterials = null; mesh.MaterialInsts = null; mesh.MaterialIds = [];
     prefab.Ents = [entry];
     Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(args[2]))!);

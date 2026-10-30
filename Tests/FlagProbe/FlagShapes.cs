@@ -81,7 +81,7 @@ internal static class FlagShapes
                     stream.Positions = low.Vertices.Take(count).Select(p => p.Position).ToArray();
                     stream.Normals = low.Vertices.Take(count).Select(p => p.Normal!.Value).ToArray();
                     stream.UVs[0] = low.TexCoords[0].TexCoords.Take(count).Select(p => p.UV).ToArray();
-                    typeof(CPlugVertexStream).GetField("count", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(stream, count);
+                    typeof(CPlugVertexStream).GetField("vertexCount", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(stream, count);
                     typeof(CPlugVisual).GetProperty("Count", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(v, count);
                     v.IndexBuffer.Indices = low.IndexBuffer!.Indices.ToArray();
                 }

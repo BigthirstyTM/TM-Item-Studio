@@ -34,17 +34,17 @@ internal static class FlagReferenceResolution
             var chunk = mat.Chunks.OfType<CPlugMaterial.Chunk09079015>().Single();
             chunk.U03 = []; chunk.U04 = null;
             mat.Shader = null;
-            mat.ShaderFile = Ref((mode == "NativeParentAbsolute" ? Game : "") + Parent, false);
+            mat.References.Shader.Descriptor = Ref((mode == "NativeParentAbsolute" ? Game : "") + Parent, false);
             if (mode.StartsWith("NativeShader"))
             {
                 var parent = Gbx.Parse<CPlugMaterial>(Data + Parent[9..]).Node;
                 foreach (var c in parent.Chunks.Where(c => c.Ignore).ToArray()) parent.Chunks.Remove(c);
                 foreach (var dev in parent.DeviceMaterials!)
-                    dev.Shader1File = dev.Shader2File = dev.Shader3File = Ref((mode.EndsWith("Absolute") ? Game : "") + Shader, true);
-                mat.Shader = parent; mat.ShaderFile = null;
+                    dev.References.Shader1.Descriptor = dev.References.Shader2.Descriptor = dev.References.Shader3.Descriptor = Ref((mode.EndsWith("Absolute") ? Game : "") + Shader, true);
+                mat.Shader = parent; if (mat.References.Shader.Descriptor is not null) mat.References.Shader.Clear();
             }
-            mesh.Materials = mode == "NativeMaterialAbsolute" ? [new External<CPlugMaterial>(null, Ref(Game + "GameData/Stadium/Media/Material/ItemFlag.Material.Gbx", false))]
-                : [new External<CPlugMaterial>(mat, null)];
+            mesh.Materials = mode == "NativeMaterialAbsolute" ? new External<CPlugMaterial>[] { new External<CPlugMaterial>(null, Ref(Game + "GameData/Stadium/Media/Material/ItemFlag.Material.Gbx", false)) }
+                : new External<CPlugMaterial>[] { new External<CPlugMaterial>(mat, null) };
             mesh.CustomMaterials = null; mesh.MaterialInsts = null; mesh.MaterialIds = [];
             var path = Path.Combine(folder, "TMIS_Refs_" + mode + ".Item.Gbx");
             new ReferenceTableDocument(item, table).Save(path);

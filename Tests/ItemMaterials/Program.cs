@@ -4,6 +4,18 @@ Check("inspect shared capability refusal",()=>{var v=Visual();var s=Solid(v);var
 Check("apply refuses atomically",()=>{var v=Visual();var d=Document(Solid(v));var path=ItemScene.Build(d.Node,0).Handles.Visuals.Single().Path;var b=Save(d);Throws(()=>ItemMaterialEdits.ApplyUv0(d,0,path,new(2,3,90,1,-1)),b,d);});
 Check("invalid and opaque refuse",()=>{var v=Visual();var d=Document(Solid(v));var path=ItemScene.Build(d.Node,0).Handles.Visuals.Single().Path;var b=Save(d);Throws(()=>ItemMaterialEdits.ApplyUv0(d,0,path,new(float.NaN)),b,d);v.TexCoords=new[]{v.TexCoords[1]};b=Save(d);Throws(()=>ItemMaterialEdits.ApplyUv0(d,0,path,new()),b,d);var sv=StreamVisual();d=Document(Solid(sv));path=ItemScene.Build(d.Node,0).Handles.Visuals.Single().Path;b=Save(d);Throws(()=>ItemMaterialEdits.ApplyUv0(d,0,path,new()),b,d);});
 Check("hidden variants included",()=>{var v=Visual();var list=new NPlugItem_SVariantList{Variants=new[]{new NPlugItem_SVariant{EntityModel=Solid(v)},new NPlugItem_SVariant{EntityModel=new CPlugSolid2Model(),HiddenInManualCycle=true}}};var d=Document(list);var scope=ItemMaterialEdits.InspectUv0(d,0,"doc:0/variant:0/root/entityModel/variant:0/entityModel/visual:0");Req(scope.VertexCount==3,"scope");});
+Check("named crystal material link survives archive save and reopen", () => {
+    var material = new CPlugCrystal.Material { MaterialName = "OldNamedMaterial" };
+    ItemMaterialEdits.SetGameMaterialLink(material, " Stadium/Platform/PlatformTech ");
+    using var output = new MemoryStream();
+    using (var writer = new GBX.NET.Serialization.GbxWriter(output)) material.Write(writer, 1);
+    using var input = new MemoryStream(output.ToArray());
+    using var reader = new GBX.NET.Serialization.GbxReader(input);
+    var reopened = new CPlugCrystal.Material(); reopened.Read(reader, 1);
+    Req(string.IsNullOrEmpty(reopened.MaterialName), "Name hides the authored instance");
+    Req(reopened.MaterialUserInst?.Link == "Stadium/Platform/PlatformTech", "Material link lost");
+    Req(reopened.MaterialUserInst?.IsUsingGameMaterial == true, "Game-material mode lost");
+});
 Console.WriteLine($"{passed} passed");return 0;
 void Check(string n,Action a){a();passed++;Console.WriteLine("PASS: "+n);} static void Req(bool x,string m){if(!x)throw new Exception(m);} static void Throws(Action a,byte[] b,Gbx<CGameItemModel>d){try{a();throw new Exception("expected refusal");}catch(NotSupportedException){Req(b.SequenceEqual(Save(d)),"mutated");}catch(ArgumentException){Req(b.SequenceEqual(Save(d)),"mutated");}}
 static Gbx<CGameItemModel> Document(CMwNod r){var i=new CGameItemModel{EntityModel=r,ItemType=CGameItemModel.EItemType.Ornament};i.CreateChunk<CGameItemModel.HeaderChunk2E002000>();i.CreateChunk<CGameItemModel.Chunk2E002019>().Version=15;return new(i){BodyCompression=GbxCompression.Uncompressed};} static byte[] Save(Gbx<CGameItemModel>d){using var s=new MemoryStream();d.Save(s);return s.ToArray();}

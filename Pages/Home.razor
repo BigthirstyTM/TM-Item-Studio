@@ -1350,16 +1350,12 @@
                                     <div class="text-muted text-break small mb-1">@material.Path</div>
                                     <label class="small text-muted d-block" for="@MaterialEditorId(material.Path)" data-help-key="fullmateriallink">Full material link</label>
                                     <input id="@MaterialEditorId(material.Path)" class="form-control form-control-sm mb-1"
-                                           disabled="@(SelectedSource?.IsReadOnly == true)" value="@MaterialLinkValue(material)"
+                                           disabled="@(SelectedSource?.IsReadOnly == true || !CanEditMaterial(material))" value="@MaterialLinkValue(material)"
                                            @onchange="@(e => OnMaterialLinkChanged(material.Path, e))" />
-                                        <select disabled="@(SelectedSource?.IsReadOnly == true)" class="form-select form-select-sm" value="@MaterialLinkValue(material)" aria-label="@($"Game material for {material.Path}")" data-help-key="fullmateriallink"
-                                            @onchange="@(e => OnMaterialLinkChanged(material.Path, e))">
-                                        <option value="">Choose a material from the game library…</option>
-                                        @foreach (var link in MaterialOptionsFor(material))
-                                        {
-                                            <option value="@link">@link</option>
-                                        }
-                                    </select>
+                                    <SearchableSelect @key="material.Path" Disabled="@(SelectedSource?.IsReadOnly == true || !CanEditMaterial(material))"
+                                        Value="@MaterialLinkValue(material)" Options="@MaterialOptionsFor(material)"
+                                        Label="@($"Game material for {material.Path}")" Placeholder="Choose a material from the game library"
+                                        ValueChanged="@(e => OnMaterialLinkChanged(material.Path, e))" />
                                 </div>
                             }
                         </div>
@@ -3812,6 +3808,11 @@ else if (itemModel is null)
             yield return entry.Path;
     }
 
+    private bool CanEditMaterial(ItemSceneMaterial material)
+        => material.SourceId is int id && authoredMotionScene is not null
+            && authoredMotionScene.Handles.Sources.TryGetValue(id, out var source)
+            && source is CPlugSolid2Model.Material or CPlugCrystal.Material;
+
     private async Task OnMaterialLinkChanged(string materialPath, ChangeEventArgs args)
     {
         var link = args.Value?.ToString()?.Trim();
@@ -3820,15 +3821,13 @@ else if (itemModel is null)
         var descriptor = authoredMotionScene.Preview.Materials.FirstOrDefault(material => material.Path == materialPath);
         if (descriptor is null || descriptor.SourceId is not int sourceId
             || !authoredMotionScene.Handles.Sources.TryGetValue(sourceId, out var source)
-            || source is not CPlugSolid2Model.Material material)
+            || source is not (CPlugSolid2Model.Material or CPlugCrystal.Material))
         {
             errorMessage = "This material slot is read-only because its authored material instance is not exposed by the GBX data.";
             return;
         }
 
-        material.MaterialUserInst ??= new CPlugMaterialUserInst();
-        material.MaterialUserInst.IsUsingGameMaterial = true;
-        material.MaterialUserInst.Link = link;
+        ItemMaterialEdits.SetGameMaterialLink(source, link);
         authoredMotionScene = ReadSelectedScene();
         detectedMaterials = authoredMotionScene.Preview.Materials;
         statusMessage = $"Updated material slot {descriptor.Index} to {link}. The live preview and the next GBX export use this link.";
