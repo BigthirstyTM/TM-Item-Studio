@@ -34,8 +34,19 @@ public static partial class ItemScene
 
             var layers = crystal.Layers ?? [];
             var geometryLayerIndex = 0;
+            Matrix4x4? pendingDeformation = null;
             foreach (var layer in layers)
             {
+                if (layer is CPlugCrystal.DeformationLayer deformationLayer)
+                {
+                    var transforms = deformationLayer.GetType().GetProperty("Transforms")?.GetValue(deformationLayer) as Iso4[];
+                    pendingDeformation = transforms is { Length: > 0 }
+                        ? FromIso4(transforms[0])
+                        : null;
+                    geometryLayerIndex++;
+                    continue;
+                }
+
                 if (layer is not CPlugCrystal.GeometryLayer geometryLayer)
                 {
                     Issue($"{crystalPath}/layer:{geometryLayerIndex}", "edition-layer",
@@ -55,7 +66,11 @@ public static partial class ItemScene
                     continue;
                 }
 
-                EmitCrystalLayer(geometryLayer.Crystal, layerPath, world, entry);
+                var layerWorld = world;
+                if (pendingDeformation.HasValue && layerWorld.HasValue)
+                    layerWorld = pendingDeformation.Value * layerWorld.Value;
+                EmitCrystalLayer(geometryLayer.Crystal, layerPath, layerWorld, entry);
+                pendingDeformation = null;
             }
         }
 
