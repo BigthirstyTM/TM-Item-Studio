@@ -422,7 +422,7 @@ public static class ItemKinematicEntityTemplate
                 "Adding entities inside nested prefabs is unsupported because native slot-table flattening is not verified.");
         if (owner.Ents is not { Length: > 0 } entries)
             return ItemMotionResult<Template>.Fail(ItemMotionStatus.Absent, "The prefab has no entity entries.");
-        var constraintEntry = entries.FirstOrDefault(entry => entry.ModelFile is null && ReferenceEquals(entry.Model, source));
+        var constraintEntry = entries.FirstOrDefault(entry => entry.References.Model.File is null && ReferenceEquals(entry.Model, source));
         if (constraintEntry?.Params is not NPlugDyna_SPrefabConstraintParams parameters)
             return ItemMotionResult<Template>.Fail(ItemMotionStatus.Unresolved, "The selected constraint has no typed prefab-binding parameters.");
         if (source.Version != 0 || source.SubVersion != 3 || source.ShaderTcType != KC.EShaderTcType.None)
@@ -430,7 +430,7 @@ public static class ItemKinematicEntityTemplate
                 "Only the verified version-0/subversion-3 constraint template without shader animation can be cloned.");
         var binding = ItemMotionBindings.Resolve(source, owner, parameters, prefabInstancePath);
         if (binding.Status != ItemMotionStatus.Supported || binding.Child.SourceEntry is not { } bodyEntry
-            || bodyEntry.ModelFile is not null || bodyEntry.Model is not CPlugDynaObjectModel dyna
+            || bodyEntry.References.Model.File is not null || bodyEntry.Model is not CPlugDynaObjectModel dyna
             || bodyEntry.Params is not NPlugDynaObjectModel_SInstanceParams instance || instance.Version != 2 || !instance.IsKinematic)
             return ItemMotionResult<Template>.Fail(binding.Status,
                 binding.Reason ?? "The selected constraint does not target a supported, local version-2 kinematic body.");
@@ -507,13 +507,14 @@ public static class ItemKinematicEntityTemplate
 
     private static CPlugSolid2Model CreateCarrierMesh()
     {
-        const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+        const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+        static FieldInfo Field(Type t, string name) => t.GetField(name, flags) ?? t.GetFields(flags).FirstOrDefault(f => string.Equals(f.Name, name, StringComparison.OrdinalIgnoreCase)) ?? throw new MissingFieldException(t.FullName, name);
         var stream = new CPlugVertexStream { Positions = [new(), new(0.0001f, 0, 0), new(0, 0.0001f, 0)] };
         var declaration = new CPlugVertexStream.DataDecl();
-        typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
+        Field(typeof(CPlugVertexStream.DataDecl), "flags1").SetValue(declaration,
             (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
-        typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
-        typeof(CPlugVertexStream).GetField("count", flags)!.SetValue(stream, 3);
+        Field(typeof(CPlugVertexStream), "dataDecls").SetValue(stream, new[] { declaration });
+        stream.VertexCount = 3;
         stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
         var indexBuffer = new CPlugIndexBuffer { Indices = [0, 1, 2] };
         indexBuffer.CreateChunk<CPlugIndexBuffer.Chunk09057000>();
@@ -552,7 +553,7 @@ public static class ItemKinematicEntityTemplate
     /// </summary>
     public static CPlugSurface? GenerateCollisionSurfaceFromMesh(CPlugSolid2Model? mesh)
     {
-        if (mesh?.Visuals is null || mesh.Visuals.Length == 0) return null;
+        if (mesh?.Visuals is null || mesh.Visuals.Count == 0) return null;
         var allVertices = new List<Vec3>();
         var allTriangles = new List<CPlugSurface.Mesh.Triangle>();
 
@@ -785,7 +786,7 @@ public static class ItemKinematicEntityTemplate
 
         var bodies = entries
             .Select((entry, index) => (entry, index))
-            .Where(static item => item.entry.Model is CPlugDynaObjectModel && item.entry.ModelFile is null)
+            .Where(static item => item.entry.Model is CPlugDynaObjectModel && item.entry.References.Model.File is null)
             .ToArray();
         var constraints = entries
             .Select((entry, index) => (entry, index))
@@ -837,7 +838,7 @@ public static class ItemKinematicEntityTemplate
         {
             if (entry.Model is not CPlugDynaObjectModel { Mesh: CPlugSolid2Model solid })
                 return 0;
-            var visuals = solid.Visuals?.Length ?? 0;
+            var visuals = solid.Visuals?.Count ?? 0;
             var vertices = solid.Visuals?.OfType<CPlugVisualIndexedTriangles>()
                 .Sum(static visual => visual.VertexStreams?.FirstOrDefault()?.Positions?.Length ?? 0) ?? 0;
             return visuals * 1_000_000 + vertices;
@@ -1436,3 +1437,13 @@ public static class ItemKinematicEntityTemplate
         NPlugDynaObjectModel_SInstanceParams Instance, ItemMotionBinding Binding, ItemMotionSnapshot Snapshot);
     private sealed record TemplateBody(int EntryIndex, CPlugDynaObjectModel Body, NPlugDynaObjectModel_SInstanceParams Instance);
 }
+
+
+
+
+
+
+
+
+
+

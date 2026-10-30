@@ -32,7 +32,10 @@ jobs:
         run: dotnet restore
 
       - name: Publish Blazor app
-        run: dotnet publish TM-Item-Studio.csproj -c Release -o publish
+        # GBX.NET 2.5 contains a much larger generated type graph. Disable the
+        # IL linker for the Pages artifact so the publish job remains bounded;
+        # the browser payload is still compressed by GitHub Pages/CDN.
+        run: dotnet publish TM-Item-Studio.csproj -c Release -o publish -p:PublishTrimmed=false
 
       - name: Prepare GitHub Pages site
         run: |

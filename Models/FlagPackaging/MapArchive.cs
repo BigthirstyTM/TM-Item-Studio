@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 
@@ -70,3 +70,8 @@ internal sealed class MapArchive
     static int Int(byte[] bytes, int offset) { PackagingGuard.That(offset >= 0 && offset + 4 <= bytes.Length, "Truncated map integer"); return BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(offset)); }
     static void Put(byte[] bytes, int offset, int value) => BinaryPrimitives.WriteInt32LittleEndian(bytes.AsSpan(offset), value);
 }
+
+
+
+
+

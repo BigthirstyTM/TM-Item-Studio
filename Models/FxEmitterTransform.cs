@@ -1,4 +1,4 @@
-using GBX.NET.Engines.Plug;
+﻿using GBX.NET.Engines.Plug;
 using System.Globalization;
 
 namespace TM_Item_Studio.Models;
@@ -37,7 +37,7 @@ public static class FxEmitterTransform
         var prefab = preview.PreviewRoot;
         Require(prefab.Ents is { Length: 2 }
             && prefab.Ents[0].Model is CPlugStaticObjectModel
-            && prefab.Ents[1].Model is null && prefab.Ents[1].ModelFile is null,
+            && prefab.Ents[1].Model is null && prefab.Ents[1].References.Model.File is null,
             "The supported FX owner must be the second entry of a direct two-entry prefab.");
         var entry = prefab.Ents[1];
         Require(entry.Params is null && string.IsNullOrEmpty(entry.U01),
@@ -159,3 +159,8 @@ public static class FxEmitterTransform
     readonly record struct Matrix(double XX, double XY, double XZ, double YX, double YY, double YZ,
         double ZX, double ZY, double ZZ);
 }
+
+
+
+
+

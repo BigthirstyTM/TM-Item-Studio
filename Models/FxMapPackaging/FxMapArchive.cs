@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Text;
 using GBX.NET;
 using GBX.NET.Engines.Game;
@@ -86,3 +86,8 @@ internal sealed class FxMapArchive
     static int Int(byte[] bytes, int offset)
     { PackagingGuard.That(offset >= 0 && offset <= bytes.Length - 4, "Truncated map integer"); return BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(offset)); }
 }
+
+
+
+
+

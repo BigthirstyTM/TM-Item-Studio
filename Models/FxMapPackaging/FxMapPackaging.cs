@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -203,3 +203,8 @@ public static class FxMapPackaging
         return (name.Length == 0 ? "CustomFX" : name) + "_EmbeddedFX.Map.Gbx";
     }
 }
+
+
+
+
+

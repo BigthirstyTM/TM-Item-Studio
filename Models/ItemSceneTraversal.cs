@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using GBX.NET.Components;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Meta;
@@ -117,13 +117,13 @@ public static partial class ItemScene
                 {
                     case CGameItemModel item:
                         Visit(item.EntityModel, path + "/entityModel", path, Matrix4x4.Identity, world, entry, depth + 1);
-                        Edge(item.VisModelCustomFile, () => item.VisModelCustom, path + "/visModelCustom", path, world, entry, depth);
-                        if (item.PhyModelCustomFile is not null)
+                        Edge(item.References.VisModelCustom.File, () => item.VisModelCustom, path + "/visModelCustom", path, world, entry, depth);
+                        if (item.References.PhyModelCustom.File is not null)
                             collisions.Add(new(path + "/phyModelCustom", entry?.Path, "Item PhyModel reference", ItemSceneState.Unresolved, ItemSceneCollisionSource.ItemPhyModel));
-                        Edge(item.PhyModelCustomFile, () => item.PhyModelCustom, path + "/phyModelCustom", path, world, entry, depth);
+                        Edge(item.References.PhyModelCustom.File, () => item.PhyModelCustom, path + "/phyModelCustom", path, world, entry, depth);
                         // An edition model is source-authoring data, not a second renderable copy.
-                        if (item.EntityModelEditionFile is not null)
-                            Edge(item.EntityModelEditionFile, () => null, path + "/entityModelEdition", path, world, entry, depth);
+                        if (item.References.EntityModelEdition.File is not null)
+                            Edge(item.References.EntityModelEdition.File, () => null, path + "/entityModelEdition", path, world, entry, depth);
                         else if (item.EntityModelEdition is not null)
                         {
                             var editionPath = path + "/entityModelEdition";
@@ -144,7 +144,7 @@ public static partial class ItemScene
                             Visit(variants.Variants[variantOrdinal.Value], path + $"/variant:{variantOrdinal.Value}", path, Matrix4x4.Identity, world, entry, depth + 1);
                         break;
                     case NPlugItem_SVariant variant:
-                        Edge(variant.EntityModelFile, () => variant.EntityModel, path + "/entityModel", path, world, entry, depth);
+                        Edge(variant.References.EntityModel.File, () => variant.EntityModel, path + "/entityModel", path, world, entry, depth);
                         break;
                     case CPlugPrefab prefab:
                         handles.Prefabs.Add(new(path, prefab, world));
@@ -163,10 +163,10 @@ public static partial class ItemScene
                             handles.Entries.Add(owner);
                             if (!entLocal.HasValue || !entWorld.HasValue)
                                 Issue(entPath, "invalid-transform", ItemSceneState.Invalid, "Nonfinite, singular or non-unit transform; geometry omitted.");
-                            if (ent.ModelFile is not null && !(resolveExternal && TryReadExternal(() => ent.Model, out _)))
+                            if (ent.References.Model.File is not null && !(resolveExternal && TryReadExternal(() => ent.Model, out _)))
                             {
                                 Node(entPath, path, ent, ItemSceneKind.Entity, ItemSceneState.Unresolved, entLocal, entWorld);
-                                Issue(entPath, "external-reference", ItemSceneState.Unresolved, $"External entity reference: {ent.ModelFile.FilePath}");
+                                Issue(entPath, "external-reference", ItemSceneState.Unresolved, $"External entity reference: {ent.References.Model.File.FilePath}");
                             }
                             else Visit(ent.Model, entPath, path, entLocal, entWorld, owner, depth + 1);
                         }
@@ -185,20 +185,20 @@ public static partial class ItemScene
                         else collisions.Add(new(path + "/triggerShape", entry?.Path, "No trigger shape", ItemSceneState.Absent, ItemSceneCollisionSource.CommonItemTrigger));
                         break;
                     case CPlugStaticObjectModel model:
-                        Edge(model.MeshFile, () => model.Mesh, path + "/mesh", path, world, entry, depth);
+                        Edge(model.References.Mesh.File, () => model.Mesh, path + "/mesh", path, world, entry, depth);
                         if (model.IsMeshCollidable)
                         {
                             collisions.Add(new(path + "/shape", entry?.Path, "Mesh-collidable flag", ItemSceneState.Unsupported, ItemSceneCollisionSource.GeneratedMeshCollision));
                             Issue(path + "/shape", "generated-collision", ItemSceneState.Unsupported, "Mesh collision is requested; no generated collision shape is available to inspect.");
                         }
-                        else CollisionEdge(model.ShapeFile, () => model.Shape, path + "/shape", path, world, entry, depth, ItemSceneCollisionSource.StaticObjectShape);
+                        else CollisionEdge(model.References.Shape.File, () => model.Shape, path + "/shape", path, world, entry, depth, ItemSceneCollisionSource.StaticObjectShape);
                         break;
                     case CPlugDynaObjectModel model:
-                        Edge(model.MeshFile, () => model.Mesh, path + "/mesh", path, world, entry, depth);
-                        CollisionEdge(model.DynaShapeFile, () => model.DynaShape, path + "/dynaShape", path, world, entry, depth, ItemSceneCollisionSource.DynamicObjectShape);
-                        CollisionEdge(model.StaticShapeFile, () => model.StaticShape, path + "/staticShape", path, world, entry, depth, ItemSceneCollisionSource.DynamicObjectStaticShape);
-                        if (model.LocAnimFile is not null)
-                            Edge(model.LocAnimFile, () => null, path + "/locAnim", path, world, entry, depth);
+                        Edge(model.References.Mesh.File, () => model.Mesh, path + "/mesh", path, world, entry, depth);
+                        CollisionEdge(model.References.DynaShape.File, () => model.DynaShape, path + "/dynaShape", path, world, entry, depth, ItemSceneCollisionSource.DynamicObjectShape);
+                        CollisionEdge(model.References.StaticShape.File, () => model.StaticShape, path + "/staticShape", path, world, entry, depth, ItemSceneCollisionSource.DynamicObjectStaticShape);
+                        if (model.References.LocAnim.File is not null)
+                            Edge(model.References.LocAnim.File, () => null, path + "/locAnim", path, world, entry, depth);
                         else if (model.LocAnim is not null)
                             Issue(path + "/locAnim", "local-animation", ItemSceneState.Unsupported, "Local animation is retained but not evaluated by scene traversal.");
                         break;
@@ -206,7 +206,7 @@ public static partial class ItemScene
                         Solid(solid, path, world, entry, depth);
                         break;
                     case CPlugSolid solid:
-                        Edge(solid.TreeFile, () => solid.Tree, path + "/tree", path, world, entry, depth);
+                        Edge(solid.References.Tree.File, () => solid.Tree, path + "/tree", path, world, entry, depth);
                         break;
                     case CPlugTree tree:
                         // Derived tree LOD/animation semantics are not inferred from ordinary child order.
@@ -215,8 +215,8 @@ public static partial class ItemScene
                             Issue(path, "tree-subclass", ItemSceneState.Unsupported, $"Only base Visual/Children/Location are interpreted for {tree.GetType().Name}; subclass LOD/animation semantics are unsupported.");
                         Visit(tree.Visual, path + "/visual", path, Matrix4x4.Identity, world, entry, depth + 1);
                         Visit(tree.Surface, path + "/surface", path, Matrix4x4.Identity, world, entry, depth + 1);
-                        TreeAuxiliary(tree.ShaderFile, () => tree.Shader, path + "/shader", path, world);
-                        TreeAuxiliary(tree.FuncTreeFile, () => tree.FuncTree, path + "/funcTree", path, world);
+                        TreeAuxiliary(tree.References.Shader.File, () => tree.Shader, path + "/shader", path, world);
+                        TreeAuxiliary(tree.References.FuncTree.File, () => tree.FuncTree, path + "/funcTree", path, world);
                         if (tree.Generator is not null)
                             Issue(path + "/generator", "tree-generator", ItemSceneState.Unsupported, "Tree generator is retained but not evaluated.");
                         var children = tree.Children;
@@ -284,9 +284,9 @@ public static partial class ItemScene
         /// </summary>
         private void PhyShapes(CGameObjectPhyModel phy, string path, Matrix4x4? world, ItemSceneEntryHandle? entry)
         {
-            PhyShape(phy.HitShapeFidFile, () => phy.HitShapeFid, path + "/hitShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectHitShape, phy.HitShape);
-            PhyShape(phy.MoveShapeFidFile, () => phy.MoveShapeFid, path + "/moveShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectMoveShape, phy.MoveShape);
-            PhyShape(phy.TriggerShapeFidFile, () => phy.TriggerShapeFid, path + "/triggerShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectTriggerShape, phy.TriggerShape);
+            PhyShape(phy.References.HitShapeFid.File, () => phy.HitShapeFid, path + "/hitShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectHitShape, phy.HitShape);
+            PhyShape(phy.References.MoveShapeFid.File, () => phy.MoveShapeFid, path + "/moveShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectMoveShape, phy.MoveShape);
+            PhyShape(phy.References.TriggerShapeFid.File, () => phy.TriggerShapeFid, path + "/triggerShapeFid", path, world, entry, ItemSceneCollisionSource.GameObjectTriggerShape, phy.TriggerShape);
             if (phy.Triggers is { Length: > 0 })
                 Issue(path + "/triggers", "phy-trigger-actions", ItemSceneState.Unsupported,
                     $"{phy.Triggers.Length} trigger action records retained; their semantics are not interpreted.");
@@ -346,10 +346,10 @@ public static partial class ItemScene
 
         private void Solid(CPlugSolid2Model solid, string path, Matrix4x4? world, ItemSceneEntryHandle? entry, int depth)
         {
-            var visuals = solid.Visuals ?? Array.Empty<CPlugVisual>();
+            var visuals = solid.Visuals?.ToArray() ?? Array.Empty<CPlugVisual>();
             var custom = solid.CustomMaterials;
-            var ordinary = solid.Materials;
-            var materialCount = custom is { Length: > 0 } ? custom.Length : ordinary is { Length: > 0 } ? ordinary.Length : solid.MaterialIds?.Length ?? 0;
+            var ordinary = solid.References.Materials;
+            var materialCount = custom is { Length: > 0 } ? custom.Length : ordinary is { Count: > 0 } ? ordinary.Count : solid.MaterialIds?.Length ?? 0;
             var materialOffset = materials.Count;
             var lodDistances = solid.LodMaxDistAtFov90;
             var validLod = lodDistances?.All(x => float.IsFinite(x) && x >= 0) != false;
@@ -367,12 +367,12 @@ public static partial class ItemScene
                         material is null ? ItemSceneState.Absent : ItemSceneState.Present, "CustomMaterial",
                         instance?.MaterialName, instance?.Link, instance?.Color?.ToArray()));
                 }
-                else if (ordinary is not { Length: > 0 })
+                else if (ordinary is not { Count: > 0 })
                 {
                     var name = solid.MaterialIds![i];
-                    var instance = solid.MaterialInsts?.ElementAtOrDefault(i);
+                    var instance = solid.References.MaterialInsts?.ElementAtOrDefault(i);
                     materials.Add(new(matPath, i, instance is null ? null : Id(instance), name,
-                        ItemSceneState.Present, "SkinMaterial", instance?.MaterialName ?? name, instance?.Link, instance?.Color?.ToArray()));
+                        ItemSceneState.Present, "SkinMaterial", instance?.Node?.MaterialName ?? name, instance?.Node?.Link, instance?.Node?.Color?.ToArray()));
                 }
                 else
                 {
@@ -394,7 +394,7 @@ public static partial class ItemScene
                         name = link.Replace('\\', '/').Split('/').Last();
                     var textures = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     foreach (var slot in resolvedMaterial?.CustomMaterial?.Textures ?? [])
-                        if (slot.Texture is CPlugBitmap { ImageFile: { } image } && !string.IsNullOrWhiteSpace(image.FilePath))
+                        if (slot.Texture is CPlugBitmap { References.Image.File: { } image } && !string.IsNullOrWhiteSpace(image.FilePath))
                             textures.TryAdd(slot.Name ?? "", image.FilePath);
                     materials.Add(new(matPath, i, material is null ? null : Id(material), name, state, "Material", name, link,
                         TexturePaths: textures));
@@ -402,7 +402,7 @@ public static partial class ItemScene
                         Issue(matPath, "external-reference", state, $"External material reference: {material!.File!.FilePath}");
                 }
             }
-            if (materialCount == 0 && solid.MaterialInsts is { Length: > 0 })
+            if (materialCount == 0 && solid.References.MaterialInsts is { Count: > 0 })
                 Issue(path, "legacy-material-table", ItemSceneState.Unsupported, "Legacy MaterialInsts retained; no verified shaded-index mapping.");
             var shaded = solid.ShadedGeoms ?? Array.Empty<CPlugSolid2Model.ShadedGeom>();
             for (var i = 0; i < shaded.Length; i++)
@@ -427,7 +427,7 @@ public static partial class ItemScene
             }
             if (!validLod)
                 Issue(path, "lod-distance", ItemSceneState.Invalid, "Nonfinite or negative LOD distance.");
-            var models = solid.LightUserModels ?? Array.Empty<CPlugLightUserModel>();
+            var models = solid.LightUserModels?.ToArray() ?? Array.Empty<CPlugLightUserModel>();
             var instances = solid.LightInsts ?? Array.Empty<CPlugSolid2Model.LightInst>();
             for (var i = 0; i < instances.Length; i++)
             {
@@ -452,8 +452,8 @@ public static partial class ItemScene
                     var lightPath = path + $"/light:{i}";
                     Node(lightPath, path, light, ItemSceneKind.Light, ItemSceneState.Unsupported, null, world);
                     Issue(lightPath, "legacy-light", ItemSceneState.Unsupported, "Legacy Solid2 light representation retained; it is legacy/diagnostic-only and its unknown fields are not interpreted.");
-                    if (light?.U03File is not null)
-                        Issue(lightPath + "/model", "external-reference", ItemSceneState.Unresolved, $"External light reference: {light.U03File.FilePath}");
+                    if (light?.References.U03.File is not null)
+                        Issue(lightPath + "/model", "external-reference", ItemSceneState.Unresolved, $"External light reference: {light.References.U03.File.FilePath}");
                 }
         }
 
@@ -485,3 +485,12 @@ public static partial class ItemScene
         }
     }
 }
+
+
+
+
+
+
+
+
+

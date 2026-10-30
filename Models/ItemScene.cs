@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using System.Text.Json.Serialization;
 using GBX.NET;
 using GBX.NET.Engines.MwFoundations;
@@ -143,3 +143,8 @@ public static partial class ItemScene
     private static bool ValidTransform(Matrix4x4 m) => Pack(m).All(float.IsFinite) && Matrix4x4.Invert(m, out var inverse)
         && Pack(inverse).All(float.IsFinite);
 }
+
+
+
+
+

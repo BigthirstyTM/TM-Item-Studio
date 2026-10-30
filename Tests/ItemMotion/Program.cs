@@ -401,10 +401,10 @@ Check("invalid child and world parent never select fallback mesh", () =>
 Check("external and nested/cyclic table ambiguity fail visibly", () =>
 {
     var (prefab, model, parameters) = Prefab();
-    prefab.Ents[0].ModelFile = new GbxRefTableFile(new GbxRefTable(), 0, true, "never-resolve.Gbx");
+    prefab.Ents[0].References.Model.Descriptor = new GbxRefTableFile(new GbxRefTable(), 0, true, "never-resolve.Gbx");
     var external = ItemMotionBindings.Resolve(model, prefab, parameters, "root");
     Require(external.Status == ItemMotionStatus.Unresolved && external.Child.Path is null, "external classification guessed");
-    prefab.Ents[0].ModelFile = null; prefab.Ents[0].Model = prefab;
+    prefab.Ents[0].References.Model.Clear(); prefab.Ents[0].Model = prefab;
     Require(ItemMotionBindings.Resolve(model, prefab, parameters, "root").Status == ItemMotionStatus.Unsupported, "cyclic nesting not bounded");
     parameters.Pos1 = new(float.NaN, 0, 0);
     prefab.Ents[0].Model = new CPlugStaticObjectModel();
@@ -814,3 +814,4 @@ static T Reparse<T>(byte[] bytes) where T : GBX.NET.Engines.MwFoundations.CMwNod
     Require(stream.Position == stream.Length, "trailing bytes after reparse");
     return result;
 }
+

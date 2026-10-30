@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.IO.Compression;
 
 namespace TM_Item_Studio.Models.FlagPackaging;
@@ -135,3 +135,8 @@ internal sealed class RawZip
     static uint U32(byte[] b, int p) { PackagingGuard.That(p >= 0 && p + 4 <= b.Length, "Truncated ZIP integer"); return BinaryPrimitives.ReadUInt32LittleEndian(b.AsSpan(p)); }
     static int I32(byte[] b, int p) => unchecked((int)U32(b, p));
 }
+
+
+
+
+

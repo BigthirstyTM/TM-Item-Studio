@@ -1,4 +1,4 @@
-using GBX.NET;
+﻿using GBX.NET;
 using GBX.NET.Components;
 
 namespace TM_Item_Studio.Models;
@@ -150,3 +150,8 @@ public static class GbxDependencyLoader
 
     private static string Normalize(string value) => value.Replace('/', '\\').TrimStart('\\').ToLowerInvariant();
 }
+
+
+
+
+

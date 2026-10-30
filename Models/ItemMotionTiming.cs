@@ -1,4 +1,4 @@
-using GBX.NET.Engines.Meta;
+﻿using GBX.NET.Engines.Meta;
 
 namespace TM_Item_Studio.Models;
 
@@ -62,3 +62,8 @@ public static class ItemMotionTiming
     private static bool ValidPhase(float value) => float.IsFinite(value) && value >= 0 && value <= 1;
     private static bool StoredPhase(float value) => float.IsFinite(value) && value <= 1; // Any negative stored phase/max is a native sentinel.
 }
+
+
+
+
+

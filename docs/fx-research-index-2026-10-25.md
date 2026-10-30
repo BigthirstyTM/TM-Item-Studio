@@ -77,3 +77,13 @@ The machine-readable matrix is [`fx-settings-matrix.tsv`](evidence/fx-settings-m
 ## Evidence and language policy
 
 All FX research, evidence, matrices, and release notes are maintained in English. Dutch explanations belong only in the chat. Older filenames remain for compatibility, but their contents are English references or point to this index.
+
+## Native gallery map
+
+The retained carrier and probe items are grouped in the native save/reopen fixture documented in [`fx-gallery-map-2026-10-27.md`](evidence/fx-gallery-map-2026-10-27.md). The map reopened with 12 anchored items. The one `FidStadiumBackslash` probe was excluded because Trackmania could not embed it during native save.
+
+The one-by-one particle inventory and the first native carrier-swap attempt are documented in [`fx-particle-replacement-2026-10-28.md`](evidence/fx-particle-replacement-2026-10-28.md). The current writer stops at opaque `CPlugParticleEmitterSubModel` replacement; the Studio exposes these candidates as status-aware routes until a binary-preserving transplant proves native visibility and persistence.
+
+The first custom-named WaterSplash emitter candidate is documented in [`fx-custom-watersplash-2026-10-28.md`](evidence/fx-custom-watersplash-2026-10-28.md). It passes fresh native item preload and the byte-identical route wrapper passes placement plus map save/reopen, but no static Stadium WaterSplash stream was visible. It remains a candidate until a vehicle/water carrier context is proven.
+
+The follow-up native name-route probe is documented in [`fx-particle-name-route-2026-10-28.md`](evidence/fx-particle-name-route-2026-10-28.md). Eight generated wrappers passed native preload and map placement, but none showed a visible particle stream in the editor/playground captures, so they remain research fixtures.

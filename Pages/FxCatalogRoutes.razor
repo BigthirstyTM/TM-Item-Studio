@@ -7,6 +7,64 @@
             not make a particle model a portable item. Promotion to an item requires native
             preload, placement, visible play, map save/reopen and a cold restart.
         </p>
+        <div class="row g-2 align-items-end mb-2" aria-label="Native FX carrier selection">
+            <div class="col-md-7">
+                <label class="form-label small mb-1" for="fxCarrierPreset">FX carrier preset</label>
+                <select id="fxCarrierPreset" class="form-select form-select-sm" @bind="selectedCarrierName">
+                    @foreach (var route in ProvenCarrierRoutes)
+                    {
+                        <option value="@route.Name">@route.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-5 small text-muted" role="status">
+                <strong class="text-info">@SelectedCarrier.Name</strong><br />
+                @SelectedCarrier.Scope
+                <span class="badge @SelectedCarrier.StatusBadge ms-1">@SelectedCarrier.Status</span>
+            </div>
+        </div>
+        <p class="small text-muted mb-2">
+            The preset list is intentionally limited to carriers with native evidence. Choosing a preset records the
+            intended carrier route for the Studio session; it does not rewrite an opaque particle graph. Particle-model
+            replacement becomes an export option only after that model passes the same native preload, visible placement,
+            save/reopen and cold-start checks.
+        </p>
+        <div class="row g-2 align-items-end mb-2" aria-label="Particle model candidate selection">
+            <div class="col-md-7">
+                <label class="form-label small mb-1" for="fxParticleCandidate">Particle model to emit</label>
+                <select id="fxParticleCandidate" class="form-select form-select-sm" @bind="selectedParticleCandidate">
+                    @foreach (var route in ParticleCandidateRoutes)
+                    {
+                        <option value="@route.Name">@route.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-5 small text-muted" role="status">
+                <strong class="text-info">@SelectedParticleCandidate.Name</strong><br />
+                @SelectedParticleCandidate.Scope
+                <span class="badge @SelectedParticleCandidate.StatusBadge ms-1">@SelectedParticleCandidate.Status</span>
+            </div>
+        </div>
+        <div class="row g-2 align-items-end mb-2" aria-label="Complete FX particle inventory">
+            <div class="col-md-7">
+                <label class="form-label small mb-1" for="fxParticleAudit">Exact particle model (83-row native audit)</label>
+                <select id="fxParticleAudit" class="form-select form-select-sm" @bind="selectedParticleAudit">
+                    @foreach (var particle in ParticleAuditRoutes)
+                    {
+                        <option value="@particle.Name">@particle.Name — @particle.Status</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-5 small text-muted" role="status">
+                <strong class="text-info">@SelectedParticleAudit.Name</strong><br />
+                @SelectedParticleAudit.Context · @SelectedParticleAudit.Evidence
+                <span class="badge @SelectedParticleAudit.StatusBadge ms-1">@SelectedParticleAudit.Status</span>
+            </div>
+        </div>
+        <p class="small text-muted mb-2">
+            This exact-model selector is an audit and route picker. It does not replace the complete native carrier graph;
+            only rows marked <strong>item-carrier-proven</strong> are eligible for the current preserve-and-origin-edit export.
+        </p>
         <div class="table-responsive">
             <table class="table table-sm align-middle mb-2">
                 <thead>
@@ -41,6 +99,11 @@
 
 @code {
     private sealed record FxRoute(string Tier, string TierBadge, string Name, string Evidence, string Status, string StatusBadge, string Scope);
+    private sealed record FxParticleAudit(string Name, string Context, string Evidence, string Status, string StatusBadge, string Route);
+
+    private string selectedCarrierName = "Embedded Sparkler (8 m / 16 m)";
+    private string selectedParticleCandidate = "PodiumSparkler / PodiumSparklerEnd";
+    private string selectedParticleAudit = "PodiumSparkler";
 
     private static readonly IReadOnlyList<FxRoute> Routes =
     [
@@ -56,4 +119,109 @@
         new("Motion", "text-bg-warning", "Kinematic FX carrier", "Current converter rejects opaque FX without a static object model", "Unavailable", "text-bg-warning", "Requires a native moving carrier"),
         new("Bitmap", "text-bg-warning", "Custom image / emoji particle", "Bitmap/material experiments do not prove a persistent particle graph", "Unavailable", "text-bg-warning", "Requires a native material graph")
     ];
+
+    private static readonly IReadOnlyList<FxRoute> ProvenCarrierRoutes =
+        Routes.Where(route => route.Tier == "Carrier" && route.Status is "Supported" or "Template" or "Stock only").ToArray();
+
+    private static readonly IReadOnlyList<FxRoute> ParticleCandidateRoutes =
+        Routes.Where(route => route.Tier == "Particle").ToArray();
+
+    private static readonly IReadOnlyList<FxParticleAudit> ParticleAuditRoutes =
+    [
+        new("FlyingLeaves_BaseModel", "Effects", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("InFogEmitter", "Effects", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Arrow", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("ArrowExplosion", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("ArrowExplosionWater", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("BulletBall1", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("BulletBall1Explosion", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("BulletBall1ExplosionPlayer", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("BulletExplosionOffzone", "ShootMania", "native preload failed", "Preload failed", "text-bg-danger", "context-specific-unavailable"),
+        new("ExplosionOnDirtBig", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("ExplosionOnGrassBig", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("ExplosionOnMetalBig", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("ExplosionOnRockBig", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("ExplosionOnStoneBig", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("ExplosionOnWaterBig", "ShootMania", "native preload failed", "Preload failed", "text-bg-danger", "context-specific-unavailable"),
+        new("ExplosionOnWoodBig", "ShootMania", "native preload failed", "Preload failed", "text-bg-danger", "context-specific-unavailable"),
+        new("GoldenlaserExplo", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("Hunter", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("MissileThickTrail", "ShootMania", "native preload failed", "Preload failed", "text-bg-danger", "context-specific-unavailable"),
+        new("MuzzleFlash", "ShootMania", "native preload failed", "Preload failed", "text-bg-danger", "context-specific-unavailable"),
+        new("Nucleus2", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("NucleusExplosion", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("PlayerDeactivated", "ShootMania", "native preload only", "Preload-only", "text-bg-warning", "context-specific-unavailable"),
+        new("PlayerDeactivatedShot", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("PlayerTeleport", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("Rail1Hit", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("Rail1HitPlayer", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("Rail1ImpactSnow", "ShootMania", "native preload failed", "Preload failed", "text-bg-danger", "context-specific-unavailable"),
+        new("RocketExplosionDeny", "ShootMania", "parser skip", "Parser skip", "text-bg-secondary", "context-specific-unavailable"),
+        new("Scout", "ShootMania", "native preload failed", "Preload failed", "text-bg-danger", "context-specific-unavailable"),
+        new("Fogger16M", "Stadium", "native item carrier proven", "Supported", "text-bg-success", "supported-preserve-and-origin-edit"),
+        new("Fogger8M", "Stadium", "native item carrier proven", "Supported", "text-bg-success", "supported-preserve-and-origin-edit"),
+        new("PodiumSparkler", "Stadium", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("PodiumSparklerEnd", "Stadium", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Sparkler16m", "Stadium", "native item carrier proven", "Supported", "text-bg-success", "supported-preserve-and-origin-edit"),
+        new("Sparkler8m", "Stadium", "native item carrier proven", "Supported", "text-bg-success", "supported-preserve-and-origin-edit"),
+        new("SparklerEnd16m", "Stadium", "native item carrier proven", "Supported", "text-bg-success", "supported-preserve-and-origin-edit"),
+        new("SparklerEnd8m", "Stadium", "native item carrier proven", "Supported", "text-bg-success", "supported-preserve-and-origin-edit"),
+        new("TorchSmoke", "Stadium", "native preload only", "Stock reference", "text-bg-info", "stock-reference-only"),
+        new("AsphaltMarks", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("AsphaltSmoke_Stronger", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("BackWaterWake", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Boost_Basic", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Boost_Turbo", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Boost_Turbo2", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Boost_TurboRoulette2", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Boost_TurboRoulette3", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("CarReactorDirtSmoke", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("CarReactorSandSmoke", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("CarReactorSnowSmoke", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("DirtMarks", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("DirtSmoke", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("DirtSmokeHigh", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("EngineDistortion", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("ExhaustFlame", "Vehicles", "parser skip", "Parser skip", "text-bg-secondary", "candidate-wrapper-needed"),
+        new("ExhaustNitro", "Vehicles", "parser skip", "Parser skip", "text-bg-secondary", "candidate-wrapper-needed"),
+        new("GlassSmash", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("HelicoWaterWake", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("IceMarks", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("IceSmoke", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("LightTrail", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("SandMarks", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("SandProjections", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("SnowMarks", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("SnowProjections", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("Sparkles", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("VehicleOnFire", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("VehicleSmokeTrail", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterSplashMesh", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterWake", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("CameraWaterDroplets", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("UnderWaterBubbles_Medium", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("UnderWaterBubbles_Small", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("UnderWaterBubbles_Spray", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterSplash", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterSplashBig", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterSpray", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterSprayAndSteam", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterSprayThin", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WaterWakeWNormals", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WetWheelsMarks", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WheelGrassMark", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed"),
+        new("WingTipVortices", "Vehicles", "native preload only", "Preload-only", "text-bg-warning", "candidate-wrapper-needed")
+    ];
+
+    private FxRoute SelectedCarrier =>
+        ProvenCarrierRoutes.FirstOrDefault(route => route.Name == selectedCarrierName)
+        ?? ProvenCarrierRoutes[0];
+
+    private FxRoute SelectedParticleCandidate =>
+        ParticleCandidateRoutes.FirstOrDefault(route => route.Name == selectedParticleCandidate)
+        ?? ParticleCandidateRoutes[0];
+
+    private FxParticleAudit SelectedParticleAudit =>
+        ParticleAuditRoutes.FirstOrDefault(route => route.Name == selectedParticleAudit)
+        ?? ParticleAuditRoutes[0];
 }

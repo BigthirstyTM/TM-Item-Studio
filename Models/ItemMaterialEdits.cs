@@ -1,4 +1,4 @@
-using GBX.NET;
+﻿using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Meta;
 using GBX.NET.Engines.Plug;
@@ -208,3 +208,8 @@ public static class ItemMaterialEdits
     private static Gbx<CGameItemModel> Parse(byte[] bytes) => Gbx.Parse<CGameItemModel>(new MemoryStream(bytes),
         new GbxReadSettings { SafeSkippableChunks = true });
 }
+
+
+
+
+

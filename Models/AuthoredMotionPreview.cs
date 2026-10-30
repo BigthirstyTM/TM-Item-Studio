@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using GBX.NET.Engines.Meta;
 
 namespace TM_Item_Studio.Models;
@@ -29,7 +29,7 @@ public static class AuthoredMotionPreview
 
         foreach (var entry in scene.Handles.Entries)
         {
-            if (entry.Entry.ModelFile is not null || entry.Entry.Model is not NPlugDyna_SKinematicConstraint source) continue;
+            if (entry.Entry.References.Model.File is not null || entry.Entry.Model is not NPlugDyna_SKinematicConstraint source) continue;
             var binding = ItemMotionBindings.Resolve(source, slots,
                 entry.Entry.Params as NPlugDyna_SPrefabConstraintParams, worldPath, tableError, tableStatus);
             if (binding.Child.Path is { } childPath)
@@ -109,3 +109,8 @@ public static class AuthoredMotionPreview
 
     private static float[] Pack(GBX.NET.Vec3 v) => new[] { v.X, v.Y, v.Z };
 }
+
+
+
+
+

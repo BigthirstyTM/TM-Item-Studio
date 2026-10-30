@@ -1,4 +1,4 @@
-using GBX.NET;
+﻿using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Managers;
 
@@ -7,8 +7,8 @@ namespace TM_Item_Studio.Models;
 /// <summary>
 /// Convert the open item into a flag item and return the file, following the same shape as
 /// <see cref="ItemMultiInstanceExport.Export"/>: the document is saved, reparsed and edited as its
-/// own snapshot, so the item the user is editing — and every view, variant and preview derived from
-/// it — is never touched. The bytes are reparsed and re-measured before they are handed back, so a
+/// own snapshot, so the item the user is editing â€” and every view, variant and preview derived from
+/// it â€” is never touched. The bytes are reparsed and re-measured before they are handed back, so a
 /// file that cannot be reopened, or that does not carry the measured flag signature, is refused.
 /// </summary>
 public static class ItemFlagExport
@@ -94,3 +94,8 @@ public static class ItemFlagExport
         return (source.Length > maxBase ? source[..maxBase] : source) + IdSuffix;
     }
 }
+
+
+
+
+

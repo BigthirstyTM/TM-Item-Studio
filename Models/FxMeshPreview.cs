@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
@@ -99,3 +99,8 @@ public static class FxMeshPreview
     static void Require(bool condition, string message)
     { if (!condition) throw new InvalidDataException(message); }
 }
+
+
+
+
+

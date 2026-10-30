@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using GBX.NET;
 
 namespace TM_Item_Studio.Models;
@@ -140,3 +140,8 @@ public static class ItemWavingFlagMapExport
         return name + "_EmbeddedFlags.Map.Gbx";
     }
 }
+
+
+
+
+
