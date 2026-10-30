@@ -51,7 +51,8 @@ then unload the plugin and remove the gate file.
 ## Verification boundaries
 
 Release build succeeds. All 14 central test suites pass, including 29 ItemScene
-checks. The research-project build sweep exposed two explicit source lists
+checks in the initial bend repair (32 after the NICE-informed polygon and UV
+regressions; see `nice-mesh-modeler-research-2026-10-30.md`). The research-project build sweep exposed two explicit source lists
 missing the new evaluator; both were corrected and rebuilt successfully.
 Browser workflow and searchable-material regressions pass, and the reported
 item was imported, visually inspected and exported through the actual UI.

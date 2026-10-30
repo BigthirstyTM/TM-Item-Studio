@@ -144,11 +144,7 @@ public static partial class ItemScene
                     }
                     var baseIndex = localPositions.Count;
                     var valid = true;
-                    // Mesh Modeler stores both triangles and quads (and can retain
-                    // higher-order polygon faces). Emit the complete polygon instead
-                    // of silently dropping every corner after the third one. A fan is
-                    // deterministic for the convex authored faces used by crystals and
-                    // preserves each corner's independent UV.
+                    // Keep corner UVs separate even where positions are shared.
                     for (var corner = 0; corner < corners.Length; corner++)
                     {
                         var vertex = corners[corner];
@@ -170,12 +166,16 @@ public static partial class ItemScene
                             "Mesh Modeler face references a position outside its crystal table.");
                         continue;
                     }
-                    for (var corner = 1; corner < corners.Length - 1; corner++)
+                    // Triangulate the authored polygon before bending it out of plane.
+                    if (!CrystalPolygon.TryTriangulate(corners.Select(v => positions[v.Index]).ToArray(), out var faceIndices))
                     {
-                        indices.Add(baseIndex);
-                        indices.Add(baseIndex + corner);
-                        indices.Add(baseIndex + corner + 1);
+                        localPositions.RemoveRange(baseIndex, corners.Length);
+                        uvValues.RemoveRange(baseIndex, corners.Length);
+                        Issue(visualPath, "edition-face-polygon", ItemSceneState.Invalid,
+                            "Mesh Modeler face is degenerate, self-intersecting or cannot be triangulated reliably.");
+                        continue;
                     }
+                    indices.AddRange(faceIndices.Select(i => baseIndex + i));
                 }
 
                 if (localPositions.Count == 0)

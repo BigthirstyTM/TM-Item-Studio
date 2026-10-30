@@ -656,6 +656,60 @@ Check("Mesh Modeler edition crystals produce preview geometry", () =>
 
 });
 
+Check("concave crystal polygons retain area and winding on all projection axes", () =>
+{
+    Vec3[] outline = [new(0, 0, 0), new(3, 0, 0), new(3, 3, 0), new(2, 3, 0),
+        new(2, 1, 0), new(1, 1, 0), new(1, 3, 0), new(0, 3, 0)];
+    foreach (var reverse in new[] { false, true })
+    foreach (var axis in new[] { 0, 1, 2 })
+    foreach (var scale in new[] { .001f, 1f, 10000f })
+    {
+        var original = reverse ? outline.Reverse().ToArray() : outline;
+        var points = original.Select(p => axis == 0 ? new Vec3(0, p.X * scale, p.Y * scale)
+            : axis == 1 ? new Vec3(p.Y * scale, 0, p.X * scale) : new Vec3(p.X * scale, p.Y * scale, 0)).ToArray();
+        Require(CrystalPolygon.TryTriangulate(points, out var indices) && indices.Length == 18, "Concave face was not fully triangulated.");
+        float totalArea = 0;
+        for (var i = 0; i < indices.Length; i += 3)
+        {
+            var a = original[indices[i]]; var b = original[indices[i + 1]]; var c = original[indices[i + 2]];
+            var area = ((b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X)) / 2;
+            Require(reverse ? area < 0 : area > 0, "Triangle winding changed.");
+            totalArea += Math.Abs(area);
+            var x = (a.X + b.X + c.X) / 3; var y = (a.Y + b.Y + c.Y) / 3;
+            Require(!(x > 1 && x < 2 && y > 1), "Triangle fills the polygon notch.");
+        }
+        Require(Math.Abs(totalArea - 7) < .0001f, "Triangles overlap or lose polygon area.");
+    }
+});
+
+Check("invalid crystal polygons are refused without partial triangle output", () =>
+{
+    Vec3[][] invalid = [
+        [new(0, 0, 0), new(2, 2, 0), new(0, 2, 0), new(2, 0, 0)],
+        [new(0, 0, 0), new(1, 0, 0), new(2, 0, 0)],
+        [new(0, 0, 0), new(1, 0, 0), new(1, 0, 0), new(0, 1, 0)],
+        [new(float.NaN, 0, 0), new(1, 0, 0), new(0, 1, 0)]];
+    foreach (var points in invalid)
+        Require(!CrystalPolygon.TryTriangulate(points, out var indices) && indices.Length == 0, "Malformed polygon produced triangles.");
+});
+
+Check("crystal face-corner UV seams and duplicate faces survive preview conversion", () =>
+{
+    var material = new CPlugCrystal.Material { MaterialName = "seams" };
+    var part = new CPlugCrystal.Part();
+    CPlugCrystal.Face Face(float u) => new([new(0, new Vec2(u, 0), default),
+        new(1, new Vec2(u, 1), default), new(2, new Vec2(u + 1, 0), default)], part, material, null);
+    var crystal = new CPlugCrystal.Crystal { Positions = [new(0, 0, 0), new(1, 0, 0), new(0, 1, 0)],
+        Groups = [part], Faces = [Face(0), Face(2)] };
+    var item = new CGameItemModel { EntityModelEdition = new CGameCommonItemEntityModelEdition {
+        MeshCrystal = new CPlugCrystal { Layers = [new CPlugCrystal.GeometryLayer {
+            IsEnabled = true, IsVisible = true, Crystal = crystal }] } } };
+    var mesh = ItemScene.Build(item, 0).Preview.Geometry.Single();
+    Require(mesh.Indices.Length == 6, "Duplicate face was dropped.");
+    Require(mesh.UVs[0][0] == 0 && mesh.UVs[0][6] == 2, "Shared position erased the face-corner UV seam.");
+    Require(crystal.Positions.Length == 3 && crystal.Faces[1].Vertices[0].TexCoord.X == 2, "Preview mutated source corners.");
+});
+
 Check("planar deformation matches native Trackmania collision vertices", () =>
 {
     var layer = NativeBend();
