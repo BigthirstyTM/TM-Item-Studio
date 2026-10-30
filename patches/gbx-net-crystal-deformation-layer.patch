@@ -1,0 +1,111 @@
+diff --git a/Src/GBX.NET/Engines/Plug/CPlugCrystal.cs b/Src/GBX.NET/Engines/Plug/CPlugCrystal.cs
+index cd881e2..dee098f 100644
+--- a/Src/GBX.NET/Engines/Plug/CPlugCrystal.cs
++++ b/Src/GBX.NET/Engines/Plug/CPlugCrystal.cs
+@@ -106,7 +106,7 @@ public partial class CPlugCrystal
+                     ELayerType.Trigger => new TriggerLayer(),
+                     ELayerType.SpawnPosition => new SpawnPositionLayer(),
+                     ELayerType.Light => new LightLayer(),
+-                    _ => throw new NotSupportedException($"Layer type {layerType} is not supported")
++                    _ => new DeformationLayer()
+                 };
+ 
+                 layer.Read(r, n);
+@@ -162,66 +162,32 @@ public partial class CPlugCrystal
+                 .Where(x => x.IsEnabled && x.IsVisible)
+                 .Select(x => x.Crystal)
+                 .OfType<Crystal>()
+-                .SelectMany(c => c.Faces);
+-
+-            var lightmapCoordCount = r.ReadInt32();
++                .SelectMany(c => c.Faces)
++                .ToArray();
++            var vertexCount = faces.Sum(face => face.Vertices.Length);
++            var count = r.ReadInt32();
++            var lightmapCoords = new Vec2[count];
+ 
+-            if (Version == 0)
++            for (var i = 0; i < count; i++)
+             {
+-                var counter = 0;
+-                foreach (var face in faces)
+-                {
+-                    for (var i = 0; i < face.Vertices.Length; i++)
+-                    {
+-                        face.Vertices[i] = face.Vertices[i] with { LightmapCoord = r.ReadVec2() };
+-                        counter++;
+-
+-                        if (counter > lightmapCoordCount)
+-                        {
+-                            throw new Exception("LightmapCoord count exceeded");
+-                        }
+-                    }
+-                }
+-
+-                if (counter != lightmapCoordCount)
+-                {
+-                    throw new Exception("LightmapCoord count mismatch");
+-                }
++                lightmapCoords[i] = Version == 0
++                    ? r.ReadVec2()
++                    : (r.ReadUInt16() / (float)ushort.MaxValue, r.ReadUInt16() / (float)ushort.MaxValue);
+             }
+ 
+-            if (Version >= 1)
+-            {
+-                var lightmapCoords = new Vec2[lightmapCoordCount];
+-
+-                for (int i = 0; i < lightmapCoordCount; i++)
+-                {
+-                    lightmapCoords[i] = (r.ReadUInt16() / (float)ushort.MaxValue, r.ReadUInt16() / (float)ushort.MaxValue);
+-                }
+-
+-                // indices of lightmap coords
+-                var indices = Version >= 2 ? r.ReadArrayOptimizedInt() : null;
+-
+-                var lightmapCount = indices?.Length ?? lightmapCoordCount;
+-
+-                var counter = 0;
+-                foreach (var face in faces)
+-                {
+-                    for (var i = 0; i < face.Vertices.Length; i++)
+-                    {
+-                        var index = indices is null ? counter : indices[counter];
+-                        face.Vertices[i] = face.Vertices[i] with { LightmapCoord = lightmapCoords[index] };
+-                        counter++;
++            var indices = Version >= 2 ? r.ReadArrayOptimizedInt() : null;
++            var lightmapCount = indices?.Length ?? count;
++            if (lightmapCount != vertexCount) return;
+ 
+-                        if (counter > lightmapCount)
+-                        {
+-                            throw new Exception("LightmapCoord count exceeded");
+-                        }
+-                    }
+-                }
+-
+-                if (counter != lightmapCount)
++            var counter = 0;
++            foreach (var face in faces)
++            {
++                for (var i = 0; i < face.Vertices.Length; i++)
+                 {
+-                    throw new Exception("LightmapCoord count mismatch");
++                    var index = indices is null ? counter : indices[counter];
++                    if ((uint)index >= (uint)lightmapCoords.Length) return;
++                    face.Vertices[i] = face.Vertices[i] with { LightmapCoord = lightmapCoords[index] };
++                    counter++;
+                 }
+             }
+         }
+diff --git a/Src/GBX.NET/Engines/Plug/CPlugCrystal.chunkl b/Src/GBX.NET/Engines/Plug/CPlugCrystal.chunkl
+index c9b9be0..b1d4d0f 100644
+--- a/Src/GBX.NET/Engines/Plug/CPlugCrystal.chunkl
++++ b/Src/GBX.NET/Engines/Plug/CPlugCrystal.chunkl
+@@ -148,5 +148,6 @@ archive DeformationLayer (inherits: ModifierLayer, contextual)
+  int DeformationVersion
+  boxaligned
+  iso4
++ iso4[] Transforms
+ 
+ archive CubesLayer (inherits: Layer, contextual)
