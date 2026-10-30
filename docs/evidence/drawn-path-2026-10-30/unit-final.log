@@ -1,0 +1,47 @@
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(52,14): warning CS8600: Converting null literal or possible null value to non-nullable type. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(52,14): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(52,67): warning CS8600: Converting null literal or possible null value to non-nullable type. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(52,67): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(663,13): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(734,17): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(734,17): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(754,17): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\Program.cs(754,17): warning CS8602: Dereference of a possibly null reference. [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\ItemMotion\ItemMotion.csproj]
+Bundled parser SHA256: c5321d9967a7fce32a8674a1838fa88e570f344a84a890e0c4b34cbb87d9cfd7
+PASS: static-to-kinematic conversion requires a valid kinematic template body
+PASS: segment count edits retain existing keys and timing mode, append in the right units, and reject atomically
+PASS: the engine's four-segment limit is enforced before any write
+PASS: duration and endpoint archives sample equally without rewriting authored data
+PASS: endpoint duplicates, decreases and normalized limits retain native segment boundaries
+PASS: independent timelines, scalar units and phase
+PASS: empty and zero-total timelines are different
+PASS: easing quarter points and reversal
+PASS: key boundary, zero-duration skip, wrap, constant reverse
+PASS: fractional-second exact loop boundaries
+PASS: microsecond step boundaries and phase retain neighboring intervals
+PASS: preview quantizes time and phase to nearest microsecond away from midpoint zero
+PASS: unsupported modes and missing data stay visible
+PASS: invalid edits are atomic across fields and both timelines
+PASS: save/reparse preserves unknown shader fields and independent timeline edits
+PASS: filtered slots ignore interleaved static, free and missing-params entries
+PASS: two shared nested occurrences refuse guessed targets, preserve topology on reparse
+PASS: invalid child and world parent never select fallback mesh
+PASS: external and nested/cyclic table ambiguity fail visibly
+PASS: target editing validates before either slot changes
+PASS: kinematic entity template appends one independently bound body and constraint atomically
+PASS: visible path proxy inserts a complete body before the original visible constraint
+PASS: hidden carrier parent inserts one meshless helper and keeps chain bindings supported
+PASS: binding preview serialization excludes source graph
+PASS: rest-relative motion uses parent and child rotations independently
+PASS: multi-constraint chain follows A-to-E axis path with supported slot bindings
+PASS: version-gated exact timing storage and save/reparse
+PASS: timing edits reject absent and invalid fields atomically
+PASS: default template fallback and collision generation from visual mesh
+PASS: relay path configures two independent root bindings (native contact tested separately)
+PASS: chained L-path configures carrier helper and synchronized child
+PASS: drawn path planner validates shape, repeat budget, speed and finite input
+PASS: drawn obstacle timelines cover every repeat/ease/pause option within four keys
+PASS: scenery schedule adds world directions without accumulating body rotation
+PASS: drawn paths preserve static entries and shader animation
+PASS: path compiler refuses forged plans atomically and aligns near negative X
+36 passed, 0 failed.

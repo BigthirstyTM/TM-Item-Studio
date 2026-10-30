@@ -1,0 +1,52 @@
+{
+  "gameFileVersion": "2026.2.2.1751",
+  "openplanet": "1.29.14",
+  "parser": "patched GBX.NET 2.5.0.0",
+  "exports": [
+    {
+      "file": "TMIS_Drawn_ResetL.Item.Gbx",
+      "nativeSha256": "67d2253cae39137f336f0aec053555e39445ae2569f45de6e229a85a38b14cad",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_ReturnL.Item.Gbx",
+      "nativeSha256": "8c5e57d07bf810a13c836d3d43fcac842cd10893a50110c89052a9228d1fd59f",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_RootDiagonal.Item.Gbx",
+      "nativeSha256": "c52fa7311cf22f489dad1e07d8a98fc72233283607ce87093ce8b33deb76db21",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_RootNegative.Item.Gbx",
+      "nativeSha256": "7550d71d9517743706c49eb990e99edcf17d884b3bf101eb6662bb84c03e5707",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_RootVertical.Item.Gbx",
+      "nativeSha256": "0ea488e8d5f2d77978658b1d7bfcf25efd110317481ee57144ffa1478eb38920",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_RootX.Item.Gbx",
+      "nativeSha256": "8921c434c6ff1fe8e66edff05e461cc29d14e11b68c9bd2ee810b9c3a7137e50",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_Space.Item.Gbx",
+      "nativeSha256": "e679ef77c8e12f2960156286bfb028171fa54cd261fe2a2701aeb0ed0809df03",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_Square.Item.Gbx",
+      "nativeSha256": "493e455d6fe703f5a065d8f21d7249e1935b1ac0353d688bf4a34b7e071020f9",
+      "finalBrowserExportMatchesNative": true
+    },
+    {
+      "file": "TMIS_Drawn_Triangle.Item.Gbx",
+      "nativeSha256": "3e809f70a0186540165d41542ed1c5f04927a389ed7654fa789b375adec325f1",
+      "finalBrowserExportMatchesNative": true
+    }
+  ]
+}

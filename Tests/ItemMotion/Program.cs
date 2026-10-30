@@ -663,7 +663,7 @@ Check("default template fallback and collision generation from visual mesh", () 
     Require(sm.Vertices?.Length == 3 && sm.Triangles?.Length == 1, "generated surface mesh did not match source");
 });
 
-Check("relay collision path configures two root bodies with 100% collision", () =>
+Check("relay path configures two independent root bindings (native contact tested separately)", () =>
 {
     var template = KinematicTemplate();
     var prefab = (CPlugPrefab)template.EntityModel!;
@@ -699,6 +699,110 @@ Check("chained L-path configures carrier helper and synchronized child", () =>
     var childParams = (NPlugDyna_SPrefabConstraintParams)prefab.Ents[1].Params!;
     Require(carrierParams.Ent1 == -1, "carrier constraint must be attached to world");
     Require(childParams.Ent1 == 1, "visible constraint must be attached to carrier body");
+});
+
+Check("drawn path planner validates shape, repeat budget, speed and finite input", () =>
+{
+    var points = new Vector3[] { new(3,2,5), new(19,2,5), new(19,2,21), new(3,2,21) };
+    var plan = Value(ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear));
+    Require(plan.Legs.Count == 4 && plan.DurationMs == 16000, "closed square schedule differs");
+    Vector(plan.Start, new(3,2,5));
+    Vector(plan.Legs.Aggregate(Vector3.Zero, (v,l) => v+l.Delta), Vector3.Zero);
+    Require(!ItemMotionPath.Plan(points, MotionPathUse.Obstacle, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear).Success, "polyline accepted as obstacle");
+    Require(!ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.PingPong, 4, KC.AnimEase.Linear).Success, "untested six-carrier return accepted");
+    foreach (var speed in new[] { 0f, -1f, float.NaN, float.PositiveInfinity, 1001f })
+        Require(!ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.Reset, speed, KC.AnimEase.Linear).Success, "invalid speed accepted");
+    foreach (var point in new[] { new Vector3(float.NaN,0,0), new Vector3(10001,0,0), Vector3.Zero })
+        Require(!ItemMotionPath.Plan([Vector3.Zero,point], MotionPathUse.Obstacle, MotionPathRepeat.Reset, 4, KC.AnimEase.Linear).Success, "invalid point accepted");
+});
+
+Check("drawn obstacle timelines cover every repeat/ease/pause option within four keys", () =>
+{
+    foreach (var repeat in Enum.GetValues<MotionPathRepeat>())
+    foreach (var ease in new[] { KC.AnimEase.Linear, KC.AnimEase.QuadIn, KC.AnimEase.QuadOut, KC.AnimEase.QuadInOut })
+    foreach (var pause in new[] { 0, 500 })
+    {
+        var original = (CPlugPrefab)KinematicTemplate().EntityModel!;
+        var plan = Value(ItemMotionPath.Plan([new(3,2,5),new(3,10,5)], MotionPathUse.Obstacle, repeat, 4, ease, pause));
+        var result = Value(ItemMotionPath.Build(original, plan));
+        Require(!ReferenceEquals(original,result) && original.Ents.Length == 2, "source graph mutated");
+        var body = result.Ents.Single(e=>e.Model is CPlugDynaObjectModel);
+        var q=body.Rotation;
+        Vector(Vector3.Transform(Vector3.UnitX,new Quaternion(q.X,q.Y,q.Z,q.W)),Vector3.UnitY);
+        Require(body.Position == new Vec3(3,2,5), "path start lost");
+        var constraint=(KC)result.Ents.Single(e=>e.Model is KC).Model!;
+        Require(constraint.TransAnimFunc.SubFuncs.Length <= 4, "native timeline overflow");
+        Near(constraint.TransAnimFunc.SubFuncs.Sum(k=>k.Duration.TotalMilliseconds),plan.DurationMs);
+        Near(Value(ItemMotion.Evaluate(constraint,pause / 1000d + 1)).TranslationMetres,
+            ease == KC.AnimEase.QuadIn ? 2 : ease == KC.AnimEase.QuadOut ? 6 : 4);
+        var instance=(NPlugDynaObjectModel_SInstanceParams)body.Params!;
+        Require(instance.PeriodSc == 1 && instance.Phase01 == 0 && instance.PeriodScMax == -1 && instance.Phase01Max == -1, "unsynchronized instance settings");
+    }
+});
+
+Check("scenery schedule adds world directions without accumulating body rotation", () =>
+{
+    var original = (CPlugPrefab)KinematicTemplate().EntityModel!;
+    var points = new Vector3[] { new(3,2,5),new(15,10,5),new(15,2,17) };
+    var plan = Value(ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear, 500));
+    var result = Value(ItemMotionPath.Build(original,plan));
+    Require(result.Ents.Length == 8 && original.Ents.Length == 2, "source mutated or wrong topology");
+    var bodies = result.Ents.Where(e=>e.Model is CPlugDynaObjectModel).ToArray();
+    var constraints = result.Ents.Where(e=>e.Model is KC).ToArray();
+    foreach(var e in constraints) {
+        var c=(KC)e.Model!;
+        Require(c.TransAnimFunc.SubFuncs.Length <= 3, "carrier timeline too long");
+        Near(c.TransAnimFunc.SubFuncs.Sum(k=>k.Duration.TotalMilliseconds),plan.DurationMs);
+        Require(c.AngleMinDeg == 0 && c.AngleMaxDeg == 0, "signal yaw accumulated");
+    }
+    for(var i=0;i<plan.Legs.Count;i++) {
+        var time=(plan.Legs[i].StartMs + plan.Legs[i].MoveMs/2d)/1000;
+        var position=plan.Start;
+        for(var j=0;j<plan.Legs.Count;j++) {
+            var q=bodies[j+1].Rotation;
+            var sample=Value(ItemMotion.Evaluate((KC)constraints[j].Model!,time));
+            position+=Vector3.Transform(sample.Translation,new Quaternion(q.X,q.Y,q.Z,q.W));
+        }
+        var expected=plan.Start+plan.Legs.Take(i).Aggregate(Vector3.Zero,(v,l)=>v+l.Delta)+plan.Legs[i].Delta/2;
+        Vector(position,expected);
+    }
+    var collider=(CPlugSurface)((CPlugDynaObjectModel)bodies[0].Model!).DynaShape!;
+    Require(((CPlugSurface.Mesh)collider.Surf!).Vertices.Max(v=>Math.Abs(v.X)+Math.Abs(v.Y)+Math.Abs(v.Z)) < .001f, "full-size invisible collision remains");
+    Require(((CPlugSurface.Mesh)((CPlugSurface)((CPlugDynaObjectModel)original.Ents[0].Model!).DynaShape!).Surf!).Vertices.Max(v=>v.X) == 1, "source collision changed");
+    Require(!ItemMotionPath.Build(result,plan).Success, "generated chain stacked without baseline");
+    original.Ents[1].Params = new NPlugDyna_SPrefabConstraintParams { Ent1=-1,Ent2=0,Pos1=new(1,0,0) };
+    Require(!ItemMotionPath.Build(original,plan).Success && original.Ents.Length == 2, "unsupported anchor partially mutated");
+});
+
+Check("drawn paths preserve static entries and shader animation", () =>
+{
+    var original = (CPlugPrefab)KinematicTemplate().EntityModel!;
+    var shader = (KC)original.Ents[1].Model!;
+    shader.ShaderTcType = KC.EShaderTcType.TransSubTexture; shader.ShaderTcVersion = 9;
+    shader.ShaderTcAnimFunc = [new() { Duration = new TimeInt32(123), TextureId = 71 }];
+    shader.ShaderTcDataTransSub = new() { NbSubTexture = 8, NbSubTexturePerLine = 4, NbSubTexturePerColumn = 2, TopToBottom = true };
+    original.Ents = [..original.Ents, new() { Model = new CPlugStaticObjectModel { Mesh = ((CPlugDynaObjectModel)original.Ents[0].Model!).Mesh }, Position = new(7,8,9), Rotation = Quat.Identity }];
+    foreach(var use in Enum.GetValues<MotionPathUse>()) {
+        var plan = Value(ItemMotionPath.Plan([Vector3.Zero,new(16,0,0)],use,MotionPathRepeat.PingPong,4,KC.AnimEase.Linear));
+        var result = Value(ItemMotionPath.Build(original,plan));
+        Require(result.Ents.Single(e=>e.Model is CPlugStaticObjectModel).Position == new Vec3(7,8,9), "static part moved");
+        var c = result.Ents.Select(e=>e.Model).OfType<KC>().Single(c=>c.ShaderTcType == KC.EShaderTcType.TransSubTexture);
+        Require(c.ShaderTcAnimFunc![0].TextureId == 71 && c.ShaderTcDataTransSub!.NbSubTexture == 8 && c.ShaderTcVersion == 9, "shader animation changed");
+    }
+});
+
+Check("path compiler refuses forged plans atomically and aligns near negative X", () =>
+{
+    var original = (CPlugPrefab)KinematicTemplate().EntityModel!;
+    var plan = Value(ItemMotionPath.Plan([Vector3.Zero,new(-16,.001f,0)], MotionPathUse.Obstacle, MotionPathRepeat.PingPong, 4, KC.AnimEase.Linear));
+    Require(!ItemMotionPath.Build(original,plan with { DurationMs = 1 }).Success, "forged duration accepted");
+    Require(!ItemMotionPath.Build(original,plan with { Legs = [] }).Success, "empty legs accepted");
+    Require(original.Ents.Length == 2 && original.Ents[0].Position == default, "failed build mutated source");
+    var q = ItemMotionPath.AlignX(new(-16,.001f,0));
+    Vector(Vector3.Transform(Vector3.UnitX,new Quaternion(q.X,q.Y,q.Z,q.W)), Vector3.Normalize(new(-16,.001f,0)));
+    var constraint = (KC)original.Ents[1].Model!;
+    var handover = ItemKinematicEntityTemplate.ConfigureParkedHandoverCollisionPath(original,constraint,"doc:0/variant:none/root",KC.EAxis.X,16,2000,KC.EAxis.Z,16,2000);
+    Require(!handover.Success && original.Ents.Length == 2 && ReferenceEquals(original.Ents[1].Model,constraint), "unfinished handover changed source");
 });
 
 Console.WriteLine($"{passed} passed, {failed} failed.");

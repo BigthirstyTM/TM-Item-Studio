@@ -1,5 +1,7 @@
 # Multi-constraint synthetic experiment
 
+> Native follow-up (2026-10-30): [drawn paths and collision findings](kinematic-drawn-paths-2026-10-30.md). Earlier speculative collision/path conclusions below are historical.
+
 Scope: issue #22 follow-up — the minimal reference experiment that must pass
 before any bounded multi-constraint path editor is considered. This is an
 analysis/test deliverable: no editor UI, no conversion API, no production-code

@@ -1,0 +1,18 @@
+C:\Users\PC\.copilot\repos\TM-Item-Studio\Models\ItemSceneGeometry.cs(293,48): warning CS0618: 'CPlugVisual.MorphCount' is obsolete: 'Use Morphs instead.' [C:\Users\PC\.copilot\repos\TM-Item-Studio\Tests\KinematicReference\KinematicReference.csproj]
+Bundled parser SHA256: c5321d9967a7fce32a8674a1838fa88e570f344a84a890e0c4b34cbb87d9cfd7
+PASS: tracked fixture identity pins the analyzed archives
+PASS: kinematic archive parses into the full mapped graph
+PASS: static archive parses into the common-item graph
+PASS: parse, save and reparse preserve both tracked archives structurally
+PASS: constraint and timeline fields round-trip through the typed adapter
+PASS: binding resolver classifies the tracked constraint as world-relative and supported
+PASS: typed segment schema exposes no per-key waypoints
+PASS: exported kinematic template carries explicit collision surface meshes
+PASS: synthetic two-object/two-constraint item builds from scratch and reparses
+PASS: binding resolver classifies world->A and A->B constraints as supported flat bindings
+PASS: experiment graph keeps every binding-resolver guard active
+PASS: chained constraint edits rebind and round-trip through save and reparse
+PASS: composed preview evaluates both constraints of the chain independently
+PASS: nested prefab item DeathPit parses, collects flattened slots, and resolves all 3 constraints
+PASS: AuthoredMotionPreview builds all 3 valid tracks for DeathPit without diagnostics
+15 passed, 0 failed.

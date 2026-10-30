@@ -16,6 +16,7 @@
     "test:icon-pipeline": "node icon-pipeline.cjs",
     "test:native-fixtures": "node native-export-fixtures.cjs",
     "test:fx-visibility": "node fx-visibility.cjs",
+    "test:motion-path": "node motion-path.cjs",
     "test:searchable-materials": "node searchable-materials.cjs"
   },
   "devDependencies": {

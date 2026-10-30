@@ -16,16 +16,6 @@ namespace TM_Item_Studio.Models;
 /// </summary>
 public static class ItemKinematicEntityTemplate
 {
-    public const int MaxSafeDrawPathSegments = 4;
-
-    public readonly record struct DrawPathSegment(
-        KC.EAxis Axis,
-        float Distance,
-        int DurationMs,
-        KC.EAxis RotationAxis,
-        float RotationStartDeg,
-        float RotationEndDeg);
-
     /// <summary>
     /// Inserts a complete, visible dyna body before a supported constraint. It
     /// deliberately shares the proven mesh and collision source so Trackmania
@@ -644,238 +634,7 @@ public static class ItemKinematicEntityTemplate
     }
 
     /// <summary>
-    /// Best-effort conversion of a sampled draw-path to authored kinematic motion.
-    /// Each segment maps to one chain constraint (outer parent to inner child), so
-    /// the visible body follows one continuous sequence over the full timeline.
-    /// </summary>
-    public static ItemMotionResult<int> ConfigureDrawnPathBestEffort(
-        CPlugPrefab owner,
-        KC source,
-        string prefabInstancePath,
-        IReadOnlyList<DrawPathSegment> segments,
-        int? maxSegmentsOverride = null)
-    {
-        ArgumentNullException.ThrowIfNull(owner);
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentException.ThrowIfNullOrWhiteSpace(prefabInstancePath);
-        ArgumentNullException.ThrowIfNull(segments);
-
-        var normalized = segments
-            .Where(static segment => MathF.Abs(segment.Distance) >= 0.01f && segment.DurationMs > 0)
-            .Select(static segment => new DrawPathSegment(
-                segment.Axis,
-                segment.Distance,
-                Math.Max(50, segment.DurationMs),
-                segment.RotationAxis,
-                segment.RotationStartDeg,
-                segment.RotationEndDeg))
-            .ToArray();
-        if (normalized.Length == 0)
-            return ItemMotionResult<int>.Fail(ItemMotionStatus.Unsupported,
-                "The drawn path does not contain enough movement to author a kinematic sequence.");
-        var maxSegments = Math.Max(1, maxSegmentsOverride ?? MaxSafeDrawPathSegments);
-        if (normalized.Length > maxSegments)
-            return ItemMotionResult<int>.Fail(ItemMotionStatus.Unsupported,
-                $"The drawn path generated {normalized.Length} segments. Trackmania placement is unstable for this path mode above {maxSegments} chained segments.");
-
-        var chain = new List<KC>(normalized.Length);
-        for (var i = 1; i < normalized.Length; i++)
-        {
-            var insert = InsertHiddenCarrierParent(owner, source, prefabInstancePath);
-            if (!insert.Success)
-                return ItemMotionResult<int>.Fail(insert.Status, insert.Reason!);
-            chain.Add(insert.Value!);
-        }
-        chain.Add(source);
-
-        var totalDuration = normalized.Sum(static segment => segment.DurationMs);
-        var elapsed = 0;
-        for (var i = 0; i < normalized.Length; i++)
-        {
-            var constraint = chain[i];
-            var segment = normalized[i];
-            var pre = elapsed;
-            var move = segment.DurationMs;
-            var post = Math.Max(0, totalDuration - pre - move);
-            elapsed += move;
-
-            constraint.TransAxis = segment.Axis;
-            constraint.TransMin = 0;
-            constraint.TransMax = segment.Distance;
-            constraint.RotAxis = segment.RotationAxis;
-            constraint.AngleMinDeg = segment.RotationStartDeg;
-            constraint.AngleMaxDeg = segment.RotationEndDeg;
-
-            var subFuncs = new List<KC.SubAnimFunc>(3);
-            if (pre > 0)
-            {
-                subFuncs.Add(new KC.SubAnimFunc
-                {
-                    Ease = KC.AnimEase.Constant,
-                    Reverse = false,
-                    Duration = new TimeInt32(pre)
-                });
-            }
-
-            subFuncs.Add(new KC.SubAnimFunc
-            {
-                Ease = KC.AnimEase.QuadInOut,
-                Reverse = false,
-                Duration = new TimeInt32(move)
-            });
-
-            if (post > 0)
-            {
-                subFuncs.Add(new KC.SubAnimFunc
-                {
-                    Ease = KC.AnimEase.Constant,
-                    Reverse = true,
-                    Duration = new TimeInt32(post)
-                });
-            }
-
-            constraint.TransAnimFunc = new KC.AnimFunc
-            {
-                IsDuration = true,
-                SubFuncs = [.. subFuncs]
-            };
-            var rotSubFuncs = new List<KC.SubAnimFunc>(3);
-            if (pre > 0)
-            {
-                rotSubFuncs.Add(new KC.SubAnimFunc
-                {
-                    Ease = KC.AnimEase.Constant,
-                    Reverse = false,
-                    Duration = new TimeInt32(pre)
-                });
-            }
-
-            rotSubFuncs.Add(new KC.SubAnimFunc
-            {
-                Ease = KC.AnimEase.Linear,
-                Reverse = false,
-                Duration = new TimeInt32(move)
-            });
-
-            if (post > 0)
-            {
-                rotSubFuncs.Add(new KC.SubAnimFunc
-                {
-                    Ease = KC.AnimEase.Constant,
-                    Reverse = true,
-                    Duration = new TimeInt32(post)
-                });
-            }
-
-            constraint.RotAnimFunc = new KC.AnimFunc
-            {
-                IsDuration = true,
-                SubFuncs = [.. rotSubFuncs]
-            };
-        }
-
-        ReorderDrawPathChain(owner);
-
-        return ItemMotionResult<int>.Ok(normalized.Length);
-    }
-
-    private static void ReorderDrawPathChain(CPlugPrefab owner)
-    {
-        if (owner.Ents is not { Length: > 0 } entries)
-            return;
-
-        var bodies = entries
-            .Select((entry, index) => (entry, index))
-            .Where(static item => item.entry.Model is CPlugDynaObjectModel && item.entry.References.Model.File is null)
-            .ToArray();
-        var constraints = entries
-            .Select((entry, index) => (entry, index))
-            .Where(static item => item.entry.Model is KC && item.entry.Params is NPlugDyna_SPrefabConstraintParams)
-            .ToArray();
-        if (bodies.Length == 0 || constraints.Length == 0 || constraints.Length != bodies.Length)
-            return;
-
-        var oldBodyIndexBySlot = new Dictionary<int, int>();
-        for (var slot = 0; slot < bodies.Length; slot++)
-            oldBodyIndexBySlot[slot] = bodies[slot].index;
-
-        var constraintsByParent = new Dictionary<int, (CPlugPrefab.EntRef entry, NPlugDyna_SPrefabConstraintParams parameters, int index)>();
-        foreach (var item in constraints)
-        {
-            var parameters = (NPlugDyna_SPrefabConstraintParams)item.entry.Params!;
-            if (constraintsByParent.ContainsKey(parameters.Ent1))
-                return;
-            constraintsByParent[parameters.Ent1] = (item.entry, parameters, item.index);
-        }
-
-        if (!constraintsByParent.TryGetValue(-1, out var root))
-            return;
-
-        var orderedConstraints = new List<(CPlugPrefab.EntRef entry, NPlugDyna_SPrefabConstraintParams parameters, int index)>(constraints.Length);
-        var orderedBodySlots = new List<int>(bodies.Length);
-        var visitedParents = new HashSet<int>();
-        var current = root;
-        while (true)
-        {
-            if (!visitedParents.Add(current.parameters.Ent1))
-                return;
-            orderedConstraints.Add(current);
-            orderedBodySlots.Add(current.parameters.Ent2);
-            if (!constraintsByParent.TryGetValue(current.parameters.Ent2, out current))
-                break;
-        }
-
-        if (orderedConstraints.Count != constraints.Length || orderedBodySlots.Count != bodies.Length)
-            return;
-        if (orderedBodySlots.Distinct().Count() != bodies.Length)
-            return;
-        if (orderedBodySlots.Any(slot => slot < 0 || slot >= bodies.Length))
-            return;
-
-        // Keep the most representative/visible body first so item inventory previews
-        // do not end up anchored to an invisible micro-carrier entry.
-        static int BodyVisualWeight(CPlugPrefab.EntRef entry)
-        {
-            if (entry.Model is not CPlugDynaObjectModel { Mesh: CPlugSolid2Model solid })
-                return 0;
-            var visuals = solid.Visuals?.Count ?? 0;
-            var vertices = solid.Visuals?.OfType<CPlugVisualIndexedTriangles>()
-                .Sum(static visual => visual.VertexStreams?.FirstOrDefault()?.Positions?.Length ?? 0) ?? 0;
-            return visuals * 1_000_000 + vertices;
-        }
-        var leadSlot = orderedBodySlots
-            .OrderByDescending(slot => BodyVisualWeight(entries[oldBodyIndexBySlot[slot]]))
-            .ThenBy(slot => orderedBodySlots.IndexOf(slot))
-            .FirstOrDefault();
-        if (leadSlot != orderedBodySlots[0])
-        {
-            orderedBodySlots.Remove(leadSlot);
-            orderedBodySlots.Insert(0, leadSlot);
-        }
-
-        var newSlotByOldSlot = new Dictionary<int, int>(bodies.Length);
-        for (var newSlot = 0; newSlot < orderedBodySlots.Count; newSlot++)
-            newSlotByOldSlot[orderedBodySlots[newSlot]] = newSlot;
-
-        var reordered = new List<CPlugPrefab.EntRef>(entries.Length);
-        foreach (var oldSlot in orderedBodySlots)
-        {
-            var bodyEntry = entries[oldBodyIndexBySlot[oldSlot]];
-            reordered.Add(bodyEntry);
-        }
-
-        foreach (var (entry, parameters, _) in orderedConstraints)
-        {
-            parameters.Ent1 = parameters.Ent1 == -1 ? -1 : newSlotByOldSlot[parameters.Ent1];
-            parameters.Ent2 = newSlotByOldSlot[parameters.Ent2];
-            reordered.Add(entry);
-        }
-
-        owner.Ents = [.. reordered];
-    }
-
-    /// <summary>
-    /// Configures a 1-axis translation movement (linear or ping-pong) with 100% Havok collision.
+    /// Configures a 1-axis translation movement (linear or ping-pong) using a world-bound constraint; native contact still depends on the body and shape.
     /// </summary>
     public static ItemMotionResult<bool> ConfigureSingleAxisMotion(
         KC source,
@@ -918,7 +677,7 @@ public static class ItemKinematicEntityTemplate
     }
 
     /// <summary>
-    /// Configures a continuous or oscillating rotation movement with 100% Havok collision.
+    /// Configures a continuous or oscillating rotation movement using a world-bound constraint; native contact still depends on the body and shape.
     /// </summary>
     public static ItemMotionResult<bool> ConfigureRotationMotion(
         KC source,
@@ -1075,8 +834,8 @@ public static class ItemKinematicEntityTemplate
 
     /// <summary>
     /// Configures a multi-body relay path (A→B on body 1, B→C on body 2) where both bodies are
-    /// root constraints (Ent1 = -1). In Trackmania, this provides 100% full Havok collision across
-    /// the entire path.
+    /// root constraints (Ent1 = -1). Each retains its own driven collision;
+    /// this does not create a single body that follows the combined path.
     /// </summary>
     public static ItemMotionResult<bool> ConfigureRelayCollisionPath(
         CPlugPrefab owner,
@@ -1118,7 +877,7 @@ public static class ItemKinematicEntityTemplate
         var c1 = (KC)constraint1Entry.Model!;
         var p1 = (NPlugDyna_SPrefabConstraintParams)constraint1Entry.Params!;
 
-        // Both bodies are root-bound (Ent1 = -1) so Trackmania gives both 100% Havok collision!
+        // Both bodies are world-bound. This is two independent colliders, not one continuous body.
         p0.Ent1 = -1;
         p0.Ent2 = 0;
         p1.Ent1 = -1;
@@ -1172,12 +931,7 @@ public static class ItemKinematicEntityTemplate
     }
 
     /// <summary>
-    /// Configures a multi-body "parker / occluder-handover" L-path:
-    /// Body 1 moves along axis 1 (A -> B), pauses while Body 2 moves along axis 2 (B -> C -> B), then Body 1 returns (B -> A).
-    /// While Body 1 is moving on axis 1, Body 2 is parked far away in the occluder/parking position (parkingDistance).
-    /// When Body 1 reaches B, Body 2 snaps from the parking distance to B (in snapDurationMs, e.g. 10ms),
-    /// traverses B -> C -> B, and snaps back to the parking distance when Body 1 takes over.
-    /// Both bodies have Ent1 = -1 (world roots), ensuring 100% full Havok collision in Trackmania!
+    /// Refuses the former incomplete parked-handover preset without mutating the graph.
     /// </summary>
     public static ItemMotionResult<bool> ConfigureParkedHandoverCollisionPath(
         CPlugPrefab owner,
@@ -1192,141 +946,8 @@ public static class ItemKinematicEntityTemplate
         float parkingDistance = -500f,
         int snapDurationMs = 20)
     {
-        ArgumentNullException.ThrowIfNull(owner);
-        ArgumentNullException.ThrowIfNull(source);
-
-        var template = ReadTemplate(owner, source, prefabInstancePath);
-        if (!template.Success) return ItemMotionResult<bool>.Fail(template.Status, template.Reason!);
-
-        var entries = owner.Ents!;
-        var dynaEntries = entries.Where(e => e.Model is CPlugDynaObjectModel).ToList();
-        var constraintEntries = entries.Where(e => e.Model is KC).ToList();
-
-        if (dynaEntries.Count < 2 || constraintEntries.Count < 2)
-        {
-            var appendResult = AppendFromConstraint(owner, source, prefabInstancePath);
-            if (!appendResult.Success)
-                return ItemMotionResult<bool>.Fail(appendResult.Status, appendResult.Reason!);
-            entries = owner.Ents!;
-            dynaEntries = entries.Where(e => e.Model is CPlugDynaObjectModel).ToList();
-            constraintEntries = entries.Where(e => e.Model is KC).ToList();
-        }
-
-        var body0Entry = dynaEntries[0];
-        var body1Entry = dynaEntries[1];
-        var constraint0Entry = constraintEntries[0];
-        var constraint1Entry = constraintEntries[1];
-
-        var c0 = (KC)constraint0Entry.Model!;
-        var p0 = (NPlugDyna_SPrefabConstraintParams)constraint0Entry.Params!;
-        var c1 = (KC)constraint1Entry.Model!;
-        var p1 = (NPlugDyna_SPrefabConstraintParams)constraint1Entry.Params!;
-
-        // Both bodies are root-bound (Ent1 = -1) so Trackmania gives both 100% Havok collision!
-        p0.Ent1 = -1;
-        p0.Ent2 = 0;
-        p1.Ent1 = -1;
-        p1.Ent2 = 1;
-
-        // Base rest positions:
-        // Body 0 rests at origin (point A).
-        // Body 1 rests at point B (the intersection point).
-        body0Entry.Position = default;
-        var offsetB = axis1 switch
-        {
-            KC.EAxis.X => new Vec3(dist1, 0, 0),
-            KC.EAxis.Y => new Vec3(0, dist1, 0),
-            KC.EAxis.Z => new Vec3(0, 0, dist1),
-            _ => new Vec3(dist1, 0, 0)
-        };
-        body1Entry.Position = offsetB;
-
-        // Timing breakdown:
-        // Total active time of segment 2 (B -> C -> B): 2 * dur2Ms
-        // During segment 1, body 0 takes dur1Ms to go A -> B.
-        // During segment 2, body 0 pauses at B for 2 * dur2Ms.
-        // Then body 0 returns B -> A in dur1Ms.
-        // Body 1 (rests at B):
-        // While body 0 is travelling A -> B (dur1Ms - snapDurationMs), body 1 stays in parking position (e.g. parkingDistance below/away).
-        // In snapDurationMs just before body 0 reaches B, body 1 rushes/snaps from parkingDistance to 0 (which is position B).
-        // Then body 1 performs B -> C -> B in 2 * dur2Ms.
-        // Immediately after reaching B again, body 1 snaps back to parkingDistance in snapDurationMs.
-        // Body 1 remains parked for the rest of body 0's return trip (dur1Ms - snapDurationMs).
-
-        var safeSnapMs = Math.Max(10, Math.Min(snapDurationMs, dur1Ms / 2));
-        var parkWaitMs = Math.Max(10, dur1Ms - safeSnapMs);
-
-        // Constraint 0: Drives Body 0 on Axis 1 (0 .. dist1)
-        c0.TransAxis = axis1;
-        c0.TransMin = 0;
-        c0.TransMax = dist1;
-        c0.RotAxis = KC.EAxis.Y;
-        c0.AngleMinDeg = 0;
-        c0.AngleMaxDeg = 0;
-        c0.TransAnimFunc = new KC.AnimFunc
-        {
-            IsDuration = true,
-            SubFuncs =
-            [
-                new() { Ease = KC.AnimEase.QuadInOut, Reverse = false, Duration = new TimeInt32(dur1Ms) },
-                new() { Ease = KC.AnimEase.Constant, Reverse = false, Duration = new TimeInt32(dur2Ms * 2) },
-                new() { Ease = KC.AnimEase.QuadInOut, Reverse = true, Duration = new TimeInt32(dur1Ms) }
-            ]
-        };
-
-        // Constraint 1: Drives Body 1 on Axis 2
-        // Since Body 1 rests at B, its TransMin can be parkingDistance (far away on Axis 2, or below ground),
-        // and its TransMax is dist2 (position C relative to B).
-        // 0 relative to rest is exactly position B!
-        // To support parking, TransMin is parkingDistance, TransMax is dist2.
-        // When at 0, Body 1 is at point B.
-        // Let's formulate with TransMin = parkingDistance and TransMax = dist2:
-        // Note: TM AnimFunc works with normalized range [TransMin, TransMax].
-        // To be simpler and avoid fraction math if parkingDistance is on axis2:
-        // Or parkingDistance can simply be an offset on Axis 2: e.g. -200m!
-        // Let's configure TransMin = parkingDistance (e.g. -200), TransMax = dist2.
-        // But in TM, each key has Ease and Reverse (Reverse flips between TransMin and TransMax, or keys interpolate).
-        // Notice: with 4 keys in AnimFunc:
-        // If TransMin = 0 and TransMax = dist2, Body 1 only moves between 0 and dist2.
-        // Can we park Body 1 far away with 4 keys?
-        // In TM, TransAnimFunc has at most 4 keys!
-        // Key 1: Constant at park? Key 2: QuadInOut to dist2? Key 3: QuadInOut back? Key 4: Constant at park?
-        // But if TransMin is 0 and TransMax is dist2, it only goes between 0 and dist2.
-        // If TransMin is parkingDistance (-200) and TransMax is dist2 (e.g. 5), then Reverse=false goes from -200 to 5! That wouldn't stop at 0 (B) unless 0 is an endpoint!
-        // AHA! If 0 is not an endpoint, a 4-key timeline can only interpolate between TransMin and TransMax!
-        // Wait, what if parking position IS TransMin (-200m), and the movement goes from parking (-200m) to C?
-        // Then it wouldn't pause at B unless B is TransMin!
-        // BUT WAIT: What if Body 1 rests at the PARKED position?
-        // E.g.: Body 1's rest position is parked far away (or in an occluder / wall)!
-        // When active, it moves from Parked (0) to Point B to Point C? That's 2 segments on 1 axis!
-        // OR: What if Body 1's axis is Y, and parking is simply underground?
-        // Let's check: Can Body 1 move between B and C (TransMin=0, TransMax=dist2), and when it's at B, Body 0 and Body 1 overlap seamlessly?
-        // YES! When Body 0 arrives at B, Body 1 is ALREADY at B!
-        // At that moment, both meshes are at the EXACT same position B!
-        // If Body 1 then moves B -> C -> B, while Body 0 stays at B (or sinks into an occluder/wall)!
-        // Wait, why park Body 2 far away if Body 2 can simply be at B?
-        // In the user's prompt:
-        // "Body 1 gaat van punt A-B horizontaal. Body 2 voor de verticale as staat ergens onzichtbaar in de verte "geparkeerd" en schiet naar punt B (het eind punt van body 1), en gaat dan rustig door naar punt C op de verticale as, komt dan weer terug naar punt B (het eind punt van body 1) en schiet dan weer weg naar een ver punt "de parkeer stand" zodat body 1 het op de horizontale as weer over kan nemen."
-        // AND:
-        // "**Fixing the visibility problem:** A slides into a wall/terrain occluder at the corner (or drops away on the vertical C axis), B appears from that same occluder. At handover they overlap, then only one remains visible."
-        //
-        // Let's examine: How can a body shoot away with Trackmania's constraint system?
-        // If a body has its OWN constraint, can it have:
-        // TransMin = 0, TransMax = dist2. But that's only between B and C!
-        // How can it shoot away?
-        // If Body 2 has TransMin = -200 (parking) and TransMax = 0? Then it can only go between -200 and 0.
-        // To go from -200 to 0 AND then 0 to dist2 on the same axis would require 3 points (-200, 0, dist2).
-        // But a Trackmania constraint only has TransMin and TransMax (2 scalar endpoints)!
-        // EVERY key in TransAnimFunc interpolates between TransMin and TransMax (or stays constant at TransMin/TransMax)!
-        // It CANNOT interpolate to an intermediate value like 0 if TransMin is -200 and TransMax is +50!
-        //
-        // WAIT! Unless Body 2 has TWO constraints chained together!
-        // Constraint A on Body 2 (Parent = -1, Child = Carrier or Body 2): Parking axis (shoots from -500 to 0)!
-        // Constraint B on Body 2: Movement axis (B -> C -> B, 0 to dist2)!
-        // OR Body 2's rest position is at the corner (Point B), and Body 1's rest position is at A!
-        // What if Body 2 is parked by a fast constraint, OR what if Body 1 and Body 2 use an occluder/tunnel/wall at corner B?
-        // Wait, let's re-read the prompt carefully!
-        return ItemMotionResult<bool>.Ok(true);
+        return ItemMotionResult<bool>.Fail(ItemMotionStatus.Unsupported,
+            "Automatic parked handover is not implemented: four scalar keys cannot express parking, an intermediate handover, travel and return. Use an explicit two-body relay or a scenery path.");
     }
 
     /// <summary>
