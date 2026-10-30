@@ -13,6 +13,7 @@
     <Compile Include="../../Models/ItemScene.cs" Link="ItemScene.cs" />
     <Compile Include="../../Models/ItemSceneTraversal.cs" Link="ItemSceneTraversal.cs" />
     <Compile Include="../../Models/ItemSceneGeometry.cs" Link="ItemSceneGeometry.cs" />
+    <Compile Include="../../Models/ItemSceneCrystalDeformation.cs" Link="ItemSceneCrystalDeformation.cs" />
     <Compile Include="../../Models/ItemSceneGeometryCache.cs" Link="ItemSceneGeometryCache.cs" />
     <Reference Include="GBX.NET"><HintPath>../../lib/GBX.NET.dll</HintPath><Private>true</Private></Reference>
     <PackageReference Include="GBX.NET.LZO" Version="2.1.6" />

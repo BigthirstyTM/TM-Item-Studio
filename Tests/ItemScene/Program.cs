@@ -656,6 +656,53 @@ Check("Mesh Modeler edition crystals produce preview geometry", () =>
 
 });
 
+Check("planar deformation matches native Trackmania collision vertices", () =>
+{
+    var layer = NativeBend();
+    Require(CrystalDeformation.TryCreate(layer, out var bend), "Native-measured bend rejected.");
+    using var fixture = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fixtures/planar-bend-native.json")));
+    var native = fixture.RootElement.GetProperty("nativePositions").EnumerateArray()
+        .Select(p => new System.Numerics.Vector3(p[0].GetSingle(), p[1].GetSingle(), p[2].GetSingle())).ToArray();
+    float maxError = 0;
+    foreach (var p in fixture.RootElement.GetProperty("sourcePositions").EnumerateArray())
+    {
+        var actual = bend!.Apply(new(p[0].GetSingle(), p[1].GetSingle(), p[2].GetSingle()));
+        var point = new System.Numerics.Vector3(actual.X, actual.Y, actual.Z);
+        maxError = Math.Max(maxError, native.Min(n => System.Numerics.Vector3.Distance(point, n)));
+    }
+    Require(maxError < .01f, $"Preview diverged from native mesh by {maxError} metres.");
+    Console.WriteLine($"Native bend maximum vertex distance: {maxError:F6} m");
+    layer.Transforms = [layer.Transforms[0], layer.Transforms[0]];
+    Require(!CrystalDeformation.TryCreate(layer, out _), "Unverified multiple control segments must be explicit.");
+    layer = NativeBend(); layer.Transform = layer.Transform with { XX = float.NaN };
+    Require(!CrystalDeformation.TryCreate(layer, out _), "Nonfinite frames accepted.");
+});
+
+Check("deformation respects layer and group masks without changing source geometry", () =>
+{
+    var selected = new CPlugCrystal.Part(); var other = new CPlugCrystal.Part();
+    var points = new Vec3[] { new(16, 1, 8), new(16, 2, 8), new(15, 1, 8) };
+    CPlugCrystal.Face Face(CPlugCrystal.Part part) => new(
+        [new(0, new Vec2(), new Vec2()), new(1, new Vec2(), new Vec2()), new(2, new Vec2(), new Vec2())], part,
+        new CPlugCrystal.Material { MaterialName = "test" }, null);
+    var crystal = new CPlugCrystal.Crystal { Positions = points, Groups = [selected, other], Faces = [Face(selected), Face(other)] };
+    var geometry = new CPlugCrystal.GeometryLayer { LayerId = "selected", IsVisible = true, IsEnabled = true,
+        Crystal = crystal, GroupIndices = [7, 9] };
+    var bend = NativeBend(); bend.Mask = [new() { LayerId = "selected", GroupIndex = 7 }];
+    var item = new CGameItemModel { EntityModelEdition = new CGameCommonItemEntityModelEdition {
+        MeshCrystal = new CPlugCrystal { Layers = [geometry, bend] } } };
+    var preview = ItemScene.Build(item, 0).Preview;
+    Require(!Has(preview, "edition-deformation"), "Measured control layout still reported unsupported.");
+    Require(!preview.Geometry[0].Positions.SequenceEqual(preview.Geometry[1].Positions), "Selected and unselected groups both unchanged or both transformed.");
+    Require(points[0] == new Vec3(16, 1, 8), "Authored positions mutated.");
+    bend.IsEnabled = false;
+    var disabled = ItemScene.Build(item, 0).Preview;
+    Require(disabled.Geometry[0].Positions.SequenceEqual(disabled.Geometry[1].Positions), "Disabled modifier changed geometry.");
+    bend.IsEnabled = true; bend.Mask[0].LayerId = "other-layer";
+    var unrelated = ItemScene.Build(item, 0).Preview;
+    Require(unrelated.Geometry[0].Positions.SequenceEqual(unrelated.Geometry[1].Positions), "Unrelated layer mask changed geometry.");
+});
+
 Console.WriteLine($"{passed} passed, {failed} failed.");
 return failed == 0 ? 0 : 1;
 
@@ -673,6 +720,12 @@ static void Near(IEnumerable<float> actual, params float[] expected)
         $"Expected [{string.Join(',', expected)}], got [{string.Join(',', values)}]");
 }
 static Quat Z90() => new(0, 0, MathF.Sqrt(.5f), MathF.Sqrt(.5f));
+static CPlugCrystal.DeformationLayer NativeBend() => new()
+{
+    IsEnabled = true, Box = new(16, 8.999998f, 16.003601f, 16.000256f, 8.999998f, 16.00058f),
+    Transform = new(-2.673125e-8f, -2.2486588e-9f, -1, 0, 1, -2.2486588e-9f, 1, -6.010946e-17f, -2.673125e-8f, 32.000256f, 8.999998f, 16.003601f),
+    Transforms = [new(-.9999995f, 0, -2.8610225e-6f, 0, 1, 0, 2.8610225e-6f, 0, -.9999995f, -47.997986f, 8.999999f, -63.999077f)]
+};
 static CPlugVisualIndexedTriangles CpuVisual() => new() { Vertices = [Vertex(new(1, 0, 0)), Vertex(new(0, 1, 0)), Vertex(Vec3.Zero)], IndexBuffer = new() { Indices = [0, 1, 2] } };
 static CPlugSurface ReopenSurface(CPlugSurface.Mesh mesh)
 {

@@ -38,10 +38,10 @@ public static partial class ItemScene
             {
                 if (layer is CPlugCrystal.DeformationLayer deformationLayer)
                 {
-                    if (deformationLayer.IsEnabled)
+                    if (deformationLayer.IsEnabled && !CrystalDeformation.TryCreate(deformationLayer, out _))
                         Issue($"{crystalPath}/layer:{geometryLayerIndex}", "edition-deformation",
                             ItemSceneState.Unsupported,
-                            "Deformation masks and control frames are preserved, but their evaluated geometry is not yet supported in the preview.");
+                            "This deformation control layout is preserved but not yet supported in the preview. Planar single-segment bends are supported.");
                     geometryLayerIndex++;
                     continue;
                 }
@@ -65,12 +65,31 @@ public static partial class ItemScene
                     continue;
                 }
 
-                EmitCrystalLayer(geometryLayer.Crystal, layerPath, world, entry);
+                var modifiers = new List<(CrystalDeformation Bend, HashSet<int> Groups)>();
+                // A modifier targets groups in earlier layers by ID, never the next layer.
+                foreach (var later in layers.Skip(geometryLayerIndex).OfType<CPlugCrystal.DeformationLayer>())
+                {
+                    if (!later.IsEnabled || !CrystalDeformation.TryCreate(later, out var bend)) continue;
+                    var selectedGroups = (later.Mask ?? []).Where(m => m.LayerId == geometryLayer.LayerId)
+                        .Select(m => m.GroupIndex).ToHashSet();
+                    if (selectedGroups.Count > 0) modifiers.Add((bend!, selectedGroups));
+                }
+                Vec3 Position(Vec3 position, CPlugCrystal.Part group)
+                {
+                    var index = Array.IndexOf(geometryLayer.Crystal.Groups ?? [], group);
+                    var authoredIndex = geometryLayer.GroupIndices is { } indices && index >= 0 && index < indices.Length
+                        ? indices[index] : index;
+                    foreach (var modifier in modifiers)
+                        if (modifier.Groups.Contains(authoredIndex)) position = modifier.Bend.Apply(position);
+                    return position;
+                }
+                EmitCrystalLayer(geometryLayer.Crystal, layerPath, world, entry,
+                    modifiers.Count == 0 ? null : Position);
             }
         }
 
         private void EmitCrystalLayer(CPlugCrystal.Crystal crystal, string path, Matrix4x4? world,
-            ItemSceneEntryHandle? entry)
+            ItemSceneEntryHandle? entry, Func<Vec3, CPlugCrystal.Part, Vec3>? positionTransform = null)
         {
             var positions = crystal.Positions ?? [];
             var faces = crystal.Faces ?? [];
@@ -138,7 +157,8 @@ public static partial class ItemScene
                             valid = false;
                             break;
                         }
-                        localPositions.Add(positions[vertex.Index]);
+                        localPositions.Add(positionTransform is null ? positions[vertex.Index]
+                            : positionTransform(positions[vertex.Index], face.Group));
                         uvValues.Add(vertex.TexCoord);
                         validUvs &= float.IsFinite(vertex.TexCoord.X) && float.IsFinite(vertex.TexCoord.Y);
                     }

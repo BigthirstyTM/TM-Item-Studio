@@ -203,6 +203,10 @@ void CheckSourceControl()
 
 void Main()
 {
+    if (IO::FileExists(IO::FromUserGameFolder("Items/TMIS_GBX250_Native_20261030/collision-snapshot.enable"))) {
+        SnapshotCrystalCollision();
+        return;
+    }
     trace("[TMIS-SMOKE] ---- start native export verification ----");
     CheckControl();
     CheckSourceControl();
@@ -219,4 +223,40 @@ void Main()
     }
 
     trace("[TMIS-SMOKE] ---- done pass=" + g_pass + " fail=" + g_fail + " ----");
+}
+
+// Bounded, read-only native oracle for the crystal preview. No raw offsets,
+// model mutations, or persistent nod handles. Opt in with the named gate file.
+// Engine-only evidence: a JSON report is clearer than a separate demo window.
+void SnapshotCrystalCollision()
+{
+    const string root = "Items/TMIS_GBX250_Native_20261030/";
+    string[] names = {"MeshModeler_Original", "MeshModeler_Roundtrip"};
+    for (uint i = 0; i < names.Length; i++) {
+        try {
+            auto item = cast<CGameItemModel>(Fids::Preload(Fids::GetUser(root + names[i] + ".Item.Gbx")));
+            if (item is null) throw("item not loaded");
+            auto entity = cast<CGameCommonItemEntityModel>(item.EntityModel);
+            if (entity is null) throw("runtime common entity unavailable; place the item first");
+            auto obj = cast<CPlugStaticObjectModel>(entity.StaticObject);
+            if (obj is null || obj.Shape is null) throw("static collision unavailable");
+            auto mesh = cast<GmSurfMesh>(obj.Shape.m_GmSurf);
+            if (mesh is null || mesh.m_Verts.Length > 100000 || mesh.m_Tris.Length > 200000)
+                throw("missing mesh or snapshot budget exceeded");
+            auto result = Json::Object();
+            auto vertices = Json::Array();
+            auto triangles = Json::Array();
+            for (uint j = 0; j < mesh.m_Verts.Length; j++) {
+                auto p = mesh.m_Verts[j];
+                auto row = Json::Array(); row.Add(p.x); row.Add(p.y); row.Add(p.z); vertices.Add(row);
+            }
+            for (uint j = 0; j < mesh.m_Tris.Length; j++) {
+                auto t = mesh.m_Tris[j];
+                auto row = Json::Array(); row.Add(t.VertIndices_0_); row.Add(t.VertIndices_1_); row.Add(t.VertIndices_2_); triangles.Add(row);
+            }
+            result["item"] = names[i]; result["vertices"] = vertices; result["triangles"] = triangles;
+            Json::ToFile(IO::FromUserGameFolder(root + names[i] + ".collision.json"), result);
+            trace("[TMIS-SMOKE] COLLISION-SNAPSHOT " + names[i] + " vertices=" + vertices.Length + " triangles=" + triangles.Length);
+        } catch { error("[TMIS-SMOKE] COLLISION-SNAPSHOT FAIL " + names[i] + ": " + getExceptionInfo()); }
+    }
 }
