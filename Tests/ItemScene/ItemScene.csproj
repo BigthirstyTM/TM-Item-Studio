@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Fixtures/planar-bend-native.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../Models/ItemScene*.cs" Link="Models/%(Filename)%(Extension)" />
     <Reference Include="GBX.NET"><HintPath>../../lib/GBX.NET.dll</HintPath><Private>true</Private></Reference>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
