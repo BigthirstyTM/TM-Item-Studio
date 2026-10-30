@@ -3,10 +3,10 @@
   <ItemGroup>
     <Compile Include="../MapArchive.cs" Link="MapArchive.cs" />
     <Compile Include="../RawZip.cs" Link="RawZip.cs" />
-    <Reference Include="GBX.NET"><HintPath>../../FlagProbe/bin/Debug/net8.0/GBX.NET.dll</HintPath></Reference>
-    <Reference Include="GBX.NET.LZO"><HintPath>../../FlagProbe/bin/Debug/net8.0/GBX.NET.LZO.dll</HintPath></Reference>
-    <Reference Include="TmEssentials"><HintPath>../../FlagProbe/bin/Debug/net8.0/TmEssentials.dll</HintPath></Reference>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions"><HintPath>../../FlagProbe/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll</HintPath></Reference>
-    <Reference Include="System.Diagnostics.DiagnosticSource"><HintPath>../../FlagProbe/bin/Debug/net8.0/System.Diagnostics.DiagnosticSource.dll</HintPath></Reference>
+    <Reference Include="GBX.NET"><HintPath>../../../lib/GBX.NET.dll</HintPath><Private>true</Private></Reference>
+    <PackageReference Include="GBX.NET.LZO" Version="2.1.6" />
+    <PackageReference Include="TmEssentials" Version="2.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.2" />
   </ItemGroup>
 </Project>
