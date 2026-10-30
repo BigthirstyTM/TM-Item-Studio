@@ -618,11 +618,17 @@ Check("Mesh Modeler edition crystals produce preview geometry", () =>
             IsVisible = true,
             Crystal = new CPlugCrystal.Crystal
             {
-                Positions = [new(0, 0, 0), new(1, 0, 0), new(0, 1, 0)],
+                Positions = [new(0, 0, 0), new(1, 0, 0), new(0, 1, 0), new(2, 0, 0), new(3, 0, 0), new(3, 1, 0), new(2, 1, 0)],
                 Faces = [new CPlugCrystal.Face(
                     [new CPlugCrystal.Vertex(0, new Vec2(0, 0), new Vec2(0, 0)),
                      new CPlugCrystal.Vertex(1, new Vec2(1, 0), new Vec2(1, 0)),
                      new CPlugCrystal.Vertex(2, new Vec2(0, 1), new Vec2(0, 1))],
+                    new CPlugCrystal.Part(), material, null),
+                    new CPlugCrystal.Face(
+                    [new CPlugCrystal.Vertex(3, new Vec2(0, 0), new Vec2(0, 0)),
+                     new CPlugCrystal.Vertex(4, new Vec2(1, 0), new Vec2(1, 0)),
+                     new CPlugCrystal.Vertex(5, new Vec2(1, 1), new Vec2(1, 1)),
+                     new CPlugCrystal.Vertex(6, new Vec2(0, 1), new Vec2(0, 1))],
                     new CPlugCrystal.Part(), material, null)]
             }
         }]
@@ -633,8 +639,8 @@ Check("Mesh Modeler edition crystals produce preview geometry", () =>
     };
     var result = ItemScene.Build(item, 0).Preview;
     Require(result.Geometry.Count == 1, "Inline edition crystal did not produce geometry.");
-    Require(result.Geometry[0].Indices.SequenceEqual(new[] { 0, 1, 2 }) && result.Geometry[0].UVs.ContainsKey(0),
-        "Crystal triangle or UV data was not converted.");
+    Require(result.Geometry[0].Indices.SequenceEqual(new[] { 0, 1, 2, 3, 4, 5, 3, 5, 6 }) && result.Geometry[0].UVs.ContainsKey(0),
+        "Crystal polygon triangulation or UV data was not converted.");
     Require(result.Materials.Single().Representation == "CrystalMaterial" && result.Mappings.Single().VisualIndex == 0,
         "Crystal material mapping was not exposed.");
     Require(!result.Diagnostics.Any(d => d.Code == "edition-model"), "Edition preview remained unsupported.");
