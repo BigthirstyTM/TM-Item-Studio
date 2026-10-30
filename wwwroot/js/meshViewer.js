@@ -987,10 +987,9 @@ function renderDrawPathVisual() {
     }
 }
 function pickDrawPoint(raycaster) {
-    const meshGroups = [staticGroup, movingGroup].filter(g => g && g.visible);
-    const meshHit = raycaster.intersectObjects(meshGroups.flatMap(g => g.children), true).find(hit => isSelectableMesh(hit.object));
-    if (meshHit?.point) return meshHit.point.clone();
-    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -drawPathPlaneY);
+    const normal = drawPathPlane === 'XY' ? new THREE.Vector3(0, 0, 1)
+        : drawPathPlane === 'YZ' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+    const plane = new THREE.Plane(normal, -drawPathPlaneY);
     const point = new THREE.Vector3();
     return raycaster.ray.intersectPlane(plane, point) ? point : null;
 }
@@ -1175,9 +1174,11 @@ window.init3DViewer = function (containerId, dotNetRef) {
         raycaster.setFromCamera(mouse, camera);
         if (drawPathEnabled) {
             const point = pickDrawPoint(raycaster);
-            if (point) {
+            if (point && point.length() <= 10000 && drawPathPoints.length < 5
+                && (!drawPathPoints.length || point.distanceTo(drawPathPoints.at(-1)) >= .01)) {
                 drawPathPoints.push(point);
                 renderDrawPathVisual();
+                dotNetHelper?.invokeMethodAsync('OnDrawPathChanged');
             }
             return;
         }
@@ -1308,6 +1309,8 @@ function disposeObjectResources(root) {
     textures.forEach(texture => texture.dispose());
 }
 window.dispose3DViewer = function () {
+    drawPathEnabled = false;
+    drawPathPoints = [];
     viewportSelectionQueue = Promise.resolve();
     window.disposeStudioMood?.();
     if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
@@ -1988,10 +1991,23 @@ window.clearViewerScene = function (keepGeometry = false) {
         releaseGeometryPool();
     }
 };
-window.setDrawPathMode = function (enabled, planeY) {
+let drawPathPlane = 'XZ';
+window.setDrawPathMode = function (enabled, planeY, plane = 'XZ') {
     drawPathEnabled = Boolean(enabled);
     if (typeof planeY === 'number' && Number.isFinite(planeY)) drawPathPlaneY = planeY;
+    drawPathPlane = ['XZ', 'XY', 'YZ'].includes(plane) ? plane : 'XZ';
+    if (controls) {
+        controls.mouseButtons.LEFT = drawPathEnabled ? null : THREE.MOUSE.ROTATE;
+        controls.mouseButtons.RIGHT = drawPathEnabled ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
+    }
     return drawPathEnabled;
+};
+window.undoDrawnPathPoint = function () { drawPathPoints.pop(); renderDrawPathVisual(); };
+window.setDrawnPathPoints = function (points) {
+    if (!Array.isArray(points) || points.length > 5 || points.some(p => ![p.x,p.y,p.z].every(Number.isFinite)
+        || Math.hypot(p.x,p.y,p.z) > 10000)) throw new Error('Invalid path coordinates.');
+    drawPathPoints = points.map(p => new THREE.Vector3(p.x,p.y,p.z));
+    renderDrawPathVisual();
 };
 window.clearDrawnPath = function () {
     drawPathPoints = [];

@@ -54,6 +54,13 @@ The check uploads the local dependency tree, opens the item, and verifies that
 the Audio & effects panel reports the opaque `CPlugFxSystem` carrier and its
 particle texture references.
 
+For drawn motion paths, run `npm --prefix Tests/Browser run test:motion-path`
+with `STUDIO_BASE_URL` pointing to a built studio. This checks real plane
+clicks, exports nine kinematic routes, replacement/restore, rejection isolation
+and static conversion/export/reopen. Set `STUDIO_NATIVE_EXPORTS` to preserve
+exports elsewhere. It does not launch Trackmania; native observations and
+limits are in `docs/kinematic-drawn-paths-2026-10-30.md`.
+
 The desktop and WASM ZIP writers can differ in their Deflate bytes and creator
 OS metadata for newly written records. The independent console verifier checks
 the exact map header, recovery of the original raw body outside the ZIP and

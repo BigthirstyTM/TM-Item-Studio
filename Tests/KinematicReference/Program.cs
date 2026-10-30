@@ -46,80 +46,21 @@ if (args.Length > 0 && args[0] == "--generate-chained-shapes")
     if (args.Length > 1) folder = args[1];
     Directory.CreateDirectory(folder);
 
-    static float HeadingDeg(Vector2 from, Vector2 to) => MathF.Atan2(to.Y - from.Y, to.X - from.X) * (180f / MathF.PI);
-
-    static List<ItemKinematicEntityTemplate.DrawPathSegment> BuildPolylineSegments(IReadOnlyList<Vector2> points, bool closedLoop, float metersPerSecond)
+    foreach (var (name, points) in new (string, Vector3[])[] {
+        ("Scenery_Square", [new(0,0,0),new(8,0,0),new(8,0,8),new(0,0,8)]),
+        ("Scenery_Triangle", [new(0,0,0),new(8,0,0),new(4,0,8)]) })
     {
-        var speed = Math.Max(0.1f, metersPerSecond);
-        var list = new List<ItemKinematicEntityTemplate.DrawPathSegment>();
-        var count = closedLoop ? points.Count : points.Count - 1;
-        for (var i = 0; i < count; i++)
-        {
-            var a = points[i];
-            var b = points[(i + 1) % points.Count];
-            var delta = b - a;
-            var length = delta.Length();
-            if (length < 0.01f) continue;
-            var yaw = HeadingDeg(a, b);
-            var duration = Math.Max(80, (int)MathF.Round(length / speed * 1000f));
-            list.Add(new ItemKinematicEntityTemplate.DrawPathSegment(
-                KC.EAxis.X,
-                length,
-                duration,
-                KC.EAxis.Y,
-                yaw,
-                yaw));
-        }
-        return list;
-    }
-
-    static CGameItemModel BuildShapeItem(string name, IReadOnlyList<Vector2> points, bool closedLoop)
-    {
-        var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate()
-            ?? throw new InvalidOperationException("Default moving template is unavailable.");
-        var prefab = (CPlugPrefab)template.EntityModel!;
-        var rootConstraint = (KC)prefab.Ents![1].Model!;
-        var segments = BuildPolylineSegments(points, closedLoop, metersPerSecond: 4f);
-        var result = ItemKinematicEntityTemplate.ConfigureDrawnPathBestEffort(
-            prefab,
-            rootConstraint,
-            "doc:0/variant:none/root",
-            segments,
-            maxSegmentsOverride: segments.Count);
-        if (!result.Success)
-            throw new InvalidOperationException($"Could not configure '{name}': {result.Reason}");
-
+        var template = ItemKinematicEntityTemplate.GetDefaultMovingTemplate() ?? throw new InvalidOperationException("Template unavailable.");
+        var plan = ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear);
+        if (!plan.Success) throw new InvalidOperationException(plan.Reason);
+        var result = ItemMotionPath.Build((CPlugPrefab)template.EntityModel!, plan.Value!);
+        if (!result.Success) throw new InvalidOperationException(result.Reason);
+        template.EntityModel = result.Value;
         template.Name = name;
-        template.Ident = new Ident(name, "Stadium2020", template.Ident?.Author ?? "TM_Item_Studio");
-        return template;
+        template.Ident = new Ident(name, 26, template.Ident.Author);
+        File.WriteAllBytes(Path.Combine(folder,name+".Item.Gbx"),Save(template));
+        Console.WriteLine("Saved scenery path (no usable collision): " + name);
     }
-
-    var squarePoints = new[]
-    {
-        new Vector2(-4f, -4f),
-        new Vector2( 4f, -4f),
-        new Vector2( 4f,  4f),
-        new Vector2(-4f,  4f)
-    };
-    var square = BuildShapeItem("Chained_Square_Loop", squarePoints, closedLoop: true);
-    var squarePath = Path.Combine(folder, "Chained_Square_Loop.Item.Gbx");
-    File.WriteAllBytes(squarePath, Save(square));
-    Console.WriteLine($"Saved square chained loop to: {squarePath}");
-
-    var outerRadius = 6f;
-    var starOuter = Enumerable.Range(0, 5)
-        .Select(i =>
-        {
-            var angle = (-90f + i * 72f) * (MathF.PI / 180f);
-            return new Vector2(MathF.Cos(angle) * outerRadius, MathF.Sin(angle) * outerRadius);
-        })
-        .ToArray();
-    var starOrder = new[] { 0, 2, 4, 1, 3 };
-    var starPoints = starOrder.Select(index => starOuter[index]).ToArray();
-    var star = BuildShapeItem("Chained_Star_Loop", starPoints, closedLoop: true);
-    var starPath = Path.Combine(folder, "Chained_Star_Loop.Item.Gbx");
-    File.WriteAllBytes(starPath, Save(star));
-    Console.WriteLine($"Saved star chained loop to: {starPath}");
 
     return 0;
 }

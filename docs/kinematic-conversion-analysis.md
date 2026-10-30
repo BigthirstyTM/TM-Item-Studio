@@ -1,5 +1,7 @@
 # Static → kinematic conversion analysis
 
+> Native follow-up (2026-10-30): [drawn paths and collision findings](kinematic-drawn-paths-2026-10-30.md). Earlier speculative collision/path conclusions below are historical.
+
 Scope: issue #22 work item 4 (kinematic authoring analysis). This document maps
 the tracked kinematic/static pair with the bundled parser, states the minimal
 transformation set required for a static→kinematic conversion, and records the

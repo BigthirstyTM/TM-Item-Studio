@@ -1,0 +1,14 @@
+PASS path export and replacement RootX
+PASS path export and replacement RootDiagonal
+PASS path export and replacement RootVertical
+PASS path export and replacement RootNegative
+PASS path export and replacement Square
+PASS path export and replacement Triangle
+PASS path export and replacement ReturnL
+PASS path export and replacement Space
+PASS path export and replacement ResetL
+PASS pointer drawing plane XZ
+PASS pointer drawing plane XY
+PASS pointer drawing plane YZ
+PASS static conversion, restore, export/reopen and document reset
+PASS invalid input isolation, undo and clear

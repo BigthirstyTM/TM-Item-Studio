@@ -1,5 +1,7 @@
 # Kinematic non-linear paths and Havok collision: spec-level research
 
+> Native follow-up (2026-10-30): [drawn paths and collision findings](kinematic-drawn-paths-2026-10-30.md). Earlier speculative collision/path conclusions below are historical.
+
 Scope: follow-up research answering the three questions from the kinematic
 dossier (single-body item following a non-linear path with mesh collision over
 the full path). This is an analysis deliverable: no production-code change, no
