@@ -17,6 +17,8 @@ p.add_argument('label', help='Unique run/map basename; use a new label for repea
 p.add_argument('--output', type=Path, required=True)
 p.add_argument('--seconds', type=int, default=32)
 p.add_argument('--wide-camera', action='store_true', help='Frame the larger two-line/two-arc fixture')
+p.add_argument('--coaster-context', action='store_true', help='Place the known NewCoaster beside the normalized 128-point fixture')
+p.add_argument('--follow-car-camera', action='store_true', help='Move only the observation camera to follow the passive test car')
 p.add_argument('--helper', type=Path, default=Path('C:/Users/PC/OpenplanetPlugins/tm-control-mcp/tools/call.py'))
 a = p.parse_args()
 if not 20 <= a.seconds <= 300 or not a.label.replace('_', '').isalnum():
@@ -76,6 +78,11 @@ call('tm-mcp-pack-epp.PlaceItem', dict(itemPath=a.item,x=400,y=15,z=400,tag='tmi
 items = call('GetItems')
 if items['total'] != 1 or items['items'][0]['idName'] != a.item:
     raise RuntimeError('Fixture must contain exactly the requested item')
+if a.coaster_context:
+    call('tm-mcp-pack-epp.PlaceItem',dict(itemPath='NewCoaster.Item.Gbx',x=534.4675,y=10.782,z=400,tag='tmis:handoff'))
+    items = call('GetItems')
+    if items['total'] != 2 or sorted(i['idName'] for i in items['items']) != sorted([a.item,'NewCoaster.Item.Gbx']):
+        raise RuntimeError('Coaster fixture must contain exactly the requested moving item and coaster')
 call('SaveMapAs', dict(fileName=a.label+'.Map.Gbx'))
 if call('GetDialog').get('hasFrame'):
     raise RuntimeError('Save dialog remains; choose a new run label')
@@ -87,17 +94,26 @@ with (a.output / (a.label + '-record.log')).open('w') as log:
         '-vf','scale=1280:720','-c:v','libx264','-preset','veryfast','-crf','20',
         '-pix_fmt','yuv420p',str(video_path)],stdout=log,stderr=log)
     try:
-        call('ControlValidation',dict(action='testFromCoord',x=12,y=10,z=12,dir='North'))
+        # The coaster cube is 8 m tall (top Y=19), unlike the thin deck (Y=16).
+        # Spawn above it, not inside its collision volume.
+        call('ControlValidation',dict(action='testFromCoord',x=12,y=11 if a.coaster_context else 10,z=12,dir='North'))
         time.sleep(2)
         camera = (dict(x=416,y=70,z=420,target=dict(x=416,y=14,z=388),fov=50)
                   if a.wide_camera else dict(x=432,y=48,z=446,target=dict(x=393,y=14,z=400),fov=55))
+        if a.coaster_context:
+            camera = dict(x=500,y=240,z=530,target=dict(x=500,y=40,z=310),fov=60)
         call('ControlPlayCamera',dict(action='set_position',**camera))
         start = time.monotonic()
+        last_camera = -1.
         while time.monotonic()-start < a.seconds-5:
             s = call('GetVehicleState')['state']
             samples.append(dict(t=time.monotonic()-start,position=s['position'],
                 velocity=s['worldVel'],gas=s['inputGasPedal'],steer=s['inputSteer'],
                 brake=s['inputBrakePedal'],up=s['up'],direction=s['dir'],wheels=s['wheels']))
+            if a.follow_car_camera and time.monotonic()-start-last_camera >= 1:
+                x,y,z = s['position']
+                call('ControlPlayCamera',dict(action='set_position',x=x+22,y=y+17,z=z+22,target=dict(x=x,y=y,z=z),fov=60))
+                last_camera = time.monotonic()-start
             time.sleep(.1)
         if recorder.wait(timeout=15) != 0:
             raise RuntimeError('Recording failed; inspect record log')
