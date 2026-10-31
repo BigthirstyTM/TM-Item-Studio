@@ -35,7 +35,9 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         await page.getByLabel('Open item files').setInputFiles(fixture);
         await page.getByRole('button', { name: 'Export selected file' }).waitFor();
         await page.getByRole('button', { name: /SnowCarTraffic.*variant 2$/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
+        if (await page.getByTestId('advanced-motion-constraints').count()) await page.getByTestId('advanced-motion-constraints').locator(':scope > summary').click();
         // SnowCar re-encodes on save in this WASM writer, so the export gate added with
         // standalone exports requires the compatibility acknowledgement before exporting.
         const acknowledgeReencoding = async () => {
@@ -80,7 +82,9 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         await page.reload({ waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(exported);
         await page.getByRole('button', { name: /variant 2$/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
+        if (await page.getByTestId('advanced-motion-constraints').count()) await page.getByTestId('advanced-motion-constraints').locator(':scope > summary').click();
         await acknowledgeReencoding();
         assert.match(await page.locator('body').innerText(), /IsDuration=true.*preserved/, 'Reopened item must report its authored timing');
         if (process.env.STUDIO_MOTION_EVIDENCE) {
@@ -93,6 +97,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         for (let variant = 1; variant < 9; variant++) {
             console.log(`Checking SnowCar variant ${variant + 1}`);
             await page.getByRole('button', { name: new RegExp(`variant ${variant + 1}$`) }).click();
+            await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
             const first = expected.find(c => c.path.includes(`/variant:${variant}/`));
             assert.ok(first);
             assert.equal(Number(await page.getByLabel('Translation maximum (m)', { exact: true }).first().inputValue()), first.TransMax);
@@ -101,6 +106,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
             assert.equal(Number(await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).first().inputValue()), first.translation[0].milliseconds);
         }
         await page.getByRole('button', { name: /variant 2$/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         console.log('Checking no-op after variant switches and explicit edits.');
         const exportTo = async filename => {
             await acknowledgeReencoding();
@@ -117,7 +123,9 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         assert.equal(await page.evaluate(() => typedMotions[0].fields.translationMax), 40,
             'An authored edit must rebuild the live motion alongside invalidated shared geometry');
         await page.getByRole('button', { name: /variant 3$/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         await page.getByRole('button', { name: /variant 2$/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         assert.equal(await page.evaluate(() => typedMotions[0].fields.translationMax), 40,
             'Returning to an edited variant must not resurrect stale cached motion');
         assert.deepEqual(inspect(await exportTo('range-edit.Item.Gbx')), inspect(fixture, ['translation-max', '40']),
@@ -130,7 +138,9 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync(process.env.DOTNET
         await page.reload({ waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(edited);
         await page.getByRole('button', { name: /variant 2$/ }).click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
+        if (await page.getByTestId('advanced-motion-constraints').count()) await page.getByTestId('advanced-motion-constraints').locator(':scope > summary').click();
         assert.equal(await page.getByLabel('Translation maximum (m)', { exact: true }).inputValue(), '40');
         assert.equal(await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).inputValue(), '1440');
         assert.deepEqual(errors, []);

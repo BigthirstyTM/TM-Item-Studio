@@ -15,6 +15,49 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("smooth routes preserve endpoints, close the seam and respect timing and budget", () =>
+{
+    Vector3[] points = [new(0,0,0), new(20,0,0), new(20,0,20), new(0,0,20)];
+    var zero = ItemMotionSmoothPath.Plan(points, MotionPathRepeat.Reset, 5, 0, 8);
+    Require(zero.Success && zero.Value!.Legs.Count == 3, "zero smoothness must retain the polygon");
+    var open = ItemMotionSmoothPath.Plan(points, MotionPathRepeat.Reset, 5, 1, 8);
+    Require(open.Success, open.Reason ?? "rounding failed");
+    var plan = open.Value!;
+    Require(plan.Start == points[0] && Vector3.Distance(plan.Legs.Aggregate(plan.Start, (p,l)=>p+l.Delta),points[^1]) < .001f, "open endpoints moved");
+    Require(plan.Legs.Count == 19 && plan.Legs.All(l=>l.MoveMs>=80), "unexpected rounded geometry or timing");
+    var closed = ItemMotionSmoothPath.Plan(points, MotionPathRepeat.Closed, 5, 1, 8);
+    Require(closed.Success && closed.Value!.Legs.Count == 36, "closed corner count");
+    Require(closed.Value!.Legs.Aggregate(Vector3.Zero,(p,l)=>p+l.Delta).Length()<.001f, "loop seam did not close");
+    var back = ItemMotionSmoothPath.Plan(points, MotionPathRepeat.PingPong, 5, 1, 8);
+    Require(back.Success && back.Value!.Legs.Count == 38, "return budget");
+    Require(!ItemMotionSmoothPath.Plan(points, MotionPathRepeat.Reset, 5, float.NaN, 8).Success, "NaN accepted");
+    Require(!ItemMotionSmoothPath.Plan(points, MotionPathRepeat.Reset, 5, .5f, 17).Success, "invalid detail accepted");
+    var many = Enumerable.Range(0,20).Select(i=>new Vector3(i*20,0,i%2*20)).ToArray();
+    Require(!ItemMotionSmoothPath.Plan(many, MotionPathRepeat.PingPong, 5, 1, 16).Success,"oversized curve accepted");
+    var fast = ItemMotionSmoothPath.Plan(points, MotionPathRepeat.Reset, 20, .2f, 16);
+    Require(fast.Success && fast.Value!.Legs.All(l=>l.MoveMs>=80),"detail reduction failed");
+});
+
+Check("route edits reschedule all channels, preserve neighbours and reject invalid durations", () =>
+{
+    var original = ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20)],MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear,100).Value!;
+    var edited = ItemMotionPathEditing.ChangeDuration(original,0,8000);
+    Require(edited.Success && edited.Value!.Legs[1].StartMs == 8200,"following channel not shifted");
+    Require(original.Legs[0].MoveMs == 4000,"source changed");
+    Require(ItemMotionPath.Validate(edited.Value!).Success,"edited plan invalid");
+    Require(!ItemMotionPathEditing.ChangeDuration(original,0,79).Success,"short duration accepted");
+    Require(!ItemMotionPathEditing.ChangeDuration(original,0,int.MaxValue).Success,"overflow accepted");
+    var moved = ItemMotionPathEditing.MovePoint(original,1,new(30,0,0));
+    Require(moved.Success && moved.Value!.Legs[0].Delta.X==30 && moved.Value.Legs[1].Delta.X==-10,"shared endpoint broken");
+    Require(!ItemMotionPathEditing.MovePoint(original,1,Vector3.Zero).Success,"zero-length leg accepted");
+    var obstacle = ItemMotionPath.Plan([Vector3.Zero,new(20,0,0)],MotionPathUse.Obstacle,MotionPathRepeat.PingPong,5,KC.AnimEase.Linear).Value!;
+    var linked = ItemMotionPathEditing.ChangeDuration(obstacle,1,7000).Value!;
+    Require(linked.Legs.All(l=>l.MoveMs==7000) && ItemMotionPath.Validate(linked).Success,"obstacle return timing diverged");
+    var json = System.Text.Json.JsonSerializer.Serialize(edited.Value,new System.Text.Json.JsonSerializerOptions{IncludeFields=true});
+    var loaded = System.Text.Json.JsonSerializer.Deserialize<MotionPathPlan>(json,new System.Text.Json.JsonSerializerOptions{IncludeFields=true})!;
+    Require(ItemMotionPath.Validate(loaded).Success && loaded.Legs[1].Delta == edited.Value!.Legs[1].Delta,"draft roundtrip lost geometry");
+});
+
 Check("static-to-kinematic conversion requires a valid kinematic template body", () =>
 {
     var staticItem = new CGameItemModel

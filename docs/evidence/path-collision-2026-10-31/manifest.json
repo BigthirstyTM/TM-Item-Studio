@@ -1,0 +1,58 @@
+{
+  "lift.mp4": {
+    "bytes": 1485527,
+    "sha256": "91079d98f62f41955ed9a6f98b27c703ca1c63d7b0b0d4c09b89ac07e7d3879d"
+  },
+  "orbit-contact2.mp4": {
+    "bytes": 2256598,
+    "sha256": "5c586f165eab06d9765fa74cdfb14f1d0d9af9b19b4d65fd192400fafbec7b42"
+  },
+  "dual-axis.mp4": {
+    "bytes": 1948410,
+    "sha256": "55701ab6db618f5aa7b59bc3fd96697b8fd3bb0f1a51af54841e9e72254f25f7"
+  },
+  "smooth-native.mp4": {
+    "bytes": 2220649,
+    "sha256": "edae17bc165bb3b7da99a5bd57766b9fc2a43de4eb7860dcd2a676cb108d160d"
+  },
+  "TMIS_Contact_Lift.Item.Gbx": {
+    "bytes": 18206,
+    "sha256": "bed50701b7592f82bbd19b99a75dab5a14c8397d9eec46c3ed44c075f68c108f"
+  },
+  "TMIS_Contact_Lift.Map.Gbx": {
+    "bytes": 96238,
+    "sha256": "6dfc1b2748120d40f06608c44cb5a8a36bb5d189e9a897e79286ecef3d997605"
+  },
+  "TMIS_Contact_Orbit.Item.Gbx": {
+    "bytes": 18089,
+    "sha256": "bfffbfb3ed07a1f50698388892f191496d742090655190d6255990c69a68fe46"
+  },
+  "TMIS_Contact_Orbit.Map.Gbx": {
+    "bytes": 96851,
+    "sha256": "1b46409839c0eeb901a3c8eb1054655fb32a33052cefba5a73898378bb7eebeb"
+  },
+  "TMIS_Contact_DualAxis.Item.Gbx": {
+    "bytes": 18239,
+    "sha256": "5f82383e4f9c28cca53894226774e87016150a79a377aee0d72231381a6dea0c"
+  },
+  "TMIS_Contact_DualAxis.Map.Gbx": {
+    "bytes": 95817,
+    "sha256": "85041e75567fea77eee8ab56973457b964a3316aaff599440c833c63f702df6b"
+  },
+  "TMIS_Smooth_Proof.Map.Gbx": {
+    "bytes": 96442,
+    "sha256": "4498ad0a42b131d758fd99c36cdea0489a59a0accda0257299e8aaa7ac4e27eb"
+  },
+  "TMIS_Smooth_Proof.Item.Gbx": {
+    "bytes": 110008,
+    "sha256": "be851aecd3ca6ab03ba0ee1854cb00e84312ca1663e356f39bbb6a8909c7e0e4"
+  },
+  "smooth-preview.json": {
+    "bytes": 7468,
+    "sha256": "234b64ca9e39e4593870dbf8ae82ec37df9de9cce8df89b7b320f87c29fcf18c"
+  },
+  "edited-route.motion-path.json": {
+    "bytes": 546,
+    "sha256": "fbef206a5cc29340575b3f1bb10264fe6dc35d18ea780902cee1ed355ae458a3"
+  }
+}

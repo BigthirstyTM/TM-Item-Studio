@@ -1,0 +1,80 @@
+@using System.Numerics
+@using System.Globalization
+@using TM_Item_Studio.Models
+
+<details class="border rounded p-2 my-2" open data-testid="path-segment-editor">
+    <summary class="fw-bold">Path segments &amp; timing</summary>
+    <p class="small text-muted mt-2">@Plan.Legs.Count segments · @(Plan.DurationMs / 1000d) s per cycle. Edits update the draft; choose Apply edited route to change the item. Timing changes shift all following segments together. Generating a new straight or smooth route replaces these segment edits. This route editor retains the current session's draft.</p>
+    <SearchableSelect Label="Path segment" Options="Labels" Value="SelectedLabel" ValueChanged="SelectSegment" />
+    <details class="my-2">
+        <summary class="small">Complete route overview</summary>
+        <div class="table-responsive" style="max-height: 18rem; overflow-y: auto">
+            <table class="table table-sm small"><thead><tr><th>Segment</th><th>From (X Y Z)</th><th>To (X Y Z)</th><th>m/s</th><th>Seconds</th></tr></thead><tbody>
+                @{ var route = ItemMotionPathEditing.Points(Plan); }
+                @for (var i = 0; i < Plan.Legs.Count; i++)
+                {
+                    var index = i;
+                    var l = Plan.Legs[i];
+                    <tr class="@(Index == i ? "table-active" : "")"><td><button class="btn btn-sm btn-link p-0" title="Select this segment to edit its endpoints and timing." @onclick="()=>Index=index">@(i+1)</button></td><td>@Position(route[i])</td><td>@Position(route[i+1])</td><td>@F(l.Delta.Length()*1000d/l.MoveMs)</td><td>@F(l.MoveMs/1000d)</td></tr>
+                }
+            </tbody></table>
+        </div>
+    </details>
+    @if (Index >= 0 && Index < Plan.Legs.Count)
+    {
+        var leg = Plan.Legs[Index];
+        var points = ItemMotionPathEditing.Points(Plan);
+        <div class="row g-2 mt-1">
+            @for (var end = 0; end < 2; end++)
+            {
+                var pointIndex = Index + end;
+                var p = points[pointIndex];
+                <div class="col-12"><strong class="small">@(end == 0 ? "From" : "To") · point @(pointIndex + 1)</strong></div>
+                @for (var axis = 0; axis < 3; axis++)
+                {
+                    var a = axis;
+                    <div class="col-4"><label class="small">@("XYZ"[a])<input aria-label="@($"Segment {(end == 0 ? "from" : "to")} {"XYZ"[a]}")" title="Move this shared route point in metres. Adjacent segments update while their durations stay unchanged." class="form-control form-control-sm" type="number" step="any" value="@F(a == 0 ? p.X : a == 1 ? p.Y : p.Z)" @onchange="e=>MovePoint(pointIndex,a,e)" /></label></div>
+                }
+            }
+            <div class="col-6"><label class="small">Average speed (m/s)<input aria-label="Segment speed" title="Set average travel speed for this segment. All following start times update together." class="form-control form-control-sm" type="number" min="0.1" step="0.1" value="@F(leg.Delta.Length()*1000d/leg.MoveMs)" @onchange="ChangeSpeed" /></label></div>
+            <div class="col-6"><label class="small">Duration (seconds)<input aria-label="Segment duration" title="Set travel duration for this segment, at least 0.08 seconds. All following start times update together." class="form-control form-control-sm" type="number" min="0.08" step="0.01" value="@F(leg.MoveMs/1000d)" @onchange="ChangeDuration" /></label></div>
+        </div>
+        <p class="small text-muted mt-2">Length @F(leg.Delta.Length()) m · starts at @F(leg.StartMs/1000d) s. Position edits keep duration. Shared endpoints move together; ping-pong geometry stays mirrored. Straight obstacle return timing is linked.</p>
+        <p class="small text-muted">Rotation: fixed orientation for generated paths. Independent rotation per segment is not supported by this compiler. Advanced rotation edits below change native constraints and may change the route; reapplying a generated path replaces those edits.</p>
+    }
+    @if (error is not null) { <p class="text-danger small" role="alert">@error</p> }
+    <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-sm btn-success" title="Play the complete edited schedule without changing the exported item." @onclick="Preview">Preview edited route</button>
+        <button class="btn btn-sm btn-primary" title="Compile all edited segments together and replace the generated movement." @onclick="Apply">Apply edited route</button>
+    </div>
+</details>
+
+@code {
+    [Parameter, EditorRequired] public MotionPathPlan Plan { get; set; } = default!;
+    [Parameter] public EventCallback<MotionPathPlan> Changed { get; set; }
+    [Parameter] public EventCallback Preview { get; set; }
+    [Parameter] public EventCallback Apply { get; set; }
+    private int Index;
+    private string? error;
+    private string[] Labels => Plan.Legs.Select((l,i)=>$"Segment {i+1}: point {i+1} → {i+2} · {F(l.Delta.Length())} m · {F(l.MoveMs/1000d)} s").ToArray();
+    private string SelectedLabel => Labels[Math.Clamp(Index,0,Plan.Legs.Count-1)];
+    protected override void OnParametersSet() => Index = Math.Clamp(Index,0,Plan.Legs.Count-1);
+    private void SelectSegment(ChangeEventArgs e) { var index=Array.IndexOf(Labels,e.Value?.ToString()); if(index>=0) Index=index; }
+    private static string F(double n) => n.ToString("0.###",CultureInfo.InvariantCulture);
+    private static string Position(Vector3 p) => $"{F(p.X)} {F(p.Y)} {F(p.Z)}";
+    private async Task Accept(ItemMotionResult<MotionPathPlan> result) { error=result.Reason; if(result.Success) await Changed.InvokeAsync(result.Value!); }
+    private async Task SetSeconds(double seconds)
+    {
+        if(!double.IsFinite(seconds) || seconds < .08 || seconds*1000 > int.MaxValue) { error="Duration must be at least 0.08 seconds and fit the native timer."; return; }
+        await Accept(ItemMotionPathEditing.ChangeDuration(Plan,Index,(int)Math.Round(seconds*1000)));
+    }
+    private Task ChangeDuration(ChangeEventArgs e) => double.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) ? SetSeconds(n) : InvalidNumber();
+    private Task ChangeSpeed(ChangeEventArgs e) => double.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) && double.IsFinite(n) && n > 0 ? SetSeconds(Plan.Legs[Index].Delta.Length()/n) : InvalidNumber();
+    private Task InvalidNumber() { error="Enter a finite positive number."; return Task.CompletedTask; }
+    private async Task MovePoint(int index,int axis,ChangeEventArgs e)
+    {
+        if(!float.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n)) { await InvalidNumber(); return; }
+        var p=ItemMotionPathEditing.Points(Plan)[index]; if(axis==0)p.X=n; else if(axis==1)p.Y=n; else p.Z=n;
+        await Accept(ItemMotionPathEditing.MovePoint(Plan,index,p));
+    }
+}

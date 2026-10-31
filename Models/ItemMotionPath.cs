@@ -57,27 +57,41 @@ public static class ItemMotionPath
         return ItemMotionResult<MotionPathPlan>.Ok(new(points[0], use, repeat, ease, legs.AsReadOnly(), (int)elapsed, pauseMs));
     }
 
-    public static ItemMotionResult<CPlugPrefab> Build(CPlugPrefab original, MotionPathPlan plan, Vector3 anchor = default)
+    public static ItemMotionResult<MotionPathPlan> Validate(MotionPathPlan plan)
     {
-        ItemMotionResult<CPlugPrefab> Fail(string reason) => ItemMotionResult<CPlugPrefab>.Fail(ItemMotionStatus.Unsupported, reason);
-        if (!Finite(anchor) || anchor.Length() > 10000 || !Enum.IsDefined(plan.Use) || !Enum.IsDefined(plan.Repeat) || !Finite(plan.Start)
+        ItemMotionResult<MotionPathPlan> Fail(string reason) => ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, reason);
+        if (!Enum.IsDefined(plan.Use) || !Enum.IsDefined(plan.Repeat) || !Finite(plan.Start)
             || plan.Start.Length() > 10000 || plan.PauseMs < 0 || plan.PauseMs > 60000
             || plan.Ease is not (KC.AnimEase.Linear or KC.AnimEase.QuadIn or KC.AnimEase.QuadOut or KC.AnimEase.QuadInOut)
             || plan.Legs is null || plan.Legs.Count is < 1 or > MaxLegs || plan.DurationMs <= 0)
             return Fail("Invalid motion path plan.");
         long expectedStart = plan.PauseMs;
+        var position = plan.Start;
         foreach (var leg in plan.Legs)
         {
-            if (!Finite(leg.Delta) || leg.Delta.Length() < .01f || leg.Delta.Length() > 20000
+            if (leg is null || !Finite(leg.Delta) || leg.Delta.Length() < .01f || leg.Delta.Length() > 20000
                 || leg.StartMs != expectedStart || leg.MoveMs < 80)
                 return Fail("Invalid motion path leg or timing.");
             expectedStart += (long)leg.MoveMs + plan.PauseMs;
+            position += leg.Delta;
+            if (!Finite(position) || position.Length() > 10000) return Fail("Route points must stay within 10,000 metres.");
         }
+        if (plan.Repeat != MotionPathRepeat.Reset && Vector3.Distance(position, plan.Start) > .01f)
+            return Fail("A repeated route must return to its start.");
         if (expectedStart - (plan.Repeat == MotionPathRepeat.Reset ? 0 : plan.PauseMs) != plan.DurationMs)
             return Fail("Invalid motion path cycle duration.");
         if (plan.Use == MotionPathUse.Obstacle && (plan.Legs.Count != (plan.Repeat == MotionPathRepeat.Reset ? 1 : 2)
             || (plan.Legs.Count == 2 && (plan.Legs[1].Delta != -plan.Legs[0].Delta || plan.Legs[1].MoveMs != plan.Legs[0].MoveMs))))
             return Fail("Obstacle paths require a single straight line and its optional return.");
+        return ItemMotionResult<MotionPathPlan>.Ok(plan);
+    }
+
+    public static ItemMotionResult<CPlugPrefab> Build(CPlugPrefab original, MotionPathPlan plan, Vector3 anchor = default)
+    {
+        ItemMotionResult<CPlugPrefab> Fail(string reason) => ItemMotionResult<CPlugPrefab>.Fail(ItemMotionStatus.Unsupported, reason);
+        var validation = Validate(plan);
+        if (!validation.Success) return Fail(validation.Reason!);
+        if (!Finite(anchor) || anchor.Length() > 10000) return Fail("Invalid motion path anchor.");
         var entries = original.Ents;
         if (entries is null || entries.Any(e => e.Model is CPlugPrefab nested && !StaticOnly(nested, new()))
             || entries.Count(e => e.Model is CPlugDynaObjectModel) != 1 || entries.Count(e => e.Model is KC) != 1)

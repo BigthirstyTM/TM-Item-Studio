@@ -77,6 +77,7 @@ const fs = require('node:fs');
         assert.deepEqual(cleared, { selected: [], path: null, pink: [] });
         await page.getByLabel('Open item files', { exact: true }).setInputFiles(path.join(__dirname, 'Fixtures/animation-static-first.Item.Gbx'));
         await page.getByRole('button', { name: 'WaypointType, Gameplay & Kinematics', exact: true }).click();
+        if (await page.getByTestId('advanced-motion-constraints').count()) await page.getByTestId('advanced-motion-constraints').locator(':scope > summary').click();
         const counts = page.getByLabel('Translation segment count', { exact: true });
         await counts.waitFor();
         assert.deepEqual(await counts.locator('option:not([disabled])').evaluateAll(options => options.map(o => o.value)), ['1', '2', '3', '4']);
