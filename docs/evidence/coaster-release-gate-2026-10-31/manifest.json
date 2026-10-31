@@ -1,0 +1,34 @@
+{
+  "artifacts\\coaster-gate\\Achtbaan-collision-vloeiende-camera.mp4": {
+    "sha256": "539b745eaeb1fdfecb02084aa017703961fa2e7f625269946a8a8c21edb443e7",
+    "bytes": 82296072
+  },
+  "artifacts\\coaster-gate\\Collision-buiten-midden-fout.mp4": {
+    "sha256": "e4f59a6e7d6cfd9b7fa116c2f15f8b55914c6c9e4d2ddbe00561054530be60a8",
+    "bytes": 8097813
+  },
+  "artifacts\\coaster-gate\\Collision-zonder-rails-fout.mp4": {
+    "sha256": "2bec41564e3a0afa27650847327f69767918ec234f2c68b5f95a295edd0ed77d",
+    "bytes": 4405710
+  },
+  "artifacts\\coaster-handoff\\fixtures\\TMIS_CC_Relay5BoundsFullNear.Item.Gbx": {
+    "sha256": "d118010ed321d29e0d89415c83f4cd24837604ccf17a18814d4af48bb8a8123b",
+    "bytes": 63116
+  },
+  "C:\\Users\\PC\\Documents\\Trackmania\\Maps\\CG_OffsetProof.Map.Gbx": {
+    "sha256": "ffc03791a35816dfe3536708407f39b2002f845200b5725993920c2c6ae154f1",
+    "bytes": 1419777
+  },
+  "C:\\Users\\PC\\Documents\\Trackmania\\Maps\\CG_NoRailsTwoLaps.Map.Gbx": {
+    "sha256": "aebbb24f2e276da60671c6c5261d1fde7bab6ffe91649b47c0f2a57ed87ac094",
+    "bytes": 119769
+  },
+  "C:\\Users\\PC\\Documents\\Trackmania\\Maps\\CG_SmoothCoaster.Map.Gbx": {
+    "sha256": "e1e4b45d0319910427e9a0a0cc3b9f99557182b6db6f09ee9ceb006f273d9be0",
+    "bytes": 1419647
+  },
+  "C:\\Users\\PC\\Documents\\Trackmania\\Maps\\CG_EnduranceConfirm.Map.Gbx": {
+    "sha256": "a3c417285e36c85f2847d1c2d9d7bd939aad8192d8e96973a16be29162cbf88d",
+    "bytes": 119740
+  }
+}

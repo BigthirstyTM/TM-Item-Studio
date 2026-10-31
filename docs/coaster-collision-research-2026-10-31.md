@@ -1,5 +1,9 @@
 # Collision experiments on the original 128-point coaster
 
+Follow-up: [the release gate](coaster-collision-release-gate-2026-10-31.md) fails
+for off-centre passengers and rail-free repeatability. Do not promote the
+centred demonstration into general production support.
+
 ## Result and boundary
 
 The exact route from the [scenery coaster proof](coaster-follow-path-2026-10-31.md)

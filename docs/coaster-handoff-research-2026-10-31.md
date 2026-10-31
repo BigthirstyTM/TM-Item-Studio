@@ -1,5 +1,9 @@
 # Coaster collision: targeted handoff experiments
 
+Follow-up: [the release gate](coaster-collision-release-gate-2026-10-31.md) fails
+for off-centre passengers and rail-free repeatability. Do not promote the
+centred demonstration into general production support.
+
 Research continuation of [the full-route tests](coaster-collision-research-2026-10-31.md).
 These are experimental native Item.Gbx fixtures, not a production feature.
 

@@ -1,0 +1,117 @@
+{
+  "CG_CameraSmoke": {
+    "samples": 104,
+    "durationSeconds": 19.812999999994645,
+    "yRange": [
+      19.013,
+      19.028
+    ],
+    "maxUpwardVelocity": 0.0494,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999877,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.69,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 0.08960128171147279,
+    "clockFitRmsMetres": 0.023081958856042372,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "scheduledSeconds": 25,
+    "placement": [
+      400,
+      15,
+      400
+    ]
+  },
+  "CG_OffsetProof": {
+    "samples": 312,
+    "durationSeconds": 59.85899999999674,
+    "yRange": [
+      8.99175,
+      98.4553
+    ],
+    "maxUpwardVelocity": 1028.29,
+    "allWheelsAirSamples": 89,
+    "minimumUpY": -0.998291,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 2.01,
+    "firstDistanceOver8mSeconds": 22.546999999991385,
+    "maxDistanceToScheduledCubeTop": 61.39922136374005,
+    "clockFitRmsMetres": 1.582838394392366,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "scheduledSeconds": 65,
+    "placement": [
+      401.25,
+      15,
+      401.25
+    ]
+  },
+  "CG_NoRailsTwoLaps": {
+    "samples": 1796,
+    "durationSeconds": 344.1559999999881,
+    "yRange": [
+      19.01,
+      73.957
+    ],
+    "maxUpwardVelocity": 56.4547,
+    "allWheelsAirSamples": 1,
+    "minimumUpY": -0.58251,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.77,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 7.525844971283197,
+    "clockFitRmsMetres": 0.020229316941855913,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "scheduledSeconds": 600,
+    "placement": [
+      400,
+      15,
+      400
+    ]
+  },
+  "CG_SmoothCoaster": {
+    "samples": 1568,
+    "durationSeconds": 294.9690000000119,
+    "yRange": [
+      19.01,
+      73.957
+    ],
+    "maxUpwardVelocity": 5.0504,
+    "allWheelsAirSamples": 1,
+    "minimumUpY": 0.907935,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.71,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 1.4836015427532914,
+    "clockFitRmsMetres": 0.022279524137182892,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "scheduledSeconds": 300,
+    "placement": [
+      400,
+      15,
+      400
+    ]
+  },
+  "CG_EnduranceConfirm": {
+    "samples": 1125,
+    "durationSeconds": 211.93799999999464,
+    "yRange": [
+      8.0889,
+      85.7342
+    ],
+    "maxUpwardVelocity": 27.187,
+    "allWheelsAirSamples": 22,
+    "minimumUpY": -0.983062,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.83,
+    "firstDistanceOver8mSeconds": 207.43700000000536,
+    "maxDistanceToScheduledCubeTop": 70.64069957015033,
+    "clockFitRmsMetres": 0.020643408025402203,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "scheduledSeconds": 600,
+    "placement": [
+      400,
+      15,
+      400
+    ]
+  }
+}
