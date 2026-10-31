@@ -37,3 +37,15 @@ Soft1/Soft2 and the overlap visual use unverified instance phase semantics.
 Their synchronization is not established. SoftOut instead uses explicit global
 timings and zero phase; it still launches the car at a handoff. None of these
 overlays is suitable for production.
+
+## Drawn-route feasibility
+
+`drawn_route_analysis.py` takes JSON `[[x,z], ...]` points and computes the
+arbitrary slide/rotation signals that would geometrically reproduce the drawing.
+It deliberately does not export GBX or claim native feasibility. See
+[the feasibility report](../../docs/drawn-collision-route-feasibility-2026-10-31.md)
+for the distinction between geometric reachability and native timeline limits.
+
+```powershell
+python -m unittest discover -s Tests/SingleVisibleCollisionProof -p test_drawn_route_analysis.py -v
+```
