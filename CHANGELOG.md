@@ -2,6 +2,15 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.6] - 2026-10-31
+
+- Separate smooth scenery path tool with adjustable corner rounding, curve detail and live preview. The existing straight/polyline tool remains available.
+- Generated route editor with searchable segment selection, full route overview, shared endpoint edits and per-segment speed/duration. Following channels are rescheduled together; straight obstacle return timing stays linked.
+- Save/load route drafts as JSON for continued editing with the source item. Preview and apply remain separate.
+- Advanced constraints now show one searchable selection at a time, with translation and rotation controls grouped beneath a collapsible heading.
+- Native collision experiments verify repeated lift support and circular obstacle contact. Two world-bound translation constraints on one body did not produce the intended square. Arbitrary multi-direction moving collision and per-segment rotation are not advertised as supported.
+- Native video evidence and reproducible experiment generator documented in `docs/smooth-path-collision-2026-10-31.md`.
+
 ## [0.5.0] - 2026-10-26
 
 ### Added

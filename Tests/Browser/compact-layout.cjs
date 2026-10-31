@@ -14,6 +14,7 @@ const path = require('node:path');
         await page.getByLabel('Open item files').setInputFiles(path.join(__dirname, 'Fixtures/Approved/TM2020/SnowCarTraffic_60kph.Item.gbx'));
         await page.getByRole('button', { name: /SnowCarTraffic.*variant 2$/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
+        if (await page.getByTestId('advanced-motion-constraints').count()) await page.getByTestId('advanced-motion-constraints').locator(':scope > summary').click();
         await page.waitForFunction(() => document.querySelector('[aria-label="Loaded items and variants"]').getAttribute('aria-busy') === 'false');
         await page.evaluate(() => setAnimationPlaying(false));
         async function measure() {

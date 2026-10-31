@@ -982,10 +982,20 @@ function renderDrawPathVisual() {
         waypointsGroup.add(marker);
     }
     if (drawPathPoints.length > 1) {
+        let route = drawPathRepeat === 'Closed' && drawPathPoints.length > 2
+            ? [...drawPathPoints, drawPathPoints[0]] : drawPathPoints;
+        if (drawPathDraft?.plan.curved) {
+            const plan = drawPathDraft.plan;
+            let point = new THREE.Vector3(plan.start.x, plan.start.y, plan.start.z);
+            route = [point.clone()];
+            for (const leg of plan.legs) {
+                point.add(new THREE.Vector3(leg.delta.x, leg.delta.y, leg.delta.z));
+                route.push(point.clone());
+            }
+        }
         drawPathLine = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(drawPathRepeat === 'Closed' && drawPathPoints.length > 2
-                ? [...drawPathPoints, drawPathPoints[0]] : drawPathPoints),
-            new THREE.LineBasicMaterial({ color: 0xfb7185 }));
+            new THREE.BufferGeometry().setFromPoints(route),
+            new THREE.LineBasicMaterial({ color: drawPathDraft?.plan.curved ? 0x22d3ee : 0xfb7185 }));
         drawPathLine.name = 'drawPathPreview';
         waypointsGroup.add(drawPathLine);
     }
@@ -2070,6 +2080,7 @@ window.stopDrawPathPreview = function () {
     scene?.remove(drawPathDraft.ghost);
     // Clones share source geometry/materials: never dispose those resources here.
     drawPathDraft = null;
+    renderDrawPathVisual();
 };
 window.previewDrawPath = function (plan, center) {
     const firstPreview = !drawPathDraft;
@@ -2087,6 +2098,7 @@ window.previewDrawPath = function (plan, center) {
     source.group.visible = false;
     scene.add(ghost);
     drawPathDraft = { source, ghost, wasVisible, plan, rotation, anchor, started: performance.now() };
+    renderDrawPathVisual();
     applyDrawPathPreview(drawPathDraft.started);
     if (firstPreview) window.fitDrawPath();
 };

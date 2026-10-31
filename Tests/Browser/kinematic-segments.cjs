@@ -20,6 +20,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync('dotnet',
         await page.getByLabel('Open item files').setInputFiles(fixture);
         await page.getByRole('button', { name: /SnowCarTraffic.*variant 2$/ }).click();
         await page.getByRole('button', { name: /WaypointType, Gameplay & Kinematics/ }).click();
+        if (await page.getByTestId('advanced-motion-constraints').count()) await page.getByTestId('advanced-motion-constraints').locator(':scope > summary').click();
         assert.equal(await page.getByLabel('Translation segment count', { exact: true }).count(), 1, 'Translation must expose its actual segment count');
         const original = inspect(fixture);
         for (const name of ['Translation', 'Rotation'])
@@ -50,6 +51,7 @@ const inspect = (file, edits = []) => JSON.parse(execFileSync('dotnet',
         assert.equal(await page.getByLabel('Rotation segment count', { exact: true }).inputValue(), '4');
         assert.equal(await page.getByLabel('Translation key 2 duration (ms)', { exact: true }).inputValue(), '1000');
         assert.deepEqual(inspect(await download()), inspect(fixture, edits));
+        if (!await page.getByTestId('advanced-motion-constraints').evaluate(e=>e.open)) await page.getByTestId('advanced-motion-constraints').locator(':scope > summary').click();
         await page.getByLabel('Translation segment count', { exact: true }).selectOption('1');
         await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).fill('2147483647');
         await page.getByLabel('Translation key 1 duration (ms)', { exact: true }).press('Tab');
