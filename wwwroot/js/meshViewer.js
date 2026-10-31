@@ -18,6 +18,46 @@ let hasAutoFramedScene = false;
 let compositeSelectionHelpers = [], compositeGroupHelpers = [];
 let drawPathEnabled = false, drawPathPlaneY = 0, drawPathPoints = [];
 let drawPathLine = null, drawPathPointMarkers = [];
+let editablePathPoints = [], editablePathGroup = null, editablePathIndex = 0, editablePathFull = true;
+window.setEditablePathSegments = function(points, index, full) {
+    if (editablePathGroup) {
+        editablePathGroup.parent?.remove(editablePathGroup);
+        editablePathGroup.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
+    }
+    editablePathPoints = (points || []).map(p=>new THREE.Vector3(p.x,p.y,p.z));
+    editablePathIndex = index; editablePathFull = full;
+    editablePathGroup = new THREE.Group();
+    editablePathGroup.name = 'editablePathSegments';
+    editablePathGroup.visible = showWaypoints;
+    for(let i=0;i<editablePathPoints.length-1;i++) {
+        const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([editablePathPoints[i],editablePathPoints[i+1]]),
+            new THREE.LineBasicMaterial({color:i===index?0xfacc15:0x22d3ee,depthTest:false}));
+        line.userData.pathSegmentIndex=i;line.visible=full||i===index;line.renderOrder=i===index?102:101;
+        editablePathGroup.add(line);
+    }
+    scene?.add(editablePathGroup);
+    if(drawPathLine)drawPathLine.visible=editablePathPoints.length<2;
+};
+function pickEditablePathSegment(event) {
+    if(!editablePathGroup?.visible || editablePathPoints.length<2)return -1;
+    camera.updateMatrixWorld();
+    const rect=renderer.domElement.getBoundingClientRect(), hits=[];
+    for(let i=0;i<editablePathPoints.length-1;i++) {
+        if(!editablePathFull&&i!==editablePathIndex)continue;
+        const a=editablePathPoints[i].clone().project(camera),b=editablePathPoints[i+1].clone().project(camera);
+        if(a.z < -1 || a.z > 1 || b.z < -1 || b.z > 1)continue;
+        const ax=rect.left+(a.x+1)*rect.width/2,ay=rect.top+(1-a.y)*rect.height/2;
+        const bx=rect.left+(b.x+1)*rect.width/2,by=rect.top+(1-b.y)*rect.height/2;
+        const dx=bx-ax,dy=by-ay;
+        const t=Math.max(0,Math.min(1,((event.clientX-ax)*dx+(event.clientY-ay)*dy)/(dx*dx+dy*dy||1)));
+        const distance=Math.hypot(event.clientX-ax-t*dx,event.clientY-ay-t*dy);
+        if(distance<=8)hits.push({index:i,distance});
+    }
+    hits.sort((a,b)=>a.distance-b.distance||a.index-b.index);
+    if(!hits.length)return -1;
+    const tied=hits.filter(h=>h.distance<=hits[0].distance+.5).map(h=>h.index).sort((a,b)=>a-b);
+    return tied[(tied.indexOf(editablePathIndex)+1)%tied.length];
+}
 let drawPathDraft = null, drawPathDragIndex = -1, drawPathRepeat = 'Closed';
 let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
@@ -997,6 +1037,7 @@ function renderDrawPathVisual() {
             new THREE.BufferGeometry().setFromPoints(route),
             new THREE.LineBasicMaterial({ color: drawPathDraft?.plan.curved ? 0x22d3ee : 0xfb7185 }));
         drawPathLine.name = 'drawPathPreview';
+        drawPathLine.visible = editablePathPoints.length < 2;
         waypointsGroup.add(drawPathLine);
     }
 }
@@ -1179,7 +1220,23 @@ window.init3DViewer = function (containerId, dotNetRef) {
         }
     });
     const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
+    let pendingPathPick = null;
+    renderer.domElement.addEventListener('pointerup', event => {
+        const pending=pendingPathPick;pendingPathPick=null;
+        if(!pending || Math.hypot(event.clientX-pending.x,event.clientY-pending.y)>5 || transformControls.dragging)return;
+        selectGizmo(null);
+        window.setEditablePathSegments(editablePathPoints,pending.index,editablePathFull);
+        dotNetHelper?.invokeMethodAsync('OnPathSegmentSelected',pending.index).then(()=>{
+            const editor=document.querySelector('[data-testid="path-segment-editor"]');
+            if(editor) {
+                editor.open=true;
+                editor.querySelector('[aria-label="Path segment"]')?.scrollIntoView({block:'nearest'});
+            }
+        });
+    });
+    renderer.domElement.addEventListener('pointercancel',()=>pendingPathPick=null);
     renderer.domElement.addEventListener('pointerdown', event => {
+        pendingPathPick=null;
         if (event.button !== 0) return;
         renderer.domElement.focus({ preventScroll: true });
         if (transformControls.dragging) return;
@@ -1202,6 +1259,8 @@ window.init3DViewer = function (containerId, dotNetRef) {
             }
             return;
         }
+        const pathIndex=pickEditablePathSegment(event);
+        if(pathIndex>=0) { pendingPathPick={index:pathIndex,x:event.clientX,y:event.clientY};return; }
         const groups = [pivotsGroup, lightsGroup, waypointsGroup, flagAnchorGroup].filter(g => g && g.visible);
         const hits = raycaster.intersectObjects(groups.flatMap(g => g.children), true).filter(hit => isVisibleInScene(hit.object));
         if (hits.length) {
@@ -1346,6 +1405,8 @@ function disposeObjectResources(root) {
 }
 window.dispose3DViewer = function () {
     window.stopDrawPathPreview();
+    window.setEditablePathSegments(null,0,true);
+    editablePathGroup?.parent?.remove(editablePathGroup);editablePathGroup=null;
     drawPathEnabled = false;
     drawPathPoints = [];
     drawPathDragIndex = -1;
@@ -2142,6 +2203,7 @@ function applyLayerVisibility() {
     staticGroup.visible = movingGroup.visible = showMeshes; collisionGroup.visible = showCollision;
     pivotsGroup.visible = showPivots; lightsGroup.visible = showLights;
     if (waypointsGroup) waypointsGroup.visible = showWaypoints;
+    if (editablePathGroup) editablePathGroup.visible = showWaypoints;
     for (const helper of [...compositeSelectionHelpers, ...compositeGroupHelpers]) helper.visible = showMeshes;
 }
 window.toggleLayer = function (name) {
