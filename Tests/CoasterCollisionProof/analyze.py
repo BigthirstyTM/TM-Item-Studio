@@ -7,7 +7,8 @@ from pathlib import Path
 
 def centre_at(schedule, seconds):
     ms = seconds*1000 % schedule['cycleMs']
-    p = [400.,19.,400.]  # cube top centre, not coaster rail height
+    p = list(schedule.get('placement', [400.,15.,400.]))
+    p[1] += 4  # cube top centre, not coaster rail height
     for leg in schedule['legs']:
         fraction = min(1.,max(0.,(ms-leg['startMs'])/leg['moveMs']))
         for i in range(3):

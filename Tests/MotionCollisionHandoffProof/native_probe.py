@@ -16,6 +16,8 @@ p.add_argument('item', help='Registered inventory model, e.g. TMIS_CH_CornerOver
 p.add_argument('label', help='Unique run/map basename; use a new label for repeats')
 p.add_argument('--output', type=Path, required=True)
 p.add_argument('--seconds', type=int, default=32)
+p.add_argument('--item-offset', type=float, nargs=2, default=[0.,0.], metavar=('X','Z'), help='Shift the fixture relative to the fixed spawn for off-centre passenger tests (metres)')
+p.add_argument('--cube-spawn', action='store_true', help='Spawn above an 8 m cube without requiring the complete coaster context')
 p.add_argument('--wide-camera', action='store_true', help='Frame the larger two-line/two-arc fixture')
 p.add_argument('--coaster-context', action='store_true', help='Place the known NewCoaster beside the normalized 128-point fixture')
 p.add_argument('--follow-car-camera', action='store_true', help='Move only the observation camera to follow the passive test car')
@@ -23,6 +25,8 @@ p.add_argument('--helper', type=Path, default=Path('C:/Users/PC/OpenplanetPlugin
 a = p.parse_args()
 if not 20 <= a.seconds <= 300 or not a.label.replace('_', '').isalnum():
     p.error('Use 20-300 seconds and an alphanumeric/underscore label')
+if any(not -3 <= v <= 3 for v in a.item_offset):
+    p.error('Item offsets must be finite and within three metres')
 a.output.mkdir(parents=True, exist_ok=True)
 video_path = a.output / (a.label + '.mp4')
 if video_path.exists():
@@ -74,12 +78,12 @@ for _ in range(20):
 else:
     raise RuntimeError('Requested fixture is not registered in the native inventory')
 call('tm-mcp-pack-epp.SetAgentTag', dict(tag='tmis:handoff'))
-call('tm-mcp-pack-epp.PlaceItem', dict(itemPath=a.item,x=400,y=15,z=400,tag='tmis:handoff'))
+call('tm-mcp-pack-epp.PlaceItem', dict(itemPath=a.item,x=400+a.item_offset[0],y=15,z=400+a.item_offset[1],tag='tmis:handoff'))
 items = call('GetItems')
 if items['total'] != 1 or items['items'][0]['idName'] != a.item:
     raise RuntimeError('Fixture must contain exactly the requested item')
 if a.coaster_context:
-    call('tm-mcp-pack-epp.PlaceItem',dict(itemPath='NewCoaster.Item.Gbx',x=534.4675,y=10.782,z=400,tag='tmis:handoff'))
+    call('tm-mcp-pack-epp.PlaceItem',dict(itemPath='NewCoaster.Item.Gbx',x=534.4675+a.item_offset[0],y=10.782,z=400+a.item_offset[1],tag='tmis:handoff'))
     items = call('GetItems')
     if items['total'] != 2 or sorted(i['idName'] for i in items['items']) != sorted([a.item,'NewCoaster.Item.Gbx']):
         raise RuntimeError('Coaster fixture must contain exactly the requested moving item and coaster')
@@ -96,7 +100,7 @@ with (a.output / (a.label + '-record.log')).open('w') as log:
     try:
         # The coaster cube is 8 m tall (top Y=19), unlike the thin deck (Y=16).
         # Spawn above it, not inside its collision volume.
-        call('ControlValidation',dict(action='testFromCoord',x=12,y=11 if a.coaster_context else 10,z=12,dir='North'))
+        call('ControlValidation',dict(action='testFromCoord',x=12,y=11 if a.coaster_context or a.cube_spawn else 10,z=12,dir='North'))
         time.sleep(2)
         camera = (dict(x=416,y=70,z=420,target=dict(x=416,y=14,z=388),fov=50)
                   if a.wide_camera else dict(x=432,y=48,z=446,target=dict(x=393,y=14,z=400),fov=55))
