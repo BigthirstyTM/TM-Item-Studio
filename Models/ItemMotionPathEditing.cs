@@ -14,7 +14,7 @@ public static class ItemMotionPathEditing
         // The native straight obstacle uses the same channel in reverse.
         if (plan.Use == MotionPathUse.Obstacle && legs.Length == 2)
             legs[1-index] = legs[1-index] with { MoveMs = milliseconds };
-        long elapsed = plan.PauseMs;
+        long elapsed = plan.PauseMs + plan.StartDelayMs;
         for (var i = 0; i < legs.Length; i++)
         {
             if (elapsed + legs[i].MoveMs + plan.PauseMs > int.MaxValue)
@@ -24,6 +24,17 @@ public static class ItemMotionPathEditing
         }
         if (plan.Repeat != MotionPathRepeat.Reset) elapsed -= plan.PauseMs;
         return ItemMotionResult<MotionPathPlan>.Ok(plan with { Legs = legs, DurationMs = (int)elapsed });
+    }
+
+    public static ItemMotionResult<MotionPathPlan> ChangeRelaySettings(MotionPathPlan plan, int delayMs, float parking)
+    {
+        var delta = (long)delayMs - plan.StartDelayMs;
+        if (plan.Use != MotionPathUse.CollisionRelay || delayMs is < 0 or > 60000 || plan.DurationMs + delta > int.MaxValue)
+            return ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, "Choose a collision start delay between 0 and 60 seconds.");
+        var changed = plan with { StartDelayMs = delayMs, ParkingDistance = parking,
+            DurationMs = (int)(plan.DurationMs + delta),
+            Legs = plan.Legs.Select(l => l with { StartMs = (int)(l.StartMs + delta) }).ToArray() };
+        return ItemMotionPath.Validate(changed);
     }
 
     public static Vector3[] Points(MotionPathPlan plan)

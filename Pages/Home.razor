@@ -701,6 +701,7 @@
                                 <div class="col-12"><label class="form-label" for="pathUse">Use</label>
                                     <select id="pathUse" aria-label="Path use" title="Choose a straight obstacle with driven collision or a scenery polyline." class="form-select form-select-sm" @bind="drawPathUse" @bind:after="RefreshDrawPathPreview">
                                         <option value="@MotionPathUse.Obstacle">Obstacle / platform — straight line</option>
+                                        <option value="@MotionPathUse.CollisionRelay">Experimental - polyline with collision</option>
                                         <option value="@MotionPathUse.Scenery">Scenery — polyline, no usable collision</option>
                                     </select>
                                 </div>
@@ -728,8 +729,19 @@
                                 </div>
                                 <div class="col-6"><label class="form-label" for="pathPlaneOffset">Plane offset (m)</label><input id="pathPlaneOffset" aria-label="Drawing plane offset" title="Offset the drawing plane along its perpendicular axis, in metres." type="number" step="0.5" class="form-control form-control-sm" @bind="drawPathPlaneOffset" @bind:after="UpdateDrawPlane" /></div>
                             </div>
+                            @if (drawPathUse == MotionPathUse.CollisionRelay)
+                            {
+                                <div class="alert alert-warning small" data-testid="collision-relay-warning">Experimental: segment handoffs can launch the car, especially off-centre or on repeated laps. Test every export in Trackmania. Inactive copies still have collision below the route: keep that space inaccessible and place them under terrain. Preview shows the route, not passenger physics.</div>
+                                <label class="small">Parking distance (m)
+                                    <select class="form-select form-select-sm" aria-label="Collision parking distance" @bind="drawRelayParking" @bind:after="RefreshDrawPathPreview">
+                                        @foreach(var distance in new[]{16,32,48,64,96,128,256}) { <option value="@distance">@distance</option> }
+                                    </select>
+                                </label>
+                                <label class="small">Start delay (ms)<input class="form-control form-control-sm" type="number" min="0" max="60000" step="100" aria-label="Collision start delay" @bind="drawRelayDelay" @bind:after="RefreshDrawPathPreview" /></label>
+                            }
                             <p class="small text-warning mt-2 mb-2">@(drawPathUse == MotionPathUse.Obstacle
                                 ? "Exactly two points. Aligns the model's local X axis with the line; this can rotate the model. Collision stays directly driven. Test your exported geometry in Trackmania."
+                                : drawPathUse == MotionPathUse.CollisionRelay ? "Experimental collision relay: decoded static triangle meshes only, up to 128 segments. Keeps orientation. Parking distance is not a stability guarantee."
                                 : $"Keeps the model orientation. Up to {ItemMotionPath.MaxLegs} legs including the return. Removes the moving body's full-size collider; static parts remain: parent-driven collision does not follow this path in Trackmania.")</p>
                             <div class="d-flex flex-wrap gap-1 mb-2">
                                 <button class="btn btn-sm btn-outline-primary" @onclick="ToggleDrawPathCapture" aria-label="@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")" title="Place points by clicking the selected plane. Right-drag orbits the camera.">@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")</button>
@@ -2177,6 +2189,8 @@ else if (itemModel is null)
     private MotionPathRepeat drawPathRepeat = MotionPathRepeat.Closed;
     private KC.AnimEase drawPathEase = KC.AnimEase.Linear;
     private int drawPathPauseMs;
+    private int drawRelayDelay = 8000;
+    private float drawRelayParking = 64;
     private string drawPathPlane = "XZ";
     private float drawPathPlaneOffset;
     private string drawPathCoordinates = "";
@@ -2707,6 +2721,7 @@ else if (itemModel is null)
 
     private async Task LoadVariant(int index)
     {
+        await JS.InvokeVoidAsync("releasePathSource");
         selectedConstraintIndex = 0;
         drawPathOriginal = drawPathGenerated = null;
         drawPathBefore = null;
@@ -3211,7 +3226,7 @@ else if (itemModel is null)
             ? ItemMotionSmoothPath.Plan(points.Select(p => new Vector3(p.X,p.Y,p.Z)).ToArray(), drawPathRepeat,
                 drawPathMetersPerSecond, smoothPathPercent / 100, smoothPathDetail)
             : ItemMotionPath.Plan(points.Select(p => new Vector3(p.X,p.Y,p.Z)).ToArray(), drawPathUse, drawPathRepeat,
-                drawPathMetersPerSecond, drawPathEase, drawPathPauseMs);
+                drawPathMetersPerSecond, drawPathEase, drawPathPauseMs, drawPathUse == MotionPathUse.CollisionRelay ? drawRelayDelay : 0, drawRelayParking);
     private async Task PreviewPath(bool smooth)
     {
         if (itemModel is null || compositeViewportMode) return;
@@ -3296,6 +3311,7 @@ else if (itemModel is null)
         var anchor = await JS.InvokeAsync<DrawPathPointDto>("getDrawPathAnchor", drawPathAnchorMode == "centre");
         var built = ItemMotionPath.Build(candidate, planned.Value!, new Vector3(anchor.X,anchor.Y,anchor.Z));
         if (!built.Success) { errorMessage = built.Reason; return; }
+        await JS.InvokeVoidAsync("retainPathSource");
         await StopDrawPathPreview();
         if (convertedDocument is not null)
         {
@@ -3311,7 +3327,7 @@ else if (itemModel is null)
         drawPathCaptureEnabled = false;
         await UpdateDrawPlane();
         drawPathStatusMessage = $"Applied {planned.Value!.Legs.Count} leg(s), {planned.Value.DurationMs / 1000d:0.###} s per cycle. "
-            + (planned.Value.Use == MotionPathUse.Scenery ? "Scenery: moving body collision removed; static parts preserved." : "Obstacle: model X axis aligned to path.")
+            + (planned.Value.Use == MotionPathUse.CollisionRelay ? "Experimental collision relay: test passenger physics in Trackmania; launches remain possible." : planned.Value.Use == MotionPathUse.Scenery ? "Scenery: moving body collision removed; static parts preserved." : "Obstacle: model X axis aligned to path.")
             + (planned.Value.Repeat == MotionPathRepeat.Reset ? " Jumps back to the start each cycle." : "");
         await RefreshPathMotion();
         await SyncPathSegments();
@@ -3319,6 +3335,7 @@ else if (itemModel is null)
     private async Task RestoreMotionBeforePath()
     {
         if (itemModel is null || !ReferenceEquals(itemModel.EntityModel, drawPathGenerated) || drawPathOriginal is null) return;
+        await JS.InvokeVoidAsync("releasePathSource");
         itemModel.EntityModel = drawPathBefore ?? drawPathOriginal;
         if (drawPathBeforeDocument is { } originalDocument)
         {

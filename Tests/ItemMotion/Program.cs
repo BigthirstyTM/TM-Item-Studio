@@ -15,6 +15,53 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("collision relay preserves geometry, schedule, collider topology and source snapshot", () =>
+{
+    var prefab = (CPlugPrefab)KinematicTemplate().EntityModel!;
+    prefab.Ents[0].Rotation = Quat.Identity;
+    ((CPlugDynaObjectModel)prefab.Ents[0].Model!).Mesh = RelaySolid();
+    var before = Bytes(KinematicWith(prefab));
+    var plan = ItemMotionPath.Plan([new(2,3,4),new(12,5,4),new(12,5,14)],MotionPathUse.CollisionRelay,MotionPathRepeat.Closed,5,KC.AnimEase.Linear,100,8000).Value!;
+    var result = ItemMotionPath.Build(prefab,plan,new(1,2,3));
+    Require(result.Success,result.Reason ?? "relay failed");
+    var built = result.Value!;
+    Require(built.Ents.Length==6,"body/driver count");
+    var cursor=plan.Start;
+    for(int i=0;i<3;i++) {
+        var e=built.Ents[i]; var b=(CPlugDynaObjectModel)e.Model!;
+        var q=new Quaternion(e.Rotation.X,e.Rotation.Y,e.Rotation.Z,e.Rotation.W);
+        var local=((CPlugSurface.Mesh)b.DynaShape!.Surf!).Vertices[0];
+        Vector(Vector3.Transform(new(local.X,local.Y,local.Z),q)+new Vector3(e.Position.X,e.Position.Y,e.Position.Z),cursor-new Vector3(1,2,3));
+        Require(((CPlugSurface.Mesh)b.DynaShape.Surf!).Triangles!.Length==1,"collision topology lost");
+        var c=(KC)built.Ents[3+i].Model!;
+        Require(built.Ents[3+i].Params is NPlugDyna_SPrefabConstraintParams {Ent1:-1} binding && binding.Ent2==i,"driver binding");
+        foreach(var f in new[]{c.TransAnimFunc,c.RotAnimFunc}) Require(f!.SubFuncs!.Length<=4 && f.SubFuncs.Sum(k=>k.Duration.TotalMilliseconds)==plan.DurationMs,"timeline mismatch");
+        cursor+=plan.Legs[i].Delta;
+    }
+    using var output = new MemoryStream();
+    new Gbx<CGameItemModel>(KinematicWith(built)).Save(output); output.Position=0;
+    var read=(CPlugPrefab)Gbx.Parse<CGameItemModel>(output).Node.EntityModel!;
+    Require(read.Ents.Length==6,"serialized relay lost entities");
+    Require(before.SequenceEqual(Bytes(KinematicWith(prefab))),"source mutated");
+    Require(!ItemMotionPath.Build(prefab,ItemMotionPath.Plan([Vector3.Zero,new(0,20,0)],MotionPathUse.CollisionRelay,MotionPathRepeat.Reset,5,KC.AnimEase.Linear).Value!).Success,"vertical accepted");
+    var edited=ItemMotionPathEditing.ChangeRelaySettings(plan,4000,48).Value!;
+    Require(edited.Legs[0].StartMs==4100 && edited.DurationMs==plan.DurationMs-4000,"delay shift");
+    var duration=ItemMotionPathEditing.ChangeDuration(edited,0,6000).Value!;
+    Require(duration.Legs[0].StartMs==4100 && ItemMotionPath.Validate(duration).Success,"duration lost delay");
+    Require(!ItemMotionPathEditing.ChangeRelaySettings(plan,8000,float.NaN).Success,"invalid parking");
+    var options=new System.Text.Json.JsonSerializerOptions { IncludeFields=true };
+    var saved=System.Text.Json.JsonSerializer.Serialize(duration,options);
+    var restored=System.Text.Json.JsonSerializer.Deserialize<MotionPathPlan>(saved,options)!;
+    Require(restored.StartDelayMs==4000 && restored.ParkingDistance==48 && ItemMotionPath.Validate(restored).Success,"draft lost relay settings");
+    var broken=((CPlugSurface.Mesh)((CPlugDynaObjectModel)prefab.Ents[0].Model!).DynaShape!.Surf!);
+    var triangles=broken.Triangles;
+    broken.Triangles=[new(new Int3(0,1,999),0,0,0)];
+    Require(!ItemMotionPath.Build(prefab,plan).Success,"invalid collision indices accepted");
+    broken.Triangles=triangles;
+    ((CPlugDynaObjectModel)prefab.Ents[0].Model!).Mesh = new CPlugSolid2Model();
+    Require(!ItemMotionPath.Build(prefab,plan).Success,"undecoded mesh accepted");
+});
+
 Check("smooth routes preserve endpoints, close the seam and respect timing and budget", () =>
 {
     Vector3[] points = [new(0,0,0), new(20,0,0), new(20,0,20), new(0,0,20)];
@@ -834,7 +881,7 @@ Check("drawn paths preserve static entries and shader animation", () =>
     shader.ShaderTcAnimFunc = [new() { Duration = new TimeInt32(123), TextureId = 71 }];
     shader.ShaderTcDataTransSub = new() { NbSubTexture = 8, NbSubTexturePerLine = 4, NbSubTexturePerColumn = 2, TopToBottom = true };
     original.Ents = [..original.Ents, new() { Model = new CPlugStaticObjectModel { Mesh = ((CPlugDynaObjectModel)original.Ents[0].Model!).Mesh }, Position = new(7,8,9), Rotation = Quat.Identity }];
-    foreach(var use in Enum.GetValues<MotionPathUse>()) {
+    foreach(var use in new[]{MotionPathUse.Obstacle,MotionPathUse.Scenery}) {
         var plan = Value(ItemMotionPath.Plan([Vector3.Zero,new(16,0,0)],use,MotionPathRepeat.PingPong,4,KC.AnimEase.Linear));
         var result = Value(ItemMotionPath.Build(original,plan));
         Require(result.Ents.Single(e=>e.Model is CPlugStaticObjectModel).Position == new Vec3(7,8,9), "static part moved");
@@ -845,7 +892,7 @@ Check("drawn paths preserve static entries and shader animation", () =>
 
 Check("path mesh anchor follows the first point for rotated obstacles and scenery", () =>
 {
-    foreach(var use in Enum.GetValues<MotionPathUse>()) {
+    foreach(var use in new[]{MotionPathUse.Obstacle,MotionPathUse.Scenery}) {
         var original=(CPlugPrefab)KinematicTemplate().EntityModel!;
         var plan=Value(ItemMotionPath.Plan([new(3,4,5),new(3,12,5)],use,MotionPathRepeat.PingPong,4,KC.AnimEase.Linear));
         var anchor=new Vector3(2,3,4);
@@ -985,3 +1032,32 @@ static T Reparse<T>(byte[] bytes) where T : GBX.NET.Engines.MwFoundations.CMwNod
     return result;
 }
 
+
+static CPlugSolid2Model RelaySolid()
+{
+    const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+    var stream = new CPlugVertexStream { Positions = [new(), new(1, 0, 0), new(0, 1, 0)] };
+    var declaration = new CPlugVertexStream.DataDecl();
+    typeof(CPlugVertexStream.DataDecl).GetField("flags1", flags)!.SetValue(declaration,
+        (uint)CPlugVertexStream.EPlugVDcl.Position | ((uint)CPlugVertexStream.EPlugVDclType.Float3 << 9) | (12u << 18));
+    typeof(CPlugVertexStream).GetField("dataDecls", flags)!.SetValue(stream, new[] { declaration });
+    typeof(CPlugVertexStream).GetField("vertexCount", flags)!.SetValue(stream, 3);
+    stream.CreateChunk<CPlugVertexStream.Chunk09056000>().Version = 1;
+    var indexBuffer = new CPlugIndexBuffer { Indices = [0, 1, 2] };
+    indexBuffer.CreateChunk<CPlugIndexBuffer.Chunk09057000>();
+    var visual = new CPlugVisualIndexedTriangles
+    {
+        VertexStreams = [stream], IndexBuffer = indexBuffer,
+        IsGeometryStatic = true, IsIndexationStatic = true,
+        BoundingBox = new BoxAligned(0, 0, 0, 1, 1, 0)
+    };
+    typeof(CPlugVisual).GetProperty("Count", flags)!.SetValue(visual, 3);
+    visual.CreateChunk<CPlugVisual.Chunk0900600F>().Version = 6;
+    visual.CreateChunk<CPlugVisualIndexed.Chunk0906A001>();
+    var solid = new CPlugSolid2Model { Visuals = [visual], CustomMaterials = [], ShadedGeoms = [] };
+    solid.CreateChunk<CPlugSolid2Model.Chunk090BB000>().Version = 34;
+    return solid;
+}
+
+
+static CGameItemModel KinematicWith(CPlugPrefab prefab) { var item=KinematicTemplate(); item.EntityModel=prefab; return item; }

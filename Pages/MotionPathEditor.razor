@@ -5,6 +5,12 @@
 <details class="border rounded p-2 my-2" open data-testid="path-segment-editor">
     <summary class="fw-bold">Path segments &amp; timing</summary>
     <p class="small text-muted mt-2">@Plan.Legs.Count segments · @(Plan.DurationMs / 1000d) s per cycle. Edits update the draft; choose Apply edited route to change the item. Timing changes shift all following segments together. Generating a new straight or smooth route replaces these segment edits. This route editor retains the current session's draft.</p>
+    @if (Plan.Use == MotionPathUse.CollisionRelay)
+    {
+        <p class="small text-warning">Experimental collision relay: handoffs can launch passengers. Inactive colliders must stay inaccessible below terrain.</p>
+        <label class="small">Start delay (ms)<input aria-label="Edited collision start delay" class="form-control form-control-sm" type="number" min="0" max="60000" value="@Plan.StartDelayMs" @onchange="ChangeDelay" /></label>
+        <label class="small">Parking distance (m)<input aria-label="Edited collision parking distance" class="form-control form-control-sm" type="number" min="16" max="256" value="@F(Plan.ParkingDistance)" @onchange="ChangeParking" /></label>
+    }
     <SearchableSelect Label="Path segment" Options="Labels" Value="@SelectedLabel" ValueChanged="SelectSegment" />
     <label class="small mt-2 d-block">Viewport route
         <select aria-label="Viewport route" title="Show every segment or only the selected segment in the viewport." class="form-select form-select-sm" value="@(FullPath ? "full" : "selected")" @onchange="@(e=>FullPathChanged.InvokeAsync(e.Value?.ToString()=="full"))">
@@ -94,6 +100,8 @@
     private Task ChangeSpeed(ChangeEventArgs e) => ChangeSpeedAt(Index,e);
     private Task ChangeDurationAt(int index,ChangeEventArgs e) => double.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) ? SetSeconds(n,index) : InvalidNumber();
     private Task ChangeSpeedAt(int index,ChangeEventArgs e) => double.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) && double.IsFinite(n) && n > 0 ? SetSeconds(Plan.Legs[index].Delta.Length()/n,index) : InvalidNumber();
+    private Task ChangeDelay(ChangeEventArgs e) => int.TryParse(e.Value?.ToString(), out var n) ? Accept(ItemMotionPathEditing.ChangeRelaySettings(Plan,n,Plan.ParkingDistance)) : InvalidNumber();
+    private Task ChangeParking(ChangeEventArgs e) => float.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) ? Accept(ItemMotionPathEditing.ChangeRelaySettings(Plan,Plan.StartDelayMs,n)) : InvalidNumber();
     private Task InvalidNumber() { error="Enter a finite positive number."; return Task.CompletedTask; }
     private async Task MovePoint(int index,int axis,ChangeEventArgs e)
     {

@@ -1,5 +1,7 @@
 # Collision path: release gate and smooth recording
 
+Historical gate: the user subsequently authorized experimental access despite these failures. See [Studio 0.5.8 experimental release](collision-path-experimental-2026-10-31.md). The stability failures below remain unresolved.
+
 The user authorized integration only if the remaining checks passed. The
 off-centre passenger check fails, so the relay compiler is **not promoted into
 the production Studio UI**. The earlier two centred laps remain valid evidence
