@@ -13,7 +13,7 @@ Each segment has its own world-bound body and native translation/fold driver. In
 ## Verification
 
 - All 14 console suites and tracked tool builds passed locally.
-- ItemMotion: 40 checks pass, including relay topology, world-space geometry with nonzero anchor, independent native bindings, channel key budget, synchronized timelines, source isolation, unsupported-shape refusal, invalid triangle indices, editable delay/parking and route JSON round-trip.
+- ItemMotion: 41 checks pass, including relay topology, world-space geometry with nonzero anchor, independent native bindings, channel key budget, synchronized timelines, source isolation, unsupported-shape refusal, invalid triangle indices, editable delay/parking and route JSON round-trip. A 48-case matrix covers every supported repeat/easing option with and without waypoint pauses and initial delay.
 - Release build succeeds.
 - Browser: unsupported stock obstacle refuses without mutation; supported cube converts, previews, applies, edits delay, reapplies without anchor drift, exports and restores the original static document.
 - Browser export reparses as three collision bodies with three world-bound drivers. Existing eight-point preview, segment-edit and smooth-path browser regressions pass.
@@ -26,7 +26,7 @@ Both off-centre tests use the production compiler, a rail-free map, fixed vehicl
 - Linear: sustained launch at 42.234 s, peak upward velocity 66.763 m/s. The recording continues five seconds after detection.
 - QuadInOut: sustained launch at 42.094 s, peak upward velocity 66.347 m/s. Easing **does not fix the handoff**. It stops/starts at each segment and reaches twice the average speed mid-segment, so it is not a lower-peak-speed experiment.
 - Both failures occur at the same problematic transition. This supports investigating collider activation/folding/contact transfer, rather than assuming easing solves the defect. It does not establish the engine's internal cause.
-- A full centred production-compiler run is recorded separately; results will be appended after completion.
+- CE_ProductionFull: the new production-compiler export completed the entire centred coaster lap (294.969 seconds sampled), returning to approximately (399.597, 19.014, 399.986). Peak upward velocity 4.4530 m/s; no launch above the 15 m/s detection threshold. Native video observation confirms the car rides on the platform. This single successful lap does not invalidate the off-centre or earlier repeat-lap failures.
 
 A transient MCP socket disconnect occurred while opening the first disposable map, before item placement. Trackmania remained running, no new crash log appeared, and the bridge recovered. That attempt provides no item-physics evidence; the test was restarted from a confirmed menu under a new label.
 

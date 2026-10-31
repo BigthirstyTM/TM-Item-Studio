@@ -1,0 +1,32 @@
+{
+  "files": [
+    {
+      "name": "TMIS_CE_Linear.Item.Gbx",
+      "bytes": 70721,
+      "sha256": "c5d61c3b4cb66c54a83f0eecb649f29d441515229e28e22fa9cf411d43586342"
+    },
+    {
+      "name": "TMIS_CE_QuadInOut.Item.Gbx",
+      "bytes": 70661,
+      "sha256": "cd4f2c116b3d20c3d78d55a557606ea096450ebf4e8023520303e39ee195a711"
+    },
+    {
+      "name": "BrowserRelay.Item.Gbx",
+      "bytes": 18979,
+      "sha256": "7c7d5641ecef96f50536162fa27cc4c9d42b68b8330845776ae1af527ec714af"
+    },
+    {
+      "name": "Achtbaan-collision-50sec.mp4",
+      "bytes": 20631424,
+      "sha256": "00d97fdd1620251f6711d9a0267a40f8b785a28dd28439da24a0fe54caa0fc60"
+    }
+  ],
+  "video": {
+    "seconds": 49.166667,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "playbackSpeed": 6,
+    "separateRuns": true
+  }
+}

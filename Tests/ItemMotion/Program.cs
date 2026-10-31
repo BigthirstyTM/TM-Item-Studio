@@ -62,6 +62,24 @@ Check("collision relay preserves geometry, schedule, collider topology and sourc
     Require(!ItemMotionPath.Build(prefab,plan).Success,"undecoded mesh accepted");
 });
 
+Check("collision relay supports each repeat/easing and pause/delay combination within native key limits", () =>
+{
+    var prefab=(CPlugPrefab)KinematicTemplate().EntityModel!;
+    prefab.Ents[0].Rotation=Quat.Identity;
+    ((CPlugDynaObjectModel)prefab.Ents[0].Model!).Mesh=RelaySolid();
+    foreach(var repeat in Enum.GetValues<MotionPathRepeat>())
+    foreach(var ease in new[]{KC.AnimEase.Linear,KC.AnimEase.QuadIn,KC.AnimEase.QuadOut,KC.AnimEase.QuadInOut})
+    foreach(var pause in new[]{0,100})
+    foreach(var delay in new[]{0,8000}) {
+        var plan=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,4,20)],MotionPathUse.CollisionRelay,repeat,5,ease,pause,delay).Value!;
+        var built=ItemMotionPath.Build(prefab,plan);
+        Require(built.Success,built.Reason ?? "relay options failed");
+        foreach(var c in built.Value!.Ents.Select(e=>e.Model).OfType<KC>())
+        foreach(var f in new[]{c.TransAnimFunc,c.RotAnimFunc})
+            Require(f!.SubFuncs is {Length: > 0 and <= 4} keys && keys.All(k=>k.Duration.TotalMilliseconds>0) && keys.Sum(k=>k.Duration.TotalMilliseconds)==plan.DurationMs,"native schedule invalid");
+    }
+});
+
 Check("smooth routes preserve endpoints, close the seam and respect timing and budget", () =>
 {
     Vector3[] points = [new(0,0,0), new(20,0,0), new(20,0,20), new(0,0,20)];
