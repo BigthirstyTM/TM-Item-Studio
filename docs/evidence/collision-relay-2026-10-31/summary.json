@@ -1,0 +1,170 @@
+[
+  {
+    "name": "CompoundElevated",
+    "samples": 100,
+    "sampleDuration": 54.594000000011874,
+    "positionRanges": [
+      [
+        402.211,
+        405.573
+      ],
+      [
+        8.99218,
+        16.006
+      ],
+      [
+        399.065,
+        401.255
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": 1.235000000000582
+  },
+  {
+    "name": "HelixElevated",
+    "samples": 100,
+    "sampleDuration": 54.59399999999732,
+    "positionRanges": [
+      [
+        401.395,
+        403.788
+      ],
+      [
+        8.99217,
+        17.3613
+      ],
+      [
+        398.985,
+        401.688
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": 1.25
+  },
+  {
+    "name": "OrbitElevated",
+    "samples": 100,
+    "sampleDuration": 54.59399999999732,
+    "positionRanges": [
+      [
+        401.387,
+        403.887
+      ],
+      [
+        8.99196,
+        16.0038
+      ],
+      [
+        398.973,
+        401.245
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": 1.2339999999967404
+  },
+  {
+    "name": "OrbitPlatform",
+    "samples": 100,
+    "sampleDuration": 54.61000000000058,
+    "positionRanges": [
+      [
+        399.168,
+        402.012
+      ],
+      [
+        8.014,
+        8.015
+      ],
+      [
+        395.711,
+        399.548
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": null
+  },
+  {
+    "name": "RelaySquare",
+    "samples": 130,
+    "sampleDuration": 71.09399999999732,
+    "positionRanges": [
+      [
+        398.254,
+        415.03
+      ],
+      [
+        8.013,
+        23.234
+      ],
+      [
+        399.491,
+        415.501
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": 38.09399999999732
+  },
+  {
+    "name": "RelaySquareCage",
+    "samples": 130,
+    "sampleDuration": 71.09400000001187,
+    "positionRanges": [
+      [
+        402.461,
+        414.355
+      ],
+      [
+        8.01,
+        67.585
+      ],
+      [
+        395.849,
+        415.528
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": 14.453000000008615
+  },
+  {
+    "name": "RelaySquareLowPivot",
+    "samples": 191,
+    "sampleDuration": 104.64100000000326,
+    "positionRanges": [
+      [
+        402.304,
+        414.271
+      ],
+      [
+        8.98678,
+        67.298
+      ],
+      [
+        395.546,
+        415.434
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": 14.452999999994063
+  },
+  {
+    "name": "RelaySquareRepeat",
+    "samples": 130,
+    "sampleDuration": 71.09300000000803,
+    "positionRanges": [
+      [
+        402.355,
+        414.342
+      ],
+      [
+        8.9843,
+        67.5732
+      ],
+      [
+        395.867,
+        415.546
+      ]
+    ],
+    "noGasOrSteer": true,
+    "firstAllWheelsAir": 14.453000000008615
+  }
+]

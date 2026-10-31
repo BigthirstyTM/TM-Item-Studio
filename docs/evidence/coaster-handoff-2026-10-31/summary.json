@@ -1,0 +1,146 @@
+{
+  "CH_Focus2": {
+    "samples": 142,
+    "durationSeconds": 29.905999999988126,
+    "yRange": [
+      19.013,
+      41.577
+    ],
+    "maxUpwardVelocity": 4.1047,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999953,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.8,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 0.09737368977227844,
+    "clockFitRmsMetres": 0.03079617102592077,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "item": "TMIS_CC_Relay5BoundsFocus",
+    "placement": [
+      400,
+      15,
+      400
+    ],
+    "upwardEventsOver10": []
+  },
+  "CH_Reverse2": {
+    "samples": 139,
+    "durationSeconds": 29.828000000008615,
+    "yRange": [
+      19.014,
+      41.577
+    ],
+    "maxUpwardVelocity": 4.0558,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999952,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.84,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 0.0723498470335257,
+    "clockFitRmsMetres": 0.031057634252079813,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "item": "TMIS_CC_Relay5BoundsReverse",
+    "placement": [
+      400,
+      15,
+      400
+    ],
+    "upwardEventsOver10": []
+  },
+  "CH_Near": {
+    "samples": 142,
+    "durationSeconds": 29.889999999984866,
+    "yRange": [
+      19.014,
+      41.577
+    ],
+    "maxUpwardVelocity": 3.3359,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999975,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.84,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 0.09438373077573031,
+    "clockFitRmsMetres": 0.028861187805355945,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "item": "TMIS_CC_Relay5BoundsNear",
+    "placement": [
+      400,
+      15,
+      400
+    ],
+    "upwardEventsOver10": []
+  },
+  "CH_Offset": {
+    "samples": 141,
+    "durationSeconds": 29.95299999997951,
+    "yRange": [
+      19.0139,
+      41.577
+    ],
+    "maxUpwardVelocity": 3.3379,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999948,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.74,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 0.7874054952571682,
+    "clockFitRmsMetres": 0.7090118187095092,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "item": "TMIS_CC_Relay5BoundsFocus",
+    "placement": [
+      400.55,
+      15,
+      400.49
+    ],
+    "upwardEventsOver10": []
+  },
+  "CH_FullNear": {
+    "samples": 1385,
+    "durationSeconds": 294.64100000000326,
+    "yRange": [
+      19.01,
+      73.957
+    ],
+    "maxUpwardVelocity": 4.2925,
+    "allWheelsAirSamples": 3,
+    "minimumUpY": 0.922843,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.72,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 1.4566097812274734,
+    "clockFitRmsMetres": 0.0211853541444326,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "item": "TMIS_CC_Relay5BoundsFullNear",
+    "placement": [
+      400,
+      15,
+      400
+    ],
+    "upwardEventsOver10": []
+  },
+  "CH_FullNearRepeat": {
+    "samples": 1375,
+    "durationSeconds": 294.9530000000086,
+    "yRange": [
+      19.01,
+      73.957
+    ],
+    "maxUpwardVelocity": 4.2149,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.908207,
+    "zeroInputs": true,
+    "estimatedClockOffsetSeconds": 1.75,
+    "firstDistanceOver8mSeconds": null,
+    "maxDistanceToScheduledCubeTop": 1.4626765684272427,
+    "clockFitRmsMetres": 0.021316689930285914,
+    "note": "Distance is a diagnostic against the scheduled cube top; phase is fitted, not native telemetry. Inspect video. Rails also have collision.",
+    "item": "TMIS_CC_Relay5BoundsFullNear",
+    "placement": [
+      400,
+      15,
+      400
+    ],
+    "upwardEventsOver10": []
+  }
+}

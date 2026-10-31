@@ -1,0 +1,22 @@
+{
+  "TMIS_CC_Relay5BoundsFocus.Item.Gbx": {
+    "sha256": "bcc9b813caceb22aa205bee1af016ccb4d20539d0d59f324800404546f9a6341",
+    "size": 20257
+  },
+  "TMIS_CC_Relay5BoundsFullNear.Item.Gbx": {
+    "sha256": "d118010ed321d29e0d89415c83f4cd24837604ccf17a18814d4af48bb8a8123b",
+    "size": 63116
+  },
+  "TMIS_CC_Relay5BoundsFullReverse.Item.Gbx": {
+    "sha256": "65fddef03c59bd89d9d04a44e309eae07a8c0039a237f9ae4be643cd674d0a5f",
+    "size": 63420
+  },
+  "TMIS_CC_Relay5BoundsNear.Item.Gbx": {
+    "sha256": "0585f5b63265822baaaaaee9e8bf674184b79b7cf37957cb60ed5c5d0e9fbbef",
+    "size": 20200
+  },
+  "TMIS_CC_Relay5BoundsReverse.Item.Gbx": {
+    "sha256": "4dbe6e64de2b6e26ae14d104efc6859bc91d2767357abef8ff1ef9adcad0ae1b",
+    "size": 20265
+  }
+}

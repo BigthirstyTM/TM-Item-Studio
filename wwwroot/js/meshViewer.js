@@ -2110,7 +2110,29 @@ window.setDrawnPathPoints = function (points) {
     drawPathPoints = points.map(p => new THREE.Vector3(p.x,p.y,p.z));
     renderDrawPathVisual();
 };
+let retainedPathSource = null;
+window.releasePathSource = function () {
+    window.stopDrawPathPreview();
+    retainedPathSource?.group.traverse(mesh => {
+        if (!mesh.isMesh) return;
+        mesh.geometry?.dispose();
+        for (const material of [mesh.material].flat()) material?.dispose();
+    });
+    retainedPathSource = null;
+};
+window.retainPathSource = function () {
+    if (retainedPathSource) return;
+    const source = drawPathSource();
+    const group = source.group.clone(true);
+    group.traverse(mesh => {
+        if (!mesh.isMesh) return;
+        mesh.geometry = mesh.geometry.clone();
+        mesh.material = Array.isArray(mesh.material) ? mesh.material.map(m => m.clone()) : mesh.material.clone();
+    });
+    retainedPathSource = { group, box: source.box.clone(), rest: source.rest.clone() };
+};
 function drawPathSource() {
+    if (retainedPathSource) return retainedPathSource;
     if (drawPathDraft) return drawPathDraft.source;
     let best = null, size = 0;
     for (const motion of typedMotions) {
@@ -2137,6 +2159,7 @@ window.getDrawPathAnchor = function (center) {
 };
 window.stopDrawPathPreview = function () {
     if (!drawPathDraft) return;
+    for (const [group, visible] of drawPathDraft.hiddenGroups ?? []) group.visible = visible;
     drawPathDraft.source.group.visible = drawPathDraft.wasVisible;
     scene?.remove(drawPathDraft.ghost);
     // Clones share source geometry/materials: never dispose those resources here.
@@ -2158,7 +2181,9 @@ window.previewDrawPath = function (plan, center) {
     const wasVisible = source.group.visible;
     source.group.visible = false;
     scene.add(ghost);
-    drawPathDraft = { source, ghost, wasVisible, plan, rotation, anchor, started: performance.now() };
+    const hiddenGroups = retainedPathSource ? [...new Set(typedMotions.flatMap(m => motionGroups.get(m.childPath) ?? []))].map(group => [group, group.visible]) : [];
+    for (const [group] of hiddenGroups) group.visible = false;
+    drawPathDraft = { source, ghost, wasVisible, hiddenGroups, plan, rotation, anchor, started: performance.now() };
     renderDrawPathVisual();
     applyDrawPathPreview(drawPathDraft.started);
     if (firstPreview) window.fitDrawPath();

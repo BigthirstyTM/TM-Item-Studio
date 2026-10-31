@@ -1,0 +1,191 @@
+[
+  {
+    "name": "CH_OverlapRepeat",
+    "samples": 108,
+    "sampleDuration": 26.905999999988126,
+    "positionRanges": [
+      [
+        400.268,
+        408.881
+      ],
+      [
+        16.014,
+        16.016
+      ],
+      [
+        399.997,
+        416.006
+      ]
+    ],
+    "lastPosition": [
+      408.881,
+      16.014,
+      416.005
+    ],
+    "allWheelsAirSamples": 0,
+    "maxAbsYVelocity": 0.0045,
+    "noGasOrSteer": true
+  },
+  {
+    "name": "CornerClearance",
+    "samples": 108,
+    "sampleDuration": 26.90700000000652,
+    "positionRanges": [
+      [
+        400.172,
+        408.882
+      ],
+      [
+        16.014,
+        16.016
+      ],
+      [
+        399.997,
+        416.006
+      ]
+    ],
+    "lastPosition": [
+      408.881,
+      16.014,
+      416.006
+    ],
+    "allWheelsAirSamples": 0,
+    "maxAbsYVelocity": 0.0062,
+    "noGasOrSteer": true
+  },
+  {
+    "name": "CornerHard",
+    "samples": 108,
+    "sampleDuration": 26.889999999999418,
+    "positionRanges": [
+      [
+        400.265,
+        417.571
+      ],
+      [
+        16.0057,
+        27.6777
+      ],
+      [
+        399.949,
+        412.445
+      ]
+    ],
+    "lastPosition": [
+      417.168,
+      16.014,
+      412.444
+    ],
+    "allWheelsAirSamples": 7,
+    "maxAbsYVelocity": 21.9241,
+    "noGasOrSteer": true
+  },
+  {
+    "name": "CornerNoFold",
+    "samples": 108,
+    "sampleDuration": 27.0,
+    "positionRanges": [
+      [
+        400.26,
+        408.882
+      ],
+      [
+        16.014,
+        16.016
+      ],
+      [
+        399.997,
+        416.006
+      ]
+    ],
+    "lastPosition": [
+      408.881,
+      16.014,
+      416.005
+    ],
+    "allWheelsAirSamples": 0,
+    "maxAbsYVelocity": 0.008,
+    "noGasOrSteer": true
+  },
+  {
+    "name": "CornerOverlap",
+    "samples": 108,
+    "sampleDuration": 26.89100000000326,
+    "positionRanges": [
+      [
+        400.276,
+        408.882
+      ],
+      [
+        16.014,
+        16.016
+      ],
+      [
+        399.997,
+        416.006
+      ]
+    ],
+    "lastPosition": [
+      408.881,
+      16.014,
+      416.006
+    ],
+    "allWheelsAirSamples": 0,
+    "maxAbsYVelocity": 0.0023,
+    "noGasOrSteer": true
+  },
+  {
+    "name": "SquareOverlap",
+    "samples": 500,
+    "sampleDuration": 124.95300000000861,
+    "positionRanges": [
+      [
+        400.281,
+        409.186
+      ],
+      [
+        8.98801,
+        16.016
+      ],
+      [
+        393.206,
+        409.217
+      ]
+    ],
+    "lastPosition": [
+      409.177,
+      8.99183,
+      393.877
+    ],
+    "allWheelsAirSamples": 298,
+    "maxAbsYVelocity": 15.351,
+    "noGasOrSteer": true
+  },
+  {
+    "name": "StraightHard",
+    "samples": 108,
+    "sampleDuration": 26.89100000000326,
+    "positionRanges": [
+      [
+        400.16,
+        418.335
+      ],
+      [
+        8.009,
+        16.406
+      ],
+      [
+        399.997,
+        436.071
+      ]
+    ],
+    "lastPosition": [
+      418.335,
+      8.014,
+      436.071
+    ],
+    "allWheelsAirSamples": 4,
+    "maxAbsYVelocity": 16.0218,
+    "noGasOrSteer": true
+  }
+]

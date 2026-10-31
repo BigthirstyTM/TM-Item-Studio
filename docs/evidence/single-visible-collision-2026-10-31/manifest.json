@@ -1,0 +1,293 @@
+{
+  "researchOnly": true,
+  "engine": "17.1-TM20201212-E02021751",
+  "crashFixtureExcluded": true,
+  "files": [
+    {
+      "path": "Items/TMIS_SV_ChainBaseline.Item.Gbx",
+      "bytes": 18687,
+      "sha256": "39bf1fcabd2ff59f419cf5c14d53d800c587cc45daa3cd4abdcfed6e2c900b6c"
+    },
+    {
+      "path": "Items/TMIS_SV_ChainPhysicalFlag.Item.Gbx",
+      "bytes": 18721,
+      "sha256": "ec136ad2938f5a460e0114893efa7d8256ed30654f5f2772ec12df3c260aa3a3"
+    },
+    {
+      "path": "Items/TMIS_SV_ChainPhysicalZeroAnim.Item.Gbx",
+      "bytes": 18781,
+      "sha256": "e439aceac9e034a4fdacc23da3fad8bb34b1fc059f2b92a2f4f3624326bf613f"
+    },
+    {
+      "path": "Items/TMIS_SV_CurvedLoopCage.Item.Gbx",
+      "bytes": 19127,
+      "sha256": "79e169f3811dae3d73dc5fcb456a801fef9a34ae20f2fc78bec0d27dc0a80133"
+    },
+    {
+      "path": "Items/TMIS_SV_OrbitCage.Item.Gbx",
+      "bytes": 19149,
+      "sha256": "19602e3f3cfe30e36af72060a779fc9fb0462900fb6af5b149f05930cd9eb7ba"
+    },
+    {
+      "path": "Items/TMIS_SV_OrbitCompoundCage.Item.Gbx",
+      "bytes": 19180,
+      "sha256": "e543360cb11c04ae99a03ed72f9b2d3b2b769b4a123a69b459e017a014e54535"
+    },
+    {
+      "path": "Items/TMIS_SV_OverlayHard.Item.Gbx",
+      "bytes": 19003,
+      "sha256": "e81b4da57d6537c48bc939f9b1cf1c633cdf43caa1326b2a6e7e8d745d14ef15"
+    },
+    {
+      "path": "Items/TMIS_SV_OverlayOverlap.Item.Gbx",
+      "bytes": 19054,
+      "sha256": "a9a043efb21391ea8ac6579a7e364d0ed0c5829e97cafa483d2149c797e3cd51"
+    },
+    {
+      "path": "Items/TMIS_SV_OverlaySoft1.Item.Gbx",
+      "bytes": 18975,
+      "sha256": "0211595491a8ac5de94657b38b02826a8f0af76455c9de19bc9da4549e091db6"
+    },
+    {
+      "path": "Items/TMIS_SV_OverlaySoft2.Item.Gbx",
+      "bytes": 18974,
+      "sha256": "7fcead542a337782c2109b1e18fb614c4b54f497d9682ae75a521cbbf4e67906"
+    },
+    {
+      "path": "Items/TMIS_SV_OverlaySoftOut.Item.Gbx",
+      "bytes": 19057,
+      "sha256": "be42dd8dd31037282682cdb1fbfbc8b40d27e3e0acbfad8608a8d70aa3cd898e"
+    },
+    {
+      "path": "Telemetry/SV_ChainBaseline-samples.json",
+      "bytes": 82447,
+      "sha256": "88403361a04886ffae3e42b0f71a47d73157e091d775cdeff18495e3f2c06d8c"
+    },
+    {
+      "path": "Videos/SV_ChainBaseline.mp4",
+      "bytes": 2219972,
+      "sha256": "f33ec2cf0c5c041181608830d0ccae7e49d697eddf16bf196b63fd6de14b1530"
+    },
+    {
+      "path": "Maps/SV_ChainBaseline.Map.Gbx",
+      "bytes": 96326,
+      "sha256": "4439c9e664340ce07649dae037a718a84ee65c310956621dccf8d9b54b91cf32"
+    },
+    {
+      "path": "Telemetry/SV_ChainPhysicalFlag-samples.json",
+      "bytes": 82444,
+      "sha256": "f70c269c81b1a6c6cef9163a3d28503d1d01be98f583c6299c5306a0b3c853a5"
+    },
+    {
+      "path": "Videos/SV_ChainPhysicalFlag.mp4",
+      "bytes": 2215984,
+      "sha256": "6c7400ef4b85b5ad9be6abd24f25912970ff5faa82649f613fd0168bdf9bde30"
+    },
+    {
+      "path": "Maps/SV_ChainPhysicalFlag.Map.Gbx",
+      "bytes": 96305,
+      "sha256": "e5b22fb4b1390274c782dd98efad250aa5ea45259f2a08cd6d0ab5f9468fb60e"
+    },
+    {
+      "path": "Telemetry/SV_ChainPhysicalZeroAnim-samples.json",
+      "bytes": 82394,
+      "sha256": "65bde1ff190e0f54250557b2ff62034e362bcf6e32cb4396f9cd6d8fdb0bf6a6"
+    },
+    {
+      "path": "Videos/SV_ChainPhysicalZeroAnim.mp4",
+      "bytes": 2222863,
+      "sha256": "46e61c96f1dac5ad363164ff49f38c0a56e4f38f5fb63d814600aba9a0eb8c2b"
+    },
+    {
+      "path": "Maps/SV_ChainPhysicalZeroAnim.Map.Gbx",
+      "bytes": 96447,
+      "sha256": "edf431bf7aad384cc30832422c1e5437210c937ed9d055a4c3e807e463f0bdc1"
+    },
+    {
+      "path": "Telemetry/SV_CurvedLoopCage-samples.json",
+      "bytes": 421390,
+      "sha256": "c9675deec3452b609213a3c25b2f9b911dbc19e1784d4f57899da8e2fb5b8715"
+    },
+    {
+      "path": "Videos/SV_CurvedLoopCage.mp4",
+      "bytes": 7761261,
+      "sha256": "3063aaf1c9db7058339de7d97e249fa7916409b9ee7c24ae1414bcb6375f4207"
+    },
+    {
+      "path": "Maps/SV_CurvedLoopCage.Map.Gbx",
+      "bytes": 97154,
+      "sha256": "44e55ef8cc874c4e8841c621bbf693b93282754c17de545de4d743c0cc59ace9"
+    },
+    {
+      "path": "Telemetry/SV_CurvedLoopRepeat-samples.json",
+      "bytes": 421436,
+      "sha256": "2ce920601c92f89d3bffa53d962287b167d56c65a8f06bc0079a273d07232dec"
+    },
+    {
+      "path": "Videos/SV_CurvedLoopRepeat.mp4",
+      "bytes": 9788862,
+      "sha256": "154ea44463826c9eff6fa5a400f9b708313ca5a092eb8530565bb2682b3422dc"
+    },
+    {
+      "path": "Maps/SV_CurvedLoopRepeat.Map.Gbx",
+      "bytes": 96745,
+      "sha256": "c914aaed3be9bf08d2468e74132aa9c0b0168fc20899a7db54fcde013518706b"
+    },
+    {
+      "path": "Telemetry/SV_OrbitCage-samples.json",
+      "bytes": 190580,
+      "sha256": "30320e33431a1c0673748036cbaeff217b8924694cb4c396c708ce3fdb0d39ff"
+    },
+    {
+      "path": "Videos/SV_OrbitCage.mp4",
+      "bytes": 5280217,
+      "sha256": "522dcd1b85f700dfc0a346d502a23c5e3fb2f84256161d4c8e65e5111258ad34"
+    },
+    {
+      "path": "Maps/SV_OrbitCage.Map.Gbx",
+      "bytes": 96442,
+      "sha256": "579055bf6476d5f4e02f906c830305888efae87835c06e4b593bade71ef127b3"
+    },
+    {
+      "path": "Telemetry/SV_OrbitCageRepeat-samples.json",
+      "bytes": 472388,
+      "sha256": "4bca3f48b8e6c6daf10bf9ad6bca3c8fefc5b436fbfd54c9df67b0a5fa00bfee"
+    },
+    {
+      "path": "Videos/SV_OrbitCageRepeat.mp4",
+      "bytes": 9509572,
+      "sha256": "95c26adc32aa777a972df37ce9d864c02395d0e8f7aaa35caf85077a82992bd3"
+    },
+    {
+      "path": "Maps/SV_OrbitCageRepeat.Map.Gbx",
+      "bytes": 96397,
+      "sha256": "12ce56142b4d0e9abdb5686359ca51cecb5b416d75e0cd0df29ac9a3873272a2"
+    },
+    {
+      "path": "Telemetry/SV_OrbitCompoundCage-samples.json",
+      "bytes": 244223,
+      "sha256": "ea25053aaa76588d434c6b5e272408b347aa745c67237febba0bff204b4c9b40"
+    },
+    {
+      "path": "Videos/SV_OrbitCompoundCage.mp4",
+      "bytes": 5308297,
+      "sha256": "6bd87f880ff7bba4a5937d09faedcf3f5c7e8ada44e1e5a91bf7cdeaa075353d"
+    },
+    {
+      "path": "Maps/SV_OrbitCompoundCage.Map.Gbx",
+      "bytes": 96550,
+      "sha256": "c756eb155c55ca3a1e7daaccd23c0bb8d9ec9df1e88412184c79de54577f614a"
+    },
+    {
+      "path": "Telemetry/SV_OverlayHard-samples.json",
+      "bytes": 175593,
+      "sha256": "abe3d86f4eac62d5fa5df5b724302d8dacb79b6cbf9b58f1f9e80c0685c890fc"
+    },
+    {
+      "path": "Videos/SV_OverlayHard.mp4",
+      "bytes": 4501610,
+      "sha256": "5d7cbdcd98593442e927138268f4d97f9b6bc5f43e19edbb9018796e61e6da9c"
+    },
+    {
+      "path": "Maps/SV_OverlayHard.Map.Gbx",
+      "bytes": 94637,
+      "sha256": "740b420a66611f1ffc2e80bf995c194ee4be71fdcb539693b1f534eb027cd637"
+    },
+    {
+      "path": "Telemetry/SV_OverlayOverlap-samples.json",
+      "bytes": 209025,
+      "sha256": "530c900ce039e9eea47f72514cbb6573c76bbdcacea111187f9d92ba82e190f3"
+    },
+    {
+      "path": "Videos/SV_OverlayOverlap.mp4",
+      "bytes": 4900231,
+      "sha256": "c1ec84a8496e130f2d537ce00f8c9ebbf6152df0aadeb3c84ac70a59327c53c1"
+    },
+    {
+      "path": "Maps/SV_OverlayOverlap.Map.Gbx",
+      "bytes": 94006,
+      "sha256": "436a5c990300dfb0e2bee2d0471207f0270421b52a9d3bfb33b2104b0d0ef0cd"
+    },
+    {
+      "path": "Telemetry/SV_OverlaySoft1-samples.json",
+      "bytes": 222889,
+      "sha256": "76d69ee74c3ea9a496eb38e703a05b8c34bd5c99f4dc1c1b8d0c365a759b2225"
+    },
+    {
+      "path": "Videos/SV_OverlaySoft1.mp4",
+      "bytes": 4404357,
+      "sha256": "14ae80f852c65982929d6dba643541cbcb3c7e6b2a88f4a3bf92badb7138b75c"
+    },
+    {
+      "path": "Maps/SV_OverlaySoft1.Map.Gbx",
+      "bytes": 94327,
+      "sha256": "8462018692a8fd972903b6594314a5b7ff80c79c237195fa2915a5ea290b37e9"
+    },
+    {
+      "path": "Telemetry/SV_OverlaySoft2-samples.json",
+      "bytes": 223843,
+      "sha256": "9c433563579462cb99f307ea2b1a9c7872629cc0e6d0cce96748925ca124e8eb"
+    },
+    {
+      "path": "Videos/SV_OverlaySoft2.mp4",
+      "bytes": 4342019,
+      "sha256": "ab43b807e62679ccc3402fd8f127ae143276163f9e20882c2a1ea7529173c3f1"
+    },
+    {
+      "path": "Maps/SV_OverlaySoft2.Map.Gbx",
+      "bytes": 94043,
+      "sha256": "2bafd2b109e878df3b97e25ba272895753554d847d5647cca78152d824b82e53"
+    },
+    {
+      "path": "Telemetry/SV_OverlaySoftOut-samples.json",
+      "bytes": 355331,
+      "sha256": "335aef1b8d38c227c608e2190be26435c81f97919804ad67e74d902f26df7ef5"
+    },
+    {
+      "path": "Videos/SV_OverlaySoftOut.mp4",
+      "bytes": 6128075,
+      "sha256": "63ee5de78901f50134427c61cee7a608cd348dd1ea5885ffb5f7bd6dff39ada1"
+    },
+    {
+      "path": "Maps/SV_OverlaySoftOut.Map.Gbx",
+      "bytes": 94661,
+      "sha256": "901d6ee1d83e56e2c241691a150c703bfd5cbe8997db904e4eccabc02944f32d"
+    },
+    {
+      "path": "Source/Program.cs",
+      "bytes": 9674,
+      "sha256": "5571035c6f11cbca7ff030ca76894f128e6cbe4dcd9083da5bf0ac7ccc01c907"
+    },
+    {
+      "path": "Source/README.md",
+      "bytes": 2055,
+      "sha256": "dd6e7b4ae07123c39b633717a2fd7efbc8aab198cb001b1a67ad2be94570d9b3"
+    },
+    {
+      "path": "Source/SingleVisibleCollisionProof.csproj",
+      "bytes": 1162,
+      "sha256": "4c5c9e5a1ff54cf1387c04651b11798e8a8df9f7c324c80a535d6e72567fe5a4"
+    },
+    {
+      "path": "Source/summarize.py",
+      "bytes": 1769,
+      "sha256": "ac21aa2a754d1e26fd907fb1c64005c086f6f1dbd1e4b5457ba4e1c6320889b1"
+    },
+    {
+      "path": "Source/native_probe.py",
+      "bytes": 5796,
+      "sha256": "d1c383c9edcd45575feda9958a79cc4d4317455a7dfc0495c8e3464d04107d94"
+    },
+    {
+      "path": "Research.md",
+      "bytes": 8206,
+      "sha256": "a4c4da20aa4126e3d42aaa4ddb3c9bfb3fb712e1538c536892a9102f4d691d32"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 7192,
+      "sha256": "fde20f6f745a215b0dcb3f5d3468ca9e1a69512d031ac6d17c975d200e1b4d8c"
+    }
+  ],
+  "quarantinedCrashFixtureSha256": "de2f81710fe71c6aaaf4f65460d1928bf4508c737507183154917707667770a1"
+}

@@ -1,0 +1,196 @@
+{
+  "researchOnly": true,
+  "notStablePassengerItem": true,
+  "files": [
+    {
+      "path": "Telemetry/CC_Chain-samples.json",
+      "bytes": 370497,
+      "sha256": "68ae6965a1b458dd43dc65f6787acd04b7125d023a13a4bba2f2ea0297a856c8"
+    },
+    {
+      "path": "Videos/CC_Chain.mp4",
+      "bytes": 5194237,
+      "sha256": "3c5a465ee1f86b9ff9561825991395a2e24e869115effe772729dffe403d3d05"
+    },
+    {
+      "path": "Maps/CC_Chain.Map.Gbx",
+      "bytes": 1405927,
+      "sha256": "b4bda9c8596d51cac95c64e8b54dc9922b0784bb23630d07a793fb7b87f22132"
+    },
+    {
+      "path": "Telemetry/CC_ChainAbove-samples.json",
+      "bytes": 125866,
+      "sha256": "28dcbe5490c046b51a077357b93c911af324005c386991d1c8aeb6bdb7eb0a0f"
+    },
+    {
+      "path": "Videos/CC_ChainAbove.mp4",
+      "bytes": 2650068,
+      "sha256": "acb55ac78c97d73c3616d22558e05c1eeb27cae0ed6cb722820c7ffbda358704"
+    },
+    {
+      "path": "Maps/CC_ChainAbove.Map.Gbx",
+      "bytes": 1406188,
+      "sha256": "c8ebebc38db92317b11e713bcf1e3a6b55762434763b4328fe73da4fe59924e5"
+    },
+    {
+      "path": "Telemetry/CC_Relay20-samples.json",
+      "bytes": 381575,
+      "sha256": "c3d4105eede1c9c65f2031652569eb0c3a5426783050ebf648d42f6a8bd999bc"
+    },
+    {
+      "path": "Videos/CC_Relay20.mp4",
+      "bytes": 5072954,
+      "sha256": "18d510b82bc63b74c1cdb05a092ef0be7b25f75630d8cb982478394b462c2b83"
+    },
+    {
+      "path": "Maps/CC_Relay20.Map.Gbx",
+      "bytes": 1422519,
+      "sha256": "c49e3d9b7aa850f8b42479840c86f25a880001a8ad8c567f693e1ee49dee70ed"
+    },
+    {
+      "path": "Telemetry/CC_Relay5-samples.json",
+      "bytes": 387516,
+      "sha256": "1fcddd74774d8e573cc0164497e7ec394715ef64eb0b580c08777c534e0e8727"
+    },
+    {
+      "path": "Videos/CC_Relay5.mp4",
+      "bytes": 5041349,
+      "sha256": "419a31a987a990f9c35ef72b7eda078bc6d9fef608bd3a224690d55ab318e40e"
+    },
+    {
+      "path": "Maps/CC_Relay5.Map.Gbx",
+      "bytes": 1422316,
+      "sha256": "dcc95c6c84b54269f69cb2aa143d51253c452d9018cdea2cac0a06092bed6960"
+    },
+    {
+      "path": "Telemetry/CC_Relay5Full-samples.json",
+      "bytes": 1254764,
+      "sha256": "fc69626c5103e68f5a9eccdad970fd0c11c41de9ba70f57ffc3d461ffaa4f18b"
+    },
+    {
+      "path": "Videos/CC_Relay5Full.mp4",
+      "bytes": 25860552,
+      "sha256": "cd1268edeab5dd7effc2e88d4558c337d58b58129adfefd1b54d62e3f7a4ec59"
+    },
+    {
+      "path": "Maps/CC_Relay5Full.Map.Gbx",
+      "bytes": 1422372,
+      "sha256": "308c4d3ecd7303ca9ad88b428e63d28794e75a6f09a92e5c5c9f9180805bebb2"
+    },
+    {
+      "path": "Telemetry/CC_Bounds-samples.json",
+      "bytes": 465898,
+      "sha256": "ed767496bedc8e39d27fbe5486701c690f2694109d28c7e6a82c6b03b78f39d2"
+    },
+    {
+      "path": "Videos/CC_Bounds.mp4",
+      "bytes": 19484353,
+      "sha256": "5fd78b24d6b3d5c1291a15dbf645a1f95979a3023aea41117bee840a8181b0f6"
+    },
+    {
+      "path": "Maps/CC_Bounds.Map.Gbx",
+      "bytes": 1419579,
+      "sha256": "a9587f4c1781928a569684b8b1661e52bd67ffd5a687a645198cc7b39a098e92"
+    },
+    {
+      "path": "Telemetry/CC_BoundsFull-samples.json",
+      "bytes": 1095064,
+      "sha256": "5fdd273bf3d75f5667ada2b1464068fc50bc81e755d7a488b77699be6ac1b236"
+    },
+    {
+      "path": "Videos/CC_BoundsFull.mp4",
+      "bytes": 32173152,
+      "sha256": "871d269d7f30a2dbd8ad5773f9403756c40389988fa4fd6f5f2b2f2d0a7d456e"
+    },
+    {
+      "path": "Maps/CC_BoundsFull.Map.Gbx",
+      "bytes": 1419628,
+      "sha256": "5b06d3ba6dcb3c730ed9d0f3e106df773c725e7a99f0e6dfaf0bc5e617d219d6"
+    },
+    {
+      "path": "Items/TMIS_CC_ChainCollision.Item.Gbx",
+      "bytes": 30729,
+      "sha256": "fe4e0e0094e195cf0b3a8df27b9e78958bdbc6e7607df5b28b7125680d2cb125"
+    },
+    {
+      "path": "Schedules/TMIS_CC_ChainCollision.json",
+      "bytes": 9041,
+      "sha256": "6cd70ef239f6d852eb5e79a1b69d5161e287cf420cbe27d553041f9a441fba76"
+    },
+    {
+      "path": "Items/TMIS_CC_Relay20.Item.Gbx",
+      "bytes": 61572,
+      "sha256": "579f8996a0e9564c159a1c2c5b145d31e48d7586d33f8e2f30c5f8d5346b74c9"
+    },
+    {
+      "path": "Schedules/TMIS_CC_Relay20.json",
+      "bytes": 9041,
+      "sha256": "6cd70ef239f6d852eb5e79a1b69d5161e287cf420cbe27d553041f9a441fba76"
+    },
+    {
+      "path": "Items/TMIS_CC_Relay5.Item.Gbx",
+      "bytes": 61544,
+      "sha256": "87e83748907824425fa20a0dede4fe4546b942b036d1a9fb5609defe5e764f68"
+    },
+    {
+      "path": "Schedules/TMIS_CC_Relay5.json",
+      "bytes": 9240,
+      "sha256": "54eba162810a7d4451d6d5aa3eecc73d647047759e98d96d604b0d2eb155000f"
+    },
+    {
+      "path": "Items/TMIS_CC_Relay5Bounds.Item.Gbx",
+      "bytes": 63419,
+      "sha256": "3def2ce5f41b01e104f8094046c4e042ac10cb8d3d9284e1d229b6849ac3a141"
+    },
+    {
+      "path": "Schedules/TMIS_CC_Relay5Bounds.json",
+      "bytes": 9240,
+      "sha256": "54eba162810a7d4451d6d5aa3eecc73d647047759e98d96d604b0d2eb155000f"
+    },
+    {
+      "path": "Source/analyze.py",
+      "bytes": 2258,
+      "sha256": "163ef90d4da9a326f03e6ce378e4c912eafbf7e9cea6eb0dc0681a5b0e476934"
+    },
+    {
+      "path": "Source/CoasterCollisionProof.csproj",
+      "bytes": 1162,
+      "sha256": "4c5c9e5a1ff54cf1387c04651b11798e8a8df9f7c324c80a535d6e72567fe5a4"
+    },
+    {
+      "path": "Source/Program.cs",
+      "bytes": 8318,
+      "sha256": "cb6faf54f17ab5b197505d5125ef0a25696437a77cc7c0c6d0a4e13b6dbd5bfc"
+    },
+    {
+      "path": "Source/README.md",
+      "bytes": 2675,
+      "sha256": "3b098ad083238ebd9a38dbe30e3ce183f2a77f2e72155ea036a29f6d6a67741a"
+    },
+    {
+      "path": "Source/native_probe.py",
+      "bytes": 7052,
+      "sha256": "38ced6b24ae572b2baf2130eaa28902c80f4967eacad7ac78bb98bced15d62a5"
+    },
+    {
+      "path": "route128.json",
+      "bytes": 3442,
+      "sha256": "82b46ab3b5248f3dd18afd16c6fb240714e1372fe90ffce2d90f6b1ac64b0dc0"
+    },
+    {
+      "path": "Research.md",
+      "bytes": 8786,
+      "sha256": "0eed19ec2cf158aec910974e9aff887126f21ab8a0f24b2fff3ffc608e5405a1"
+    },
+    {
+      "path": "Excerpts/Achtbaan-collision-gedeeltelijk-werkend.mp4",
+      "bytes": 7509951,
+      "sha256": "157ff776f33edaa4795170df2ab44343211866c9b08e38a79c793584ba7ea0ad"
+    },
+    {
+      "path": "Excerpts/Achtbaan-collision-overdracht-fout.mp4",
+      "bytes": 2970534,
+      "sha256": "e706c60702e360dcd8afe85c66a0021ad14d6ee02c4e7d3dd97a5bd8ddf14068"
+    }
+  ]
+}

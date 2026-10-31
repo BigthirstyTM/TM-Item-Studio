@@ -7,11 +7,11 @@ using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 
 namespace TM_Item_Studio.Models;
 
-public enum MotionPathUse { Obstacle, Scenery }
+public enum MotionPathUse { Obstacle, Scenery, CollisionRelay }
 public enum MotionPathRepeat { PingPong, Closed, Reset }
 public sealed record MotionPathLeg(Vector3 Delta, int StartMs, int MoveMs);
 public sealed record MotionPathPlan(Vector3 Start, MotionPathUse Use, MotionPathRepeat Repeat,
-    KC.AnimEase Ease, IReadOnlyList<MotionPathLeg> Legs, int DurationMs, int PauseMs);
+    KC.AnimEase Ease, IReadOnlyList<MotionPathLeg> Legs, int DurationMs, int PauseMs, int StartDelayMs = 0, float ParkingDistance = 64);
 
 /// <summary>
 /// Compiles paths into native scalar channels. Parent motion is visual-only in the
@@ -24,7 +24,7 @@ public static class ItemMotionPath
     public const int MaxLegs = 128;
 
     public static ItemMotionResult<MotionPathPlan> Plan(IReadOnlyList<Vector3> points,
-        MotionPathUse use, MotionPathRepeat repeat, float speed, KC.AnimEase ease, int pauseMs = 0)
+        MotionPathUse use, MotionPathRepeat repeat, float speed, KC.AnimEase ease, int pauseMs = 0, int startDelayMs = 0, float parkingDistance = 64)
     {
         ItemMotionResult<MotionPathPlan> Fail(string reason) => ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, reason);
         if (!Enum.IsDefined(use) || !Enum.IsDefined(repeat) || ease is not (KC.AnimEase.Linear or KC.AnimEase.QuadIn or KC.AnimEase.QuadOut or KC.AnimEase.QuadInOut))
@@ -35,13 +35,15 @@ public static class ItemMotionPath
             return Fail($"Use 2–{MaxLegs + 1} finite points within 10,000 metres of the item origin.");
         if (use == MotionPathUse.Obstacle && points.Count != 2)
             return Fail("Obstacle paths need exactly two points. Multi-direction parent motion does not carry vehicle collision; use Scenery for a polyline.");
+        if (startDelayMs is < 0 or > 60000 || !float.IsFinite(parkingDistance) || parkingDistance is < 16 or > 256
+            || (use != MotionPathUse.CollisionRelay && startDelayMs != 0)) return Fail("Invalid collision relay start delay or parking distance.");
         var route = points.ToList();
         if (repeat == MotionPathRepeat.Closed && Vector3.Distance(route[0], route[^1]) > .001f) route.Add(route[0]);
         else if (repeat == MotionPathRepeat.PingPong) route.AddRange(points.Reverse().Skip(1));
-        if (use == MotionPathUse.Scenery && route.Count - 1 > MaxLegs)
-            return Fail($"This path needs {route.Count - 1} legs including the return. The tested scenery limit is {MaxLegs}; reduce points or choose Reset.");
+        if (use != MotionPathUse.Obstacle && route.Count - 1 > MaxLegs)
+            return Fail($"This path needs {route.Count - 1} legs including the return. The path limit is {MaxLegs}; reduce points or choose Reset.");
         var legs = new List<MotionPathLeg>();
-        long elapsed = pauseMs;
+        long elapsed = pauseMs + startDelayMs;
         for (var i = 1; i < route.Count; i++)
         {
             var delta = route[i] - route[i - 1];
@@ -54,7 +56,7 @@ public static class ItemMotionPath
         }
         // A repeated cycle pauses once at the start, and once at each OTHER waypoint.
         if (repeat != MotionPathRepeat.Reset) elapsed -= pauseMs;
-        return ItemMotionResult<MotionPathPlan>.Ok(new(points[0], use, repeat, ease, legs.AsReadOnly(), (int)elapsed, pauseMs));
+        return ItemMotionResult<MotionPathPlan>.Ok(new(points[0], use, repeat, ease, legs.AsReadOnly(), (int)elapsed, pauseMs, startDelayMs, parkingDistance));
     }
 
     public static ItemMotionResult<MotionPathPlan> Validate(MotionPathPlan plan)
@@ -65,7 +67,9 @@ public static class ItemMotionPath
             || plan.Ease is not (KC.AnimEase.Linear or KC.AnimEase.QuadIn or KC.AnimEase.QuadOut or KC.AnimEase.QuadInOut)
             || plan.Legs is null || plan.Legs.Count is < 1 or > MaxLegs || plan.DurationMs <= 0)
             return Fail("Invalid motion path plan.");
-        long expectedStart = plan.PauseMs;
+        if (plan.StartDelayMs is < 0 or > 60000 || !float.IsFinite(plan.ParkingDistance) || plan.ParkingDistance is < 16 or > 256
+            || (plan.Use != MotionPathUse.CollisionRelay && plan.StartDelayMs != 0)) return Fail("Invalid collision relay settings.");
+        long expectedStart = plan.PauseMs + plan.StartDelayMs;
         var position = plan.Start;
         foreach (var leg in plan.Legs)
         {
@@ -107,6 +111,7 @@ public static class ItemMotionPath
             || binding.Pos1 != default || binding.Pos2 != default || source.Version != 0 || source.SubVersion != 3
             || bodyEntry.Model is not CPlugDynaObjectModel { Mesh: not null, LocAnim: null, DynamizeOnSpawn: false })
             return Fail("This body's binding, driver, anchors or shader animation cannot safely be replaced with a path.");
+        if (plan.Use == MotionPathUse.CollisionRelay) return ItemMotionCollisionRelay.Build(original, plan, anchor);
         // Clone before changing anything. Rejected builds never alter the live document.
         CPlugPrefab prefab;
         try

@@ -1,0 +1,10 @@
+{
+  "decodedFrames": 60,
+  "uniqueFrames": 60,
+  "adjacentDuplicates": 0,
+  "windowSeconds": [
+    45,
+    47
+  ],
+  "requestedFps": 30
+}
