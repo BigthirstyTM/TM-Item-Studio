@@ -1,0 +1,12 @@
+{
+  "bodies": 128,
+  "allBodies": {
+    "type": "Mesh",
+    "version": 6,
+    "vertices": 24,
+    "triangles": 12,
+    "cooked": null,
+    "octree": null,
+    "aabb": null
+  }
+}

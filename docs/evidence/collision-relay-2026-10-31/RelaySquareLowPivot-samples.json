@@ -1,0 +1,7069 @@
+[
+  {
+    "t": 0.14100000000325963,
+    "position": [
+      402.304,
+      16.015,
+      399.999
+    ],
+    "velocity": [
+      1.9945,
+      -0.001,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 0.7189999999973224,
+    "position": [
+      403.403,
+      16.015,
+      399.999
+    ],
+    "velocity": [
+      1.9794,
+      -0.001,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 1.25,
+    "position": [
+      404.502,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      2.0079,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 1.7970000000059372,
+    "position": [
+      405.602,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      2.0104,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 2.3439999999973224,
+    "position": [
+      406.702,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      1.9959,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 2.8910000000032596,
+    "position": [
+      407.801,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      1.9891,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 3.452999999994063,
+    "position": [
+      408.901,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      1.9869,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 4.0,
+    "position": [
+      410.001,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      2.0011,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 4.547000000005937,
+    "position": [
+      411.1,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      2.0172,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 5.0939999999973224,
+    "position": [
+      412.2,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      1.9891,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 5.6560000000026776,
+    "position": [
+      413.3,
+      16.014,
+      399.999
+    ],
+    "velocity": [
+      1.9959,
+      0,
+      0
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 6.202999999994063,
+    "position": [
+      414.248,
+      16.0577,
+      400.026
+    ],
+    "velocity": [
+      0.0005,
+      -3.108,
+      1.9834
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 6.75,
+    "position": [
+      414.252,
+      16.012,
+      401.123
+    ],
+    "velocity": [
+      0.0049,
+      0.0013,
+      2.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 7.297000000005937,
+    "position": [
+      414.253,
+      16.013,
+      402.223
+    ],
+    "velocity": [
+      -0.0029,
+      0.0017,
+      2.014
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 7.8439999999973224,
+    "position": [
+      414.254,
+      16.014,
+      403.322
+    ],
+    "velocity": [
+      0.0039,
+      0.001,
+      1.993
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 8.406000000002678,
+    "position": [
+      414.254,
+      16.014,
+      404.423
+    ],
+    "velocity": [
+      -0.0032,
+      0,
+      1.9923
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 8.952999999994063,
+    "position": [
+      414.254,
+      16.014,
+      405.523
+    ],
+    "velocity": [
+      0.0032,
+      0,
+      2.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 9.5,
+    "position": [
+      414.254,
+      16.014,
+      406.623
+    ],
+    "velocity": [
+      -0.0032,
+      0,
+      2.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 10.047000000005937,
+    "position": [
+      414.254,
+      16.014,
+      407.724
+    ],
+    "velocity": [
+      0.0032,
+      0,
+      2.014
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 10.610000000000582,
+    "position": [
+      414.254,
+      16.014,
+      408.825
+    ],
+    "velocity": [
+      -0.0032,
+      0,
+      1.9923
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 11.14100000000326,
+    "position": [
+      414.254,
+      16.014,
+      409.926
+    ],
+    "velocity": [
+      0.0032,
+      0,
+      1.9923
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 11.702999999994063,
+    "position": [
+      414.254,
+      16.014,
+      411.027
+    ],
+    "velocity": [
+      -0.0032,
+      0,
+      2.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 12.25,
+    "position": [
+      414.254,
+      16.014,
+      412.128
+    ],
+    "velocity": [
+      0.0032,
+      0,
+      2.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 12.797000000005937,
+    "position": [
+      414.254,
+      16.014,
+      413.229
+    ],
+    "velocity": [
+      -0.0032,
+      0,
+      2.014
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 13.343999999997322,
+    "position": [
+      414.254,
+      16.014,
+      414.33
+    ],
+    "velocity": [
+      0.0032,
+      0,
+      1.9923
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 13.89100000000326,
+    "position": [
+      414.254,
+      16.014,
+      415.434
+    ],
+    "velocity": [
+      -0.0016,
+      0,
+      1.9954
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "RestingGround",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "RestingGround",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 14.452999999994063,
+    "position": [
+      414.262,
+      37.7948,
+      411.927
+    ],
+    "velocity": [
+      0.004,
+      46.0417,
+      -8.285
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 15.0,
+    "position": [
+      414.252,
+      57.1435,
+      408.476
+    ],
+    "velocity": [
+      0.003,
+      25.3181,
+      -6.8015
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 15.547000000005937,
+    "position": [
+      414.262,
+      67.1097,
+      404.495
+    ],
+    "velocity": [
+      0.002,
+      8.0532,
+      -5.4831
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 16.093999999997322,
+    "position": [
+      414.247,
+      67.298,
+      402.699
+    ],
+    "velocity": [
+      0.002,
+      -5.9026,
+      -4.166
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 16.64100000000326,
+    "position": [
+      414.261,
+      60.3375,
+      400.229
+    ],
+    "velocity": [
+      0.001,
+      -17.0415,
+      -3.3101
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 17.202999999994063,
+    "position": [
+      414.271,
+      48.6494,
+      398.034
+    ],
+    "velocity": [
+      0.001,
+      -26.3032,
+      -2.69
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 17.75,
+    "position": [
+      414.268,
+      32.5236,
+      396.689
+    ],
+    "velocity": [
+      0.001,
+      -34.0174,
+      -2.2026
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 18.297000000005937,
+    "position": [
+      414.259,
+      12.2663,
+      395.92
+    ],
+    "velocity": [
+      0.001,
+      -40.4481,
+      -1.8099
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 18.843999999997322,
+    "position": [
+      414.202,
+      9.94405,
+      397.835
+    ],
+    "velocity": [
+      -0.112,
+      0.8359,
+      1.9034
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 19.406000000002678,
+    "position": [
+      414.156,
+      9.97439,
+      397.949
+    ],
+    "velocity": [
+      -0.1932,
+      -0.9245,
+      -1.1248
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 19.952999999994063,
+    "position": [
+      413.998,
+      9.14867,
+      396.592
+    ],
+    "velocity": [
+      -0.2992,
+      -4.1459,
+      -2.0885
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 20.5,
+    "position": [
+      413.987,
+      9.12895,
+      396.204
+    ],
+    "velocity": [
+      0.1416,
+      -2.1522,
+      0.6601
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 21.047000000005937,
+    "position": [
+      413.982,
+      8.98678,
+      396.313
+    ],
+    "velocity": [
+      0.0134,
+      -0.2438,
+      0.0496
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 21.593999999997322,
+    "position": [
+      413.995,
+      8.99212,
+      396.299
+    ],
+    "velocity": [
+      0.004,
+      -0.2505,
+      -0.0127
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 22.14100000000326,
+    "position": [
+      413.986,
+      8.99179,
+      396.295
+    ],
+    "velocity": [
+      -0.01,
+      -0.2362,
+      -0.0036
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 22.702999999994063,
+    "position": [
+      413.988,
+      8.9919,
+      396.29
+    ],
+    "velocity": [
+      0.0066,
+      -0.2106,
+      -0.0154
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 23.25,
+    "position": [
+      413.988,
+      8.99179,
+      396.285
+    ],
+    "velocity": [
+      -0.007,
+      -0.2365,
+      -0.0036
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 23.797000000005937,
+    "position": [
+      413.984,
+      8.99182,
+      396.28
+    ],
+    "velocity": [
+      0.001,
+      -0.2131,
+      -0.0126
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 24.343999999997322,
+    "position": [
+      413.986,
+      8.99175,
+      396.274
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2627,
+      -0.0057
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 24.89100000000326,
+    "position": [
+      413.983,
+      8.99182,
+      396.27
+    ],
+    "velocity": [
+      -0.003,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 25.452999999994063,
+    "position": [
+      413.984,
+      8.99184,
+      396.265
+    ],
+    "velocity": [
+      0.001,
+      -0.2596,
+      -0.005
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 26.0,
+    "position": [
+      413.982,
+      8.99182,
+      396.26
+    ],
+    "velocity": [
+      -0.0033,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 26.547000000005937,
+    "position": [
+      413.981,
+      8.99175,
+      396.255
+    ],
+    "velocity": [
+      0,
+      -0.2634,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 27.093999999997322,
+    "position": [
+      413.981,
+      8.99181,
+      396.25
+    ],
+    "velocity": [
+      -0.002,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 27.656000000002678,
+    "position": [
+      413.979,
+      8.99246,
+      396.245
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3154,
+      -0.0109
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 28.202999999994063,
+    "position": [
+      413.979,
+      8.99189,
+      396.241
+    ],
+    "velocity": [
+      -0.0014,
+      -0.2164,
+      -0.0098
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 28.75,
+    "position": [
+      413.978,
+      8.99246,
+      396.235
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3168,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 29.297000000005937,
+    "position": [
+      413.978,
+      8.99181,
+      396.231
+    ],
+    "velocity": [
+      -0.001,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 29.843999999997322,
+    "position": [
+      413.977,
+      8.99168,
+      396.226
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3171,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 30.39100000000326,
+    "position": [
+      413.976,
+      8.99181,
+      396.221
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 30.952999999994063,
+    "position": [
+      413.976,
+      8.99212,
+      396.216
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0127
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 31.5,
+    "position": [
+      413.975,
+      8.99181,
+      396.211
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 32.04700000000594,
+    "position": [
+      413.974,
+      8.99212,
+      396.206
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 32.59399999999732,
+    "position": [
+      413.974,
+      8.99187,
+      396.201
+    ],
+    "velocity": [
+      -0.001,
+      -0.2346,
+      -0.0058
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 33.17200000000594,
+    "position": [
+      413.973,
+      8.99182,
+      396.196
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2107,
+      -0.0136
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 33.70299999999406,
+    "position": [
+      413.972,
+      8.99179,
+      396.191
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 34.25,
+    "position": [
+      413.972,
+      8.99182,
+      396.186
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 34.79700000000594,
+    "position": [
+      413.971,
+      8.99184,
+      396.181
+    ],
+    "velocity": [
+      -0.001,
+      -0.2596,
+      -0.0056
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 35.34399999999732,
+    "position": [
+      413.971,
+      8.99182,
+      396.176
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 35.90600000000268,
+    "position": [
+      413.97,
+      8.99175,
+      396.171
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 36.45299999999406,
+    "position": [
+      413.969,
+      8.99182,
+      396.166
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 37.0,
+    "position": [
+      413.969,
+      8.99175,
+      396.161
+    ],
+    "velocity": [
+      -0.001,
+      -0.2634,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 37.54700000000594,
+    "position": [
+      413.968,
+      8.99181,
+      396.156
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 38.11000000000058,
+    "position": [
+      413.967,
+      8.99246,
+      396.151
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3154,
+      -0.0109
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 38.65600000000268,
+    "position": [
+      413.967,
+      8.99181,
+      396.146
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 39.20299999999406,
+    "position": [
+      413.966,
+      8.99246,
+      396.141
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3168,
+      -0.0099
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 39.75,
+    "position": [
+      413.966,
+      8.99181,
+      396.136
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 40.29700000000594,
+    "position": [
+      413.965,
+      8.99212,
+      396.131
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2472,
+      -0.0144
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 40.84399999999732,
+    "position": [
+      413.964,
+      8.99181,
+      396.126
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 41.40600000000268,
+    "position": [
+      413.964,
+      8.99212,
+      396.121
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0127
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 41.95299999999406,
+    "position": [
+      413.963,
+      8.99181,
+      396.116
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 42.5,
+    "position": [
+      413.962,
+      8.99212,
+      396.111
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 43.04700000000594,
+    "position": [
+      413.962,
+      8.99179,
+      396.106
+    ],
+    "velocity": [
+      -0.001,
+      -0.2362,
+      -0.0056
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 43.59399999999732,
+    "position": [
+      413.961,
+      8.99182,
+      396.101
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2107,
+      -0.0136
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 44.14100000000326,
+    "position": [
+      413.961,
+      8.99179,
+      396.096
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 44.70299999999406,
+    "position": [
+      413.96,
+      8.99182,
+      396.091
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 45.25,
+    "position": [
+      413.959,
+      8.99175,
+      396.086
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0057
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 45.79700000000594,
+    "position": [
+      413.959,
+      8.99189,
+      396.081
+    ],
+    "velocity": [
+      -0.002,
+      -0.2128,
+      -0.0118
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 46.34399999999732,
+    "position": [
+      413.958,
+      8.99175,
+      396.076
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 46.89100000000326,
+    "position": [
+      413.958,
+      8.99181,
+      396.071
+    ],
+    "velocity": [
+      -0.002,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 47.45299999999406,
+    "position": [
+      413.957,
+      8.99175,
+      396.066
+    ],
+    "velocity": [
+      -0.001,
+      -0.2634,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 48.01600000000326,
+    "position": [
+      413.956,
+      8.99181,
+      396.061
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 48.54700000000594,
+    "position": [
+      413.956,
+      8.99246,
+      396.056
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3154,
+      -0.0109
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 49.09399999999732,
+    "position": [
+      413.955,
+      8.99181,
+      396.051
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 49.64100000000326,
+    "position": [
+      413.954,
+      8.99246,
+      396.046
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3168,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 50.20299999999406,
+    "position": [
+      413.954,
+      8.99181,
+      396.041
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 50.75,
+    "position": [
+      413.953,
+      8.99212,
+      396.036
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2472,
+      -0.0144
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 51.29700000000594,
+    "position": [
+      413.952,
+      8.99181,
+      396.031
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 51.84399999999732,
+    "position": [
+      413.952,
+      8.99212,
+      396.026
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0127
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 52.40600000000268,
+    "position": [
+      413.951,
+      8.99188,
+      396.021
+    ],
+    "velocity": [
+      -0.001,
+      -0.2228,
+      -0.0072
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 52.95299999999406,
+    "position": [
+      413.951,
+      8.99212,
+      396.016
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 53.5,
+    "position": [
+      413.95,
+      8.99181,
+      396.011
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0059
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 54.04700000000594,
+    "position": [
+      413.949,
+      8.99182,
+      396.006
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2107,
+      -0.0136
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 54.61000000000058,
+    "position": [
+      413.949,
+      8.99179,
+      396.001
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 55.15600000000268,
+    "position": [
+      413.948,
+      8.99182,
+      395.996
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 55.70299999999406,
+    "position": [
+      413.947,
+      8.99175,
+      395.991
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0057
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 56.25,
+    "position": [
+      413.947,
+      8.99182,
+      395.986
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 56.79700000000594,
+    "position": [
+      413.946,
+      8.99175,
+      395.981
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 57.34399999999732,
+    "position": [
+      413.946,
+      8.992,
+      395.976
+    ],
+    "velocity": [
+      -0.002,
+      -0.216,
+      -0.01
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 57.90600000000268,
+    "position": [
+      413.945,
+      8.99175,
+      395.971
+    ],
+    "velocity": [
+      -0.001,
+      -0.2634,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 58.45299999999406,
+    "position": [
+      413.944,
+      8.99181,
+      395.966
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 59.0,
+    "position": [
+      413.944,
+      8.99246,
+      395.961
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3154,
+      -0.0109
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 59.54700000000594,
+    "position": [
+      413.943,
+      8.99181,
+      395.956
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 60.11000000000058,
+    "position": [
+      413.942,
+      8.99212,
+      395.951
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2462,
+      -0.0154
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 60.65600000000268,
+    "position": [
+      413.942,
+      8.99181,
+      395.946
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 61.20299999999406,
+    "position": [
+      413.941,
+      8.99212,
+      395.941
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2472,
+      -0.0144
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 61.75,
+    "position": [
+      413.941,
+      8.99181,
+      395.936
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 62.29700000000594,
+    "position": [
+      413.94,
+      8.99212,
+      395.931
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 62.84399999999732,
+    "position": [
+      413.939,
+      8.99179,
+      395.926
+    ],
+    "velocity": [
+      -0.001,
+      -0.2362,
+      -0.0056
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 63.39100000000326,
+    "position": [
+      413.939,
+      8.9919,
+      395.921
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 63.95299999999406,
+    "position": [
+      413.938,
+      8.99179,
+      395.916
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 64.5,
+    "position": [
+      413.937,
+      8.99182,
+      395.911
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2107,
+      -0.0136
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 65.04700000000594,
+    "position": [
+      413.937,
+      8.99179,
+      395.906
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 65.59399999999732,
+    "position": [
+      413.936,
+      8.99182,
+      395.901
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 66.15600000000268,
+    "position": [
+      413.936,
+      8.99175,
+      395.896
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0057
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 66.70299999999406,
+    "position": [
+      413.935,
+      8.99182,
+      395.891
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 67.25,
+    "position": [
+      413.934,
+      8.99175,
+      395.886
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 67.79700000000594,
+    "position": [
+      413.934,
+      8.99181,
+      395.881
+    ],
+    "velocity": [
+      -0.002,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 68.34399999999732,
+    "position": [
+      413.933,
+      8.99175,
+      395.876
+    ],
+    "velocity": [
+      -0.001,
+      -0.2634,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 68.90600000000268,
+    "position": [
+      413.933,
+      8.99189,
+      395.871
+    ],
+    "velocity": [
+      -0.0014,
+      -0.2164,
+      -0.0098
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 69.45299999999406,
+    "position": [
+      413.932,
+      8.99175,
+      395.866
+    ],
+    "velocity": [
+      -0.001,
+      -0.2644,
+      -0.003
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 70.0,
+    "position": [
+      413.931,
+      8.99181,
+      395.861
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 70.54700000000594,
+    "position": [
+      413.931,
+      8.99246,
+      395.856
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3171,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 71.11000000000058,
+    "position": [
+      413.93,
+      8.99181,
+      395.851
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 71.65600000000268,
+    "position": [
+      413.929,
+      8.99212,
+      395.846
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2472,
+      -0.0144
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 72.20299999999406,
+    "position": [
+      413.929,
+      8.99181,
+      395.841
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 72.75,
+    "position": [
+      413.928,
+      8.99212,
+      395.836
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 73.29700000000594,
+    "position": [
+      413.927,
+      8.99179,
+      395.831
+    ],
+    "velocity": [
+      -0.001,
+      -0.2362,
+      -0.0056
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 73.84399999999732,
+    "position": [
+      413.927,
+      8.9919,
+      395.826
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 74.39100000000326,
+    "position": [
+      413.926,
+      8.99179,
+      395.821
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 74.95299999999406,
+    "position": [
+      413.926,
+      8.99182,
+      395.816
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2107,
+      -0.0136
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 75.5,
+    "position": [
+      413.925,
+      8.99179,
+      395.811
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 76.04700000000594,
+    "position": [
+      413.924,
+      8.99182,
+      395.806
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2114,
+      -0.0133
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 76.59399999999732,
+    "position": [
+      413.924,
+      8.99175,
+      395.801
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0057
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 77.14100000000326,
+    "position": [
+      413.923,
+      8.99182,
+      395.796
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 77.70299999999406,
+    "position": [
+      413.922,
+      8.99175,
+      395.791
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 78.25,
+    "position": [
+      413.922,
+      8.99181,
+      395.786
+    ],
+    "velocity": [
+      -0.002,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 78.79700000000594,
+    "position": [
+      413.921,
+      8.99246,
+      395.781
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3154,
+      -0.0109
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 79.34399999999732,
+    "position": [
+      413.921,
+      8.99181,
+      395.776
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 79.89100000000326,
+    "position": [
+      413.92,
+      8.99246,
+      395.771
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3168,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 80.45299999999406,
+    "position": [
+      413.919,
+      8.99181,
+      395.766
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 81.0,
+    "position": [
+      413.919,
+      8.99246,
+      395.761
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3171,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 81.54700000000594,
+    "position": [
+      413.918,
+      8.99181,
+      395.756
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 82.09399999999732,
+    "position": [
+      413.918,
+      8.99212,
+      395.751
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2472,
+      -0.0144
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 82.67200000000594,
+    "position": [
+      413.917,
+      8.99179,
+      395.746
+    ],
+    "velocity": [
+      -0.001,
+      -0.2355,
+      -0.0063
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 83.21899999999732,
+    "position": [
+      413.916,
+      8.99212,
+      395.741
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 83.75,
+    "position": [
+      413.916,
+      8.99179,
+      395.736
+    ],
+    "velocity": [
+      -0.001,
+      -0.2362,
+      -0.0056
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 84.29700000000594,
+    "position": [
+      413.915,
+      8.9919,
+      395.731
+    ],
+    "velocity": [
+      -0.0024,
+      -0.2106,
+      -0.0138
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 84.84399999999732,
+    "position": [
+      413.914,
+      8.99179,
+      395.726
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 85.40600000000268,
+    "position": [
+      413.914,
+      8.99182,
+      395.721
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 85.95299999999406,
+    "position": [
+      413.913,
+      8.99179,
+      395.716
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 86.5,
+    "position": [
+      413.913,
+      8.99182,
+      395.711
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 87.04700000000594,
+    "position": [
+      413.912,
+      8.99175,
+      395.706
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0057
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 87.59399999999732,
+    "position": [
+      413.911,
+      8.99182,
+      395.701
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 88.14100000000326,
+    "position": [
+      413.911,
+      8.99175,
+      395.696
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 88.70299999999406,
+    "position": [
+      413.91,
+      8.99181,
+      395.691
+    ],
+    "velocity": [
+      -0.002,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 89.25,
+    "position": [
+      413.909,
+      8.99175,
+      395.686
+    ],
+    "velocity": [
+      -0.001,
+      -0.2644,
+      -0.003
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 89.79700000000594,
+    "position": [
+      413.909,
+      8.99181,
+      395.681
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 90.34399999999732,
+    "position": [
+      413.908,
+      8.99246,
+      395.676
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3168,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 90.92200000000594,
+    "position": [
+      413.907,
+      8.99181,
+      395.671
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 91.46899999999732,
+    "position": [
+      413.907,
+      8.99168,
+      395.666
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3171,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 92.0,
+    "position": [
+      413.906,
+      8.99181,
+      395.661
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 92.54700000000594,
+    "position": [
+      413.906,
+      8.99212,
+      395.656
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2472,
+      -0.0144
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 93.11000000000058,
+    "position": [
+      413.905,
+      8.99181,
+      395.651
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 93.65600000000268,
+    "position": [
+      413.904,
+      8.99212,
+      395.646
+    ],
+    "velocity": [
+      -0.002,
+      -0.2485,
+      -0.0124
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 94.20299999999406,
+    "position": [
+      413.904,
+      8.99179,
+      395.641
+    ],
+    "velocity": [
+      -0.001,
+      -0.2362,
+      -0.0056
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 94.75,
+    "position": [
+      413.903,
+      8.99182,
+      395.636
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2107,
+      -0.0136
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 95.29700000000594,
+    "position": [
+      413.902,
+      8.99179,
+      395.631
+    ],
+    "velocity": [
+      -0.001,
+      -0.2365,
+      -0.0046
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 95.84399999999732,
+    "position": [
+      413.902,
+      8.99182,
+      395.626
+    ],
+    "velocity": [
+      -0.0023,
+      -0.2114,
+      -0.0133
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 96.39100000000326,
+    "position": [
+      413.901,
+      8.99175,
+      395.621
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0057
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 96.95299999999406,
+    "position": [
+      413.901,
+      8.99182,
+      395.616
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 97.5,
+    "position": [
+      413.9,
+      8.99175,
+      395.611
+    ],
+    "velocity": [
+      -0.001,
+      -0.2627,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 98.04700000000594,
+    "position": [
+      413.899,
+      8.99182,
+      395.606
+    ],
+    "velocity": [
+      -0.002,
+      -0.2131,
+      -0.0116
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 98.61000000000058,
+    "position": [
+      413.899,
+      8.99175,
+      395.601
+    ],
+    "velocity": [
+      -0.001,
+      -0.2634,
+      -0.0047
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 99.15600000000268,
+    "position": [
+      413.898,
+      8.99181,
+      395.596
+    ],
+    "velocity": [
+      -0.002,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 99.70299999999406,
+    "position": [
+      413.897,
+      8.99246,
+      395.591
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3154,
+      -0.0109
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 100.25,
+    "position": [
+      413.897,
+      8.99181,
+      395.586
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2168,
+      -0.0096
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 100.79700000000594,
+    "position": [
+      413.896,
+      8.99243,
+      395.581
+    ],
+    "velocity": [
+      -0.0016,
+      -0.3104,
+      -0.0086
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 101.34399999999732,
+    "position": [
+      413.896,
+      8.99181,
+      395.576
+    ],
+    "velocity": [
+      -0.0013,
+      -0.2229,
+      -0.0076
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 101.89100000000326,
+    "position": [
+      413.895,
+      8.99168,
+      395.571
+    ],
+    "velocity": [
+      -0.0017,
+      -0.3171,
+      -0.0092
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 102.45299999999406,
+    "position": [
+      413.894,
+      8.99181,
+      395.566
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 103.0,
+    "position": [
+      413.894,
+      8.99212,
+      395.561
+    ],
+    "velocity": [
+      -0.0027,
+      -0.2472,
+      -0.0144
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 103.54700000000594,
+    "position": [
+      413.893,
+      8.99181,
+      395.556
+    ],
+    "velocity": [
+      -0.001,
+      -0.2236,
+      -0.0069
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 104.09399999999732,
+    "position": [
+      413.893,
+      8.99237,
+      395.551
+    ],
+    "velocity": [
+      -0.002,
+      -0.261,
+      -0.0122
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  },
+  {
+    "t": 104.64100000000326,
+    "position": [
+      413.892,
+      8.99179,
+      395.546
+    ],
+    "velocity": [
+      -0.001,
+      -0.2362,
+      -0.0056
+    ],
+    "gas": 0,
+    "steer": 0,
+    "wheels": [
+      {
+        "falling": "FallingAir",
+        "index": 0,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 1,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 2,
+        "dirt": 0
+      },
+      {
+        "falling": "FallingAir",
+        "index": 3,
+        "dirt": 0
+      }
+    ]
+  }
+]
