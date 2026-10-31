@@ -773,7 +773,7 @@
                         </details>
                         @if (editablePathPlan is not null)
                         {
-                            <MotionPathEditor Plan="editablePathPlan" Changed="EditPathPlan" Preview="PreviewEditedPath" Apply="ApplyEditedPath" />
+                            <MotionPathEditor Plan="editablePathPlan" Index="selectedPathSegment" IndexChanged="SelectPathSegment" FullPath="showFullPath" FullPathChanged="ShowFullPath" Changed="EditPathPlan" Preview="PreviewEditedPath" Apply="ApplyEditedPath" />
                         }
                         <div class="border rounded p-2 mb-2">
                             <button class="btn btn-sm btn-outline-secondary mb-2" title="Download the compiled points and complete segment timing for later editing." disabled="@(editablePathPlan is null)" @onclick="SavePathDraft">Save route draft (.json)</button>
@@ -817,11 +817,11 @@
                         else if (authoredConstraints.Count > 0)
                         {
                             <!-- Path & Collision Generator Card -->
-                            <div class="card border-primary mb-3 shadow-sm">
-                                <div class="card-header bg-primary text-white py-1 d-flex justify-content-between align-items-center">
+                            <details class="card border-primary mb-3 shadow-sm" data-testid="motion-path-assistant">
+                                <summary class="card-header bg-primary text-white py-1">
                                     <span class="fw-bold"><i class="bi bi-bezier2"></i> Motion & Path Assistant (A ➔ B ➔ C)</span>
                                     <span class="badge bg-light text-primary">One-click Generation</span>
-                                </div>
+                                </summary>
                                 <div class="card-body p-2 small">
                                     <div class="mb-2">
                                         <label class="form-label fw-bold mb-1" data-help-key="choosemotiontypepreset">Choose motion type / preset</label>
@@ -940,12 +940,12 @@
                                         </ul>
                                     </div>
                                 </div>
-                            </div>
+                            </details>
 
                             <details class="border rounded p-2 mb-2" data-testid="advanced-motion-constraints">
                             <summary class="fw-bold">Detailed constraints &amp; timeline edits (@authoredConstraints.Count)</summary>
                             <p class="small text-muted mt-2">Advanced native channels. Choose one constraint to edit translation, rotation and key timing. These edits change the item immediately. Generated path carriers are implementation details; use Path segments &amp; timing for coordinated route edits.</p>
-                            <SearchableSelect Label="Motion constraint" Options="ConstraintLabels" Value="SelectedConstraintLabel" ValueChanged="ChooseConstraint" />
+                            <SearchableSelect Label="Motion constraint" Options="ConstraintLabels" Value="@SelectedConstraintLabel" ValueChanged="ChooseConstraint" />
                             @if (!string.IsNullOrWhiteSpace(kinematicTemplateStatus))
                             {
                                 <p role="status" class="small text-info">@kinematicTemplateStatus</p>
@@ -2141,6 +2141,28 @@ else if (itemModel is null)
     private bool drawPathPreviewActive;
     private bool smoothPathPreview;
     private MotionPathPlan? editablePathPlan;
+    private int selectedPathSegment;
+    private bool showFullPath = true;
+    private async Task SelectPathSegment(int index)
+    {
+        if (editablePathPlan is null || index < 0 || index >= editablePathPlan.Legs.Count) return;
+        selectedPathSegment = index;
+        await SyncPathSegments();
+    }
+    [JSInvokable]
+    public async Task OnPathSegmentSelected(int index)
+    {
+        await SelectPathSegment(index);
+        StateHasChanged();
+    }
+    private async Task ShowFullPath(bool full) { showFullPath = full; await SyncPathSegments(); }
+    private Task SyncPathSegments()
+    {
+        if (editablePathPlan is null) return JS.InvokeVoidAsync("setEditablePathSegments", null, 0, true).AsTask();
+        selectedPathSegment = Math.Clamp(selectedPathSegment, 0, editablePathPlan.Legs.Count-1);
+        return JS.InvokeVoidAsync("setEditablePathSegments", ItemMotionPathEditing.Points(editablePathPlan)
+            .Select(p=>new { x=p.X,y=p.Y,z=p.Z }), selectedPathSegment, showFullPath).AsTask();
+    }
     private IEnumerable<string> ConstraintLabels => authoredConstraints.Select((c,i)=>$"Constraint {i+1} · {c.TransAxis} translation · {c.RotAxis} rotation · {(IsRootConstraint(c) ? "world" : "parent")}");
     private string SelectedConstraintLabel => ConstraintLabels.ElementAtOrDefault(Math.Max(0,selectedConstraintIndex)) ?? "";
     private async Task ChooseConstraint(ChangeEventArgs e)
@@ -2431,6 +2453,9 @@ else if (itemModel is null)
 
     private async Task LoadFileSet(IReadOnlyList<IBrowserFile> files)
     {
+        editablePathPlan = null;
+        selectedPathSegment = 0;
+        if (isViewerInitialized) await SyncPathSegments();
         isLoading = true;
         errorMessage = null;
         variantSources.Clear();
@@ -2688,6 +2713,8 @@ else if (itemModel is null)
         drawPathBeforeDocument = null;
         drawPathPreviewActive = false;
         editablePathPlan = null;
+        selectedPathSegment = 0;
+        await SyncPathSegments();
         drawPathCaptureEnabled = false;
         drawPathCoordinates = "";
         drawPathStatusMessage = null;
@@ -3235,6 +3262,7 @@ else if (itemModel is null)
             plan.DurationMs, ease=(int)plan.Ease, obstacle=plan.Use == MotionPathUse.Obstacle, curved=smooth
         }, drawPathAnchorMode == "centre");
         drawPathPreviewActive = true;
+        await SyncPathSegments();
         errorMessage = null;
         drawPathStatusMessage = $"Draft preview: {plan.Legs.Count} legs, {plan.DurationMs/1000d:0.###} s. Item unchanged until Apply path.";
     }
@@ -3286,6 +3314,7 @@ else if (itemModel is null)
             + (planned.Value.Use == MotionPathUse.Scenery ? "Scenery: moving body collision removed; static parts preserved." : "Obstacle: model X axis aligned to path.")
             + (planned.Value.Repeat == MotionPathRepeat.Reset ? " Jumps back to the start each cycle." : "");
         await RefreshPathMotion();
+        await SyncPathSegments();
     }
     private async Task RestoreMotionBeforePath()
     {

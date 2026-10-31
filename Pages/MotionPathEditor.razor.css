@@ -1,0 +1,3 @@
+.path-route-table thead { position: sticky; top: 0; z-index: 1; background: var(--bs-body-bg, white); }
+.path-route-table tr[aria-selected="true"] > td { background: rgba(250, 204, 21, .16); }
+.path-route-table tr[aria-selected="true"] > td:first-child { box-shadow: inset 3px 0 #facc15; }

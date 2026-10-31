@@ -2,6 +2,13 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.7] - 2026-10-31
+
+- Collapse the one-click Motion & Path Assistant by default.
+- Choose Full path or selected segment in the viewport, with a yellow selection highlight. Select route lines to synchronize the segment editor; repeated clicks cycle overlapping outbound/return legs.
+- Edit endpoint coordinates, speeds and durations directly in Complete route overview. Row and dropdown selection synchronize with the viewport, including after applying the route.
+- Correct dynamic selected values in the path and native-constraint dropdowns. Clear route overlays when changing files and preserve camera dragging and drawing interactions.
+
 ## [0.5.6] - 2026-10-31
 
 - Separate smooth scenery path tool with adjustable corner rounding, curve detail and live preview. The existing straight/polyline tool remains available.
