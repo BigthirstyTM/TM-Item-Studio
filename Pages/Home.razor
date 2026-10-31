@@ -730,7 +730,7 @@
                             </div>
                             <p class="small text-warning mt-2 mb-2">@(drawPathUse == MotionPathUse.Obstacle
                                 ? "Exactly two points. Aligns the model's local X axis with the line; this can rotate the model. Collision stays directly driven. Test your exported geometry in Trackmania."
-                                : "Keeps the model orientation. Up to eight legs including the return. Removes the moving body's full-size collider; static parts remain: parent-driven collision does not follow this path in Trackmania.")</p>
+                                : $"Keeps the model orientation. Up to {ItemMotionPath.MaxLegs} legs including the return. Removes the moving body's full-size collider; static parts remain: parent-driven collision does not follow this path in Trackmania.")</p>
                             <div class="d-flex flex-wrap gap-1 mb-2">
                                 <button class="btn btn-sm btn-outline-primary" @onclick="ToggleDrawPathCapture" aria-label="@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")" title="Place points by clicking the selected plane. Right-drag orbits the camera.">@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")</button>
                                 <button class="btn btn-sm btn-outline-secondary" @onclick="UndoDrawPath" aria-label="Undo point" title="Remove the last drawn point without changing applied motion.">Undo point</button>
@@ -2120,6 +2120,7 @@ else if (itemModel is null)
     private CPlugPrefab? drawPathOriginal;
     private CPlugPrefab? drawPathGenerated;
     private CMwNod? drawPathBefore;
+    private ItemVariantSource? drawPathBeforeDocument;
     private string? drawPathStatusMessage;
     private CGameItemModel? uploadedMovingTemplate;
     private NPlugDyna_SKinematicConstraint? uploadedConstraintTemplate;
@@ -2642,6 +2643,7 @@ else if (itemModel is null)
     {
         drawPathOriginal = drawPathGenerated = null;
         drawPathBefore = null;
+        drawPathBeforeDocument = null;
         drawPathPreviewActive = false;
         drawPathCaptureEnabled = false;
         drawPathCoordinates = "";
@@ -3035,6 +3037,17 @@ else if (itemModel is null)
         await RefreshDebugDiagnostics();
     }
 
+    private void InstallConvertedItem(CGameItemModel converted)
+    {
+        var original = SelectedSource!;
+        var document = new Gbx<CGameItemModel>(converted);
+        variantSources[activeVariantIndex] = ItemVariantSource.FromFile(original.FileName, document)[0];
+        compositeVariantSelection.Remove(original.GbxFile);
+        compositeVariantSelection[document] = activeVariantIndex;
+        itemModel = converted;
+        gbxFile = document;
+    }
+
     private async Task ConvertStaticItemToKinematic()
     {
         if (itemModel is null)
@@ -3050,18 +3063,7 @@ else if (itemModel is null)
         }
 
         var converted = result.Value!;
-        itemModel.EntityModel = converted.EntityModel;
-        itemModel.ItemType = converted.ItemType;
-        itemModel.ItemTypeE = converted.ItemTypeE;
-        itemModel.DefaultPlacement = converted.DefaultPlacement;
-        itemModel.GroundPoint = converted.GroundPoint;
-        itemModel.Name = converted.Name;
-        itemModel.Ident = converted.Ident;
-        itemModel.Icon = converted.Icon;
-        itemModel.IconWebP = converted.IconWebP;
-        itemModel.OrbitalCenterHeightFromGround = converted.OrbitalCenterHeightFromGround;
-        itemModel.OrbitalPreviewAngle = converted.OrbitalPreviewAngle;
-        itemModel.OrbitalRadiusBase = converted.OrbitalRadiusBase;
+        InstallConvertedItem(converted);
 
         isMovingItem = true;
         authoredMotionScene = ReadSelectedScene();
@@ -3115,7 +3117,7 @@ else if (itemModel is null)
             { errorMessage = "Enter finite X Y Z coordinates on each line, using a decimal point, within 10,000 m of the origin."; return; }
             points.Add(new() { X=x, Y=y, Z=z });
         }
-        if (points.Count > ItemMotionPath.MaxLegs + 1) { errorMessage = "Use at most nine points."; return; }
+        if (points.Count > ItemMotionPath.MaxLegs + 1) { errorMessage = $"Use at most {ItemMotionPath.MaxLegs + 1} points."; return; }
         await JS.InvokeVoidAsync("setDrawnPathPoints", points);
         errorMessage = null;
         drawPathStatusMessage = $"{points.Count} points ready. Preview or apply the path.";
@@ -3158,12 +3160,14 @@ else if (itemModel is null)
         if (!planned.Success) { errorMessage = planned.Reason; return; }
         // Prepare conversion without installing it. All validation completes before the live item changes.
         CPlugPrefab? candidate = itemModel.EntityModel as CPlugPrefab;
+        CGameItemModel? convertedDocument = null;
         if (ReferenceEquals(candidate, drawPathGenerated) && drawPathOriginal is not null) candidate = drawPathOriginal;
         if (candidate is null || !isMovingItem)
         {
             var converted = ItemKinematicEntityTemplate.ConvertStaticToKinematic(itemModel,
                 uploadedMovingTemplate ?? FindMovingTemplateVariant() ?? ItemKinematicEntityTemplate.GetDefaultMovingTemplate(), uploadedConstraintTemplate);
             if (!converted.Success) { errorMessage = converted.Reason; return; }
+            convertedDocument = converted.Value;
             candidate = converted.Value!.EntityModel as CPlugPrefab;
         }
         if (candidate is null) { errorMessage = "This item does not expose a supported root prefab."; return; }
@@ -3171,6 +3175,13 @@ else if (itemModel is null)
         var built = ItemMotionPath.Build(candidate, planned.Value!, new Vector3(anchor.X,anchor.Y,anchor.Z));
         if (!built.Success) { errorMessage = built.Reason; return; }
         await StopDrawPathPreview();
+        if (convertedDocument is not null)
+        {
+            // Conversion produces a complete native template document, not just an entity.
+            // Retaining the static source's older root chunks can make its prefab export unloadable.
+            drawPathBeforeDocument = SelectedSource;
+            InstallConvertedItem(convertedDocument);
+        }
         if (!ReferenceEquals(itemModel.EntityModel, drawPathGenerated)) drawPathBefore = itemModel.EntityModel;
         drawPathOriginal = candidate;
         drawPathGenerated = built.Value;
@@ -3186,6 +3197,15 @@ else if (itemModel is null)
     {
         if (itemModel is null || !ReferenceEquals(itemModel.EntityModel, drawPathGenerated) || drawPathOriginal is null) return;
         itemModel.EntityModel = drawPathBefore ?? drawPathOriginal;
+        if (drawPathBeforeDocument is { } originalDocument)
+        {
+            compositeVariantSelection.Remove(gbxFile!);
+            variantSources[activeVariantIndex] = originalDocument;
+            gbxFile = originalDocument.GbxFile;
+            compositeVariantSelection[gbxFile] = activeVariantIndex;
+            itemModel = originalDocument.Model;
+            drawPathBeforeDocument = null;
+        }
         drawPathOriginal = drawPathGenerated = null;
         drawPathBefore = null;
         drawPathStatusMessage = "Restored the motion from before path generation.";

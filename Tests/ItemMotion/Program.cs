@@ -21,6 +21,9 @@ Check("static-to-kinematic conversion requires a valid kinematic template body",
     {
         Ident = new Ident("ConvertedMotion", 26, "FixtureGenerator"),
         Name = "Converted Motion",
+        Description = "Preserve this description",
+        PageName = "CustomFolder",
+        CopperPrice = 7,
         ItemType = CGameItemModel.EItemType.Ornament,
         ItemTypeE = CGameItemModel.EItemType.Ornament,
         EntityModel = new CPlugStaticObjectModel { Mesh = new CPlugSolid2Model() }
@@ -44,6 +47,8 @@ Check("static-to-kinematic conversion requires a valid kinematic template body",
     };
     result = ItemKinematicEntityTemplate.ConvertStaticToKinematic(staticItem, template, explicitConstraint);
     Require(result.Success, result.Reason ?? "conversion failed");
+    Require(result.Value!.Description == staticItem.Description && result.Value.PageName == staticItem.PageName
+        && result.Value.CopperPrice == 7, "conversion lost authored collector metadata");
     var prefab = (CPlugPrefab)result.Value!.EntityModel!;
     Require(prefab.Ents!.Length == 2, "conversion did not build a two-entry prefab");
     var body = (CPlugDynaObjectModel)prefab.Ents[0].Model!;
@@ -709,7 +714,11 @@ Check("drawn path planner validates shape, repeat budget, speed and finite input
     Vector(plan.Start, new(3,2,5));
     Vector(plan.Legs.Aggregate(Vector3.Zero, (v,l) => v+l.Delta), Vector3.Zero);
     Require(!ItemMotionPath.Plan(points, MotionPathUse.Obstacle, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear).Success, "polyline accepted as obstacle");
-    Require(!ItemMotionPath.Plan([..points,new(0,2,21),new(0,2,10)], MotionPathUse.Scenery, MotionPathRepeat.PingPong, 4, KC.AnimEase.Linear).Success, "untested ten-carrier return accepted");
+    var overReturn = Enumerable.Range(0, ItemMotionPath.MaxLegs / 2 + 2).Select(i => new Vector3(i, 2, 0)).ToArray();
+    Require(!ItemMotionPath.Plan(overReturn, MotionPathUse.Scenery, MotionPathRepeat.PingPong, 4, KC.AnimEase.Linear).Success, "over-budget return accepted");
+    var loop = Enumerable.Range(0, ItemMotionPath.MaxLegs).Select(i => new Vector3(100 * MathF.Cos(i * MathF.Tau / ItemMotionPath.MaxLegs), 0, 100 * MathF.Sin(i * MathF.Tau / ItemMotionPath.MaxLegs))).ToArray();
+    Require(Value(ItemMotionPath.Plan(loop, MotionPathUse.Scenery, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear)).Legs.Count == ItemMotionPath.MaxLegs, "maximum loop rejected");
+    Require(!ItemMotionPath.Plan([..loop, new(101,0,0)], MotionPathUse.Scenery, MotionPathRepeat.Closed, 4, KC.AnimEase.Linear).Success, "over-budget closing leg accepted");
     foreach (var speed in new[] { 0f, -1f, float.NaN, float.PositiveInfinity, 1001f })
         Require(!ItemMotionPath.Plan(points, MotionPathUse.Scenery, MotionPathRepeat.Reset, speed, KC.AnimEase.Linear).Success, "invalid speed accepted");
     foreach (var point in new[] { new Vector3(float.NaN,0,0), new Vector3(10001,0,0), Vector3.Zero })

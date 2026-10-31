@@ -1,0 +1,16 @@
+{
+  "game": "Trackmania 2026.2.2.1751",
+  "openplanet": "1.29.14",
+  "routePoints": 128,
+  "durationMs": 71509,
+  "placement": [
+    800,
+    24,
+    800
+  ],
+  "files": {
+    "TMIS_Achtbaan_Bewijs.Item.Gbx": "c0047e5b7d4fdbe91398e21f1c3479866e18b7a61b45386f8ae56a0e7550f79b",
+    "Achtbaan-128punten-Ingame.mp4": "a828a3fbcbedc8065d4e84de3c2f58919522738c9a1682c7f78d6f71ee094a09",
+    "route128.json": "82b46ab3b5248f3dd18afd16c6fb240714e1372fe90ffce2d90f6b1ac64b0dc0"
+  }
+}
