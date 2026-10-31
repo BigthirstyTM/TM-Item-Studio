@@ -1,0 +1,418 @@
+{
+  "SV_ChainBaseline": {
+    "samples": 108,
+    "durationSeconds": 26.75,
+    "positionRanges": [
+      [
+        399.996,
+        399.998
+      ],
+      [
+        8.014,
+        8.015
+      ],
+      [
+        399.996,
+        399.996
+      ]
+    ],
+    "maxVerticalSpeed": 0.001,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999995,
+    "zeroInputs": true,
+    "firstPosition": [
+      399.996,
+      8.015,
+      399.996
+    ],
+    "lastPosition": [
+      399.998,
+      8.014,
+      399.996
+    ]
+  },
+  "SV_ChainPhysicalFlag": {
+    "samples": 108,
+    "durationSeconds": 26.75,
+    "positionRanges": [
+      [
+        399.996,
+        399.999
+      ],
+      [
+        8.014,
+        8.015
+      ],
+      [
+        399.996,
+        399.996
+      ]
+    ],
+    "maxVerticalSpeed": 0.0005,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999993,
+    "zeroInputs": true,
+    "firstPosition": [
+      399.998,
+      8.015,
+      399.996
+    ],
+    "lastPosition": [
+      399.998,
+      8.014,
+      399.996
+    ]
+  },
+  "SV_ChainPhysicalZeroAnim": {
+    "samples": 108,
+    "durationSeconds": 26.75,
+    "positionRanges": [
+      [
+        399.997,
+        399.999
+      ],
+      [
+        8.014,
+        8.015
+      ],
+      [
+        399.996,
+        399.996
+      ]
+    ],
+    "maxVerticalSpeed": 0.001,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999999,
+    "zeroInputs": true,
+    "firstPosition": [
+      399.997,
+      8.015,
+      399.996
+    ],
+    "lastPosition": [
+      399.998,
+      8.014,
+      399.996
+    ]
+  },
+  "SV_CurvedLoopCage": {
+    "samples": 532,
+    "durationSeconds": 132.79699999999139,
+    "positionRanges": [
+      [
+        403.571,
+        445.677
+      ],
+      [
+        16.008,
+        16.043
+      ],
+      [
+        375.723,
+        401.56
+      ]
+    ],
+    "maxVerticalSpeed": 0.1826,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999829,
+    "zeroInputs": true,
+    "firstPosition": [
+      403.571,
+      16.016,
+      399.999
+    ],
+    "lastPosition": [
+      437.064,
+      16.014,
+      400.013
+    ]
+  },
+  "SV_CurvedLoopRepeat": {
+    "samples": 532,
+    "durationSeconds": 132.75,
+    "positionRanges": [
+      [
+        403.485,
+        445.677
+      ],
+      [
+        16.009,
+        16.043
+      ],
+      [
+        375.715,
+        401.558
+      ]
+    ],
+    "maxVerticalSpeed": 0.1513,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.999829,
+    "zeroInputs": true,
+    "firstPosition": [
+      403.485,
+      16.015,
+      399.999
+    ],
+    "lastPosition": [
+      436.865,
+      16.014,
+      400.227
+    ]
+  },
+  "SV_OrbitCage": {
+    "samples": 308,
+    "durationSeconds": 76.75,
+    "positionRanges": [
+      [
+        373.66,
+        402.761
+      ],
+      [
+        16.018,
+        16.202
+      ],
+      [
+        385.249,
+        414.743
+      ]
+    ],
+    "maxVerticalSpeed": 0.191,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.998104,
+    "zeroInputs": true,
+    "firstPosition": [
+      400.616,
+      16.018,
+      398.205
+    ],
+    "lastPosition": [
+      389.949,
+      16.201,
+      385.249
+    ]
+  },
+  "SV_OrbitCageRepeat": {
+    "samples": 595,
+    "durationSeconds": 148.75,
+    "positionRanges": [
+      [
+        371.745,
+        404.533
+      ],
+      [
+        16.013,
+        16.206
+      ],
+      [
+        383.482,
+        416.551
+      ]
+    ],
+    "maxVerticalSpeed": 1.8013,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.998106,
+    "zeroInputs": true,
+    "firstPosition": [
+      400.62,
+      16.018,
+      398.23
+    ],
+    "lastPosition": [
+      389.558,
+      16.02,
+      383.482
+    ]
+  },
+  "SV_OrbitCompoundCage": {
+    "samples": 308,
+    "durationSeconds": 76.73400000002584,
+    "positionRanges": [
+      [
+        389.923,
+        402.132
+      ],
+      [
+        16.017,
+        16.158
+      ],
+      [
+        387.074,
+        412.945
+      ]
+    ],
+    "maxVerticalSpeed": 0.016,
+    "allWheelsAirSamples": 0,
+    "minimumUpY": 0.998887,
+    "zeroInputs": true,
+    "firstPosition": [
+      401.428,
+      16.018,
+      398.504
+    ],
+    "lastPosition": [
+      400.522,
+      16.158,
+      387.133
+    ]
+  },
+  "SV_OverlayHard": {
+    "samples": 284,
+    "durationSeconds": 70.79700000002049,
+    "positionRanges": [
+      [
+        402.344,
+        414.376
+      ],
+      [
+        8.00902,
+        68.485
+      ],
+      [
+        395.963,
+        415.433
+      ]
+    ],
+    "maxVerticalSpeed": 59.1675,
+    "allWheelsAirSamples": 22,
+    "minimumUpY": -0.990008,
+    "zeroInputs": true,
+    "firstPosition": [
+      402.344,
+      16.015,
+      399.999
+    ],
+    "lastPosition": [
+      413.673,
+      8.014,
+      402.235
+    ]
+  },
+  "SV_OverlayOverlap": {
+    "samples": 340,
+    "durationSeconds": 84.90599999998813,
+    "positionRanges": [
+      [
+        400.287,
+        409.221
+      ],
+      [
+        8.9849,
+        16.0918
+      ],
+      [
+        393.207,
+        409.217
+      ]
+    ],
+    "maxVerticalSpeed": 12.4876,
+    "allWheelsAirSamples": 140,
+    "minimumUpY": -0.994845,
+    "zeroInputs": true,
+    "firstPosition": [
+      400.287,
+      16.014,
+      399.997
+    ],
+    "lastPosition": [
+      409.195,
+      8.99187,
+      394.284
+    ]
+  },
+  "SV_OverlaySoft1": {
+    "samples": 284,
+    "durationSeconds": 70.75,
+    "positionRanges": [
+      [
+        402.332,
+        409.983
+      ],
+      [
+        8.0034,
+        16.5092
+      ],
+      [
+        395.183,
+        399.999
+      ]
+    ],
+    "maxVerticalSpeed": 14.3551,
+    "allWheelsAirSamples": 167,
+    "minimumUpY": -0.978996,
+    "zeroInputs": true,
+    "firstPosition": [
+      402.332,
+      16.015,
+      399.999
+    ],
+    "lastPosition": [
+      409.504,
+      8.99218,
+      399.649
+    ]
+  },
+  "SV_OverlaySoft2": {
+    "samples": 284,
+    "durationSeconds": 70.75,
+    "positionRanges": [
+      [
+        402.487,
+        411.122
+      ],
+      [
+        8.00545,
+        16.2274
+      ],
+      [
+        395.311,
+        399.999
+      ]
+    ],
+    "maxVerticalSpeed": 15.2044,
+    "allWheelsAirSamples": 2,
+    "minimumUpY": 0.748937,
+    "zeroInputs": true,
+    "firstPosition": [
+      402.487,
+      16.015,
+      399.999
+    ],
+    "lastPosition": [
+      411.121,
+      8.014,
+      397.583
+    ]
+  },
+  "SV_OverlaySoftOut": {
+    "samples": 451,
+    "durationSeconds": 112.93700000000536,
+    "positionRanges": [
+      [
+        399.519,
+        417.525
+      ],
+      [
+        8.014,
+        27.8592
+      ],
+      [
+        399.992,
+        415.902
+      ]
+    ],
+    "maxVerticalSpeed": 25.4025,
+    "allWheelsAirSamples": 47,
+    "minimumUpY": -0.979755,
+    "zeroInputs": true,
+    "firstPosition": [
+      400.27,
+      16.0309,
+      399.992
+    ],
+    "lastPosition": [
+      416.755,
+      8.014,
+      415.6
+    ]
+  }
+}

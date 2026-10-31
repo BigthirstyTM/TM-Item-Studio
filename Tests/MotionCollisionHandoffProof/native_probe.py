@@ -16,6 +16,7 @@ p.add_argument('item', help='Registered inventory model, e.g. TMIS_CH_CornerOver
 p.add_argument('label', help='Unique run/map basename; use a new label for repeats')
 p.add_argument('--output', type=Path, required=True)
 p.add_argument('--seconds', type=int, default=32)
+p.add_argument('--wide-camera', action='store_true', help='Frame the larger two-line/two-arc fixture')
 p.add_argument('--helper', type=Path, default=Path('C:/Users/PC/OpenplanetPlugins/tm-control-mcp/tools/call.py'))
 a = p.parse_args()
 if not 20 <= a.seconds <= 300 or not a.label.replace('_', '').isalnum():
@@ -62,6 +63,14 @@ else:
     raise RuntimeError('Editor not ready')
 if call('GetItems')['total'] != 0:
     raise RuntimeError('New fixture is not empty; refusing placement')
+call('tm-mcp-pack-epp.RefreshInventory')
+for _ in range(20):
+    inventory = call('tm-mcp-pack-epp.FindInventory', dict(query=a.item, limit=20))
+    if any(entry.get('path') == a.item for entry in inventory.get('results', [])):
+        break
+    time.sleep(.5)
+else:
+    raise RuntimeError('Requested fixture is not registered in the native inventory')
 call('tm-mcp-pack-epp.SetAgentTag', dict(tag='tmis:handoff'))
 call('tm-mcp-pack-epp.PlaceItem', dict(itemPath=a.item,x=400,y=15,z=400,tag='tmis:handoff'))
 items = call('GetItems')
@@ -80,13 +89,15 @@ with (a.output / (a.label + '-record.log')).open('w') as log:
     try:
         call('ControlValidation',dict(action='testFromCoord',x=12,y=10,z=12,dir='North'))
         time.sleep(2)
-        call('ControlPlayCamera',dict(action='set_position',x=432,y=48,z=446,
-             target=dict(x=393,y=14,z=400),fov=55))
+        camera = (dict(x=416,y=70,z=420,target=dict(x=416,y=14,z=388),fov=50)
+                  if a.wide_camera else dict(x=432,y=48,z=446,target=dict(x=393,y=14,z=400),fov=55))
+        call('ControlPlayCamera',dict(action='set_position',**camera))
         start = time.monotonic()
         while time.monotonic()-start < a.seconds-5:
             s = call('GetVehicleState')['state']
             samples.append(dict(t=time.monotonic()-start,position=s['position'],
-                velocity=s['worldVel'],gas=s['inputGasPedal'],steer=s['inputSteer'],wheels=s['wheels']))
+                velocity=s['worldVel'],gas=s['inputGasPedal'],steer=s['inputSteer'],
+                brake=s['inputBrakePedal'],up=s['up'],direction=s['dir'],wheels=s['wheels']))
             time.sleep(.1)
         if recorder.wait(timeout=15) != 0:
             raise RuntimeError('Recording failed; inspect record log')
@@ -95,7 +106,7 @@ with (a.output / (a.label + '-record.log')).open('w') as log:
         if recorder.poll() is None:
             recorder.terminate()
             recorder.wait(timeout=10)
-if not samples or any(s['gas'] != 0 or s['steer'] != 0 for s in samples):
+if not samples or any(s['gas'] != 0 or s['steer'] != 0 or s['brake'] != 0 for s in samples):
     raise RuntimeError('Missing telemetry or driver input invalidates passive-car test')
 call('tm-mcp-pack-epp.SetAgentTag', dict(tag=''))
 leave_fixture()
