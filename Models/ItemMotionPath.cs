@@ -21,7 +21,7 @@ public sealed record MotionPathPlan(Vector3 Start, MotionPathUse Use, MotionPath
 public static class ItemMotionPath
 {
     // A tested product bound, distinct from the engine's FOUR KEYS PER CHANNEL limit.
-    public const int MaxLegs = 8;
+    public const int MaxLegs = 128;
 
     public static ItemMotionResult<MotionPathPlan> Plan(IReadOnlyList<Vector3> points,
         MotionPathUse use, MotionPathRepeat repeat, float speed, KC.AnimEase ease, int pauseMs = 0)

@@ -1184,7 +1184,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
                 return;
             }
             const point = pickDrawPoint(raycaster);
-            if (point && point.length() <= 10000 && drawPathPoints.length < 9
+            if (point && point.length() <= 10000 && drawPathPoints.length < 129
                 && (!drawPathPoints.length || point.distanceTo(drawPathPoints.at(-1)) >= .01)) {
                 drawPathPoints.push(point);
                 renderDrawPathVisual();
@@ -2034,7 +2034,7 @@ window.setDrawPathMode = function (enabled, planeY, plane = 'XZ') {
 window.undoDrawnPathPoint = function () { drawPathPoints.pop(); renderDrawPathVisual(); };
 window.setDrawPathRepeat = function (repeat) { drawPathRepeat = repeat; renderDrawPathVisual(); };
 window.setDrawnPathPoints = function (points) {
-    if (!Array.isArray(points) || points.length > 9 || points.some(p => ![p.x,p.y,p.z].every(Number.isFinite)
+    if (!Array.isArray(points) || points.length > 129 || points.some(p => ![p.x,p.y,p.z].every(Number.isFinite)
         || Math.hypot(p.x,p.y,p.z) > 10000)) throw new Error('Invalid path coordinates.');
     drawPathPoints = points.map(p => new THREE.Vector3(p.x,p.y,p.z));
     renderDrawPathVisual();

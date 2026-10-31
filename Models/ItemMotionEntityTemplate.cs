@@ -261,6 +261,14 @@ public static class ItemKinematicEntityTemplate
         converted.OrbitalRadiusBase = source.OrbitalRadiusBase;
         converted.Icon = source.Icon;
         converted.IconWebP = source.IconWebP;
+        converted.Description = source.Description;
+        converted.PageName = source.PageName;
+        converted.CatalogPosition = source.CatalogPosition;
+        converted.CopperPrice = source.CopperPrice;
+        converted.NbAvailableMin = source.NbAvailableMin;
+        converted.NbAvailableMax = source.NbAvailableMax;
+        converted.WaypointType = source.WaypointType;
+        converted.DisableLightmap = source.DisableLightmap;
 
         var binding = ItemMotionBindings.Resolve(constraint, prefab, parameters, "doc:0/variant:none/root");
         if (binding.Status != ItemMotionStatus.Supported)
