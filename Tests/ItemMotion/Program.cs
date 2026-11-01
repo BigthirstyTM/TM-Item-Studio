@@ -30,6 +30,14 @@ Check("full-detail arrays preserve the segment budget when shifting copies",()=>
  p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),129).ToArray()};
  var shifted=ItemMotionArray.Shift(p,500);Require(shifted.Legs.Count==128,"phase split exceeded budget");Require(shifted.DurationMs==p.DurationMs&&shifted.StartDelayMs==8000,"loop or dwell changed");Require(ItemMotionPath.Validate(shifted).Success,"invalid shifted full-detail route");
 });
+Check("smoothed routes build arrays with three and eight followers",()=>{
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+ foreach(var detail in new[]{2,8,16}) {
+  var p=ItemMotionSmoothPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20),new(0,0,20)],MotionPathRepeat.Closed,5,.6f,detail).Value!;
+  p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),p.Legs.Count+1).ToArray()};
+  foreach(var count in new[]{3,8}){var built=ItemMotionPath.Build(source,p with{Array=new(count,1000)});Require(built.Success,built.Reason??"smooth array");}
+ }
+});
 Check("array clock rebasing preserves constant acceleration and route closure",()=>{
  var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20),new(0,0,20)],MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;
  p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray()};

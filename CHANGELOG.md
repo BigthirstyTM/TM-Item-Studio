@@ -4,6 +4,8 @@ All notable changes to TM Item Studio are documented in this file.
 
 ## [0.5.14] - 2026-11-01
 
+- Preserve array settings when switching to or regenerating a smooth path, including direct Apply smooth path.
+
 - Fix arrays failing when a third or later follower splits a route segment below the native minimum duration or distance. Such offsets now snap to the nearest route point, consistently in preview and export, instead of rejecting the entire array. Maximum-detail paths also avoid adding a 129th segment. The panel explains the possible spacing adjustment.
 
 ## [0.5.13] - 2026-11-01
