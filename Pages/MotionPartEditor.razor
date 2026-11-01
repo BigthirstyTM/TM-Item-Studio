@@ -1,0 +1,39 @@
+@using TM_Item_Studio.Models
+@using System.Numerics
+@using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
+<details class="border rounded p-2 my-2" data-testid="path-parts-editor">
+    <summary class="fw-bold">Separate wings, wheels &amp; propellers</summary>
+    <p class="small text-muted mt-2">Select an existing separate visual mesh and set its pivot in source-model coordinates. Fused geometry cannot be automatically identified as a wing or wheel. Scenery only; keep at least one mesh as the main body.</p>
+    @if(VisualCount<2 || Plan.Use!=MotionPathUse.Scenery) {
+        <p class="small text-info">This source needs a single kinematic body with at least two separate decoded visual meshes, in scenery mode. Split the model in Blender and import it before adding part animation.</p>
+    } else {
+        <div class="small">Moving mesh</div><SearchableSelect Label="Animated visual mesh" Options="Visuals" Value="@Visuals[visual]" ValueChanged="ChooseVisual" />
+        <label class="small d-block mt-2">Movement<select aria-label="Part movement" class="form-select form-select-sm" @bind="kind"><option value="@MotionPartKind.Wing">Wing · oscillating hinge</option><option value="@MotionPartKind.Wheel">Wheel · rotate with travelled distance</option><option value="@MotionPartKind.Propeller">Propeller · continuous spin</option></select></label>
+        <div class="row g-1"><div class="col-4"><label class="small">Pivot X<input aria-label="Part pivot X" type="number" step="any" class="form-control form-control-sm" @bind="x" /></label></div><div class="col-4"><label class="small">Pivot Y<input aria-label="Part pivot Y" type="number" step="any" class="form-control form-control-sm" @bind="y" /></label></div><div class="col-4"><label class="small">Pivot Z<input aria-label="Part pivot Z" type="number" step="any" class="form-control form-control-sm" @bind="z" /></label></div></div>
+        <label class="small d-block">Axis<select aria-label="Part rotation axis" class="form-select form-select-sm" @bind="axis"><option value="@KC.EAxis.X">X</option><option value="@KC.EAxis.Y">Y</option><option value="@KC.EAxis.Z">Z</option></select></label>
+        @if(kind==MotionPartKind.Wing) {
+            <div class="row g-1"><div class="col-6"><label class="small">Minimum degrees<input aria-label="Part minimum angle" type="number" class="form-control form-control-sm" @bind="min" /></label></div><div class="col-6"><label class="small">Maximum degrees<input aria-label="Part maximum angle" type="number" class="form-control form-control-sm" @bind="max" /></label></div></div>
+        }
+        @if(kind==MotionPartKind.Wheel) {
+            <label class="small d-block">Wheel radius (m)<input aria-label="Wheel radius" type="number" min="0.01" step="0.01" class="form-control form-control-sm" @bind="radius" /></label>
+            <p class="small text-muted">Wheel speed follows each segment's average travel speed. On a closed route its spin phase resets at the loop boundary; this is a visual wheel, not a physical tyre.</p>
+        } else {<label class="small d-block">Full cycle (ms)<input aria-label="Part period" type="number" min="160" step="10" class="form-control form-control-sm" @bind="period" /></label>}
+        <label class="small d-block"><input type="checkbox" @bind="reverse" /> Reverse / mirror motion</label>
+        <button class="btn btn-sm btn-outline-primary my-2" @onclick="Save">Set animation for this mesh</button>
+        <button class="btn btn-sm btn-outline-secondary ms-1" @onclick="Remove">Remove this part animation</button>
+        <p class="small text-muted">@((Plan.Parts?.Length??0)) animated parts. Select a configured mesh to edit its settings. Preview and Apply use the same pivots and animation channels.</p>
+    }
+    @if(error is not null){<p class="small text-danger" role="alert">@error</p>}
+</details>
+@code {
+    [Parameter,EditorRequired] public MotionPathPlan Plan{get;set;}=default!;
+    [Parameter] public int VisualCount{get;set;}
+    [Parameter] public EventCallback<MotionPathPlan> Changed{get;set;}
+    private int visual,period=700;private float x,y,z,min=-25,max=40,radius=.4f;private bool reverse;private KC.EAxis axis;private MotionPartKind kind;private string? error;
+    private string[] Visuals=>Enumerable.Range(0,VisualCount).Select(i=>$"Visual mesh {i+1}"+(Plan.Parts?.Any(p=>p.VisualIndex==i)==true?" · animated":"")).ToArray();
+    protected override void OnParametersSet(){visual=Math.Clamp(visual,0,Math.Max(0,VisualCount-1));}
+    private Task ChooseVisual(ChangeEventArgs e){int i=Array.IndexOf(Visuals,e.Value?.ToString());if(i>=0){visual=i;var p=Plan.Parts?.FirstOrDefault(p=>p.VisualIndex==i);if(p is not null){kind=p.Kind;x=p.Pivot.X;y=p.Pivot.Y;z=p.Pivot.Z;axis=p.Axis;min=p.MinimumAngle;max=p.MaximumAngle;period=p.PeriodMs;radius=p.Radius;reverse=p.Reverse;}}return Task.CompletedTask;}
+    private async Task Save(){var part=new MotionPathPart(visual,kind,new(x,y,z),axis,min,max,period,radius,reverse);var parts=(Plan.Parts??[]).Where(p=>p.VisualIndex!=visual).Append(part).ToArray();if(parts.Length>=VisualCount){error="Keep at least one mesh as the main body.";return;}await Commit(Plan with{Parts=parts,Rotations=Plan.Rotations??ItemMotionPathProfile.FollowDirection(Plan)});}
+    private Task Remove()=>Commit(Plan with{Parts=Plan.Parts?.Where(p=>p.VisualIndex!=visual).ToArray()});
+    private async Task Commit(MotionPathPlan p){var c=ItemMotionPathProfile.Compile(p);error=c.Reason;if(c.Success)await Changed.InvokeAsync(p);}
+}

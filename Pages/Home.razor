@@ -744,7 +744,7 @@
                                 : drawPathUse == MotionPathUse.CollisionRelay ? "Experimental collision relay: decoded static triangle meshes only, up to 128 segments. Keeps orientation. Parking distance is not a stability guarantee."
                                 : $"Keeps the model orientation. Up to {ItemMotionPath.MaxLegs} legs including the return. Removes the moving body's full-size collider; static parts remain: parent-driven collision does not follow this path in Trackmania.")</p>
                             <div class="d-flex flex-wrap gap-1 mb-2">
-                                <button class="btn btn-sm btn-outline-primary" @onclick="ToggleDrawPathCapture" aria-label="@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")" title="Place points by clicking the selected plane. Right-drag orbits the camera.">@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")</button>
+                                <button class="btn btn-sm @(drawPathCaptureEnabled ? "btn-primary active" : "btn-outline-primary")" aria-pressed="@drawPathCaptureEnabled.ToString().ToLowerInvariant()" @onclick="ToggleDrawPathCapture" aria-label="@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")" title="Place points by clicking the selected plane. Drag existing points to reposition them.">@(drawPathCaptureEnabled ? "Stop drawing" : "Start drawing")</button>
                                 <button class="btn btn-sm btn-outline-secondary" @onclick="UndoDrawPath" aria-label="Undo point" title="Remove the last drawn point without changing applied motion.">Undo point</button>
                                 <button class="btn btn-sm btn-outline-secondary" @onclick="ClearDrawPath" aria-label="Clear points" title="Clear route points without changing applied motion.">Clear points</button>
                             </div>
@@ -752,11 +752,18 @@
                                 <select class="form-select form-select-sm" aria-label="Path anchor" title="Choose the point of the moving mesh that follows the route." @bind="drawPathAnchorMode" @bind:after="RefreshPathAnchorPreview">
                                     <option value="centre">Mesh centre follows path</option><option value="origin">Body origin follows path</option>
                                 </select>
-                                <button class="btn btn-sm btn-success" aria-label="Preview path" title="Play the route without modifying or converting the item." @onclick="PreviewDrawPath">Preview path</button>
+                                <button class="btn btn-sm @(drawPathPreviewActive && !smoothPathPreview ? "btn-success active" : "btn-outline-success")" aria-pressed="@((drawPathPreviewActive && !smoothPathPreview).ToString().ToLowerInvariant())" aria-label="Preview path" title="Play the route without modifying or converting the item." @onclick="PreviewDrawPath">Preview path</button>
                                 <button class="btn btn-sm btn-outline-secondary" aria-label="Stop path preview" title="Stop the draft animation and restore the item's own motion." @onclick="StopDrawPathPreview">Stop preview</button>
                                 <button class="btn btn-sm btn-outline-secondary" aria-label="Fit path in view" title="Frame the entire drawn route and moving mesh." @onclick="FitDrawPath">Fit path</button>
                             </div>
-                            <small class="d-block text-muted mb-2">While drawing, drag an orange point to move it. Preview updates when a point or setting changes. The draft does not change the exported item until Apply path.</small>
+                            <div class="d-flex flex-wrap gap-1 mb-2" role="group" aria-label="Path editing view">
+                                @foreach(var view in new[]{"free","top","front","right"}) {
+                                    var v=view;
+                                    <button class="btn btn-sm @(drawPathView==v ? "btn-primary active" : "btn-outline-primary")" aria-label="@($"Path view {v}")" aria-pressed="@((drawPathView==v).ToString().ToLowerInvariant())" @onclick="()=>SetPathView(v)">@(v=="free"?"Free camera":v=="right"?"Side · locked":v=="top"?"Top · locked":"Front · locked")</button>
+                                }
+                            </div>
+                            <small class="d-block text-muted mb-2">Locked views keep the camera still while you drag points; scroll to zoom. Top edits X/Z, front X/Y, side Y/Z. Each point keeps its depth. Preview updates after a drag. Apply is required to change the item.</small>
+                            @if(!string.IsNullOrEmpty(drawPathPreviewError)) { <div class="small text-danger" role="alert">@drawPathPreviewError</div> }
                             <label class="form-label small" for="pathCoordinates">Points: one X Y Z per line (metres, decimal point)</label>
                             <textarea id="pathCoordinates" aria-label="Path coordinates" title="Enter one X Y Z position per line, then choose Use coordinates." class="form-control form-control-sm font-monospace" rows="4" @bind="drawPathCoordinates" placeholder="X Y Z (one point per line)"></textarea>
                             <div class="d-flex flex-wrap gap-1 mt-2">
@@ -766,6 +773,7 @@
                             </div>
                             <small class="text-muted mt-1">Apply replaces the previous generated path. Manual coordinates need “Use coordinates” first. Combined-file view is not editable here.</small>
                             @if (!string.IsNullOrWhiteSpace(drawPathStatusMessage)) { <div class="small text-info mt-2">@drawPathStatusMessage</div> }
+                            <div id="draw-path-playback-status" class="small text-info" role="status" aria-live="polite"></div>
                         </details>
                         <details class="border rounded p-2 mb-2" data-testid="smooth-motion-path">
                             <summary class="fw-bold">Smooth scenery path</summary>
@@ -778,14 +786,14 @@
                             </select>
                             <small class="d-block text-muted mb-2">Up to 128 total legs, including the return. Short corners use fewer segments to respect native timing limits. Preview uses the same route as export.</small>
                             <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-sm btn-success" aria-label="Preview smooth path" title="Preview the rounded route without changing the item." @onclick="PreviewSmoothPath">Preview smooth path</button>
+                                <button class="btn btn-sm @(drawPathPreviewActive && smoothPathPreview ? "btn-success active" : "btn-outline-success")" aria-pressed="@((drawPathPreviewActive && smoothPathPreview).ToString().ToLowerInvariant())" aria-label="Preview smooth path" title="Preview the rounded route without changing the item." @onclick="PreviewSmoothPath">Preview smooth path</button>
                                 <button class="btn btn-sm btn-outline-secondary" aria-label="Stop smooth preview" title="Stop the draft and restore authored playback." @onclick="StopDrawPathPreview">Stop preview</button>
                                 <button class="btn btn-sm btn-primary" aria-label="Apply smooth path" title="Replace spatial movement with the rounded scenery route; remove moving-body collision." @onclick="ConvertSmoothPathToMotion" disabled="@compositeViewportMode">Apply smooth path</button>
                             </div>
                         </details>
                         @if (editablePathPlan is not null)
                         {
-                            <MotionPathEditor Plan="editablePathPlan" Index="selectedPathSegment" IndexChanged="SelectPathSegment" FullPath="showFullPath" FullPathChanged="ShowFullPath" Changed="EditPathPlan" Preview="PreviewEditedPath" Apply="ApplyEditedPath" />
+                            <MotionPathEditor VisualCount="PathSourceVisualCount" Plan="editablePathPlan" Index="selectedPathSegment" IndexChanged="SelectPathSegment" FullPath="showFullPath" FullPathChanged="ShowFullPath" Changed="EditPathPlan" Preview="PreviewEditedPath" Apply="ApplyEditedPath" />
                         }
                         <div class="border rounded p-2 mb-2">
                             <button class="btn btn-sm btn-outline-secondary mb-2" title="Download the compiled points and complete segment timing for later editing." disabled="@(editablePathPlan is null)" @onclick="SavePathDraft">Save route draft (.json)</button>
@@ -2151,6 +2159,8 @@ else if (itemModel is null)
     private bool drawPathCaptureEnabled;
     private string drawPathAnchorMode = "centre";
     private bool drawPathPreviewActive;
+    private string drawPathView = "free";
+    private string? drawPathPreviewError;
     private bool smoothPathPreview;
     private MotionPathPlan? editablePathPlan;
     private int selectedPathSegment;
@@ -2194,6 +2204,7 @@ else if (itemModel is null)
     private string drawPathPlane = "XZ";
     private float drawPathPlaneOffset;
     private string drawPathCoordinates = "";
+    private int PathSourceVisualCount => ((drawPathOriginal ?? itemModel?.EntityModel as CPlugPrefab)?.Ents.Select(e=>e.Model).OfType<CPlugDynaObjectModel>().FirstOrDefault()?.Mesh as CPlugSolid2Model)?.Visuals?.Count ?? 0;
     private CPlugPrefab? drawPathOriginal;
     private CPlugPrefab? drawPathGenerated;
     private CMwNod? drawPathBefore;
@@ -2733,7 +2744,8 @@ else if (itemModel is null)
         drawPathCaptureEnabled = false;
         drawPathCoordinates = "";
         drawPathStatusMessage = null;
-        if (isViewerInitialized) { await UpdateDrawPlane(); await JS.InvokeVoidAsync("clearDrawnPath"); }
+        drawPathView="free";drawPathPreviewError=null;
+        if (isViewerInitialized) { await UpdateDrawPlane(); await JS.InvokeVoidAsync("setDrawPathView","free"); await JS.InvokeVoidAsync("clearDrawnPath"); }
         activeVariantIndex = index;
         var source = variantSources[index];
         if (!ReferenceEquals(itemModel, source.Model))
@@ -3166,7 +3178,15 @@ else if (itemModel is null)
         await RefreshDebugDiagnostics();
     }
 
-    private Task UpdateDrawPlane() => JS.InvokeVoidAsync("setDrawPathMode", drawPathCaptureEnabled, drawPathPlaneOffset, drawPathPlane).AsTask();
+    private async Task UpdateDrawPlane() {
+        await JS.InvokeVoidAsync("setDrawPathMode",drawPathCaptureEnabled,drawPathPlaneOffset,drawPathPlane);
+        if(drawPathView!="free") {drawPathView=drawPathPlane=="XZ"?"top":drawPathPlane=="XY"?"front":"right";await JS.InvokeVoidAsync("setDrawPathView",drawPathView);}
+    }
+    private async Task SetPathView(string view) {
+        drawPathView=view;
+        if(view!="free")drawPathPlane=view=="top"?"XZ":view=="front"?"XY":"YZ";
+        await UpdateDrawPlane();await JS.InvokeVoidAsync("setDrawPathView",view);
+    }
 
     private async Task ToggleDrawPathCapture()
     {
@@ -3179,11 +3199,23 @@ else if (itemModel is null)
         await JS.InvokeVoidAsync("clearDrawnPath");
         await StopDrawPathPreview();
         drawPathCoordinates = "";
+        editablePathPlan=null;await SyncPathSegments();
         drawPathStatusMessage = "Points cleared; the applied motion is unchanged.";
     }
     private async Task UndoDrawPath() { await JS.InvokeVoidAsync("undoDrawnPathPoint"); await ReadDrawPathCoordinates(); await RefreshDrawPathPreview(); }
     [JSInvokable]
-    public async Task OnDrawPathChanged() { await ReadDrawPathCoordinates(); await RefreshDrawPathPreview(); StateHasChanged(); }
+    public async Task OnDrawPathChanged() {
+        var previous=editablePathPlan;var playing=drawPathPreviewActive;
+        await ReadDrawPathCoordinates();
+        var points=await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
+        var planned=PlanDrawPath(points,smoothPathPreview);
+        if(!planned.Success){errorMessage=drawPathPreviewError=planned.Reason;await StopDrawPathPreview();editablePathPlan=null;await SyncPathSegments();StateHasChanged();return;}
+        var updated=planned.Value!;
+        if(previous is not null && updated.Legs.Count==previous.Legs.Count)updated=updated with{SpeedPoints=previous.SpeedPoints,Rotations=previous.Rotations,ContinuousVelocity=previous.ContinuousVelocity,RampDetail=previous.RampDetail,Behavior=previous.Behavior,Parts=previous.Parts};
+        editablePathPlan=updated;
+        if(playing)await PreviewPlannedPath(updated,smoothPathPreview);else await SyncPathSegments();
+        StateHasChanged();
+    }
     private async Task ReadDrawPathCoordinates()
     {
         var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
@@ -3212,6 +3244,7 @@ else if (itemModel is null)
     {
         await JS.InvokeVoidAsync("setDrawPathRepeat", drawPathRepeat.ToString());
         if (drawPathPreviewActive) await PreviewPath(smoothPathPreview);
+        else editablePathPlan=null;
     }
     private Task FitDrawPath() => JS.InvokeVoidAsync("fitDrawPath").AsTask();
     private async Task StopDrawPathPreview()
@@ -3219,7 +3252,7 @@ else if (itemModel is null)
         drawPathPreviewActive = false;
         await JS.InvokeVoidAsync("stopDrawPathPreview");
     }
-    private Task PreviewDrawPath() => PreviewPath(false);
+    private Task PreviewDrawPath() => editablePathPlan is not null ? PreviewPlannedPath(editablePathPlan,smoothPathPreview) : PreviewPath(false);
     private Task PreviewSmoothPath() => PreviewPath(true);
     private ItemMotionResult<MotionPathPlan> PlanDrawPath(DrawPathPointDto[] points, bool smooth)
         => smooth
@@ -3232,7 +3265,7 @@ else if (itemModel is null)
         if (itemModel is null || compositeViewportMode) return;
         var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
         var planned = PlanDrawPath(points, smooth);
-        if (!planned.Success) { await StopDrawPathPreview(); errorMessage = planned.Reason; return; }
+        if (!planned.Success) { await StopDrawPathPreview(); errorMessage = drawPathPreviewError = planned.Reason; return; }
         var plan = planned.Value!;
         editablePathPlan = plan;
         smoothPathPreview = smooth;
@@ -3241,7 +3274,7 @@ else if (itemModel is null)
     private async Task EditPathPlan(MotionPathPlan plan)
     {
         editablePathPlan = plan;
-        await PreviewPlannedPath(plan, true);
+        await PreviewPlannedPath(plan, smoothPathPreview);
     }
     private Task PreviewEditedPath() => editablePathPlan is null ? Task.CompletedTask : EditPathPlan(editablePathPlan);
     private Task RefreshPathAnchorPreview() => drawPathPreviewActive && editablePathPlan is not null
@@ -3272,13 +3305,15 @@ else if (itemModel is null)
     {
         if (itemModel is null || compositeViewportMode) return;
         var compiled = ItemMotionPathProfile.Compile(plan);
-        if (!compiled.Success) { errorMessage = compiled.Reason; return; }
+        if (!compiled.Success) { errorMessage = drawPathPreviewError = compiled.Reason; return; }
         plan = compiled.Value!;
-        await JS.InvokeVoidAsync("previewDrawPath", new {
+        drawPathPreviewError=null;
+        try { await JS.InvokeVoidAsync("previewDrawPath", new {
             start = new { x=plan.Start.X, y=plan.Start.Y, z=plan.Start.Z },
-            legs = plan.Legs.Select(l => new { delta = new { x=l.Delta.X,y=l.Delta.Y,z=l.Delta.Z }, l.StartMs,l.MoveMs }),
-            plan.DurationMs, rotations=plan.Rotations, ease=(int)plan.Ease, obstacle=plan.Use == MotionPathUse.Obstacle, curved=smooth
-        }, drawPathAnchorMode == "centre");
+            legs = plan.Legs.Select(l => new { delta = new { x=l.Delta.X,y=l.Delta.Y,z=l.Delta.Z }, l.StartMs,l.MoveMs,l.VelocityRatio }),
+            plan.DurationMs, parts=plan.Parts?.Select(p=>new {p.VisualIndex,p.Kind,p.Axis,p.MinimumAngle,p.MaximumAngle,p.PeriodMs,p.Radius,p.Reverse,pivot=new {x=p.Pivot.X,y=p.Pivot.Y,z=p.Pivot.Z}}), rotations=plan.Rotations, ease=(int)plan.Ease, obstacle=plan.Use == MotionPathUse.Obstacle, curved=smooth
+        }, drawPathAnchorMode == "centre"); }
+        catch(JSException ex) {drawPathPreviewActive=false;errorMessage=drawPathPreviewError="Cannot preview route: "+ex.Message;return;}
         drawPathPreviewActive = true;
         await SyncPathSegments();
         errorMessage = null;
@@ -3289,6 +3324,7 @@ else if (itemModel is null)
     private async Task ApplyDrawPath(bool smooth)
     {
         if (itemModel is null || compositeViewportMode) return;
+        if(editablePathPlan is not null && smooth==smoothPathPreview) {await ApplyPlannedPath(ItemMotionResult<MotionPathPlan>.Ok(editablePathPlan));return;}
         var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
         var planned = PlanDrawPath(points, smooth);
         if (!planned.Success) { errorMessage = planned.Reason; return; }

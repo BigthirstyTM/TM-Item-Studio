@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const path=require('node:path');
 const fs=require('node:fs');
 (async()=>{
- const out=path.resolve(__dirname,'../../artifacts/coaster-flight/profile');fs.mkdirSync(out,{recursive:true});
+ const out=path.resolve(__dirname,process.env.PROFILE_CONTINUOUS?'../../artifacts/coaster-inertia/browser':'../../artifacts/coaster-flight/profile');fs.mkdirSync(out,{recursive:true});
  const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
  try {
   const page=await browser.newPage({viewport:{width:1500,height:1000},acceptDownloads:true});
@@ -34,6 +34,7 @@ const fs=require('node:fs');
   await speed.getByLabel('Ramp to point',{exact:true}).selectOption({label:'Point 3'});
   await speed.getByRole('button',{name:'Apply speed ramp',exact:true}).click();
   await page.waitForTimeout(150);
+  if(process.env.PROFILE_CONTINUOUS) { await speed.getByLabel('Continuous speed ramps',{exact:true}).check(); await page.waitForFunction(()=>drawPathDraft.plan.legs.some(l=>l.velocityRatio!==1)); }
   // Save the editable profile, not the subdivided export; restoration must be exact.
   const save=page.waitForEvent('download');await page.getByRole('button',{name:'Save route draft (.json)',exact:true}).click();
   const draft=path.join(out,'ramp-pose.motion-path.json');await(await save).saveAs(draft);
@@ -44,7 +45,7 @@ const fs=require('node:fs');
   // Snapshot ghost transforms before Apply, then compare native-graph visual matrices.
   const expected=await page.evaluate(()=>drawPathDraft.plan.legs.map((l,i)=>{
    applyDrawPathPreview(drawPathDraft.started+l.startMs+l.moveMs/2);
-   return {time:l.startMs+l.moveMs/2,matrix:drawPathDraft.ghost.matrix.toArray(),body:drawPathDraft.plan.legs.length+4*i+3};
+   return {time:l.startMs+l.moveMs/2,matrix:drawPathDraft.ghost.matrix.toArray(),body:drawPathDraft.plan.legs.length+4*i+3+drawPathDraft.plan.legs.slice(0,i+1).filter(l=>l.velocityRatio!==1).length};
   }));
   await page.getByTestId('path-segment-editor').screenshot({path:path.join(out,'profile-controls.png')});
   await page.getByRole('button',{name:'Apply edited route',exact:true}).click();
@@ -64,6 +65,15 @@ const fs=require('node:fs');
   const download=page.waitForEvent('download');await page.getByRole('button',{name:/Export selected file/}).click();
   await(await download).saveAs(path.join(out,'TMIS_Profile_RampPose.Item.Gbx'));
   fs.writeFileSync(path.join(out,'preview-export-comparison.json'),JSON.stringify({compiled,errors:actual},null,2));
+  if(process.env.PROFILE_CONTINUOUS) {
+   const behavior=page.getByTestId('motion-behavior-editor'); await behavior.locator(':scope > summary').click();
+   for(let template=1;template<=5;template++) {
+    await behavior.getByLabel('Movement template',{exact:true}).selectOption({index:template});
+    await behavior.getByRole('button',{name:'Apply movement template',exact:true}).click();
+    await page.waitForTimeout(150); assert.equal(await behavior.locator('[role=alert]').count(),0);
+    assert.ok(await page.evaluate(()=>drawPathDraft.plan.legs.some(l=>l.velocityRatio!==undefined)));
+   }
+  }
   assert.deepEqual(errors,[]);console.log('PASS curve/ramp controls, rotation, selection sync, JSON, preview/export transform parity and item export');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

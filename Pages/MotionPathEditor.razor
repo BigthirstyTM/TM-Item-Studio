@@ -4,6 +4,8 @@
 
 <details class="border rounded p-2 my-2" open data-testid="path-segment-editor">
     <summary class="fw-bold">Path segments &amp; timing</summary>
+    <label class="small d-block mt-2">Total loop time (seconds)<input aria-label="Total path loop time" class="form-control form-control-sm" type="number" min="0.08" step="0.1" value="@F(DisplayPlan.DurationMs/1000d)" @onchange="ChangeLoopTime" /></label>
+    <small class="text-muted">Scales movement speeds together and preserves speed ramps. Includes start delay and waypoint pauses, which stay unchanged. Native millisecond rounding may slightly adjust the result.</small>
     <p class="small text-muted mt-2">@Plan.Legs.Count segments · @(DisplayPlan.DurationMs / 1000d) s per cycle. Edits update the draft; choose Apply edited route to change the item. Timing changes shift all following segments together. Generating a new straight or smooth route replaces these segment edits. This route editor retains the current session's draft.</p>
     @if (Plan.Use == MotionPathUse.CollisionRelay)
     {
@@ -66,7 +68,7 @@
             <div class="col-6"><label class="small">Duration (seconds)<input aria-label="Segment duration" disabled="@(Plan.SpeedPoints is not null)" title="Set travel duration for this segment, at least 0.08 seconds. All following start times update together." class="form-control form-control-sm" type="number" min="0.08" step="0.01" value="@F(leg.MoveMs/1000d)" @onchange="ChangeDuration" /></label></div>
         </div>
         <p class="small text-muted mt-2">Length @F(leg.Delta.Length()) m · starts at @F(leg.StartMs/1000d) s. Position edits keep duration. Shared endpoints move together; ping-pong geometry stays mirrored. Straight obstacle return timing is linked.</p>
-        <MotionPathProfileEditor Plan="Plan" Changed="Changed" Index="Index" IndexChanged="IndexChanged" />
+        <MotionPathProfileEditor Plan="Plan" Changed="Changed" Index="Index" IndexChanged="IndexChanged" VisualCount="VisualCount" />
     }
     @if (error is not null) { <p class="text-danger small" role="alert">@error</p> }
     <div class="d-flex flex-wrap gap-2">
@@ -78,6 +80,7 @@
 @code {
     [Parameter, EditorRequired] public MotionPathPlan Plan { get; set; } = default!;
     [Parameter] public EventCallback<MotionPathPlan> Changed { get; set; }
+    [Parameter] public int VisualCount {get;set;}
     [Parameter] public EventCallback Preview { get; set; }
     [Parameter] public EventCallback Apply { get; set; }
     [Parameter] public int Index { get; set; }
@@ -99,6 +102,8 @@
         await Accept(ItemMotionPathEditing.ChangeDuration(Plan,index,(int)Math.Round(seconds*1000)));
     }
     private Task ChangeDuration(ChangeEventArgs e) => ChangeDurationAt(Index,e);
+    private Task ChangeLoopTime(ChangeEventArgs e) => double.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) && double.IsFinite(n) && n>0 && n*1000<int.MaxValue
+        ? Accept(ItemMotionPathEditing.ChangeLoopTime(Plan,(int)Math.Round(n*1000))) : InvalidNumber();
     private Task ChangeSpeed(ChangeEventArgs e) => ChangeSpeedAt(Index,e);
     private Task ChangeDurationAt(int index,ChangeEventArgs e) => double.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) ? SetSeconds(n,index) : InvalidNumber();
     private Task ChangeSpeedAt(int index,ChangeEventArgs e) => double.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var n) && double.IsFinite(n) && n > 0 ? SetSeconds(Plan.Legs[index].Delta.Length()/n,index) : InvalidNumber();

@@ -7,6 +7,8 @@ using TM_Item_Studio.Models;
 using TmEssentials;
 using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 Gbx.LZO=new GBX.NET.LZO.MiniLZO();
+if(args.Length==4 && args[0]=="behavior"){BehaviorScene.Run(args[1],args[2],args[3]);return;}
+if(args.Length==4 && args[0]=="parts-source"){BehaviorScene.Parts(args[1],args[2],args[3]);return;}
 if(args.Length==2 && args[0]=="verify-flight-map"){
  var map=Gbx.Parse<GBX.NET.Engines.Game.CGameCtnChallenge>(args[1]).Node;
  using var zip=map.OpenReadEmbeddedZipData();
