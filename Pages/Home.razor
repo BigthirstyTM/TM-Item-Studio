@@ -3234,8 +3234,8 @@ else if (itemModel is null)
         var planned=PlanDrawPath(points,smoothPathPreview);
         if(!planned.Success){errorMessage=drawPathPreviewError=planned.Reason;await StopDrawPathPreview();editablePathPlan=null;await SyncPathSegments();await RecordPathEdit();StateHasChanged();return;}
         var updated=planned.Value!;
-        if(previous is not null)updated=updated with{Array=previous.Array,Layers=previous.Layers,Parts=previous.Parts,Rotations=previous.Rotations is null?null:ItemMotionPathProfile.FollowDirection(updated)};
-        if(previous is not null && updated.Legs.Count==previous.Legs.Count)updated=updated with{SpeedPoints=previous.SpeedPoints,Rotations=previous.Rotations,ContinuousVelocity=previous.ContinuousVelocity,RampDetail=previous.RampDetail,Behavior=previous.Behavior,Parts=previous.Parts,Array=previous.Array,Layers=previous.Layers};
+        if(previous is not null)updated=updated with{Array=previous.Array,Layers=previous.Layers,SampleCollisionRotation=previous.SampleCollisionRotation,Parts=previous.Parts,Rotations=previous.Rotations is null?null:ItemMotionPathProfile.FollowDirection(updated)};
+        if(previous is not null && updated.Legs.Count==previous.Legs.Count)updated=updated with{SpeedPoints=previous.SpeedPoints,Rotations=previous.Rotations,ContinuousVelocity=previous.ContinuousVelocity,RampDetail=previous.RampDetail,Behavior=previous.Behavior,Parts=previous.Parts,Array=previous.Array,Layers=previous.Layers,SampleCollisionRotation=previous.SampleCollisionRotation};
         editablePathPlan=updated;await RecordPathEdit();
         if(playing)await PreviewPlannedPath(updated,smoothPathPreview);else await SyncPathSegments();
         StateHasChanged();
@@ -3337,7 +3337,7 @@ else if (itemModel is null)
             object PreviewDto(MotionPathPlan p,float scale=1,bool reverseWings=false) => new {
                 start = new { x=p.Start.X, y=p.Start.Y, z=p.Start.Z },
                 legs = p.Legs.Select(l => new { delta = new { x=l.Delta.X,y=l.Delta.Y,z=l.Delta.Z }, l.StartMs,l.MoveMs,l.VelocityRatio }),
-                p.DurationMs, scale, layers=p.Layers,
+                p.DurationMs, scale, layers=p.Layers, collisionPoses=p.CollisionPoses?.Select(q=>new{x=q.X,y=q.Y,z=q.Z,w=q.W}),
                 parts=p.Parts?.Select(part=>new {part.VisualIndex,part.Kind,part.Axis,part.MinimumAngle,part.MaximumAngle,part.PeriodMs,part.Radius,Reverse=part.Reverse^(reverseWings&&part.Kind==MotionPartKind.Wing),pivot=new {x=part.Pivot.X,y=part.Pivot.Y,z=part.Pivot.Z}}),
                 rotations=p.Rotations, ease=(int)p.Ease, obstacle=p.Use == MotionPathUse.Obstacle, curved=smooth
             };

@@ -66,7 +66,7 @@ public static class ItemMotionPathPose
                     velocity.TransAnimFunc!.SubFuncs=vk.ToArray();drivers.Add(Driver(velocity,parent,correction));parent=correction;
                 }
                 var a = plan.Rotations![i]; var b = plan.Rotations[i+1];
-                foreach(var (from,to,axis) in new[] { (a.Yaw,b.Yaw,KC.EAxis.Y), (a.Pitch,b.Pitch,KC.EAxis.Z), (a.Roll,b.Roll,KC.EAxis.X) })
+                if(plan.CollisionPoses is null)foreach(var (from,to,axis) in new[] { (a.Yaw,b.Yaw,KC.EAxis.Y), (a.Pitch,b.Pitch,KC.EAxis.Z), (a.Roll,b.Roll,KC.EAxis.X) })
                 {
                     int child = bodies.Count;
                     bodies.Add(Body(ItemKinematicEntityTemplate.CreateCarrierBody(),cursor));
@@ -89,7 +89,10 @@ public static class ItemMotionPathPose
                     drivers.Add(Driver(c,parent,child));parent=child;
                 }
                 int visible=bodies.Count;
-                bodies.Add(Body(visual,cursor-anchor));
+                var sampledPose=plan.CollisionPoses?[i]??Quaternion.Identity;
+                var visibleBody=Body(visual,cursor-Vector3.Transform(anchor,sampledPose));
+                if(plan.CollisionPoses is not null)visibleBody.Rotation=new(sampledPose.X,sampledPose.Y,sampledPose.Z,sampledPose.W);
+                bodies.Add(visibleBody);
                 var instance=(NPlugDynaObjectModel_SInstanceParams)bodies[^1].Params!;
                 instance.TextureId=sourceParams.TextureId; instance.CastStaticShadow=sourceParams.CastStaticShadow;
                 var visibleDriver=Hold(plan.DurationMs);
@@ -97,7 +100,8 @@ public static class ItemMotionPathPose
                 visibleDriver.ShaderTcAnimFunc=sourceShader.ShaderTcAnimFunc; visibleDriver.ShaderTcDataTransSub=sourceShader.ShaderTcDataTransSub;
                 drivers.Add(Driver(visibleDriver,parent,visible));
                 foreach(var (part,model) in parts) {
-                    var partBody=bodies.Count;bodies.Add(Body(model,cursor+part.Pivot-anchor));
+                    var partBody=bodies.Count;var partEntry=Body(model,cursor+Vector3.Transform(part.Pivot-anchor,sampledPose));
+                    if(plan.CollisionPoses is not null)partEntry.Rotation=new(sampledPose.X,sampledPose.Y,sampledPose.Z,sampledPose.W);bodies.Add(partEntry);
                     var partInstance=(NPlugDynaObjectModel_SInstanceParams)bodies[^1].Params!;
                     partInstance.TextureId=sourceParams.TextureId;partInstance.CastStaticShadow=sourceParams.CastStaticShadow;
                     var pc=Hold(plan.DurationMs);pc.RotAxis=part.Axis;float sign=part.Reverse?-1:1;

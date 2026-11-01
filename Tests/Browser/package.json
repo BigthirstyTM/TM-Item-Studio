@@ -17,6 +17,7 @@
     "test:native-fixtures": "node native-export-fixtures.cjs",
     "test:fx-visibility": "node fx-visibility.cjs",
     "test:follow-path-preview": "node follow-path-preview.cjs",
+    "test:collision-array": "node collision-array.cjs",
     "test:path-array": "node path-array.cjs",
     "test:motion-path": "node motion-path.cjs",
     "test:long-motion-path": "node long-motion-path.cjs",

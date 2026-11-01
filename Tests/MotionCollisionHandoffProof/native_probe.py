@@ -20,6 +20,7 @@ p.add_argument('--camera-mode', choices=['cam1','cam2','cam3'], help='Use a nati
 p.add_argument('--stop-on-launch', action='store_true', help='Capture five seconds after an upward impulse above 15 m/s, then finalize evidence')
 p.add_argument('--fps', type=int, choices=[30,60], default=30)
 p.add_argument('--item-offset', type=float, nargs=2, default=[0.,0.], metavar=('X','Z'), help='Shift the fixture relative to the fixed spawn for off-centre passenger tests (metres)')
+p.add_argument('--spawn-grid',type=int,nargs=3,metavar=('X','Y','Z'),help='Explicit grid spawn for testing a later array copy')
 p.add_argument('--cube-spawn', action='store_true', help='Spawn above an 8 m cube without requiring the complete coaster context')
 p.add_argument('--wide-camera', action='store_true', help='Frame the larger two-line/two-arc fixture')
 p.add_argument('--coaster-context', action='store_true', help='Place the known NewCoaster beside the normalized 128-point fixture')
@@ -36,6 +37,8 @@ if not 20 <= a.seconds <= 900 or not a.label.replace('_', '').isalnum():
     p.error('Use 20-900 seconds and an alphanumeric/underscore label')
 if any(not -3 <= v <= 3 for v in a.item_offset):
     p.error('Item offsets must be finite and within three metres')
+if a.spawn_grid and (a.empty_cart or any(v<0 or v>47 for v in a.spawn_grid)):
+    p.error('Explicit spawn must be within 0..47 and cannot be combined with empty-cart')
 if a.camera_mode and a.follow_car_camera:
     p.error('Choose native camera or polling camera, not both')
 if a.cart_shots and (a.camera_mode or a.follow_car_camera or not a.coaster_context):
@@ -48,7 +51,7 @@ a.output.mkdir(parents=True, exist_ok=True)
 video_path = a.output / (a.label + '.mp4')
 if video_path.exists() or (a.output / (a.label + '-calls.jsonl')).exists():
     p.error('Run label already has evidence; choose a new label')
-(a.output / (a.label+'-request.json')).write_text(json.dumps(dict(item=a.item,label=a.label,seconds=a.seconds,itemOffset=a.item_offset,cubeSpawn=a.cube_spawn,coasterContext=a.coaster_context,cameraMode=a.camera_mode,pollingFollowCamera=a.follow_car_camera,cartShots=a.cart_shots,emptyCart=a.empty_cart,birds=a.birds,birdItem=a.bird_item,shotFile=str(a.shot_file) if a.shot_file else None,fps=a.fps,stopOnLaunch=a.stop_on_launch),indent=2),encoding='utf-8')
+(a.output / (a.label+'-request.json')).write_text(json.dumps(dict(item=a.item,label=a.label,seconds=a.seconds,itemOffset=a.item_offset,spawnGrid=a.spawn_grid,cubeSpawn=a.cube_spawn,coasterContext=a.coaster_context,cameraMode=a.camera_mode,pollingFollowCamera=a.follow_car_camera,cartShots=a.cart_shots,emptyCart=a.empty_cart,birds=a.birds,birdItem=a.bird_item,shotFile=str(a.shot_file) if a.shot_file else None,fps=a.fps,stopOnLaunch=a.stop_on_launch),indent=2),encoding='utf-8')
 
 def call(name, data=None):
     result = subprocess.run([sys.executable, str(a.helper), '--skip-process-check',
@@ -150,7 +153,8 @@ with (a.output / (a.label + '-record.log')).open('w') as log:
     try:
         # The coaster cube is 8 m tall (top Y=19), unlike the thin deck (Y=16).
         # Spawn above it, not inside its collision volume.
-        call('ControlValidation',dict(action='testFromCoord',x=2 if a.empty_cart else 12,y=10 if a.empty_cart else (11 if a.coaster_context or a.cube_spawn else 10),z=2 if a.empty_cart else 12,dir='North'))
+        spawn=a.spawn_grid or [2 if a.empty_cart else 12,10 if a.empty_cart else (11 if a.coaster_context or a.cube_spawn else 10),2 if a.empty_cart else 12]
+        call('ControlValidation',dict(action='testFromCoord',x=spawn[0],y=spawn[1],z=spawn[2],dir='North'))
         time.sleep(2)
         camera = (dict(x=416,y=70,z=420,target=dict(x=416,y=14,z=388),fov=50)
                   if a.wide_camera else dict(x=432,y=48,z=446,target=dict(x=393,y=14,z=400),fov=55))

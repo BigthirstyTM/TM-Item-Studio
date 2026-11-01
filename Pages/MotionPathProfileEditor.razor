@@ -38,7 +38,7 @@
             </div>
             <button class="btn btn-sm btn-outline-primary mt-2" @onclick="Offset">Add offsets to whole route</button>
         }
-        @if(Plan.Use==MotionPathUse.CollisionRelay) { <p class="small text-warning mt-2">Rotation affects the visible mesh. Collision keeps its fixed source orientation per segment; it does not continuously tilt with the mesh. Passenger handoffs remain experimental.</p> }
+        @if(Plan.Use==MotionPathUse.CollisionRelay) { <p class="small text-warning mt-2">By default, route rotation affects only the visible mesh. Enable Sample route tilt into collision in Animation layers to tilt both mesh and collider in discrete segments. Physical layers also sample route orientation. Rotation is stepped, not continuous; handoffs can eject or drop passengers.</p> }
     </details>
     <details class="border rounded p-2 my-2" data-testid="path-speed-editor">
         <summary class="fw-bold">Whole-route speed curve</summary>

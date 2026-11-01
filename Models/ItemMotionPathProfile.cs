@@ -38,7 +38,7 @@ public static class ItemMotionPathProfile
         ItemMotionResult<MotionPathPlan> Fail(string s) => ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, s);
         var valid = ItemMotionPath.Validate(p);
         if (!valid.Success) return Fail(valid.Reason!);
-        if (p.SpeedPoints is null) return ItemMotionResult<MotionPathPlan>.Ok(p);
+        if (p.SpeedPoints is null) return ItemMotionCollisionLayers.Compile(p);
         var legs = new List<MotionPathLeg>();
         var rotations = p.Rotations is null ? null : new List<MotionPathRotation> { p.Rotations[0] };
         long elapsed = p.StartDelayMs;
@@ -66,7 +66,8 @@ public static class ItemMotionPathProfile
                 if (rotations is not null) rotations.Add(Lerp(p.Rotations![i], p.Rotations[i + 1], (j + 1f) / count));
             }
         }
-        return ItemMotionPath.Validate(p with { Legs = legs, DurationMs = (int)elapsed, SpeedPoints = null, Rotations = rotations?.ToArray(), Ease = KC.AnimEase.Linear });
+        var compiled=ItemMotionPath.Validate(p with { Legs = legs, DurationMs = (int)elapsed, SpeedPoints = null, Rotations = rotations?.ToArray(), Ease = KC.AnimEase.Linear });
+        return compiled.Success?ItemMotionCollisionLayers.Compile(compiled.Value!):compiled;
     }
 
     public static MotionPathRotation Lerp(MotionPathRotation a, MotionPathRotation b, float t) => new(a.Yaw + (b.Yaw-a.Yaw)*t, a.Pitch + (b.Pitch-a.Pitch)*t, a.Roll + (b.Roll-a.Roll)*t);
