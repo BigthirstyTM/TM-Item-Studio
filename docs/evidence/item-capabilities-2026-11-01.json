@@ -1,0 +1,175 @@
+{
+  "date": "2026-11-01",
+  "bridgeVersion": "0.4.0",
+  "enumRoundtrip": [
+    {
+      "type": "Undefined",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Ornament",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "PickUp",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Character",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Vehicle",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Spot",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Cannon",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Group",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Decal",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Turret",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Wagon",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    },
+    {
+      "type": "Block",
+      "roundtrip": false,
+      "error": "EntityModel cannot exist for Block"
+    },
+    {
+      "type": "EntitySpawner",
+      "roundtrip": true,
+      "gameplay": "Not established by enum serialization"
+    }
+  ],
+  "nativeEnumLoad": [
+    {
+      "file": "TMIS_Type_Cannon.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Character.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Decal.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_EntitySpawner.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Group.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Ornament.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_PickUp.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Spot.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Turret.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Undefined.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Vehicle.Item.Gbx",
+      "loaded": true,
+      "error": null
+    },
+    {
+      "file": "TMIS_Type_Wagon.Item.Gbx",
+      "loaded": true,
+      "error": null
+    }
+  ],
+  "triggerNativeLoad": {
+    "NoTrigger": {
+      "loaded": true,
+      "error": null,
+      "file": "TMIS_TriggerV2_NoTrigger.Item.Gbx",
+      "sha256": "5b689c2a66c8620f4886abfa3511f35674ade9f45b881b27d79ba60749b97c2e"
+    },
+    "Static": {
+      "loaded": false,
+      "error": "Preload returned null",
+      "file": "TMIS_TriggerV2_Static.Item.Gbx",
+      "sha256": "19aa792e1c04c801d29a44d01b1929c28e0d930c1868a4067c6483febabcfa26"
+    },
+    "CommonTrigger": {
+      "loaded": false,
+      "error": "Preload returned null",
+      "file": "TMIS_TriggerV2_CommonTrigger.Item.Gbx",
+      "sha256": "b2ee12b5eb1eaa843726935f3d1216dc3ae3786ba348a9e6421df62134cfdff8"
+    },
+    "DrivenTrigger": {
+      "loaded": false,
+      "error": "Preload returned null",
+      "file": "TMIS_TriggerV2_DrivenTrigger.Item.Gbx",
+      "sha256": "b3ba327b1590bbe4119a9b96dd8b0d5bc691fc42e1b850d57b475afab72d28b7"
+    },
+    "NestedTrigger": {
+      "loaded": false,
+      "error": "Preload returned null",
+      "file": "TMIS_TriggerV2_NestedTrigger.Item.Gbx",
+      "sha256": "422f0b7afb52828dba992cc9c4cde736c86f41a4ea31b100321398c800faa57f"
+    },
+    "CommonRoot": {
+      "loaded": false,
+      "error": "Preload returned null",
+      "file": "TMIS_TriggerV3_CommonRoot.Item.Gbx",
+      "sha256": "515044efbd81c592a9fd99d1d9b71d6898ddded24810a38aa30d8b3ed677ed98"
+    }
+  },
+  "sourceFixture": {
+    "path": "artifacts/handoff-cart/fixtures/TMIS_Cart_Source.Item.Gbx",
+    "sha256": "e3a977ed15f53b7e174e9d5f8912c910786a2f334b0a7787b96169afd480d904"
+  }
+}

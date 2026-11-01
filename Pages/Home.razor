@@ -257,7 +257,7 @@
             
             <nav class="studio-workflow-nav p-2 border-bottom" aria-label="Item editing workflow">
                 <div class="studio-inspector-tabs">
-                    @foreach (var section in EditorSections.Where(s => s.Primary))
+                    @foreach (var section in EditorSections)
                     {
                         <button aria-label="@section.AccessibleName" aria-expanded="@((activeTab==section.Key).ToString().ToLowerInvariant())"
                                 class="btn btn-sm text-start @(activeTab==section.Key ? "btn-primary" : "btn-outline-secondary")"
@@ -299,7 +299,7 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label mb-0 fw-bold" data-help-key="itemtypeeitemtype">ItemType (EItemType)</label>
-                        <select class="form-select form-select-sm" @bind="itemModel.ItemType">
+                        <select aria-label="Item type" class="form-select form-select-sm" @bind="itemModel.ItemType">
                             @foreach (var type in Enum.GetValues<CGameItemModel.EItemType>())
                             {
                                 <option value="@type">@type</option>
@@ -307,8 +307,10 @@
                         </select>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label mb-0 fw-bold" data-help-key="archetypeinventorypath">Archetype / Inventory Path</label>
-                        <input type="text" class="form-control form-control-sm" value="@(itemModel.ArchetypeRef ?? "None")" readonly />
+                        <p class="small text-muted">@ItemTypeExplanation</p>
+                        <label class="form-label mb-0 fw-bold" data-help-key="archetypeinventorypath">Archetype reference</label>
+                        <input type="text" class="form-control form-control-sm" value="@(itemModel.ArchetypeRef ?? "")" placeholder="No archetype reference stored" readonly />
+                        <p class="small text-muted">Archetype is a stored base-item/reference identifier, not a folder picker. Empty is valid for standalone custom items. The inventory location comes from the exported file under Documents/Trackmania/Items; move the file into subfolders there to organize it.</p>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-8">
@@ -648,6 +650,7 @@
                                 <option value="@wp">@wp</option>
                             }
                         </select>
+                        <p class="small text-muted">A waypoint needs a valid trigger shape. Animating its visible mesh does not establish a moving checkpoint trigger; moving triggers are not currently verified.</p>
                     </div>
 
                     <h6 class="border-bottom pb-1 text-primary">Build and refine motion</h6>
@@ -1587,6 +1590,7 @@
 
                 @if (activeTab == "extras")
                 {
+                    <p class="small text-muted">Audio is currently inspection only: this detects stored sound references, not a playable sound emitter. Changing ItemType or adding a sound file alone does not connect it to an in-game playback event. Map music and MediaTracker sound tracks are separate map features.</p>
                     <h6 class="border-bottom pb-1 text-primary">Audio, CPlugFx & MediaTracker Triggers <span class="text-muted" title="Audio, particle systems and MediaTracker zones are optional GBX nodes.">?</span></h6>
                     <div class="list-group small">
                         <div class="list-group-item d-flex justify-content-between"><span>WaypointType</span><strong>@itemModel.WaypointType</strong></div>
@@ -4065,6 +4069,12 @@ else if (itemModel is null)
         }
     }
 
+    private string ItemTypeExplanation => itemModel?.ItemType switch {
+        CGameItemModel.EItemType.Ornament => "Ornament is the usual Trackmania custom-item type. Static geometry, kinematics, collision and checkpoints depend on the embedded model and trigger data, not this label alone.",
+        CGameItemModel.EItemType.Vehicle => "Vehicle requires a compatible vehicle model and physics graph. Choosing Vehicle does not turn a mesh into a drivable car.",
+        CGameItemModel.EItemType.Block => "Block requires the corresponding block model and placement data; this is not an item-to-block converter.",
+        _ => "Advanced shared engine type. This enum is used across ManiaPlanet games; ordinary Trackmania 2020 gameplay support is not established for every value. The matching entity/physics data is required. Preserve the source type unless testing a compatible model."
+    };
     private sealed record EditorSection(string Key,string Label,string AccessibleName,string Description,bool Primary=false);
     private IEnumerable<EditorSection> EditorSections => new EditorSection[] {
         new("general","1. Identity & icon","Item Identification & Collector Metadata","Set the item name, author and icon before export.",true),

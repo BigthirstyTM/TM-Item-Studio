@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const repo = path.resolve(__dirname, '../..');
 const roots = [path.join(repo, 'bin/Debug/net8.0/wwwroot'), path.join(repo, 'wwwroot')];
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
     '.wasm': 'application/wasm', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp' };
 http.createServer((request, response) => {
     const relative = decodeURIComponent(new URL(request.url, 'http://localhost').pathname).replace(/^\/+/, '') || 'index.html';
