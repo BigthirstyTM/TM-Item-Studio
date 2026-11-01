@@ -6,6 +6,32 @@ let animTime = 0, lastFrameTime = null, animationFrameId = null, resizeHandler =
 let resizeObserver = null;
 let viewKeyHandler = null;
 let activeStudioView = 'perspective';
+window.bindSpeedCurveDrag = function(svg,callback) {
+    if(!svg)return;
+    svg.speedCallback=callback;if(svg.speedDragBound)return;svg.speedDragBound=true;
+    let drag=null;
+    svg.addEventListener('pointerdown',e=>{
+        const point=e.target.closest('[data-speed-point]');if(!point || e.button!==0)return;
+        e.preventDefault();e.stopPropagation();svg.setPointerCapture(e.pointerId);
+        drag={point,index:Number(point.dataset.speedPoint),max:Number(svg.dataset.maxSpeed),value:null,startY:e.clientY,cy:point.getAttribute('cy'),line:svg.querySelector('polyline').getAttribute('points')};
+    });
+    svg.addEventListener('pointermove',e=>{
+        if(!drag)return;e.preventDefault();
+        const local=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());
+        drag.value=Math.max(.1,Math.min(1000,(155-local.y)*drag.max/130));
+        drag.point.setAttribute('cy',String(155-130*drag.value/drag.max));
+        svg.querySelector('polyline').setAttribute('points',[...svg.querySelectorAll('[data-speed-point]')].map(c=>`${c.getAttribute('cx')},${c.getAttribute('cy')}`).join(' '));
+        drag.point.querySelector('title').textContent=`${drag.value.toFixed(2)} m/s — release to update preview`;
+    });
+    const finish=e=>{
+        if(!drag)return;const done=drag;drag=null;
+        if(svg.hasPointerCapture(e.pointerId))svg.releasePointerCapture(e.pointerId);
+        done.point.setAttribute('cy',done.cy);svg.querySelector('polyline').setAttribute('points',done.line);
+        if(done.value!==null)svg.speedCallback.invokeMethodAsync('OnSpeedPointDragged',done.index,done.value).catch(console.error);
+        else svg.speedCallback.invokeMethodAsync('OnSpeedPointSelected',done.index).catch(console.error);
+    };
+    svg.addEventListener('pointerup',finish);svg.addEventListener('pointercancel',finish);
+};
 let showMeshes = true, showCollision = false, showPivots = true, showLights = true, showWaypoints = true;
 let activeConstraintIndex = 0, activeMeshHelper = null;
 let selectedMeshPath = null, selectedMeshObject = null, selectedMeshHelper = null;
@@ -59,6 +85,7 @@ function pickEditablePathSegment(event) {
     return tied[(tied.indexOf(editablePathIndex)+1)%tied.length];
 }
 let drawPathDraft = null, drawPathDragIndex = -1, drawPathRepeat = 'Closed';
+let drawPathViewLock = null, drawPathDragOffset = 0;
 let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
 const pooledGeometry = new WeakSet();
@@ -1041,10 +1068,10 @@ function renderDrawPathVisual() {
         waypointsGroup.add(drawPathLine);
     }
 }
-function pickDrawPoint(raycaster) {
+function pickDrawPoint(raycaster, offset = drawPathPlaneY) {
     const normal = drawPathPlane === 'XY' ? new THREE.Vector3(0, 0, 1)
         : drawPathPlane === 'YZ' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
-    const plane = new THREE.Plane(normal, -drawPathPlaneY);
+    const plane = new THREE.Plane(normal, -offset);
     const point = new THREE.Vector3();
     return raycaster.ray.intersectPlane(plane, point) ? point : null;
 }
@@ -1158,7 +1185,7 @@ window.init3DViewer = function (containerId, dotNetRef) {
     renderer.domElement.setAttribute('aria-label', '3D item viewport');
     controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = .05;
     controls.addEventListener('start', () => {
-        if (activeStudioView === 'top' && camera) {
+        if (activeStudioView === 'top' && camera && !drawPathViewLock) {
             // Top view needs a Z up-vector to stay square, but orbiting should use
             // the normal world Y-up orientation so the grid never rolls with the camera.
             camera.up.set(0, 1, 0);
@@ -1220,6 +1247,19 @@ window.init3DViewer = function (containerId, dotNetRef) {
         }
     });
     const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
+    // Own marker drags before OrbitControls receives pointerdown.
+    renderer.domElement.addEventListener('pointerdown', event => {
+        if(event.button!==0 || !(drawPathEnabled || drawPathViewLock) || !showWaypoints)return;
+        const rect=renderer.domElement.getBoundingClientRect();
+        const candidates=drawPathPoints.map((p,i)=>{const v=p.clone().project(camera);return {i,z:v.z,d:Math.hypot(rect.left+(v.x+1)*rect.width/2-event.clientX,rect.top+(1-v.y)*rect.height/2-event.clientY)};})
+            .filter(p=>p.z>=-1 && p.z<=1 && p.d<=12).sort((a,b)=>a.d-b.d);
+        if(!candidates.length)return;
+        event.preventDefault();event.stopImmediatePropagation();
+        drawPathDragIndex=candidates[0].i;
+        const p=drawPathPoints[drawPathDragIndex];drawPathDragOffset=drawPathPlane==='XY'?p.z:drawPathPlane==='YZ'?p.x:p.y;
+        controls.enableDamping=false;controls.update();controls.enabled=false;
+        transformControls.detach();renderer.domElement.setPointerCapture(event.pointerId);
+    },true);
     let pendingPathPick = null;
     renderer.domElement.addEventListener('pointerup', event => {
         const pending=pendingPathPick;pendingPathPick=null;
@@ -1287,12 +1327,13 @@ window.init3DViewer = function (containerId, dotNetRef) {
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
         raycaster.setFromCamera(mouse, camera);
-        const point = pickDrawPoint(raycaster);
+        const point = pickDrawPoint(raycaster,drawPathDragOffset);
         if (point && point.length() <= 10000) { drawPathPoints[drawPathDragIndex].copy(point); renderDrawPathVisual(); }
     });
     const finishPathDrag = () => {
         if (drawPathDragIndex < 0) return;
         drawPathDragIndex = -1;
+        controls.enabled=true;controls.enableDamping=!drawPathViewLock;
         dotNetHelper?.invokeMethodAsync('OnDrawPathChanged');
     };
     renderer.domElement.addEventListener('pointerup', finishPathDrag);
@@ -1409,6 +1450,7 @@ window.dispose3DViewer = function () {
     editablePathGroup?.parent?.remove(editablePathGroup);editablePathGroup=null;
     drawPathEnabled = false;
     drawPathPoints = [];
+    drawPathViewLock = null;
     drawPathDragIndex = -1;
     viewportSelectionQueue = Promise.resolve();
     window.disposeStudioMood?.();
@@ -1628,6 +1670,7 @@ function frameCamera(bounds) {
     camera.position.copy(center).add(new THREE.Vector3(1, .8, 1).normalize().multiplyScalar(distance));
     camera.near = Math.max(distance / 10000, .001); camera.far = Math.max(distance * 10, radius * 100, 100);
     camera.updateProjectionMatrix(); controls.target.copy(center); controls.update(); controls.saveState();
+    if(drawPathViewLock)window.setStudioView(drawPathViewLock);
 }
 
 function getMotionBaseMatrix(motion) {
@@ -2103,6 +2146,14 @@ window.setDrawPathMode = function (enabled, planeY, plane = 'XZ') {
     return drawPathEnabled;
 };
 window.undoDrawnPathPoint = function () { drawPathPoints.pop(); renderDrawPathVisual(); };
+window.setDrawPathView = function(view) {
+    drawPathViewLock=['top','front','right'].includes(view)?view:null;
+    if(!controls)return;
+    controls.enableDamping=false;controls.update();
+    controls.enableRotate=!drawPathViewLock;controls.enablePan=!drawPathViewLock;
+    controls.enableDamping=!drawPathViewLock;
+    if(drawPathViewLock)window.setStudioView(drawPathViewLock);
+};
 window.setDrawPathRepeat = function (repeat) { drawPathRepeat = repeat; renderDrawPathVisual(); };
 window.setDrawnPathPoints = function (points) {
     if (!Array.isArray(points) || points.length > 129 || points.some(p => ![p.x,p.y,p.z].every(Number.isFinite)
@@ -2158,6 +2209,7 @@ window.getDrawPathAnchor = function (center) {
     return { x: point.x, y: point.y, z: point.z };
 };
 window.stopDrawPathPreview = function () {
+    const status=document.getElementById('draw-path-playback-status');if(status)status.textContent='';
     if (!drawPathDraft) return;
     for (const [group, visible] of drawPathDraft.hiddenGroups ?? []) group.visible = visible;
     drawPathDraft.source.group.visible = drawPathDraft.wasVisible;
@@ -2174,6 +2226,17 @@ window.previewDrawPath = function (plan, center) {
     ghost.matrixAutoUpdate = false;
     ghost.visible = true;
     ghost.name = 'drawPathDraft';
+    const animatedParts=[];
+    for(const part of plan.parts??[]) {
+        let found=false;
+        ghost.traverse(mesh=>{
+            const match=mesh.userData?.path?.match(/\/visual:(\d+)(?:\/|$)/);
+            if(mesh.isMesh && !mesh.userData.isCollision && match && Number(match[1])===part.visualIndex) {
+                found=true;animatedParts.push({mesh,part,rest:mesh.matrix.clone()});
+            }
+        });
+        if(!found)throw new Error(`Separate visual mesh ${part.visualIndex+1} is not available in this preview source.`);
+    }
     const rotation = new THREE.Quaternion();
     source.rest.decompose(new THREE.Vector3(), rotation, new THREE.Vector3());
     if (plan.obstacle) rotation.setFromUnitVectors(new THREE.Vector3(1,0,0), new THREE.Vector3(...['x','y','z'].map(k=>plan.legs[0].delta[k])).normalize());
@@ -2183,7 +2246,7 @@ window.previewDrawPath = function (plan, center) {
     scene.add(ghost);
     const hiddenGroups = retainedPathSource ? [...new Set(typedMotions.flatMap(m => motionGroups.get(m.childPath) ?? []))].map(group => [group, group.visible]) : [];
     for (const [group] of hiddenGroups) group.visible = false;
-    drawPathDraft = { source, ghost, wasVisible, hiddenGroups, plan, rotation, anchor, started: performance.now() };
+    drawPathDraft = { source, ghost, wasVisible, hiddenGroups, plan, rotation, anchor, animatedParts, started: performance.now() };
     renderDrawPathVisual();
     applyDrawPathPreview(drawPathDraft.started);
     if (firstPreview) window.fitDrawPath();
@@ -2198,11 +2261,18 @@ window.fitDrawPath = function () {
 function applyDrawPathPreview(timestamp) {
     if (!drawPathDraft) return;
     const { ghost, plan, rotation, anchor, started } = drawPathDraft;
-    const t = (timestamp - started) % plan.durationMs;
+    const elapsed = timestamp - started;
+    const t = elapsed % plan.durationMs;
+    const status=document.getElementById('draw-path-playback-status');
+    if(status) {
+        const wait=plan.legs[0].startMs-t;
+        const label=wait>0?`Preview running — waiting ${Math.ceil(wait/1000)} s for start delay / pause`:`Preview playing — ${Math.floor(t/1000)} / ${Math.ceil(plan.durationMs/1000)} s`;
+        if(status.textContent!==label)status.textContent=label;
+    }
     const position = new THREE.Vector3(plan.start.x,plan.start.y,plan.start.z);
     for (const leg of plan.legs) {
         const x = Math.max(0,Math.min(1,(t-leg.startMs)/leg.moveMs));
-        const u = plan.ease === 2 ? x*x : plan.ease === 3 ? x*(2-x)
+        const u = leg.velocityRatio != null && leg.velocityRatio !== 1 ? leg.velocityRatio*x+(1-leg.velocityRatio)*x*x : plan.ease === 2 ? x*x : plan.ease === 3 ? x*(2-x)
             : plan.ease === 4 ? (x < .5 ? 2*x*x : 1-2*(1-x)*(1-x)) : x;
         position.addScaledVector(new THREE.Vector3(leg.delta.x,leg.delta.y,leg.delta.z),u);
     }
@@ -2219,6 +2289,22 @@ function applyDrawPathPreview(timestamp) {
     }
     position.sub(anchor.clone().applyQuaternion(rotation));
     ghost.matrix.compose(position,rotation,new THREE.Vector3(1,1,1));
+    for(const {mesh,part,rest} of drawPathDraft.animatedParts??[]) {
+        let angle;
+        if(part.kind===0) {
+            const phase=elapsed%part.periodMs,half=Math.floor(part.periodMs/2);
+            const x=phase<half?phase/half:1-(phase-half)/(part.periodMs-half);
+            const u=x<.5?2*x*x:1-2*(1-x)*(1-x);
+            angle=THREE.MathUtils.degToRad(part.minimumAngle+(part.maximumAngle-part.minimumAngle)*u);
+        } else if(part.kind===2)angle=2*Math.PI*(elapsed%part.periodMs)/part.periodMs;
+        else {
+            let distance=0;for(const leg of plan.legs)distance+=Math.hypot(leg.delta.x,leg.delta.y,leg.delta.z)*Math.max(0,Math.min(1,(t-leg.startMs)/leg.moveMs));
+            angle=distance/part.radius;
+        }
+        if(part.reverse)angle=-angle;
+        const p=part.pivot,axis=[new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1)][part.axis];
+        mesh.matrix.copy(new THREE.Matrix4().makeTranslation(p.x,p.y,p.z)).multiply(new THREE.Matrix4().makeRotationAxis(axis,angle)).multiply(new THREE.Matrix4().makeTranslation(-p.x,-p.y,-p.z)).multiply(rest);
+    }
     ghost.matrixWorldNeedsUpdate = true;
 }
 window.clearDrawnPath = function () {

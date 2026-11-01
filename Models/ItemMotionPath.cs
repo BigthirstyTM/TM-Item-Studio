@@ -9,10 +9,10 @@ namespace TM_Item_Studio.Models;
 
 public enum MotionPathUse { Obstacle, Scenery, CollisionRelay }
 public enum MotionPathRepeat { PingPong, Closed, Reset }
-public sealed record MotionPathLeg(Vector3 Delta, int StartMs, int MoveMs, int SourceIndex = -1);
+public sealed record MotionPathLeg(Vector3 Delta, int StartMs, int MoveMs, int SourceIndex = -1, float VelocityRatio = 1);
 public sealed record MotionPathPlan(Vector3 Start, MotionPathUse Use, MotionPathRepeat Repeat,
     KC.AnimEase Ease, IReadOnlyList<MotionPathLeg> Legs, int DurationMs, int PauseMs, int StartDelayMs = 0, float ParkingDistance = 64,
-    float[]? SpeedPoints = null, MotionPathRotation[]? Rotations = null, int RampDetail = 4);
+    float[]? SpeedPoints = null, MotionPathRotation[]? Rotations = null, int RampDetail = 4, MotionBehaviorSettings? Behavior = null, bool ContinuousVelocity = false, MotionPathPart[]? Parts = null);
 
 /// <summary>
 /// Compiles paths into native scalar channels. Parent motion is visual-only in the
@@ -76,7 +76,7 @@ public static class ItemMotionPath
         var position = plan.Start;
         foreach (var leg in plan.Legs)
         {
-            if (leg is null || !Finite(leg.Delta) || leg.Delta.Length() < .01f || leg.Delta.Length() > 20000
+            if (leg is null || !Finite(leg.Delta) || leg.Delta.Length() < .01f || leg.Delta.Length() > 20000 || !float.IsFinite(leg.VelocityRatio) || leg.VelocityRatio is <=0 or >=2
                 || leg.StartMs != expectedStart || leg.MoveMs < 80)
                 return Fail("Invalid motion path leg or timing.");
             expectedStart += (long)leg.MoveMs + plan.PauseMs;

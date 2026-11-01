@@ -2,6 +2,15 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.10] - 2026-11-01
+
+- Movement templates for rollercoasters, birds, cars, boats and trains, with editable speeds, braking, corner banking and a marked coaster lift. Coaster speed carries momentum between segments, gains speed downhill and loses it uphill.
+- Continuous scenery acceleration inside each segment through shallow linear/quadratic carriers, without spending more route points. Sampled ramp detail remains adjustable for collision relay.
+- Separate existing visual meshes can animate as wings, wheels or propellers, with editable pivots, axes, periods, radius and mirrored direction. No automatic splitting of fused meshes; wheels use segment-average speed.
+- Total loop time scales the movement profile while retaining fixed delays/pauses and relative speed differences.
+- Locked top/front/side path views, exclusive point dragging with preserved depth, highlighted active draw/preview buttons, and an explicit preview-delay countdown.
+- Drag speed-curve points vertically. Preview resumes the edited schedule; coordinate drags with an unchanged point count retain profile and part settings.
+
 ## [0.5.9] - 2026-11-01
 
 - Collapsible path tilt/rotation editor: follow direction, per-point yaw/pitch/bank and whole-route offsets, with matching draft preview and native export.

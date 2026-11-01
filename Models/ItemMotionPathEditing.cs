@@ -5,6 +5,31 @@ namespace TM_Item_Studio.Models;
 /// <summary>Edits the complete schedule, keeping all following channels synchronized.</summary>
 public static class ItemMotionPathEditing
 {
+    public static ItemMotionResult<MotionPathPlan> ChangeLoopTime(MotionPathPlan plan,int totalMs)
+    {
+        ItemMotionResult<MotionPathPlan> Fail(string s)=>ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid,s);
+        var current=ItemMotionPathProfile.Compile(plan);if(!current.Success)return Fail(current.Reason!);
+        long fixedMs=plan.StartDelayMs+(long)plan.PauseMs*(plan.Legs.Count+(plan.Repeat==MotionPathRepeat.Reset?1:0));
+        if(totalMs-fixedMs<80L*plan.Legs.Count)return Fail("Loop time must leave at least 80 ms per segment after start delay and pauses.");
+        double factor=(current.Value!.DurationMs-fixedMs)/(double)(totalMs-fixedMs);
+        if(plan.SpeedPoints is {} speeds) {
+            var changed=plan with{SpeedPoints=speeds.Select(s=>(float)(s*factor)).ToArray()};
+            var compiled=ItemMotionPathProfile.Compile(changed);
+            return compiled.Success?ItemMotionResult<MotionPathPlan>.Ok(changed):Fail(compiled.Reason!);
+        }
+        var legs=plan.Legs.ToArray();long elapsed=plan.StartDelayMs+plan.PauseMs;
+        double cumulative=0;int previous=0;
+        for(int i=0;i<legs.Length;i++) {
+            cumulative+=legs[i].MoveMs/factor;int end=(int)Math.Round(cumulative);int duration=end-previous;previous=end;
+            if(plan.Use==MotionPathUse.Obstacle && i>0)duration=legs[0].MoveMs;
+            if(duration<80)return Fail("That loop time makes a short segment faster than the 80 ms native limit.");
+            legs[i]=legs[i] with{StartMs=(int)elapsed,MoveMs=duration};elapsed+=duration+(long)plan.PauseMs;
+        }
+        if(plan.Repeat!=MotionPathRepeat.Reset)elapsed-=plan.PauseMs;
+        if(elapsed>int.MaxValue)return Fail("Loop time exceeds the native timer range.");
+        return ItemMotionPath.Validate(plan with{Legs=legs,DurationMs=(int)elapsed});
+    }
+
     public static ItemMotionResult<MotionPathPlan> ChangeDuration(MotionPathPlan plan, int index, int milliseconds)
     {
         if (plan.SpeedPoints is not null)

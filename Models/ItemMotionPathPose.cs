@@ -35,11 +35,36 @@ public static class ItemMotionPathPose
             var drivers = prefab.Ents.Where(e => e.Model is KC).ToList();
             var extras = prefab.Ents.Where(e => e.Model is not (KC or CPlugDynaObjectModel)).ToArray();
             visual.StaticShape = micro.StaticShape; visual.DynaShape = micro.DynaShape;
+            var parts=new List<(MotionPathPart Settings,CPlugDynaObjectModel Body)>();
+            if(plan.Parts is {Length:>0}) {
+                var solid=(CPlugSolid2Model)visual.Mesh!;
+                if(plan.Parts.Any(p=>p.VisualIndex>=solid.Visuals!.Count) || solid.LightInsts is {Length:>0})
+                    return ItemMotionResult<CPlugPrefab>.Fail(ItemMotionStatus.Unsupported,"Part selection is outside this mesh, or the mesh contains lights that cannot be split safely.");
+                foreach(var p in plan.Parts)parts.Add((p,ItemMotionParts.Extract(visual,new HashSet<int>{p.VisualIndex},p.Pivot)));
+                var remaining=Enumerable.Range(0,solid.Visuals!.Count).Except(plan.Parts.Select(p=>p.VisualIndex)).ToHashSet();
+                if(remaining.Count==0)return ItemMotionResult<CPlugPrefab>.Fail(ItemMotionStatus.Unsupported,"Keep at least one visual mesh as the main body.");
+                visual=ItemMotionParts.Extract(visual,remaining,Vector3.Zero);
+            }
             var cursor = plan.Start;
+            float travelled=0;
             for (int i=0; i<plan.Legs.Count; i++)
             {
                 var leg = plan.Legs[i]; int parent = i;
                 ((CPlugDynaObjectModel)bodies[i].Model!).Mesh = micro.Mesh;
+                if(leg.VelocityRatio!=1) {
+                    // x(t)=v0*T*u + (v1-v0)*T*u²/2. A second shallow scalar
+                    // carrier supplies the quadratic term, including signed deceleration.
+                    ((KC)drivers[i].Model!).TransMax=leg.Delta.Length()*leg.VelocityRatio;
+                    int correction=bodies.Count;
+                    var carrier=Body(ItemKinematicEntityTemplate.CreateCarrierBody(),cursor);
+                    carrier.Rotation=bodies[i].Rotation;bodies.Add(carrier);
+                    var velocity=Hold(plan.DurationMs);velocity.TransMax=leg.Delta.Length()*(1-leg.VelocityRatio);
+                    var vk=new List<KC.SubAnimFunc>();
+                    if(leg.StartMs>0)vk.Add(Key(KC.AnimEase.Constant,leg.StartMs));
+                    vk.Add(Key(KC.AnimEase.QuadIn,leg.MoveMs));
+                    if(plan.DurationMs>leg.StartMs+leg.MoveMs)vk.Add(Key(KC.AnimEase.Constant,plan.DurationMs-leg.StartMs-leg.MoveMs,true));
+                    velocity.TransAnimFunc!.SubFuncs=vk.ToArray();drivers.Add(Driver(velocity,parent,correction));parent=correction;
+                }
                 var a = plan.Rotations![i]; var b = plan.Rotations[i+1];
                 foreach(var (from,to,axis) in new[] { (a.Yaw,b.Yaw,KC.EAxis.Y), (a.Pitch,b.Pitch,KC.EAxis.Z), (a.Roll,b.Roll,KC.EAxis.X) })
                 {
@@ -61,6 +86,26 @@ public static class ItemMotionPathPose
                 visibleDriver.ShaderTcType=sourceShader.ShaderTcType; visibleDriver.ShaderTcVersion=sourceShader.ShaderTcVersion;
                 visibleDriver.ShaderTcAnimFunc=sourceShader.ShaderTcAnimFunc; visibleDriver.ShaderTcDataTransSub=sourceShader.ShaderTcDataTransSub;
                 drivers.Add(Driver(visibleDriver,parent,visible));
+                foreach(var (part,model) in parts) {
+                    var partBody=bodies.Count;bodies.Add(Body(model,cursor+part.Pivot-anchor));
+                    var partInstance=(NPlugDynaObjectModel_SInstanceParams)bodies[^1].Params!;
+                    partInstance.TextureId=sourceParams.TextureId;partInstance.CastStaticShadow=sourceParams.CastStaticShadow;
+                    var pc=Hold(plan.DurationMs);pc.RotAxis=part.Axis;float sign=part.Reverse?-1:1;
+                    pc.ShaderTcType=sourceShader.ShaderTcType;pc.ShaderTcVersion=sourceShader.ShaderTcVersion;
+                    pc.ShaderTcAnimFunc=sourceShader.ShaderTcAnimFunc;pc.ShaderTcDataTransSub=sourceShader.ShaderTcDataTransSub;
+                    if(part.Kind==MotionPartKind.Wing) {
+                        pc.AngleMinDeg=part.MinimumAngle*sign;pc.AngleMaxDeg=part.MaximumAngle*sign;
+                        pc.RotAnimFunc!.SubFuncs=[Key(KC.AnimEase.QuadInOut,part.PeriodMs/2),Key(KC.AnimEase.QuadInOut,part.PeriodMs-part.PeriodMs/2,true)];
+                    } else if(part.Kind==MotionPartKind.Propeller) {
+                        pc.AngleMaxDeg=360*sign;pc.RotAnimFunc!.SubFuncs=[Key(KC.AnimEase.Linear,part.PeriodMs)];
+                    } else {
+                        pc.AngleMinDeg=travelled/part.Radius*180/MathF.PI*sign;pc.AngleMaxDeg=(travelled+leg.Delta.Length())/part.Radius*180/MathF.PI*sign;
+                        var wk=new List<KC.SubAnimFunc>();if(leg.StartMs>0)wk.Add(Key(KC.AnimEase.Constant,leg.StartMs));wk.Add(Key(KC.AnimEase.Linear,leg.MoveMs));if(plan.DurationMs>leg.StartMs+leg.MoveMs)wk.Add(Key(KC.AnimEase.Constant,plan.DurationMs-leg.StartMs-leg.MoveMs,true));pc.RotAnimFunc!.SubFuncs=wk.ToArray();
+                    }
+                    // Sibling of the body: local pivot translates after rotation, preserving the hinge.
+                    drivers.Add(Driver(pc,parent,partBody));
+                }
+                travelled+=leg.Delta.Length();
                 cursor+=leg.Delta;
             }
             prefab.Ents=[..bodies,..drivers,..extras];

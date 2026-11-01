@@ -10,8 +10,12 @@ public static class ItemMotionPathProfile
 {
     public static string? Validate(MotionPathPlan p)
     {
+        var partError=ItemMotionParts.Validate(p);if(partError is not null)return partError;
         if (p.Legs is null) return "Missing route segments.";
         if (p.RampDetail is < 1 or > 16) return "Ramp detail must be 1–16.";
+        if(p.ContinuousVelocity && p.Rotations is null)return "Continuous speed ramps require route orientation carriers. Enable route rotation first.";
+        if(p.ContinuousVelocity && p.Use!=MotionPathUse.Scenery)return "Continuous velocity is scenery-only: parent acceleration does not move the physical collider.";
+        if(p.Legs.Any(l=>l is not null && l.VelocityRatio!=1) && (!p.ContinuousVelocity || p.Rotations is null || p.SpeedPoints is not null))return "Invalid compiled velocity profile.";
         if (p.SpeedPoints is {} speeds && (speeds.Length != p.Legs.Count + 1 || speeds.Any(v => !float.IsFinite(v) || v < .1f || v > 1000)))
             return "Set a speed of 0.1–1000 m/s at every route point.";
         if (p.Rotations is {} angles && (angles.Length != p.Legs.Count + 1 || angles.Any(r => r is null || !float.IsFinite(r.Yaw) || !float.IsFinite(r.Pitch) || !float.IsFinite(r.Roll) || Math.Max(Math.Abs(r.Yaw), Math.Max(Math.Abs(r.Pitch), Math.Abs(r.Roll))) > 36000)))
@@ -40,6 +44,13 @@ public static class ItemMotionPathProfile
         for (int i = 0; i < p.Legs.Count; i++)
         {
             double a = p.SpeedPoints[i], b = p.SpeedPoints[i + 1], length = p.Legs[i].Delta.Length();
+            if(p.ContinuousVelocity) {
+                double ms=Math.Round(2000*length/(a+b));
+                if(ms<80 || elapsed+ms>int.MaxValue)return Fail("Continuous ramp segments must take at least 80 ms. Reduce speed or simplify the route.");
+                legs.Add(new(p.Legs[i].Delta,(int)elapsed,(int)ms,i,(float)(2*a/(a+b))));elapsed+=(int)ms;
+                if(rotations is not null)rotations.Add(p.Rotations![i+1]);
+                continue;
+            }
             double Time(double from, double to) => Math.Abs(b - a) < .00001 ? length * (to - from) / a : length / (b - a) * Math.Log((a + (b - a) * to) / (a + (b - a) * from));
             int count = Math.Abs(a - b) < .00001 ? 1 : detail;
             // Respect the proven minimum native duration, reducing sampling when necessary.

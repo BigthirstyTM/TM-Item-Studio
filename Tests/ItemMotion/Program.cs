@@ -15,6 +15,66 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("total loop time preserves pauses and scales speed profiles together", () =>
+{
+    var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20)],MotionPathUse.CollisionRelay,MotionPathRepeat.Closed,5,KC.AnimEase.Linear,100,2000).Value!;
+    var time=ItemMotionPathEditing.ChangeLoopTime(p,20000);
+    Require(time.Success && time.Value!.DurationMs==20000,"loop retime");
+    Require(time.Value!.StartDelayMs==2000 && time.Value.PauseMs==100,"waits changed");
+    var behavior=ItemMotionBehavior.Apply(p with{PauseMs=0},new());
+    var raw=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20)],MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;
+    var profile=raw with{SpeedPoints=[5,10,15,5],Rotations=ItemMotionPathProfile.FollowDirection(raw),ContinuousVelocity=true};
+    var total=ItemMotionPathProfile.Compile(profile).Value!.DurationMs;
+    var slower=ItemMotionPathEditing.ChangeLoopTime(profile,total*2).Value!;
+    Near(slower.SpeedPoints![1]/slower.SpeedPoints[0],2);
+    Require(Math.Abs(ItemMotionPathProfile.Compile(slower).Value!.DurationMs-total*2)<=3,"profile loop time");
+    Require(!ItemMotionPathEditing.ChangeLoopTime(profile,1).Success,"impossible total accepted");
+});
+
+Check("separate wing wheel and propeller parts split once and retain source bytes", () =>
+{
+    var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;
+    var solid=RelaySolid();solid.Visuals=[solid.Visuals![0],solid.Visuals[0]];solid.ShadedGeoms=[new(){VisualIndex=0,MaterialIndex=0,LodMask=1},new(){VisualIndex=1,MaterialIndex=0,LodMask=1}];
+    ((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=solid;var before=Bytes(KinematicWith(source));
+    var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0)],MotionPathUse.Scenery,MotionPathRepeat.Reset,5,KC.AnimEase.Linear).Value!;
+    foreach(var kind in Enum.GetValues<MotionPartKind>()) {
+        var plan=p with{Rotations=ItemMotionPathProfile.FollowDirection(p),Parts=[new(1,kind,new(.2f,.3f,.4f))]};
+        var b=ItemMotionPath.Build(source,plan);Require(b.Success,b.Reason??"part build");
+        var bodies=b.Value!.Ents.Select(e=>e.Model).OfType<CPlugDynaObjectModel>().ToArray();
+        Require(((CPlugSolid2Model)bodies[^1].Mesh!).Visuals!.Count==1,"part visual split");
+        var c=b.Value.Ents.Select(e=>e.Model).OfType<KC>().Last();
+        Require(c.RotAnimFunc!.SubFuncs.Length<=3,"part key count");
+        if(kind==MotionPartKind.Wheel)Near(c.AngleMaxDeg,20/.4f*180/MathF.PI);
+        if(kind==MotionPartKind.Wing)Require(c.RotAnimFunc.SubFuncs.Sum(k=>k.Duration.TotalMilliseconds)==700,"wing period");
+        using var stream=new MemoryStream();new Gbx<CGameItemModel>(KinematicWith(b.Value)).Save(stream);stream.Position=0;Gbx.Parse<CGameItemModel>(stream);
+    }
+    Require(before.SequenceEqual(Bytes(KinematicWith(source))),"part split mutated source");
+    Require(!ItemMotionPath.Build(source,p with{Rotations=ItemMotionPathProfile.FollowDirection(p),Parts=[new(9)]}).Success,"invalid part accepted");
+});
+
+Check("behavior templates carry momentum, brake for lifts and settle loop seams", () =>
+{
+    var p=ItemMotionPath.Plan([new(0,20,0),new(20,10,0),new(40,10,0),new(60,15,0)],MotionPathUse.Scenery,MotionPathRepeat.Reset,10,KC.AnimEase.Linear).Value!;
+    var b=ItemMotionBehavior.Apply(p,new(Speed:10,Resistance:0,MaximumSpeed:60)).Value!;
+    Near(b.SpeedPoints![1],Math.Sqrt(100+2*9.81*10));
+    Near(b.SpeedPoints[1],b.SpeedPoints[2]);
+    Require(b.SpeedPoints[3]<b.SpeedPoints[2],"climb did not consume speed");
+    Require(b.ContinuousVelocity,"scenery template did not request continuous ramps");
+    var c=ItemMotionPathProfile.Compile(b).Value!;
+    Require(c.Legs.Count==3,"continuous ramp consumed point budget");
+    Require(Math.Abs(c.Legs[0].MoveMs-2000*p.Legs[0].Delta.Length()/(10+b.SpeedPoints[1]))<=1,"constant acceleration travel time");
+    Require(c.Legs[0].VelocityRatio<1 && c.Legs[2].VelocityRatio>1,"acceleration/deceleration decomposition");
+    var lift=ItemMotionBehavior.Apply(p,new(Speed:10,LiftFrom:2,LiftTo:2)).Value!;
+    Near(lift.SpeedPoints![2],4);Near(lift.SpeedPoints[3],4);
+    var loop=ItemMotionPath.Plan([new(0,0,0),new(30,20,0),new(60,0,0)],MotionPathUse.Scenery,MotionPathRepeat.Closed,10,KC.AnimEase.Linear).Value!;
+    var looped=ItemMotionBehavior.Apply(loop,new(LiftFrom:0,LiftTo:0)).Value!;
+    Require(looped.SpeedPoints![0]==looped.SpeedPoints[^1] && looped.SpeedPoints[2]>looped.SpeedPoints[1],"loop seam or descent");
+    foreach(var kind in Enum.GetValues<MotionBehaviorKind>())Require(ItemMotionBehavior.Apply(p,ItemMotionBehavior.Defaults(kind)).Success,$"template {kind}");
+    Require(!ItemMotionBehavior.Apply(p,new(Gravity:float.NaN)).Success,"nonfinite template accepted");
+    Require(!ItemMotionBehavior.Apply(p,new(LiftFrom:8,LiftTo:9)).Success,"invalid lift accepted");
+    Require(!ItemMotionPathProfile.Compile(b with{Use=MotionPathUse.CollisionRelay}).Success,"visual acceleration advertised as collision");
+});
+
 Check("speed ramps integrate travel time, preserve route and reject invalid profiles", () =>
 {
     var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0)],MotionPathUse.Scenery,MotionPathRepeat.Reset,5,KC.AnimEase.Linear).Value!;
