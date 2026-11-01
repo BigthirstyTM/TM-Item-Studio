@@ -2,6 +2,12 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.15] - 2026-11-01
+
+- Route along a model: load a separate reference Item.Gbx or capture a selected mesh, search its parts, align its position and draw/drag points directly on its surface.
+- Snap existing points to the reference with a maximum distance, or generate a shortest connected mesh-edge route between guide points. Adjustable approximation and loop closure; disconnected surfaces and paths exceeding 128 segments are refused without replacing the current points. This is geometric routing, not automatic rail-centreline recognition.
+- Reference geometry is a viewport-only guide; generated paths use the normal editable preview and explicit Apply/export workflow.
+
 ## [0.5.14] - 2026-11-01
 
 - Dock the scrubbable path preview timeline below the viewport canvas instead of in the inspector. Playback controls remain visible while browsing path settings.

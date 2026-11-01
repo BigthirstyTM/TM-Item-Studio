@@ -39,3 +39,11 @@ jobs:
       - name: Run test suites
         shell: bash
         run: ./Tests/run-all.sh
+
+      - name: Setup Node for geometry tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test model route geometry
+        run: node Tests/Browser/model-route-unit.cjs

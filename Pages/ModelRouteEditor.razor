@@ -1,0 +1,55 @@
+@using GBX.NET
+@using GBX.NET.Engines.GameData
+@using TM_Item_Studio.Models
+@inject IJSRuntime JS
+<details class="border rounded p-2 mb-2" data-testid="model-route-editor">
+ <summary class="fw-bold">Route along a model</summary>
+ <p class="small text-muted mt-2">Load a rail, road or other reference separately from the moving item. The blue reference is a guide only and is never added to the export.</p>
+ <label class="small d-block">Reference .Item.Gbx<InputFile aria-label="Load route reference" OnChange="Load" accept=".gbx" /></label>
+ <button class="btn btn-sm btn-outline-secondary mt-1" @onclick="Capture">Use selected mesh as reference</button>
+ @if(parts.Length>0){
+ <small class="d-block">@fileName</small>
+ <SearchableSelect Label="Reference mesh part" Options="parts" Value="@part" ValueChanged="SelectPart" />
+ <div class="row g-1 mt-1">
+  <div class="col-4"><label class="small">Offset X<input aria-label="Reference offset X" class="form-control form-control-sm" type="number" @bind="x" @bind:after="Configure" /></label></div>
+  <div class="col-4"><label class="small">Offset Y<input aria-label="Reference offset Y" class="form-control form-control-sm" type="number" @bind="y" @bind:after="Configure" /></label></div>
+  <div class="col-4"><label class="small">Offset Z<input aria-label="Reference offset Z" class="form-control form-control-sm" type="number" @bind="z" @bind:after="Configure" /></label></div>
+ </div>
+ <div class="d-flex gap-1 my-2"><button class="btn btn-sm btn-outline-secondary" @onclick="Fit">Frame reference</button><button class="btn btn-sm btn-outline-secondary" @onclick="Clear">Remove reference</button></div>
+ <label class="small d-block"><input aria-label="Draw on reference surface" type="checkbox" @bind="drawing" @bind:after="DrawingChanged" /> Draw / drag points on the reference surface</label>
+ <p class="small text-muted">Click the reference for start/end and optional intermediate guide points. Misses leave points unchanged. Turn this off to draw in the regular plane.</p>
+ <label class="small">Maximum snap distance (m)<input aria-label="Model snap distance" class="form-control form-control-sm" type="number" min="0.01" max="1000" step="0.1" @bind="snapDistance" /></label>
+ <button class="btn btn-sm btn-outline-primary m-1" @onclick="Project">Snap current points to surface</button>
+ <hr />
+ <label class="small">Maximum route approximation (m)<input aria-label="Model route tolerance" class="form-control form-control-sm" type="number" min="0" max="10" step="0.01" @bind="tolerance" /></label>
+ <label class="small d-block"><input aria-label="Close model route" type="checkbox" @bind="closed" /> Close route through the first guide point</label>
+ <button class="btn btn-sm btn-primary my-1" @onclick="Generate">Generate route along mesh</button>
+ <p class="small text-warning">Automatic routing follows the shortest connected mesh-edge route between your guide points. It does not detect a rail centreline or driving direction. Supports and crossings can offer unwanted shortcuts: select the rail/deck part and add intermediate guide points. Approximation can cut corners; inspect the preview. Disconnected geometry is not bridged automatically.</p>
+ }
+ @if(status is not null){<div class="small text-info" role="status">@status</div>}
+ @if(error is not null){<div class="small text-danger" role="alert">@error</div>}
+</details>
+@code {
+ [Parameter]public EventCallback Changed{get;set;}
+ [Parameter]public EventCallback<bool> Generated{get;set;}
+ [Parameter]public EventCallback StartDrawing{get;set;}
+ private string[] parts=[];private string part="",fileName="";private string? status,error;
+ private bool drawing,closed;private float x,y,z,snapDistance=5,tolerance=.05f;
+ private async Task Run(Func<Task> action){error=null;status=null;try{await action();}catch(Exception ex){error=ex.Message;}}
+ private Task Load(InputFileChangeEventArgs e)=>Run(async()=>{
+  using var stream=new MemoryStream();await e.File.OpenReadStream(50*1024*1024).CopyToAsync(stream);stream.Position=0;
+  var item=Gbx.Parse<CGameItemModel>(stream).Node;
+  var geometry=ItemScene.Build(item,0,0).Preview.Geometry.Where(g=>!g.IsCollision&&g.Indices.Length>0).ToArray();
+  if(geometry.Sum(g=>(long)g.Positions.Length)>1500000)throw new InvalidOperationException("Reference exceeds 500,000 vertices. Use a simpler reference item.");
+  parts=await JS.InvokeAsync<string[]>("loadRouteReference",(object)geometry.Select(g=>new{name=g.Path,positions=g.Positions,indices=g.Indices}).ToArray());
+  part=parts[0];fileName=e.File.Name;x=y=z=0;drawing=false;status="Reference loaded. Choose a mesh part and draw guide points. Variant items use their first variant.";
+ });
+ private Task Capture()=>Run(async()=>{parts=await JS.InvokeAsync<string[]>("captureRouteReference");part=parts[0];fileName="Selected mesh snapshot";x=y=z=0;drawing=false;status="Reference snapshot created.";});
+ private Task SelectPart(ChangeEventArgs e){part=e.Value?.ToString()??"";return Configure();}
+ private Task Configure()=>Run(async()=>await JS.InvokeVoidAsync("configureRouteReference",part,drawing,x,y,z));
+ private async Task DrawingChanged(){await Configure();if(drawing)await StartDrawing.InvokeAsync();}
+ private Task Fit()=>Run(async()=>await JS.InvokeVoidAsync("fitRouteReference"));
+ private Task Clear()=>Run(async()=>{await JS.InvokeVoidAsync("clearRouteReference");parts=[];part="";drawing=false;});
+ private Task Project()=>Run(async()=>{var count=await JS.InvokeAsync<int>("projectRouteOnModel",snapDistance);await Changed.InvokeAsync();status=$"Snapped {count} points. Preview updated; Apply path changes the item.";});
+ private Task Generate()=>Run(async()=>{var count=await JS.InvokeAsync<int>("generateModelRoute",tolerance,closed);await Generated.InvokeAsync(closed);status=$"Generated {count} route points. Review and edit the preview, then Apply path.";});
+}

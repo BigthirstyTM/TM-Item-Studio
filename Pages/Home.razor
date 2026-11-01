@@ -779,6 +779,7 @@
                             @if (!string.IsNullOrWhiteSpace(drawPathStatusMessage)) { <div class="small text-info mt-2">@drawPathStatusMessage</div> }
                             <div id="draw-path-playback-status" class="small text-info" role="status" aria-live="polite"></div>
                         </details>
+                        <ModelRouteEditor Changed="OnDrawPathChanged" Generated="UseGeneratedModelRoute" StartDrawing="StartModelRouteDrawing" />
                         <details class="border rounded p-2 mb-2" data-testid="smooth-motion-path">
                             <summary class="fw-bold">Smooth scenery path</summary>
                             <p class="small text-muted mt-2">Draw or edit control points above. This separate tool rounds corners inward; it keeps open endpoints. Speed, repeat and anchor use the settings above. Movement is linear along sampled curve segments, with fixed orientation and no moving collision or waypoint pauses.</p>
@@ -3214,6 +3215,20 @@ else if (itemModel is null)
         await UpdateDrawPlane();await JS.InvokeVoidAsync("setDrawPathView",view);
     }
 
+    private async Task StartModelRouteDrawing()
+    {
+        drawPathCaptureEnabled=true;
+        if(drawPathUse==MotionPathUse.Obstacle)drawPathUse=MotionPathUse.Scenery;
+        await UpdateDrawPlane();
+    }
+    private async Task UseGeneratedModelRoute(bool closed)
+    {
+        drawPathRepeat=closed?MotionPathRepeat.Closed:MotionPathRepeat.Reset;
+        if(drawPathUse==MotionPathUse.Obstacle)drawPathUse=MotionPathUse.Scenery;
+        smoothPathPreview=false;
+        await JS.InvokeVoidAsync("setDrawPathRepeat",drawPathRepeat.ToString());
+        await OnDrawPathChanged();
+    }
     private async Task ToggleDrawPathCapture()
     {
         drawPathCaptureEnabled = !drawPathCaptureEnabled;
