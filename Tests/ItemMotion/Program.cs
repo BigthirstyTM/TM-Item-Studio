@@ -15,6 +15,43 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+foreach(var kind in Enum.GetValues<MotionBehaviorKind>()) Check($"template {kind} compiles and serializes on a closed route",()=>{
+    var points=Enumerable.Range(0,32).Select(i=>new Vector3(20*MathF.Cos(i*MathF.PI/16),5+2*MathF.Sin(i*MathF.PI/8),20*MathF.Sin(i*MathF.PI/16))).ToArray();
+    var p=ItemMotionPath.Plan(points,MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;
+    var applied=ItemMotionBehavior.Apply(p,ItemMotionBehavior.Defaults(kind));Require(applied.Success,applied.Reason??"apply");
+    var compiled=ItemMotionPathProfile.Compile(applied.Value!);Require(compiled.Success,compiled.Reason??"compile");
+    var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+    var built=ItemMotionPath.Build(source,applied.Value!);Require(built.Success,built.Reason??"build");
+    using var bytes=new MemoryStream();new Gbx<CPlugPrefab>(built.Value!).Save(bytes);bytes.Position=0;Require(Gbx.Parse<CPlugPrefab>(bytes).Node.Ents.Length>0,"empty serialized graph");
+    if(kind is MotionBehaviorKind.LiftPlatform or MotionBehaviorKind.Drone or MotionBehaviorKind.Conveyor)Require(compiled.Value!.PauseMs==1000 && compiled.Value.SpeedPoints is null && compiled.Value.Ease==KC.AnimEase.QuadInOut,"station timing");
+    if(kind==MotionBehaviorKind.Ride)Near(applied.Value!.Rotations![^1].Yaw-applied.Value.Rotations[0].Yaw,720);
+});
+Check("sparse cable routes gain enough samples to show sway",()=>{
+ var p=ItemMotionPath.Plan([Vector3.Zero,new(20,5,0)],MotionPathUse.Scenery,MotionPathRepeat.Closed,4,KC.AnimEase.Linear).Value!;
+ var r=ItemMotionBehavior.Apply(p,ItemMotionBehavior.Defaults(MotionBehaviorKind.CableCar));Require(r.Success,r.Reason??"cable");Require(r.Value!.Legs.Count>=16,"missing sway samples");Require(r.Value.Rotations!.Any(r=>Math.Abs(r.Roll)>2),"sway aliased to zero");
+});
+Check("lift supports exact vertical scenery and retains collision refusal",()=>{
+ var p=ItemMotionPath.Plan([Vector3.Zero,new(0,15,0)],MotionPathUse.Scenery,MotionPathRepeat.Closed,4,KC.AnimEase.Linear).Value!;
+ var applied=ItemMotionBehavior.Apply(p,ItemMotionBehavior.Defaults(MotionBehaviorKind.LiftPlatform));Require(applied.Success,applied.Reason??"lift");
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+ Require(ItemMotionPath.Build(source,applied.Value!).Success,"vertical scenery failed");
+ Require(!ItemMotionPath.Build(source,applied.Value! with{Use=MotionPathUse.CollisionRelay}).Success,"vertical collider incorrectly allowed");
+});
+Check("custom templates adapt by distance, restore route, serialize and reject invalid input",()=>{
+    var p=ItemMotionPath.Plan([Vector3.Zero,new(10,0,0),new(20,0,0)],MotionPathUse.Scenery,MotionPathRepeat.Reset,5,KC.AnimEase.Linear).Value!;
+    p=p with{SpeedPoints=[2,6,10],Rotations=ItemMotionPathProfile.FollowDirection(p),ContinuousVelocity=true};
+    var t=new MotionCustomTemplate("Test","description","Custom",p,IncludeTiming:false);
+    var q=ItemMotionPath.Plan([Vector3.Zero,new(0,0,5),new(0,0,10),new(0,0,15),new(0,0,20)],MotionPathUse.Scenery,MotionPathRepeat.Reset,5,KC.AnimEase.Linear).Value!;
+    var applied=ItemMotionCustomTemplate.Apply(t,q);Require(applied.Success,applied.Reason??"custom");Near(applied.Value!.SpeedPoints![1],4);Near(applied.Value.SpeedPoints[3],8);
+    Near(applied.Value.Rotations![0].Yaw,ItemMotionPathProfile.FollowDirection(q)[0].Yaw);
+    var json=System.Text.Json.JsonSerializer.Serialize(t,ItemMotionCustomTemplate.Json);
+    var loaded=System.Text.Json.JsonSerializer.Deserialize<MotionCustomTemplate>(json,ItemMotionCustomTemplate.Json)!;
+    Require(ItemMotionCustomTemplate.Validate(loaded)==null,"JSON roundtrip");
+    Require(ItemMotionCustomTemplate.Apply(loaded with{IncludeRoute=true},q).Value!.Legs.Count==2,"route restore");
+    Require(ItemMotionCustomTemplate.Validate(t with{Version=9})!=null,"unknown version");
+    Require(ItemMotionCustomTemplate.Validate(t with{Name=""})!=null,"empty name");
+});
+
 Check("total loop time preserves pauses and scales speed profiles together", () =>
 {
     var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20)],MotionPathUse.CollisionRelay,MotionPathRepeat.Closed,5,KC.AnimEase.Linear,100,2000).Value!;

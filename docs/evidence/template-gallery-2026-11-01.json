@@ -1,0 +1,199 @@
+{
+  "version": "0.5.11",
+  "templates": 13,
+  "customExamples": 1,
+  "unitChecks": 62,
+  "browserExports": 14,
+  "nativeMapPlacements": 14,
+  "completeEmbeddedPrefabs": 14,
+  "nativeObservationSeconds": 262.812,
+  "showcaseSeconds": 53.2,
+  "collisionProof": false,
+  "independentCleanMachineLoad": false,
+  "artifacts": {
+    "TMIS_Demo_BirdFlight.Item.Gbx": {
+      "bytes": 33530,
+      "sha256": "ccc92fab390af45b573b01c493850a275ab33dac519fb6c8a421c013f6690574"
+    },
+    "TMIS_Demo_Boat.Item.Gbx": {
+      "bytes": 31069,
+      "sha256": "c044bf277ac0447f44ea2a7c27bd66d1a9a61bb404c91bd2352bc14961642b04"
+    },
+    "TMIS_Demo_Butterfly.Item.Gbx": {
+      "bytes": 37249,
+      "sha256": "b5c7724a68c9fe140aced1c2071a005d102a4b82cece4fd3cc830aa24feb6d00"
+    },
+    "TMIS_Demo_CableCar.Item.Gbx": {
+      "bytes": 32095,
+      "sha256": "204dd2bc99fbe7a68ddd3d6a3faabbe2188dd848dafa323aaa6246d333bd7981"
+    },
+    "TMIS_Demo_CarBody.Item.Gbx": {
+      "bytes": 50534,
+      "sha256": "0fbf947bb4a7edc7fa42993c2327d0751f6a5b5e99d9dee5b7845a763226ff82"
+    },
+    "TMIS_Demo_Conveyor.Item.Gbx": {
+      "bytes": 20007,
+      "sha256": "ec1a18aa9f6bca44042787e503dd6f1da7ae3b6543f0cd0a0bee0b461c470be1"
+    },
+    "TMIS_Demo_Custom.Item.Gbx": {
+      "bytes": 19997,
+      "sha256": "c9420dfac66bc14bd6750b56f51087b36ba8377b929482be6b47d9afcac40df7"
+    },
+    "TMIS_Demo_Drone.Item.Gbx": {
+      "bytes": 22426,
+      "sha256": "cc0c35d4d062dc29185d0717fedc4eaa69bd568c722f3daad7d418e0a5b7f9be"
+    },
+    "TMIS_Demo_Fish.Item.Gbx": {
+      "bytes": 32565,
+      "sha256": "4933e8de3741bb98f3201228b154124da8aeb4515764a46397bc06d21a795508"
+    },
+    "TMIS_Demo_LiftPlatform.Item.Gbx": {
+      "bytes": 20807,
+      "sha256": "68a24b639c84ea3abbdd14801cd90309c75b5ce555dda49fd35f7a94eb71c9c9"
+    },
+    "TMIS_Demo_Ride.Item.Gbx": {
+      "bytes": 31273,
+      "sha256": "ed19089de49154db467cb8a0a715bc74b0d82f128395bda1e1c713c344abed18"
+    },
+    "TMIS_Demo_Robot.Item.Gbx": {
+      "bytes": 35884,
+      "sha256": "0b897d4b13dac373bf99d911c5ceb303dda1808c75845e1b407a4433a3ff69a8"
+    },
+    "TMIS_Demo_Rollercoaster.Item.Gbx": {
+      "bytes": 50662,
+      "sha256": "500a86b6c4b99d6501a68202657088a849c8025764fd1250062e16fdb185c3a5"
+    },
+    "TMIS_Demo_Train.Item.Gbx": {
+      "bytes": 50778,
+      "sha256": "2409d0f355221f56a5e122bf1e2d99ad07acbf9dc3e8106d123ab2da0d933cf3"
+    },
+    "TMIS_Template_Showcase.Map.Gbx": {
+      "bytes": 254161,
+      "sha256": "24933bf6093e9df7c1e43cc2e58c1b38cd2ecbfcbaa1d97bb07a1dc357f228a5"
+    },
+    "Template-Showcase.mp4": {
+      "bytes": 4433249,
+      "sha256": "037213d3680ebd88d2b30f5239164b8006a6a646d7544ad3065273716059f56e"
+    },
+    "Sources/TMIS_Demo_BirdFlight_Source.Item.Gbx": {
+      "bytes": 18941,
+      "sha256": "d49279e56931176cf18dd92719c4b85b931d53d3960b9d81fa605aa437513c3a"
+    },
+    "Sources/TMIS_Demo_Boat_Source.Item.Gbx": {
+      "bytes": 18653,
+      "sha256": "771f624ed863f5b2ab9327ad19731b3fd400f19af2e3b4d55087baf300df3866"
+    },
+    "Sources/TMIS_Demo_Butterfly_Source.Item.Gbx": {
+      "bytes": 18940,
+      "sha256": "97155f3b93f478621f66b9c9bb62839992da1fee7f67a68115be6e01edabf07f"
+    },
+    "Sources/TMIS_Demo_CableCar_Source.Item.Gbx": {
+      "bytes": 19584,
+      "sha256": "e991ba72254533f42f15ebfe0076db170881b901bc45a0cbe1ff012645080ac5"
+    },
+    "Sources/TMIS_Demo_CarBody_Source.Item.Gbx": {
+      "bytes": 31620,
+      "sha256": "a6e87e49b33604dbf4c1eb96daa27d7609c9e764cfc46f613702fe214b4121ef"
+    },
+    "Sources/TMIS_Demo_Conveyor_Source.Item.Gbx": {
+      "bytes": 18409,
+      "sha256": "2e5943e2e101c11822740296aab1f6c12e356c01ef2635cf2b30bfb0fdaba874"
+    },
+    "Sources/TMIS_Demo_Custom_Source.Item.Gbx": {
+      "bytes": 18401,
+      "sha256": "1f49232c0bf30d5444ae02c9e2924eda27fc5fe92f48ad4441c32fd76a315650"
+    },
+    "Sources/TMIS_Demo_Drone_Source.Item.Gbx": {
+      "bytes": 20028,
+      "sha256": "5ef6499c62ce8a5f89b01d008e0a177f8f4b9fabc45188b056b4b6d94ba9726d"
+    },
+    "Sources/TMIS_Demo_Fish_Source.Item.Gbx": {
+      "bytes": 18958,
+      "sha256": "fd5f72a4cac805ed45faf4fcadeb02570541dc7407b1516008812365751d0cb9"
+    },
+    "Sources/TMIS_Demo_LiftPlatform_Source.Item.Gbx": {
+      "bytes": 19920,
+      "sha256": "60263cc11bd55493d17364957da64607882a248029944d8c271808b399146ce4"
+    },
+    "Sources/TMIS_Demo_Ride_Source.Item.Gbx": {
+      "bytes": 19034,
+      "sha256": "906d7c80aaa0d40f09539c6739d6b3e76cb1db7a572eccfd108bcb4ea2332b91"
+    },
+    "Sources/TMIS_Demo_Robot_Source.Item.Gbx": {
+      "bytes": 19432,
+      "sha256": "18d9b4ab454ef4c063874a5b4a48d63cc51397c73d8b17996bc296a6585b68c1"
+    },
+    "Sources/TMIS_Demo_Rollercoaster_Source.Item.Gbx": {
+      "bytes": 31632,
+      "sha256": "b0340f3bfcb654749673f40133c480f6d4602527108e2fdb483bb27314cdf897"
+    },
+    "Sources/TMIS_Demo_Train_Source.Item.Gbx": {
+      "bytes": 31870,
+      "sha256": "fc3998547829ef470261b28fd29229831fdbdc611492eaf4a897b32d9105c8d1"
+    },
+    "Templates/BirdFlight.motion-path.json": {
+      "bytes": 11405,
+      "sha256": "0c3fa37c8e41e7a2bbff814f3ce89afd9a77d8694bd50425500a3e9f55ce04ed"
+    },
+    "Templates/Boat.motion-path.json": {
+      "bytes": 10692,
+      "sha256": "6d72d439e27f64c7c7ef075bc052ead737d89490878b70b777cdd72d7d299743"
+    },
+    "Templates/Browser-custom.motion-template.json": {
+      "bytes": 13222,
+      "sha256": "c20497e81ec6a93f18308c6907fe7511519c8921bfd67ce3a3c2f22797d63fe8"
+    },
+    "Templates/Butterfly.motion-path.json": {
+      "bytes": 11812,
+      "sha256": "4e1c4a34046731dee33bd9b0a57a8e401556573cf4d1b21c18c58d520cc0c7cd"
+    },
+    "Templates/CableCar.motion-path.json": {
+      "bytes": 10691,
+      "sha256": "ebc00cd74600f0492cd725d4bbb57325dbe00c5bd4ba96cdd26ef155b0d98643"
+    },
+    "Templates/CarBody.motion-path.json": {
+      "bytes": 12384,
+      "sha256": "c2047e013d0cdb8f76edb41316a65dafb5f658545ced9c797fba3fb77ccf406f"
+    },
+    "Templates/Conveyor.motion-path.json": {
+      "bytes": 1881,
+      "sha256": "f817e2a52428f267d5befb2c8e3dcdfc0581776196c048a8ec751f8b939b69ea"
+    },
+    "Templates/Custom.motion-path.json": {
+      "bytes": 1890,
+      "sha256": "1a7a815811a0174813b16ddb62b38ec899e655887d4becad46cf17a386ce91cc"
+    },
+    "Templates/Custom.motion-template.json": {
+      "bytes": 2378,
+      "sha256": "797025c81217d9e87e06a6023e3d43845393046acffbf2bccaf433a157430abf"
+    },
+    "Templates/Drone.motion-path.json": {
+      "bytes": 3098,
+      "sha256": "c7a2e38c7d53ba143cc3fae051dba7ca7c378267a5e7594ad6b75e811e762a9b"
+    },
+    "Templates/Fish.motion-path.json": {
+      "bytes": 11351,
+      "sha256": "59e4341c613fe2e970ea1bcf47d64be1ecc6df7b94fab433fdde1b0347d9b81e"
+    },
+    "Templates/LiftPlatform.motion-path.json": {
+      "bytes": 1352,
+      "sha256": "b289322455b813598cfc91c259e47db39f1e4e460049eed2fb579d5f7a77256d"
+    },
+    "Templates/Ride.motion-path.json": {
+      "bytes": 10693,
+      "sha256": "355e04ea5974d763cf919e4b9e37ac38c4c36ec928486567cc11eb7633d799f2"
+    },
+    "Templates/Robot.motion-path.json": {
+      "bytes": 12156,
+      "sha256": "cf5c4d28fb04c0a2a828b04229cae197aaeb4267c5c7dc22522b32e318c70cfc"
+    },
+    "Templates/Rollercoaster.motion-path.json": {
+      "bytes": 12339,
+      "sha256": "ae1f8a9f5e141e93d1093949e7a1ab2c35a71168ae9232b512081f65ef2489ec"
+    },
+    "Templates/Train.motion-path.json": {
+      "bytes": 12416,
+      "sha256": "6b150c0f08adf637b34443b04ae1225f39cb5777d5764c611865116ee0dfaeab"
+    }
+  }
+}

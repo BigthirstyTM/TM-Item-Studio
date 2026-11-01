@@ -2,13 +2,13 @@
 @using System.Numerics
 @using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 <details class="border rounded p-2 my-2" data-testid="path-parts-editor">
-    <summary class="fw-bold">Separate wings, wheels &amp; propellers</summary>
+    <summary class="fw-bold">Separate moving parts</summary>
     <p class="small text-muted mt-2">Select an existing separate visual mesh and set its pivot in source-model coordinates. Fused geometry cannot be automatically identified as a wing or wheel. Scenery only; keep at least one mesh as the main body.</p>
     @if(VisualCount<2 || Plan.Use!=MotionPathUse.Scenery) {
         <p class="small text-info">This source needs a single kinematic body with at least two separate decoded visual meshes, in scenery mode. Split the model in Blender and import it before adding part animation.</p>
     } else {
         <div class="small">Moving mesh</div><SearchableSelect Label="Animated visual mesh" Options="Visuals" Value="@Visuals[visual]" ValueChanged="ChooseVisual" />
-        <label class="small d-block mt-2">Movement<select aria-label="Part movement" class="form-select form-select-sm" @bind="kind"><option value="@MotionPartKind.Wing">Wing · oscillating hinge</option><option value="@MotionPartKind.Wheel">Wheel · rotate with travelled distance</option><option value="@MotionPartKind.Propeller">Propeller · continuous spin</option></select></label>
+        <label class="small d-block mt-2">Movement<select aria-label="Part movement" class="form-select form-select-sm" @bind="kind"><option value="@MotionPartKind.Wing">Wing / tail / limb · oscillating hinge</option><option value="@MotionPartKind.Wheel">Wheel · rotate with travelled distance</option><option value="@MotionPartKind.Propeller">Propeller · continuous spin</option></select></label>
         <div class="row g-1"><div class="col-4"><label class="small">Pivot X<input aria-label="Part pivot X" type="number" step="any" class="form-control form-control-sm" @bind="x" /></label></div><div class="col-4"><label class="small">Pivot Y<input aria-label="Part pivot Y" type="number" step="any" class="form-control form-control-sm" @bind="y" /></label></div><div class="col-4"><label class="small">Pivot Z<input aria-label="Part pivot Z" type="number" step="any" class="form-control form-control-sm" @bind="z" /></label></div></div>
         <label class="small d-block">Axis<select aria-label="Part rotation axis" class="form-select form-select-sm" @bind="axis"><option value="@KC.EAxis.X">X</option><option value="@KC.EAxis.Y">Y</option><option value="@KC.EAxis.Z">Z</option></select></label>
         @if(kind==MotionPartKind.Wing) {

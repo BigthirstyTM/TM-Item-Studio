@@ -23,6 +23,7 @@ p.add_argument('--item-offset', type=float, nargs=2, default=[0.,0.], metavar=('
 p.add_argument('--cube-spawn', action='store_true', help='Spawn above an 8 m cube without requiring the complete coaster context')
 p.add_argument('--wide-camera', action='store_true', help='Frame the larger two-line/two-arc fixture')
 p.add_argument('--coaster-context', action='store_true', help='Place the known NewCoaster beside the normalized 128-point fixture')
+p.add_argument('--gallery-file', type=Path, help='Verified showcase manifest: place every listed item in one new map')
 p.add_argument('--shot-file', type=Path, help='JSON list of fixed camera views with time in seconds')
 p.add_argument('--bird-item', default='TMIS_Coaster_BirdsFinal', help='Registered bird item identifier')
 p.add_argument('--birds', action='store_true', help='Include generated animated bird flock')
@@ -115,10 +116,18 @@ if a.coaster_context:
     else:
         raise RuntimeError('Coaster inventory is not ready; no items placed')
 call('tm-mcp-pack-epp.SetAgentTag', dict(tag='tmis:handoff'))
-call('tm-mcp-pack-epp.PlaceItem', dict(itemPath=a.item,x=400+a.item_offset[0],y=15,z=400+a.item_offset[1],tag='tmis:handoff'))
-items = call('GetItems')
-if items['total'] != 1 or items['items'][0]['idName'] != a.item:
-    raise RuntimeError('Fixture must contain exactly the requested item')
+if a.gallery_file:
+    gallery=json.loads(a.gallery_file.read_text(encoding='utf-8'))
+    for entry in gallery:
+        call('tm-mcp-pack-epp.PlaceItem',dict(itemPath=entry['item'],x=entry['x'],y=entry['y'],z=entry['z'],tag='tmis:handoff'))
+    items=call('GetItems')
+    if items['total']!=len(gallery) or sorted(i['idName'] for i in items['items'])!=sorted(g['item'] for g in gallery):
+        raise RuntimeError('Gallery placement mismatch')
+else:
+    call('tm-mcp-pack-epp.PlaceItem', dict(itemPath=a.item,x=400+a.item_offset[0],y=15,z=400+a.item_offset[1],tag='tmis:handoff'))
+    items = call('GetItems')
+    if items['total'] != 1 or items['items'][0]['idName'] != a.item:
+        raise RuntimeError('Fixture must contain exactly the requested item')
 if a.coaster_context:
     call('tm-mcp-pack-epp.PlaceItem',dict(itemPath='NewCoaster.Item.Gbx',x=534.4675+a.item_offset[0],y=10.782,z=400+a.item_offset[1],tag='tmis:handoff'))
     items = call('GetItems')

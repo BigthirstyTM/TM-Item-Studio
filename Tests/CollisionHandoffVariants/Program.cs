@@ -7,6 +7,30 @@ using TM_Item_Studio.Models;
 using TmEssentials;
 using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 Gbx.LZO=new GBX.NET.LZO.MiniLZO();
+if(args.Length==4 && args[0]=="embed-gallery"){
+ var doc=new TM_Item_Studio.Models.FlagPackaging.MapArchive(File.ReadAllBytes(args[1]));
+ using var output=new MemoryStream();
+ using(var zip=new System.IO.Compression.ZipArchive(output,System.IO.Compression.ZipArchiveMode.Create,true))
+ using(var old=doc.Map.OpenReadEmbeddedZipData())foreach(var entry in old.Entries){
+   var basename=Path.GetFileName(entry.FullName.Replace('\\','/'));
+   if(!basename.StartsWith("TMIS_Demo_") || !basename.EndsWith(".Item.Gbx"))throw new Exception("Unexpected gallery payload");
+   using var input=entry.Open();using var bytes=new MemoryStream();input.CopyTo(bytes);bytes.Position=0;
+   var identity=Gbx.Parse<CGameItemModel>(bytes).Node.Ident;
+   var item=Gbx.Parse<CGameItemModel>(Path.Combine(args[2],basename)).Node;item.Ident=identity;
+   using var target=zip.CreateEntry(entry.FullName,System.IO.Compression.CompressionLevel.Optimal).Open();new Gbx<CGameItemModel>(item).Save(target);
+ }
+ File.WriteAllBytes(args[3],doc.ReplaceZip(output.ToArray()).Output);return;
+}
+if(args.Length==3 && args[0]=="verify-gallery"){
+ var map=Gbx.Parse<GBX.NET.Engines.Game.CGameCtnChallenge>(args[1]).Node;
+ var expected=JsonDocument.Parse(File.ReadAllText(args[2])).RootElement.EnumerateArray().Select(x=>x.GetProperty("label").GetString()!).ToArray();
+ if(map.AnchoredObjects?.Count!=expected.Length)throw new Exception("Wrong placed count");
+ using var zip=map.OpenReadEmbeddedZipData();
+
+ foreach(var label in expected){var entry=zip.Entries.Single(e=>e.FullName.Contains("TMIS_Demo_"+label+".") || e.FullName.EndsWith("TMIS_Demo_"+label));using var stream=entry.Open();using var bytes=new MemoryStream();stream.CopyTo(bytes);bytes.Position=0;var item=Gbx.Parse<CGameItemModel>(bytes).Node;if(item.EntityModel is not CPlugPrefab)throw new Exception("Incomplete embedded model: "+label);Console.WriteLine("PASS placed and embedded: "+label);}
+ return;
+}
+if(args.Length==3 && args[0]=="gallery"){TemplateGallery.Run(args[1],args[2]);return;}
 if(args.Length==4 && args[0]=="behavior"){BehaviorScene.Run(args[1],args[2],args[3]);return;}
 if(args.Length==4 && args[0]=="parts-source"){BehaviorScene.Parts(args[1],args[2],args[3]);return;}
 if(args.Length==2 && args[0]=="verify-flight-map"){
