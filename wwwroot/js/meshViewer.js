@@ -2302,7 +2302,8 @@ function applyPathInstance(instance,elapsed){
             : plan.ease === 4 ? (x < .5 ? 2*x*x : 1-2*(1-x)*(1-x)) : x;
         position.addScaledVector(new THREE.Vector3(leg.delta.x,leg.delta.y,leg.delta.z),u);
     }
-    if (plan.rotations) {
+    if(plan.collisionPoses){let i=plan.legs.findIndex(l=>t<l.startMs+l.moveMs);if(i<0)i=plan.legs.length-1;const q=plan.collisionPoses[i];rotation.set(q.x,q.y,q.z,q.w);}
+    else if (plan.rotations) {
         let i = plan.legs.findIndex(leg => t < leg.startMs + leg.moveMs);
         if (i < 0) i = plan.legs.length - 1;
         const leg = plan.legs[i], a = plan.rotations[i], b = plan.rotations[i + 1];

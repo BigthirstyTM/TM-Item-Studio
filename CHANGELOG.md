@@ -2,6 +2,14 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.13] - 2026-11-01
+
+- Experimental collision-relay arrays retain separate physical colliders for each copy, including uniform scale variants, spatial spread and time offsets. The shared startup dwell is retained while copy offsets apply to the moving portion of the loop.
+- Bound total expanded collision vertices and retain the existing per-channel timing limits. The timeline, draft history and custom-template storage also work with these physical arrays.
+- Expose experimental physical translation, rotation and spin layers, plus optional sampled route tilt. Up to 128 samples move and orient both the visual body and collider; rotation steps at handoffs and layer clocks restart each lap. Warnings explicitly cover passenger launches, drops and loop seams.
+- Allow animated visual parts with a rigid source collider in collision mode. Wings, wheels and other articulated parts do not receive independently animated collision. Sources still need useful collision geometry; arrays do not invent it.
+- Native passenger tests cover multiple copies and scale variants. Sustained support on a tested segment is not a guaranteed complete ride; a later handoff lost the passenger in the longer second-copy test.
+
 ## [0.5.12] - 2026-11-01
 
 - Array along a looping scenery path: up to 32 time-offset followers, deterministic XYZ spread, 1-4 shared size variants and alternating wing direction. Mesh geometry is shared across equal-size copies; animation data still adds to file size.

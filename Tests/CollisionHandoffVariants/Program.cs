@@ -7,6 +7,7 @@ using TM_Item_Studio.Models;
 using TmEssentials;
 using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 Gbx.LZO=new GBX.NET.LZO.MiniLZO();
+if(args.Length==3 && args[0]=="collision-array-probe"){CollisionArrayProbe.Run(args[1],args[2]);return;}
 if(args.Length==3 && args[0]=="array-gallery"){ArrayGallery.Run(args[1],args[2]);return;}
 if(args.Length==3 && args[0]=="instance-phase-probe"){
  Directory.CreateDirectory(args[2]);var original=Gbx.Parse<CGameItemModel>(args[1]).Node;var source=(CPlugPrefab)original.EntityModel!;

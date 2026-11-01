@@ -3,9 +3,9 @@
 @using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
 <details class="border rounded p-2 my-2" data-testid="path-parts-editor">
     <summary class="fw-bold">Separate moving parts</summary>
-    <p class="small text-muted mt-2">Select an existing separate visual mesh and set its pivot in source-model coordinates. Fused geometry cannot be automatically identified as a wing or wheel. Scenery only; keep at least one mesh as the main body.</p>
-    @if(VisualCount<2 || Plan.Use!=MotionPathUse.Scenery) {
-        <p class="small text-info">This source needs a single kinematic body with at least two separate decoded visual meshes, in scenery mode. Split the model in Blender and import it before adding part animation.</p>
+    <p class="small text-muted mt-2">Select an existing separate visual mesh and set its pivot in source-model coordinates. Fused geometry cannot be automatically identified as a wing or wheel. Keep at least one mesh as the main body. In collision mode, only the rigid body collider is retained; these separate part movements are visual and do not articulate their own collision.</p>
+    @if(VisualCount<2 || Plan.Use==MotionPathUse.Obstacle) {
+        <p class="small text-info">This source needs a single kinematic body with at least two separate decoded visual meshes, in scenery or experimental collision mode. Split the model in Blender and import it before adding part animation.</p>
     } else {
         <div class="small">Moving mesh</div><SearchableSelect Label="Animated visual mesh" Options="Visuals" Value="@Visuals[visual]" ValueChanged="ChooseVisual" />
         <label class="small d-block mt-2">Movement<select aria-label="Part movement" class="form-select form-select-sm" @bind="kind"><option value="@MotionPartKind.Wing">Wing / tail / limb · oscillating hinge</option><option value="@MotionPartKind.Wheel">Wheel · rotate with travelled distance</option><option value="@MotionPartKind.Propeller">Propeller · continuous spin</option></select></label>

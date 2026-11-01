@@ -34,7 +34,37 @@ Check("arrays share serialized models, remap bindings and leave the source untou
  foreach(var e in read.Ents.Where(e=>e.Model is KC)){var c=(NPlugDyna_SPrefabConstraintParams)e.Params!;Require(c.Ent2<bodies.Length&&c.Ent1<bodies.Length,"native body index must exclude constraint entries");Require(c.Ent1==-1||read.Ents[c.Ent1].Model is CPlugDynaObjectModel,"parent remap");Require(read.Ents[c.Ent2].Model is CPlugDynaObjectModel,"child remap");var driver=(KC)e.Model!;Require(driver.TransAnimFunc!.SubFuncs.Length<=4&&driver.RotAnimFunc!.SubFuncs.Length<=4,"native key limit");}
  Require(source.Ents.Length==2,"source changed");
  var settings=p with{Array=new(8,1000,new(2,1,3),.5f,1.5f,3,123,true)};Require(ItemMotionArray.Instances(settings).SequenceEqual(ItemMotionArray.Instances(settings)),"spread nondeterministic");Require(ItemMotionArray.Instances(settings).Select(i=>i.Scale).Distinct().Count()<=3,"too many scale variants");
- Require(!ItemMotionPath.Validate(p with{Use=MotionPathUse.CollisionRelay}).Success,"collidable array incorrectly accepted");
+ Require(ItemMotionPath.Validate(p with{Use=MotionPathUse.CollisionRelay,Layers=[new()]}).Success,"experimental physical layers refused");
+});
+Check("collision arrays retain dwell, scale physical vertices and remap body bindings",()=>{
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;var model=(CPlugDynaObjectModel)source.Ents[0].Model!;model.Mesh=RelaySolid();
+ var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20),new(0,0,20)],MotionPathUse.CollisionRelay,MotionPathRepeat.Closed,5,KC.AnimEase.Linear,0,8000).Value!;
+ p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray(),Array=new(3,1000,default,1.5f,1.5f)};
+ var shifted=ItemMotionArray.Shift(p,1000);Require(shifted.StartDelayMs==8000&&shifted.Legs[0].StartMs==8000&&shifted.DurationMs==24000,"dwell changed");Near(shifted.Start.Z,5);
+ var built=ItemMotionPath.Build(source,p);Require(built.Success,built.Reason??"build");
+ var root=built.Value!.Ents.First();var body=(CPlugDynaObjectModel)root.Model!;var q=new Quaternion(root.Rotation.X,root.Rotation.Y,root.Rotation.Z,root.Rotation.W);
+ var actual=((CPlugSurface.Mesh)body.DynaShape!.Surf!).Vertices;var original=((CPlugSurface.Mesh)model.DynaShape!.Surf!).Vertices;
+ for(int i=0;i<actual.Length;i++)Vector(Vector3.Transform(new(actual[i].X,actual[i].Y,actual[i].Z),q)+new Vector3(root.Position.X,root.Position.Y,root.Position.Z),new Vector3(original[i].X,original[i].Y,original[i].Z)*1.5f);
+ var roots=built.Value.Ents.Where(e=>e.Params is NPlugDyna_SPrefabConstraintParams{Ent1:-1}).ToArray();Require(roots.Length==14,"missing physical branches on followers");
+ foreach(var entry in roots){var link=(NPlugDyna_SPrefabConstraintParams)entry.Params!;var physical=(CPlugDynaObjectModel)built.Value.Ents[link.Ent2].Model!;
+  foreach(var shape in new[]{physical.StaticShape,physical.DynaShape}){var v=((CPlugSurface.Mesh)shape!.Surf!).Vertices;Require(v.Max(x=>Vector3.Distance(new(x.X,x.Y,x.Z),new(v[0].X,v[0].Y,v[0].Z)))>1.49f,"a follower lost its full-size collision");}}
+ var micro=ItemKinematicEntityTemplate.CreateCarrierBody();model.StaticShape=micro.StaticShape;model.DynaShape=micro.DynaShape;
+ Require(!ItemMotionPath.Build(source,p).Success,"carrier-only source advertised as passenger collision");
+ var bodies=built.Value.Ents.TakeWhile(e=>e.Model is CPlugDynaObjectModel).Count();foreach(var e in built.Value.Ents.Where(e=>e.Model is KC)){var b=(NPlugDyna_SPrefabConstraintParams)e.Params!;Require(b.Ent1<bodies&&b.Ent2<bodies,"bad physical binding");}
+});
+Check("experimental physical layers use bounded collider poses and preserve phase on copies",()=>{
+ var p=ItemMotionPath.Plan([Vector3.Zero,new(8,0,0),new(8,0,8),new(0,0,8)],MotionPathUse.CollisionRelay,MotionPathRepeat.Closed,4,KC.AnimEase.Linear,0,8000).Value!;
+ p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray()};
+ foreach(var kind in Enum.GetValues<MotionLayerKind>()){
+  var c=ItemMotionPathProfile.Compile(p with{Layers=[new("Physical layer",Kind:kind,Amplitude:.25f,PeriodMs:4000)]});Require(c.Success,c.Reason??"compile");Require(c.Value!.Layers is null&&c.Value.CollisionPoses?.Length==c.Value.Legs.Count&&c.Value.Legs.Count<=128,"missing baked poses");Require(c.Value.Legs.All(l=>l.MoveMs>=80),"sample too short");
+  var shifted=ItemMotionArray.Shift(c.Value,250);Require(shifted.CollisionPoses!.Length==shifted.Legs.Count,"pose split mismatch");Require(shifted.StartDelayMs==8000,"delay lost");
+ }
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+ var angle=Quaternion.CreateFromAxisAngle(Vector3.UnitZ,MathF.PI/2);
+ var baked=p with{CollisionPoses=Enumerable.Repeat(angle,4).ToArray()};var result=ItemMotionPath.Build(source,baked);Require(result.Success,result.Reason??"physical pose");
+ var root=result.Value!.Ents[0];var shape=((CPlugSurface.Mesh)((CPlugDynaObjectModel)root.Model!).DynaShape!.Surf!).Vertices;var q=new Quaternion(root.Rotation.X,root.Rotation.Y,root.Rotation.Z,root.Rotation.W);
+ var edge=Vector3.Transform(new Vector3(shape[1].X-shape[0].X,shape[1].Y-shape[0].Y,shape[1].Z-shape[0].Z),q);Vector(edge,Vector3.UnitY);
+ Require(!ItemMotionPath.Validate(p with{CollisionPoses=[new(float.NaN,0,0,1)]}).Success,"malformed pose accepted");
 });
 foreach(var kind in Enum.GetValues<MotionBehaviorKind>()) Check($"template {kind} compiles and serializes on a closed route",()=>{
     var points=Enumerable.Range(0,32).Select(i=>new Vector3(20*MathF.Cos(i*MathF.PI/16),5+2*MathF.Sin(i*MathF.PI/8),20*MathF.Sin(i*MathF.PI/16))).ToArray();

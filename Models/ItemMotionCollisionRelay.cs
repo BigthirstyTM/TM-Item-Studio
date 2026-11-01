@@ -51,8 +51,9 @@ public static class ItemMotionCollisionRelay
                 var model = (CPlugDynaObjectModel)body.Model!;
                 var solid = CheckMesh(model);
                 var seen = new HashSet<Vec3[]>();
-                Vec3 Point(Vec3 p) => Pack(Vector3.Transform(V(p) - anchor, inverse) + offset);
-                Vec3 Direction(Vec3 p) => Pack(Vector3.Transform(V(p), inverse));
+                var pose=plan.CollisionPoses?[i]??Quaternion.Identity;
+                Vec3 Point(Vec3 p) => Pack(Vector3.Transform(Vector3.Transform(V(p) - anchor,pose), inverse) + offset);
+                Vec3 Direction(Vec3 p) => Pack(Vector3.Transform(Vector3.Transform(V(p),pose), inverse));
                 void Transform(Vec3[]? values, bool positions)
                 {
                     if (values is null || !seen.Add(values)) return;

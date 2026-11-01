@@ -14,7 +14,7 @@ public static class ItemMotionParts
     public static string? Validate(MotionPathPlan p) {
         if(p.Parts is not {Length:>0} parts)return null;
         if(parts.Any(p=>p is null))return "Missing animated part settings.";
-        if(p.Use!=MotionPathUse.Scenery || p.Rotations is null)return "Separate part animation requires scenery with route rotation.";
+        if(p.Use==MotionPathUse.Obstacle || p.Rotations is null)return "Separate part animation requires scenery or experimental collision relay with route rotation.";
         if(parts.Length>8 || parts.Select(x=>x.VisualIndex).Distinct().Count()!=parts.Length)return "Choose at most eight distinct visual meshes for moving parts.";
         foreach(var part in parts)if(part.VisualIndex<0 || !Enum.IsDefined(part.Kind) || !Enum.IsDefined(part.Axis)
             || !float.IsFinite(part.Pivot.Length()) || part.Pivot.Length()>10000 || !float.IsFinite(part.MinimumAngle) || !float.IsFinite(part.MaximumAngle)

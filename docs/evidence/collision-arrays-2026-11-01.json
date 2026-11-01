@@ -1,0 +1,217 @@
+{
+  "date": "2026-11-01",
+  "version": "0.5.13",
+  "nativeRuns": [
+    {
+      "run": "CA_Array_V1",
+      "samples": 192,
+      "observedSeconds": 36.828,
+      "start": [
+        399.998,
+        16.065,
+        399.998
+      ],
+      "end": [
+        432.022,
+        16.064,
+        429.176
+      ],
+      "yMin": 16.062,
+      "yMax": 16.3093,
+      "maxUpwardVelocity": 0.0304,
+      "firstBelowY14After3s": null
+    },
+    {
+      "run": "CA_Bob_V1",
+      "samples": 189,
+      "observedSeconds": 36.985,
+      "start": [
+        399.999,
+        15.914,
+        399.999
+      ],
+      "end": [
+        404.436,
+        8.014,
+        383.059
+      ],
+      "yMin": 8.0048,
+      "yMax": 78.1011,
+      "maxUpwardVelocity": 63.517,
+      "firstBelowY14After3s": 11.844
+    },
+    {
+      "run": "CA_BrowserThird_V2",
+      "samples": 191,
+      "observedSeconds": 36.844,
+      "start": [
+        432,
+        16.603,
+        431.999
+      ],
+      "end": [
+        400.086,
+        16.601,
+        402.711
+      ],
+      "yMin": 16.601,
+      "yMax": 16.6865,
+      "maxUpwardVelocity": 0.0002,
+      "firstBelowY14After3s": null
+    },
+    {
+      "run": "CA_RootSpin_V1",
+      "samples": 160,
+      "observedSeconds": 30.875,
+      "start": [
+        400.688,
+        16.065,
+        400.454
+      ],
+      "end": [
+        421.351,
+        16.064,
+        403.334
+      ],
+      "yMin": 16.064,
+      "yMax": 16.066,
+      "maxUpwardVelocity": 0,
+      "firstBelowY14After3s": null
+    },
+    {
+      "run": "CA_Scaled_V1",
+      "samples": 193,
+      "observedSeconds": 36.875,
+      "start": [
+        400,
+        16.327,
+        399.999
+      ],
+      "end": [
+        432.035,
+        16.327,
+        429.326
+      ],
+      "yMin": 16.327,
+      "yMax": 16.3906,
+      "maxUpwardVelocity": 0.0114,
+      "firstBelowY14After3s": null
+    },
+    {
+      "run": "CA_SecondCopy_V1",
+      "samples": 424,
+      "observedSeconds": 80.985,
+      "start": [
+        399.999,
+        16.327,
+        431.999
+      ],
+      "end": [
+        432.481,
+        8.98785,
+        443.309
+      ],
+      "yMin": 8.98656,
+      "yMax": 16.5539,
+      "maxUpwardVelocity": 1.3638,
+      "firstBelowY14After3s": 56.125
+    },
+    {
+      "run": "CA_RotateLayer_V1",
+      "samples": 108,
+      "observedSeconds": 26.75,
+      "start": [
+        400.023,
+        13.8897,
+        395.449
+      ],
+      "end": [
+        399.974,
+        8.99235,
+        390.361
+      ],
+      "yMin": 8.9852,
+      "yMax": 13.8897,
+      "maxUpwardVelocity": 1.4554,
+      "allWheelsAirSamples": 108
+    },
+    {
+      "run": "CA_SpinLayer_V1",
+      "samples": 108,
+      "observedSeconds": 26.766,
+      "start": [
+        399.999,
+        16.065,
+        399.998
+      ],
+      "end": [
+        395.361,
+        8.98786,
+        407.42
+      ],
+      "yMin": 8.6072,
+      "yMax": 71.6446,
+      "maxUpwardVelocity": 61.838,
+      "allWheelsAirSamples": 74
+    }
+  ],
+  "findings": {
+    "array": "All three copies tested separately across generated and browser-exported fixtures. Physical collision retained, including scale and spread.",
+    "passengerSafety": "Second-copy long run loses support at approximately 56.125 s; not a stable full-loop passenger solution.",
+    "translationLayer": "Available experimentally with warning: earlier bob prototype launched passenger at 63.517 m/s upward. Not a reliable passenger platform.",
+    "rotation": "Sampled route tilt, Rotate and Spin layers are exposed experimentally. Rotation is stepped at handoffs; native Rotate lost passenger support and Spin launched the passenger. Direct root spin on a straight path is a separate constrained experiment."
+  },
+  "fixtures": [
+    {
+      "file": "TMIS_CA_Array.Item.Gbx",
+      "bytes": 58391,
+      "sha256": "2e3abc51fc2ddf2c94e7f2ab019a9dce5ba88591149761a00d0f023e44f47a4c"
+    },
+    {
+      "file": "TMIS_CA_Bob.Item.Gbx",
+      "bytes": 175364,
+      "sha256": "22b62477cb93a3b8f04284affe2698b3bd45c47bec1616c98f9fdab2d43f781d"
+    },
+    {
+      "file": "TMIS_CA_Browser.Item.Gbx",
+      "bytes": 58261,
+      "sha256": "8a3dac701dc88462d6fccfbde3a4a566c2adea1666dcb1811617d533940ba941"
+    },
+    {
+      "file": "TMIS_CA_Control.Item.Gbx",
+      "bytes": 55606,
+      "sha256": "8706404cd0df6ab8e74b9fd65f2e28c28561955746735d94c45d644a24d07ceb"
+    },
+    {
+      "file": "TMIS_CA_RootSpin.Item.Gbx",
+      "bytes": 53315,
+      "sha256": "b20f4a8aa35db7aeed0970fcc114187eb71e3e1f16f864ff001807436d4ebcb0"
+    },
+    {
+      "file": "TMIS_CA_Scaled.Item.Gbx",
+      "bytes": 58167,
+      "sha256": "cdaf89fa35aefb40398979e5d20ef288dbffc910c1cebfe3edde04fcdd1224fd"
+    },
+    {
+      "file": "TMIS_CA_RotateLayer.Item.Gbx",
+      "bytes": 108325,
+      "sha256": "388b3bffabf5c9fcaab4a6a77ad616a9ee1d84b762ceb58b850a1a0886c3169f"
+    },
+    {
+      "file": "TMIS_CA_SpinLayer.Item.Gbx",
+      "bytes": 130561,
+      "sha256": "0dfd3044f8905805fe5be17f1b4f73c27158a3c968e7429c156bb165e35094c5"
+    }
+  ],
+  "limits": [
+    "Layers sample at most 128 segments; orientation is discontinuous.",
+    "Original rigid collision is retained; separately animated parts are visual only.",
+    "Loops with zero waypoint pauses required; geometry and timing budgets remain enforced.",
+    "CA_Bob_V1 records an earlier prototype, not the final optimized body hierarchy."
+  ],
+  "automatedChecks": {
+    "itemMotion": "66 passed, 0 failed",
+    "browserScenery": "PASS array sharing, count, undo/redo, scrub, resume, layers, serialization and compilation",
+    "browserCollision": "PASS physical array, scale preview, scrub, layers, sampled tilt, warning, Apply and export"
+  }
+}
