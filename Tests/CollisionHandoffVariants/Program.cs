@@ -7,6 +7,18 @@ using TM_Item_Studio.Models;
 using TmEssentials;
 using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 Gbx.LZO=new GBX.NET.LZO.MiniLZO();
+if(args.Length==2 && args[0]=="verify-flight-map"){
+ var map=Gbx.Parse<GBX.NET.Engines.Game.CGameCtnChallenge>(args[1]).Node;
+ using var zip=map.OpenReadEmbeddedZipData();
+ if(map.AnchoredObjects?.Count!=3)throw new Exception("Expected cart, birds and coaster");
+ foreach(var entry in zip.Entries)Console.WriteLine($"Embedded: {entry.FullName} ({entry.Length} bytes)");
+ if(!zip.Entries.Any(e=>e.FullName.Contains("TMIS_Cart_GravitySmooth"))||!zip.Entries.Any(e=>e.FullName.Contains("TMIS_Coaster_BirdsFinal"))||!zip.Entries.Any(e=>e.FullName.Contains("NewCoaster")))throw new Exception("Missing embedded models");
+ Console.WriteLine("PASS three placed and embedded models");return;
+}
+
+if(args.Length==2 && args[0]=="verify-flight"){FlightScene.Verify(args[1]);return;}
+if(args.Length==4 && args[0]=="birds"){FlightScene.Birds(args[1],args[2],args[3]);return;}
+if(args.Length==4 && args[0]=="flight"){FlightScene.Run(args[1],args[2],args[3]);return;}
 if(args.Length==5 && args[0]=="cart"){CartBuilder.Run(args[1],args[2],args[3],args[4]);return;}
 if(args.Length>=3 && args[0]=="inspect") {
  Directory.CreateDirectory(args[1]);

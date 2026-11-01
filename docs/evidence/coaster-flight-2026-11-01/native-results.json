@@ -1,0 +1,11 @@
+{
+  "cartFullRun": "CoasterFlight_Full",
+  "cartCycleSeconds": 145.002,
+  "fullRecordingSeconds": 180,
+  "finalSceneRun": "CoasterFlight_Delivery",
+  "birdCloseRun": "CoasterBird_Tracked",
+  "endMode": "Menu",
+  "passengerTest": false,
+  "embeddedModels": 3,
+  "productionDeployment": false
+}
