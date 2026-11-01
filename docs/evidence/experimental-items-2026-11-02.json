@@ -1,0 +1,152 @@
+{
+  "date": "2026-11-02",
+  "gameBuild": "2026-02-02_17_51 128149-c7d05ad2551 / 3.3.0",
+  "scope": "Disposable editor test maps; no online racing or user-map modification",
+  "cases": [
+    {
+      "name": "static-inside",
+      "mapUid": "TMIS_EXP_84fb167095fb48baac",
+      "mapCheckpointCount": 1,
+      "playerCheckpointCount": 1,
+      "lastCpTime": -281,
+      "rawArtifact": "inside-GetRaceData.json"
+    },
+    {
+      "name": "static-outside",
+      "mapUid": "TMIS_EXP_2d450548e7c44edc85",
+      "mapCheckpointCount": 1,
+      "playerCheckpointCount": 0,
+      "lastCpTime": 0,
+      "rawArtifact": "control-b-GetRaceData.json"
+    },
+    {
+      "name": "visual-only-outside",
+      "mapUid": "TMIS_EXP_bbde51f39bb74c45bb",
+      "mapCheckpointCount": 1,
+      "playerCheckpointCount": 0,
+      "lastCpTime": 0,
+      "rawArtifact": "visual-end-GetRaceData.json"
+    },
+    {
+      "name": "driven-trigger-outside",
+      "mapUid": "TMIS_EXP_bf84752b87954d67b1",
+      "mapCheckpointCount": 1,
+      "playerCheckpointCount": 0,
+      "lastCpTime": 0,
+      "rawArtifact": "c-driven-end-GetRaceData.json"
+    },
+    {
+      "name": "driven-trigger-original-position",
+      "mapUid": "TMIS_EXP_15779ab94add4e6bb5",
+      "mapCheckpointCount": 1,
+      "playerCheckpointCount": 1,
+      "lastCpTime": -361,
+      "rawArtifact": "c-inside-end-GetRaceData.json"
+    }
+  ],
+  "knownUnsafe": {
+    "candidate": "TMIS_ExpB_ParentTrigger",
+    "result": "Process exited while loading map; socket reset and fresh LogCrash_00000000006C39D4.txt at 00:02:49",
+    "cause": "Not isolated to engine or plugin; direct parent attachment is not safe to ship",
+    "defaultGeneration": false
+  },
+  "fixtures": [
+    {
+      "file": "TMIS_ExpB_CheckpointControl.Item.Gbx",
+      "sha256": "4fcc2ea8bf29655eff708b53d2cd0ef897fe26fbe3d376d5b131024760a82799",
+      "bytes": 945441
+    },
+    {
+      "file": "TMIS_ExpB_DrivenTrigger.Item.Gbx",
+      "sha256": "6404265b5ed4aeaa9ffe0cc95f52ef828f97dfe0a149bd99dd44978ff0020e52",
+      "bytes": 945796
+    },
+    {
+      "file": "TMIS_ExpB_ParentTrigger.Item.Gbx",
+      "sha256": "216a7a9c0f995a5e25e20196a0d9439d27a49385483d1c5a654a58fdc0ac4a24",
+      "bytes": 945808
+    },
+    {
+      "file": "TMIS_ExpB_VisualOnly.Item.Gbx",
+      "sha256": "867ecc3970099f711f942b955e8d4e08ffbc4a61c68811af4a90cf7ab8c4a11b",
+      "bytes": 945394
+    },
+    {
+      "file": "TMIS_ExpC_CheckpointControl.Item.Gbx",
+      "sha256": "ed62876a1260e4bfd3089f9bdbe017efaf794cf6ccb11876d4553321c00f5320",
+      "bytes": 945441
+    },
+    {
+      "file": "TMIS_ExpC_DrivenTrigger.Item.Gbx",
+      "sha256": "c60abb51ff97463de4e0505bf8ab1c3a9ba9923b301c5aaec0137fd34065f786",
+      "bytes": 945791
+    },
+    {
+      "file": "TMIS_ExpC_ParentTrigger.Item.Gbx",
+      "sha256": "cb4d4a6f3b2e8cf66120c84f6f7b1fefc564af04fa1181b93d39b8738fcd72a3",
+      "bytes": 945803
+    },
+    {
+      "file": "TMIS_ExpC_VisualOnly.Item.Gbx",
+      "sha256": "1042ec532ff46d9304a24ce65b38f357ab9cbd63b15d3a23881bd4f443329074",
+      "bytes": 945389
+    },
+    {
+      "file": "TMIS_ExpD_AudioPermanent.Item.Gbx",
+      "sha256": "e253f8f2af9e65a08d21717f4eb70615d70c2f713866b7645bc8fe5bdb63c990",
+      "bytes": 930723
+    },
+    {
+      "file": "TMIS_ExpD_AudioSpawn.Item.Gbx",
+      "sha256": "83e28a571af80f932aa5e08c520e3cab15cc66fa8fe12e46a35699970b23e5e0",
+      "bytes": 932653
+    },
+    {
+      "file": "TMIS_ExpD_OrnamentControl.Item.Gbx",
+      "sha256": "e219ee821a2aa6ee8a6fb8cab2500f97fb9ea82df226015c76853fd97d5eaebc",
+      "bytes": 944686
+    },
+    {
+      "file": "TMIS_ExpD_PickUp.Item.Gbx",
+      "sha256": "6d2c5fd26b7c72e9835ef55fdc581200db86f6eb6e4f6f3206295234cbab5d15",
+      "bytes": 931313
+    }
+  ],
+  "catalog": {
+    "items": 1364,
+    "parsed": 1363,
+    "types": {
+      "Ornament": 1358,
+      "Character": 1,
+      "Vehicle": 4
+    },
+    "failed": [
+      {
+        "file": "/RedIsland/Items/Vegetation/BushSmallA.Item.Gbx",
+        "error": "EndOfStreamException"
+      }
+    ]
+  },
+  "commonCandidates": {
+    "OrnamentControl": {
+      "nativePreload": true,
+      "mapObserved": false,
+      "gameplayProven": false
+    },
+    "PickUp": {
+      "nativePreload": true,
+      "mapObserved": true,
+      "gameplayProven": false
+    },
+    "AudioPermanent": {
+      "nativePreload": true,
+      "mapObserved": false,
+      "gameplayProven": false
+    },
+    "AudioSpawn": {
+      "nativePreload": true,
+      "mapObserved": false,
+      "gameplayProven": false
+    }
+  }
+}

@@ -1139,12 +1139,14 @@ function selectMeshObject(mesh, notify = true, additive = false, range = false) 
     selectedMeshObject = mesh ?? null;
     selectedMeshPath = mesh?.userData?.path ?? null;
     updateSelectedMeshHighlight();
+    const instanceStatus=document.getElementById('instance-selection-status');
+    if(instanceStatus)instanceStatus.textContent=mesh?.userData?.instanceIndex!=null ? `Selected instance ${mesh.userData.instanceIndex+1} - root mesh ${mesh.userData.sourcePath}` : 'Root source mesh';
     if (!mesh && selectedCompositeSources.size) {
         selectedCompositeSources.clear();
         applyCompositeVisualState();
     }
     if (notify && dotNetHelper) {
-        const helper = dotNetHelper, path = selectedMeshPath;
+        const helper = dotNetHelper, path = mesh?.userData?.sourcePath ?? selectedMeshPath;
         const sourceIndex = Number.isInteger(mesh?.userData?.sourceIndex) ? mesh.userData.sourceIndex : null;
         // Source switching rebuilds the payload asynchronously. Keep selection and clearing in
         // pointer order so a late source-switch render cannot restore an old selection.
@@ -1608,6 +1610,8 @@ function makePart(part, owner, bounds, pool) {
     mesh.visible = enabled && visible;
     mesh.userData = {
         path: part.path ?? part.name ?? '',
+        sourcePath: part.sourcePath ?? part.path,
+        instanceIndex: Number.isInteger(part.instanceIndex) ? part.instanceIndex : null,
         entityPath: part.entityPath,
         sourceIndex: Number.isInteger(part.sourceIndex) ? part.sourceIndex : null,
         groupId: Number.isInteger(part.groupId) ? part.groupId : null,
@@ -1991,6 +1995,8 @@ function updateWaypointHighlights() {
 }
 
 function renderPayload(input, preserveCamera) {
+    const previousInstance = selectedMeshObject?.userData?.instanceIndex;
+    const previousSourcePath = selectedMeshObject?.userData?.sourcePath;
     if (!scene) return;
     const data = structuredClone(typeof input === 'string' ? JSON.parse(input) : input);
     if (!data || typeof data !== 'object') throw new Error('Scene payload required.');
@@ -2078,6 +2084,10 @@ function renderPayload(input, preserveCamera) {
     staged.forEach((group, index) => { while (group.children.length) destinations[index].add(group.children[0]); });
     // clearViewerScene retires the old selection. Apply the new payload only afterwards.
     selectedMeshPath = typeof data.selectedMeshPath === 'string' && data.selectedMeshPath.length > 0 ? data.selectedMeshPath : null;
+    if (Number.isInteger(previousInstance) && (!selectedMeshPath || selectedMeshPath === previousSourcePath)) {
+        const instancePath = `instance/${previousInstance}/${previousSourcePath}`;
+        if (findMeshByPath(instancePath)) selectedMeshPath = instancePath;
+    }
     selectedCompositeSources = new Set((compositeSelection.selectedSourceIndices ?? []).filter(Number.isInteger));
     compositeLeaderSource = Number.isInteger(compositeSelection.leaderSourceIndex) && compositeSelection.leaderSourceIndex >= 0
         ? compositeSelection.leaderSourceIndex : null;
@@ -2393,11 +2403,11 @@ function applySceneFilter() {
     const damageLayers = new Set((currentPayload?.materials ?? []).filter(material => /DmgDecal_/i.test(material.gameMaterialName || '')).map(material => material.path));
     for (const group of [staticGroup, movingGroup]) group?.traverse(child => {
         if (!child.isMesh) return;
-        child.visible = sceneFilter.materialIndex === null && sceneFilter.materialPath === null && lod === null || child.userData.mappings.some(map =>
+        child.visible = child.userData.enabled !== false && child.userData.visible !== false && (sceneFilter.materialIndex === null && sceneFilter.materialPath === null && lod === null || child.userData.mappings.some(map =>
             (sceneFilter.materialIndex === null || map.materialIndex === sceneFilter.materialIndex)
             && (sceneFilter.materialPath === null || map.materialPath === sceneFilter.materialPath)
             && !damageLayers.has(map.materialPath)
-            && (lod === null || map.lodMask !== null && (map.lodMask & lod) !== 0));
+            && (lod === null || map.lodMask !== null && (map.lodMask & lod) !== 0)));
     });
     applyCompositeVisualState();
 }
@@ -2471,4 +2481,9 @@ window.downloadObjFile = function (filename, content) {
 };
 window.downloadBinaryGbx = function (filename, base64Data) {
     const link = document.createElement('a'); link.download = filename; link.href = 'data:application/octet-stream;base64,' + base64Data; link.click();
+};
+
+window.selectStudioInstance=function(index){
+ const matches=[];for(const group of [staticGroup,movingGroup])group?.traverse(m=>{if(isSelectableMesh(m)&&m.userData.instanceIndex===index)matches.push(m);});
+ if(!matches.length)return;selectMeshObject(matches[0],false);const bounds=new THREE.Box3();matches.forEach(m=>bounds.expandByObject(m));frameCamera(bounds);
 };

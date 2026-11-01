@@ -432,5 +432,30 @@ Check("a prefab item keeps one shared model per source entry across all copies",
     Console.WriteLine($"  kinematic source {new FileInfo(kinematicPath).Length}B, {entriesPerCopy} entrie(s) per copy -> {export.EntryCount} entries, {export.Bytes.Length}B");
 });
 
+Check("constraint copies target their own bodies and retain local anchors", () =>
+{
+    var source = Gbx.Parse<CGameItemModel>(Path.Combine("Test Exported items", "CustomItem_Kinematic.Item.Gbx"));
+    var root = MultiRoot(source.Node)!;
+    var count = root.Ents.Length;
+    Require(count >= 2, "Need two source bodies");
+    var local = new NPlugDyna_SPrefabConstraintParams { Version=0, Ent1=0, Ent2=1, Pos1=new(1,2,3), Pos2=new(4,5,6) };
+    var world = new NPlugDyna_SPrefabConstraintParams { Version=0, Ent1=-1, Ent2=0, Pos1=new(2,3,4) };
+    root.Ents = root.Ents.Concat(new[] {
+        new CPlugPrefab.EntRef {Model=new NPlugDyna_SKinematicConstraint(), Rotation=Quat.Identity, Params=local},
+        new CPlugPrefab.EntRef {Model=new NPlugDyna_SKinematicConstraint(), Rotation=Quat.Identity, Params=world}
+    }).ToArray();
+    var copies = new[] { new ItemMacroblockInstance(), new ItemMacroblockInstance {PosX=20, PosY=5, PosZ=10} };
+    var export = ItemMultiInstance.Export(source,1,copies,"ConstraintCopies");
+    var result = MultiRoot(Gbx.Parse<CGameItemModel>(new MemoryStream(export.Bytes)).Node)!;
+    var stride = count+2;
+    var second = (NPlugDyna_SPrefabConstraintParams)result.Ents[stride+count].Params!;
+    Require(second.Ent1==stride && second.Ent2==stride+1,"Second constraint still targets first copy");
+    Require(second.Pos1==local.Pos1 && second.Pos2==local.Pos2,"Local anchors changed");
+    var secondWorld = (NPlugDyna_SPrefabConstraintParams)result.Ents[stride+count+1].Params!;
+    Require(secondWorld.Ent1==-1 && secondWorld.Ent2==stride,"World sentinel or body index changed");
+    Require(secondWorld.Pos1==new Vec3(22,8,14),"World anchor did not follow placement");
+    Require(local.Ent1==0 && local.Ent2==1 && world.Pos1==new Vec3(2,3,4),"Source was mutated");
+});
+
 Console.WriteLine($"\n{passed} passed, {failed} failed");
 return failed == 0 ? 0 : 1;
