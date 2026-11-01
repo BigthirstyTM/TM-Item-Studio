@@ -84,7 +84,7 @@ function pickEditablePathSegment(event) {
     const tied=hits.filter(h=>h.distance<=hits[0].distance+.5).map(h=>h.index).sort((a,b)=>a-b);
     return tied[(tied.indexOf(editablePathIndex)+1)%tied.length];
 }
-let drawPathDraft = null, drawPathDragIndex = -1, drawPathRepeat = 'Closed';
+let drawPathDraft = null, drawPathDragIndex = -1, drawPathRepeat = 'Closed', showPathPivots = false;
 let drawPathViewLock = null, drawPathDragOffset = 0;
 let legacyMotion = null;
 let geometryEpoch = null, sharedGeometry = new Map();
@@ -2213,15 +2213,18 @@ window.stopDrawPathPreview = function () {
     if (!drawPathDraft) return;
     for (const [group, visible] of drawPathDraft.hiddenGroups ?? []) group.visible = visible;
     drawPathDraft.source.group.visible = drawPathDraft.wasVisible;
-    scene?.remove(drawPathDraft.ghost);
+    for(const helper of drawPathDraft.pivotHelpers??[]){helper.geometry.dispose();helper.material.dispose();}
+    for(const instance of drawPathDraft.instances??[drawPathDraft])scene?.remove(instance.ghost);
     // Clones share source geometry/materials: never dispose those resources here.
     drawPathDraft = null;
     renderDrawPathVisual();
 };
-window.previewDrawPath = function (plan, center) {
+window.previewDrawPath = function (input, center) {
+    const plan=input.plan??input, plans=input.instances??[plan];
     const firstPreview = !drawPathDraft;
     const source = drawPathSource();
     window.stopDrawPathPreview();
+    const instances=plans.map(plan=>{
     const ghost = source.group.clone(true);
     ghost.matrixAutoUpdate = false;
     ghost.visible = true;
@@ -2241,12 +2244,15 @@ window.previewDrawPath = function (plan, center) {
     source.rest.decompose(new THREE.Vector3(), rotation, new THREE.Vector3());
     if (plan.obstacle) rotation.setFromUnitVectors(new THREE.Vector3(1,0,0), new THREE.Vector3(...['x','y','z'].map(k=>plan.legs[0].delta[k])).normalize());
     const anchor = center ? source.box.getCenter(new THREE.Vector3()) : new THREE.Vector3();
+    return {ghost,plan,rotation,anchor,animatedParts};
+    });
     const wasVisible = source.group.visible;
     source.group.visible = false;
-    scene.add(ghost);
+    for(const instance of instances)scene.add(instance.ghost);
     const hiddenGroups = retainedPathSource ? [...new Set(typedMotions.flatMap(m => motionGroups.get(m.childPath) ?? []))].map(group => [group, group.visible]) : [];
     for (const [group] of hiddenGroups) group.visible = false;
-    drawPathDraft = { source, ghost, wasVisible, hiddenGroups, plan, rotation, anchor, animatedParts, started: performance.now() };
+    drawPathDraft = { source, ...instances[0], wasVisible, hiddenGroups, plan, instances, started: performance.now() };
+    window.setPathPivotPreview(showPathPivots);
     renderDrawPathVisual();
     applyDrawPathPreview(drawPathDraft.started);
     if (firstPreview) window.fitDrawPath();
@@ -2258,17 +2264,37 @@ window.fitDrawPath = function () {
     bounds.expandByScalar(Math.max(radius, 1));
     frameCamera(bounds);
 };
+window.setPathPivotPreview=function(enabled){
+    showPathPivots=!!enabled;if(!drawPathDraft)return;
+    for(const helper of drawPathDraft.pivotHelpers??[]){helper.removeFromParent();helper.geometry.dispose();helper.material.dispose();}
+    drawPathDraft.pivotHelpers=[];
+    if(!showPathPivots)return;
+    const first=drawPathDraft.instances[0];
+    for(const point of [first.anchor,...(first.plan.parts??[]).map(p=>p.pivot)]){
+        const helper=new THREE.AxesHelper(1.2);helper.position.set(point.x,point.y,point.z);helper.material.depthTest=false;helper.renderOrder=1000;
+        first.ghost.add(helper);drawPathDraft.pivotHelpers.push(helper);
+    }
+};
+window.seekDrawPathPreview=function(ms){if(!drawPathDraft)return;drawPathDraft.paused=true;drawPathDraft.seekMs=Math.max(0,Math.min(drawPathDraft.plan.durationMs-.001,ms));applyDrawPathPreview(performance.now());};
+window.pauseDrawPathPreview=function(paused){if(!drawPathDraft)return;const now=performance.now();if(paused&&!drawPathDraft.paused)drawPathDraft.seekMs=(now-drawPathDraft.started);if(!paused&&drawPathDraft.paused)drawPathDraft.started=now-drawPathDraft.seekMs;drawPathDraft.paused=paused;applyDrawPathPreview(now);};
 function applyDrawPathPreview(timestamp) {
     if (!drawPathDraft) return;
-    const { ghost, plan, rotation, anchor, started } = drawPathDraft;
-    const elapsed = timestamp - started;
+    const { plan, started } = drawPathDraft;
+    const elapsed = drawPathDraft.paused ? drawPathDraft.seekMs : timestamp - started;
     const t = elapsed % plan.durationMs;
+    const scrub=document.getElementById('path-preview-scrubber');if(scrub&&document.activeElement!==scrub)scrub.value=String(Math.round(t));
+    const clock=document.getElementById('path-preview-time');if(clock)clock.textContent=`${(t/1000).toFixed(2)} / ${(plan.durationMs/1000).toFixed(2)} s`;
     const status=document.getElementById('draw-path-playback-status');
     if(status) {
         const wait=plan.legs[0].startMs-t;
-        const label=wait>0?`Preview running — waiting ${Math.ceil(wait/1000)} s for start delay / pause`:`Preview playing — ${Math.floor(t/1000)} / ${Math.ceil(plan.durationMs/1000)} s`;
+        const label=drawPathDraft.paused?'Preview paused':wait>0?`Preview running — waiting ${Math.ceil(wait/1000)} s for start delay / pause`:`Preview playing — ${Math.floor(t/1000)} / ${Math.ceil(plan.durationMs/1000)} s`;
         if(status.textContent!==label)status.textContent=label;
     }
+    for(const instance of drawPathDraft.instances??[drawPathDraft])applyPathInstance(instance,elapsed);
+}
+function applyPathInstance(instance,elapsed){
+    const {ghost,plan,rotation,anchor}=instance;
+    const t=elapsed%plan.durationMs;
     const position = new THREE.Vector3(plan.start.x,plan.start.y,plan.start.z);
     for (const leg of plan.legs) {
         const x = Math.max(0,Math.min(1,(t-leg.startMs)/leg.moveMs));
@@ -2287,9 +2313,19 @@ function applyDrawPathPreview(timestamp) {
         rotation.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),angle('pitch')));
         rotation.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),angle('roll')));
     }
-    position.sub(anchor.clone().applyQuaternion(rotation));
     ghost.matrix.compose(position,rotation,new THREE.Vector3(1,1,1));
-    for(const {mesh,part,rest} of drawPathDraft.animatedParts??[]) {
+    for(const layer of plan.layers??[]){
+        if(!layer.enabled)continue;
+        const half=Math.floor(layer.periodMs/2),phase=elapsed%layer.periodMs;
+        const x=phase<half?phase/half:1-(phase-half)/(layer.periodMs-half);
+        const u=x<.5?2*x*x:1-2*(1-x)*(1-x),sign=layer.reverse?-1:1;
+        const value=layer.kind===2?360*phase/layer.periodMs*sign:(2*u-1)*layer.amplitude*sign;
+        const axis=[new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1)][layer.axis];
+        ghost.matrix.multiply(layer.kind===0?new THREE.Matrix4().makeTranslation(...axis.multiplyScalar(value).toArray()):new THREE.Matrix4().makeRotationAxis(axis,THREE.MathUtils.degToRad(value)));
+    }
+    const scale=plan.scale??1;
+    ghost.matrix.multiply(new THREE.Matrix4().makeScale(scale,scale,scale)).multiply(new THREE.Matrix4().makeTranslation(-anchor.x,-anchor.y,-anchor.z));
+    for(const {mesh,part,rest} of instance.animatedParts??[]) {
         let angle;
         if(part.kind===0) {
             const phase=elapsed%part.periodMs,half=Math.floor(part.periodMs/2);

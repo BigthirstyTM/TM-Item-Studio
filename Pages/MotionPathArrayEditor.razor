@@ -1,0 +1,52 @@
+@using TM_Item_Studio.Models
+@using System.Numerics
+@using System.Globalization
+@using KC = GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint
+@if(Plan.Use==MotionPathUse.Scenery){
+<details class="border rounded p-2 my-2" data-testid="path-array-editor">
+ <summary class="fw-bold">Array along path · copies &amp; groups</summary>
+ <p class="small text-muted mt-2">One route, multiple followers. Copies share mesh data at the same size; timing data and additional sizes add file data. One shared size uses Minimum scale. Start with 2-8 copies; large groups cost more runtime work. Time spacing changes physical gaps when the route speeds up. This is scenery, without passenger collision.</p>
+ <div class="d-flex gap-2"><select aria-label="Array preset" class="form-select form-select-sm" @bind="preset"><option value="train">Train / coaster carts</option><option value="birds">Bird flock</option><option value="fish">Fish school</option></select><button class="btn btn-sm btn-outline-primary" @onclick="Preset">Use group preset</button></div>
+ <div class="row g-2 mt-1">
+ @foreach(var field in new[]{"Copies","Delay (seconds)","Spread X (m)","Spread Y (m)","Spread Z (m)","Minimum scale","Maximum scale","Shared sizes","Random seed"}){
+  var f=field;<div class="col-6"><label class="small">@f<input class="form-control form-control-sm" aria-label="@($"Array {f}")" type="number" step="@(f is "Copies" or "Shared sizes" or "Random seed"?"1":"0.1")" value="@F(Value(f))" @onchange="e=>Number(f,e)" /></label></div>
+ }
+ </div>
+ <label class="small d-block mt-2"><input type="checkbox" checked="@Array.AlternateWings" @onchange="e=>Commit(Plan with{Array=Array with{AlternateWings=e.Value is true}})" /> Alternate wing direction between copies</label>
+ <button class="btn btn-sm btn-outline-secondary mt-2" @onclick="()=>Commit(Plan with{Array=null})">Remove array</button>
+ <small class="d-block text-muted mt-2">Requires a looping route, no waypoint pauses and linear movement or a speed curve. A delayed copy must leave at least 80 ms on either side of a split segment. Adjust delay if preview reports a short split.</small>
+</details>
+<details class="border rounded p-2 my-2" data-testid="path-layers-editor">
+ <summary class="fw-bold">Animation layers · sway, bob &amp; spin</summary>
+ <p class="small text-muted mt-2">Route → route tilt → these local layers, from top to bottom → moving parts. Rotations use the path anchor. Translation amplitude is metres; rotation amplitude is degrees. Spin makes one full turn per period.</p>
+ @for(int i=0;i<(Plan.Layers?.Length??0);i++){
+  var index=i;var layer=Plan.Layers![i];
+  <div class="border rounded p-2 my-2" data-testid="animation-layer">
+   <div class="d-flex gap-2"><input aria-label="@($"Layer {i+1} enabled")" type="checkbox" checked="@layer.Enabled" @onchange="e=>Layer(index,layer with{Enabled=e.Value is true})"/><input aria-label="@($"Layer {i+1} name")" maxlength="80" class="form-control form-control-sm" value="@layer.Name" @onchange="e=>Rename(index,layer,e)"/></div>
+   <div class="row g-1 mt-1"><div class="col-6"><label class="small">Movement<select aria-label="@($"Layer {i+1} movement")" class="form-select form-select-sm" value="@layer.Kind" @onchange="e=>Kind(index,layer,e)">@foreach(var k in Enum.GetValues<MotionLayerKind>()){<option value="@k">@k</option>}</select></label></div><div class="col-6"><label class="small">Local axis<select aria-label="@($"Layer {i+1} axis")" class="form-select form-select-sm" value="@layer.Axis" @onchange="e=>Axis(index,layer,e)">@foreach(var a in Enum.GetValues<KC.EAxis>()){<option value="@a">@a</option>}</select></label></div></div>
+   <div class="row g-1 mt-1"><div class="col-6"><label class="small">Amplitude<input disabled="@(layer.Kind==MotionLayerKind.Spin)" aria-label="@($"Layer {i+1} amplitude")" class="form-control form-control-sm" type="number" step="0.1" value="@F(layer.Amplitude)" @onchange="e=>LayerNumber(index,layer,e,false)"/></label></div><div class="col-6"><label class="small">Period (seconds)<input aria-label="@($"Layer {i+1} period")" class="form-control form-control-sm" type="number" min="0.16" max="60" step="0.1" value="@F(layer.PeriodMs/1000d)" @onchange="e=>LayerNumber(index,layer,e,true)"/></label></div></div>
+   <label class="small"><input type="checkbox" checked="@layer.Reverse" @onchange="e=>Layer(index,layer with{Reverse=e.Value is true})"/> Reverse</label>
+   <div class="d-flex gap-2"><button class="btn btn-sm btn-outline-secondary" disabled="@(i==0)" @onclick="()=>Move(index,-1)">Move up</button><button class="btn btn-sm btn-outline-secondary" disabled="@(i==Plan.Layers.Length-1)" @onclick="()=>Move(index,1)">Move down</button><button aria-label="@($"Remove layer {i+1}")" class="btn btn-sm btn-outline-danger" @onclick="()=>Commit(Plan with{Layers=Plan.Layers.Where((_,j)=>j!=index).ToArray()})">Remove</button></div>
+  </div>
+ }
+ <button class="btn btn-sm btn-outline-primary" disabled="@((Plan.Layers?.Length??0)>=4)" @onclick="AddLayer">Add animation layer</button>
+</details>
+@if(error is not null){<div role="alert" class="text-danger small">@error</div>}
+}
+@code{
+ [Parameter,EditorRequired]public MotionPathPlan Plan{get;set;}=default!;
+ [Parameter]public EventCallback<MotionPathPlan> Changed{get;set;}
+ private MotionPathArray Array=>Plan.Array??new();private string preset="train";private string? error;
+ private static string F(double x)=>x.ToString("0.###",CultureInfo.InvariantCulture);
+ private async Task Commit(MotionPathPlan p){if(p.Array is not null || p.Layers is {Length:>0})p=p with{Rotations=p.Rotations??Enumerable.Repeat(new MotionPathRotation(),p.Legs.Count+1).ToArray()};var v=ItemMotionPathProfile.Compile(p);error=v.Reason;if(v.Success)await Changed.InvokeAsync(p);}
+ private Task Preset()=>Commit(Plan with{Array=preset=="train"?new(4,1000):preset=="birds"?new(8,600,new(4,2,4),.7f,1.2f,3,1,true):new(12,400,new(3,1,3),.6f,1.1f,3,2,true)});
+ private double Value(string f)=>f switch{"Copies"=>Array.Count,"Delay (seconds)"=>Array.DelayMs/1000d,"Spread X (m)"=>Array.Spread.X,"Spread Y (m)"=>Array.Spread.Y,"Spread Z (m)"=>Array.Spread.Z,"Minimum scale"=>Array.MinScale,"Maximum scale"=>Array.MaxScale,"Shared sizes"=>Array.ScaleSteps,_=>Array.Seed};
+ private Task Number(string f,ChangeEventArgs e){if(!float.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var v)||!float.IsFinite(v))return Task.CompletedTask;var a=Array;return Commit(Plan with{Array=f switch{"Copies"=>a with{Count=(int)v},"Delay (seconds)"=>a with{DelayMs=(int)Math.Round(v*1000)},"Spread X (m)"=>a with{Spread=a.Spread with{X=v}},"Spread Y (m)"=>a with{Spread=a.Spread with{Y=v}},"Spread Z (m)"=>a with{Spread=a.Spread with{Z=v}},"Minimum scale"=>a with{MinScale=v},"Maximum scale"=>a with{MaxScale=v},"Shared sizes"=>a with{ScaleSteps=(int)v},_=>a with{Seed=(int)v}}});}
+ private Task AddLayer()=>Commit(Plan with{Layers=[..Plan.Layers??[],new MotionPathLayer()]});
+ private Task Rename(int i,MotionPathLayer l,ChangeEventArgs e)=>Layer(i,l with{Name=e.Value?.ToString()??"Layer"});
+ private Task Layer(int i,MotionPathLayer layer){var a=Plan.Layers!.ToArray();a[i]=layer;return Commit(Plan with{Layers=a});}
+ private Task Kind(int i,MotionPathLayer l,ChangeEventArgs e)=>Enum.TryParse<MotionLayerKind>(e.Value?.ToString(),out var k)?Layer(i,l with{Kind=k}):Task.CompletedTask;
+ private Task Axis(int i,MotionPathLayer l,ChangeEventArgs e)=>Enum.TryParse<KC.EAxis>(e.Value?.ToString(),out var a)?Layer(i,l with{Axis=a}):Task.CompletedTask;
+ private Task LayerNumber(int i,MotionPathLayer l,ChangeEventArgs e,bool period)=>float.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var v)&&float.IsFinite(v)?Layer(i,period?l with{PeriodMs=(int)Math.Round(v*1000)}:l with{Amplitude=v}):Task.CompletedTask;
+ private Task Move(int i,int delta){var a=Plan.Layers!.ToArray();(a[i],a[i+delta])=(a[i+delta],a[i]);return Commit(Plan with{Layers=a});}
+}

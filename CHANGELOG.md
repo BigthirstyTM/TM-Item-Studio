@@ -2,6 +2,13 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.12] - 2026-11-01
+
+- Array along a looping scenery path: up to 32 time-offset followers, deterministic XYZ spread, 1-4 shared size variants and alternating wing direction. Mesh geometry is shared across equal-size copies; animation data still adds to file size.
+- Up to four ordered, independently enabled local animation layers for translation, rotation and spinning, composed after route orientation and before moving parts. Arrays and layers are retained in route drafts and custom templates.
+- Scrubbable preview timeline, pause/resume, return to start and visible path-anchor/part-hinge axes. Route draft Undo/Redo retains 40 edits, including points, profiles, arrays and layers; applying remains explicit.
+- Native gallery tests cover four following carts, eight birds and eight fish. Corrected multi-copy body bindings after an initial native test exposed visible parked branches. Arrays and additive layers are scenery-only; they do not add passenger collision or rigid train coupling.
+
 ## [0.5.11] - 2026-11-01
 
 - Eight additional movement presets: lift/platform, cable car, drone/helicopter, fish, butterfly, robot, spinning ride and conveyor. Station presets stop smoothly and wait at route points; sway presets add geometry samples when needed.

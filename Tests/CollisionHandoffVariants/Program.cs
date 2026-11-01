@@ -7,6 +7,19 @@ using TM_Item_Studio.Models;
 using TmEssentials;
 using KC=GBX.NET.Engines.Meta.NPlugDyna_SKinematicConstraint;
 Gbx.LZO=new GBX.NET.LZO.MiniLZO();
+if(args.Length==3 && args[0]=="array-gallery"){ArrayGallery.Run(args[1],args[2]);return;}
+if(args.Length==3 && args[0]=="instance-phase-probe"){
+ Directory.CreateDirectory(args[2]);var original=Gbx.Parse<CGameItemModel>(args[1]).Node;var source=(CPlugPrefab)original.EntityModel!;
+ var p=ItemMotionPath.Plan([new(0,5,0),new(20,5,0),new(20,5,20),new(0,5,20)],MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;
+ p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray()};
+ foreach(float phase in new[]{0f,.25f,.75f}){
+  var built=ItemMotionPath.Build(source,p);if(!built.Success)throw new Exception(built.Reason);
+  foreach(var e in built.Value!.Ents)if(e.Params is GBX.NET.Engines.Meta.NPlugDynaObjectModel_SInstanceParams ip)ip.Phase01=phase;
+  original.EntityModel=built.Value;string name="TMIS_PhaseProbe_"+(int)(phase*100);original.Name=name;original.Ident=new(name+".Item.Gbx",26,original.Ident.Author);
+  new Gbx<CGameItemModel>(original).Save(Path.Combine(args[2],name+".Item.Gbx"));
+ }
+ return;
+}
 if(args.Length==4 && args[0]=="embed-gallery"){
  var doc=new TM_Item_Studio.Models.FlagPackaging.MapArchive(File.ReadAllBytes(args[1]));
  using var output=new MemoryStream();

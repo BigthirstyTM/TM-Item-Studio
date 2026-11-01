@@ -1,0 +1,20 @@
+@using TM_Item_Studio.Models
+@inject IJSRuntime JS
+<div class="border rounded p-2 my-2" data-testid="path-playback">
+ <div class="fw-bold small">Preview timeline</div>
+ <input id="path-preview-scrubber" aria-label="Preview timeline" type="range" min="0" max="@Total" step="10" value="@time" class="form-range" @oninput="Seek" />
+ <div class="d-flex gap-2 align-items-center"><button aria-label="Pause or resume path" aria-pressed="@paused.ToString().ToLowerInvariant()" class="btn btn-sm @(paused?"btn-primary":"btn-outline-primary")" @onclick="Toggle">@(paused?"Resume":"Pause")</button><button class="btn btn-sm btn-outline-secondary" @onclick="Restart">Start</button><output id="path-preview-time" class="small">@(time/1000d) / @(Total/1000d) s</output></div>
+ <label class="small d-block"><input type="checkbox" @bind="pivots" @bind:after="Pivots"/> Show path anchor &amp; part hinges (XYZ axes)</label>
+ <small class="text-muted">Drag to inspect any moment. Scrubbing pauses playback and does not alter the exported animation.</small>
+</div>
+@code {
+ [Parameter,EditorRequired] public MotionPathPlan Plan{get;set;}=default!;
+ [Parameter]public EventCallback EnsurePreview{get;set;}
+ private MotionPathPlan? last;private int time;private bool paused;private bool pivots;
+ private async Task Pivots()=>await JS.InvokeVoidAsync("setPathPivotPreview",pivots);
+ private int Total=>ItemMotionPathProfile.DisplaySchedule(Plan).DurationMs;
+ protected override void OnParametersSet(){if(!ReferenceEquals(last,Plan)){last=Plan;time=0;paused=false;}}
+ private async Task Seek(ChangeEventArgs e){if(int.TryParse(e.Value?.ToString(),out var ms)){await EnsurePreview.InvokeAsync();time=Math.Clamp(ms,0,Total);paused=true;await JS.InvokeVoidAsync("seekDrawPathPreview",time);}}
+ private async Task Toggle(){await EnsurePreview.InvokeAsync();paused=!paused;await JS.InvokeVoidAsync("pauseDrawPathPreview",paused);}
+ private async Task Restart(){await EnsurePreview.InvokeAsync();time=0;paused=true;await JS.InvokeVoidAsync("seekDrawPathPreview",0);}
+}

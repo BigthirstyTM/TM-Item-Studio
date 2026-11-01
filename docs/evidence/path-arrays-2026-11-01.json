@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-01",
+  "version": "0.5.12",
+  "parser": "GBX.NET 2.5.0",
+  "unitTests": {
+    "passed": 64,
+    "failed": 0
+  },
+  "fullSuites": "all suites passed",
+  "browser": [
+    "path-array.cjs",
+    "path-profile.cjs",
+    "path-dragging.cjs"
+  ],
+  "nativeRuns": [
+    "TMIS_Array_Gallery_V2",
+    "TMIS_Array_Close_V3",
+    "TMIS_Array_Loop_V4"
+  ],
+  "nativeObservation": "Gallery shows 4 carts, 8 birds, 8 fish with separate timing. Isolated bird run reaches game clock 01:05.21, exceeding two 32-second cycles. No passenger collision tested. Initial V1 failed and is not pass evidence.",
+  "items": [
+    {
+      "file": "TMIS_Array_CarBody.Item.Gbx",
+      "bytes": 80955,
+      "sha256": "d9fd50e2b7951f407c6dca46bb19efafb06eb2779384db71e3a3059715dac1d6"
+    },
+    {
+      "file": "TMIS_Array_BirdFlight.Item.Gbx",
+      "bytes": 134595,
+      "sha256": "8f5cca52aeb360654a3aca4fbfb927e60f0ef075b8ca4a8bdbcdc9f08788d56b"
+    },
+    {
+      "file": "TMIS_Array_Fish.Item.Gbx",
+      "bytes": 126734,
+      "sha256": "a412c034ed3e47b632aad72cec89edaaae4555fff063f2c8e91dae320562478c"
+    }
+  ],
+  "limits": {
+    "copies": 32,
+    "sharedSizes": 4,
+    "layers": 4,
+    "bodyBudget": 16384,
+    "minimumSplitMs": 80,
+    "mode": "looping scenery, no pauses, linear or compiled speed curve"
+  }
+}

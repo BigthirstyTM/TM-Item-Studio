@@ -45,7 +45,7 @@ public static class ItemMotionCustomTemplate
             if(elapsed>int.MaxValue)return Fail("Template timing exceeds native limits.");
             target=target with{Legs=legs,DurationMs=(int)elapsed,PauseMs=pause,StartDelayMs=delay,SpeedPoints=speeds,Rotations=rotations,
                 Ease=source.Ease,ContinuousVelocity=source.ContinuousVelocity&&rotations!=null&&speeds!=null,RampDetail=source.RampDetail,
-                Parts=mapParts&&t.IncludeParts?source.Parts:target.Parts,Behavior=null};
+                Parts=mapParts&&t.IncludeParts?source.Parts:target.Parts,Array=source.Array,Layers=source.Layers,Behavior=null};
             if(t.IncludeTiming) {
                 var time=ItemMotionPathEditing.ChangeLoopTime(target,ItemMotionPathProfile.Compile(source).Value!.DurationMs);
                 if(!time.Success)return Fail(time.Reason!);target=time.Value!;

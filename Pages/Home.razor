@@ -791,8 +791,11 @@
                                 <button class="btn btn-sm btn-primary" aria-label="Apply smooth path" title="Replace spatial movement with the rounded scenery route; remove moving-body collision." @onclick="ConvertSmoothPathToMotion" disabled="@compositeViewportMode">Apply smooth path</button>
                             </div>
                         </details>
+                        <div class="d-flex gap-2 my-2"><button class="btn btn-sm btn-outline-secondary" aria-label="Undo path edit" disabled="@(pathUndo.Count==0)" @onclick="()=>RestorePathEdit(false)">Undo path edit</button><button class="btn btn-sm btn-outline-secondary" aria-label="Redo path edit" disabled="@(pathRedo.Count==0)" @onclick="()=>RestorePathEdit(true)">Redo</button></div>
+                        <small class="text-muted">History restores the route draft. Apply the restored draft to update the item.</small>
                         @if (editablePathPlan is not null)
                         {
+                            <MotionPathPlayback Plan="editablePathPlan" EnsurePreview="EnsurePathPreview" />
                             <MotionPathEditor VisualCount="PathSourceVisualCount" Plan="editablePathPlan" Index="selectedPathSegment" IndexChanged="SelectPathSegment" FullPath="showFullPath" FullPathChanged="ShowFullPath" Changed="EditPathPlan" Preview="PreviewEditedPath" Apply="ApplyEditedPath" />
                         }
                         <div class="border rounded p-2 mb-2">
@@ -2163,6 +2166,26 @@ else if (itemModel is null)
     private string? drawPathPreviewError;
     private bool smoothPathPreview;
     private MotionPathPlan? editablePathPlan;
+    private sealed record PathEditSnapshot(MotionPathPlan? Plan,DrawPathPointDto[] Points,bool Smooth);
+    private readonly List<string> pathUndo=[],pathRedo=[];
+    private string? pathHistoryCurrent;
+    private void ResetPathHistory(){pathUndo.Clear();pathRedo.Clear();pathHistoryCurrent=null;}
+    private async Task RecordPathEdit(){
+        var snapshot=new PathEditSnapshot(editablePathPlan,await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints"),smoothPathPreview);
+        var next=System.Text.Json.JsonSerializer.Serialize(snapshot,PathJsonOptions);
+        if(next==pathHistoryCurrent)return;
+        pathUndo.Add(pathHistoryCurrent??System.Text.Json.JsonSerializer.Serialize(new PathEditSnapshot(null,[],false),PathJsonOptions));
+        if(pathUndo.Count>40)pathUndo.RemoveAt(0);pathRedo.Clear();pathHistoryCurrent=next;
+    }
+    private async Task RestorePathEdit(bool redo){
+        var from=redo?pathRedo:pathUndo;var to=redo?pathUndo:pathRedo;if(from.Count==0)return;
+        if(pathHistoryCurrent is not null)to.Add(pathHistoryCurrent);
+        var json=from[^1];from.RemoveAt(from.Count-1);pathHistoryCurrent=json;
+        var state=System.Text.Json.JsonSerializer.Deserialize<PathEditSnapshot>(json,PathJsonOptions)!;
+        editablePathPlan=state.Plan;smoothPathPreview=state.Smooth;
+        await JS.InvokeVoidAsync("setDrawnPathPoints",(object)state.Points);await ReadDrawPathCoordinates();
+        if(state.Plan is not null)await PreviewPlannedPath(state.Plan,state.Smooth);else{await StopDrawPathPreview();await SyncPathSegments();}
+    }
     private int selectedPathSegment;
     private bool showFullPath = true;
     private async Task SelectPathSegment(int index)
@@ -2478,7 +2501,7 @@ else if (itemModel is null)
 
     private async Task LoadFileSet(IReadOnlyList<IBrowserFile> files)
     {
-        editablePathPlan = null;
+        editablePathPlan = null;ResetPathHistory();
         selectedPathSegment = 0;
         if (isViewerInitialized) await SyncPathSegments();
         isLoading = true;
@@ -2738,7 +2761,7 @@ else if (itemModel is null)
         drawPathBefore = null;
         drawPathBeforeDocument = null;
         drawPathPreviewActive = false;
-        editablePathPlan = null;
+        editablePathPlan = null;ResetPathHistory();
         selectedPathSegment = 0;
         await SyncPathSegments();
         drawPathCaptureEnabled = false;
@@ -3199,20 +3222,21 @@ else if (itemModel is null)
         await JS.InvokeVoidAsync("clearDrawnPath");
         await StopDrawPathPreview();
         drawPathCoordinates = "";
-        editablePathPlan=null;await SyncPathSegments();
+        editablePathPlan=null;await SyncPathSegments();await RecordPathEdit();
         drawPathStatusMessage = "Points cleared; the applied motion is unchanged.";
     }
-    private async Task UndoDrawPath() { await JS.InvokeVoidAsync("undoDrawnPathPoint"); await ReadDrawPathCoordinates(); await RefreshDrawPathPreview(); }
+    private async Task UndoDrawPath() { await JS.InvokeVoidAsync("undoDrawnPathPoint"); await OnDrawPathChanged(); }
     [JSInvokable]
     public async Task OnDrawPathChanged() {
         var previous=editablePathPlan;var playing=drawPathPreviewActive;
         await ReadDrawPathCoordinates();
         var points=await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
         var planned=PlanDrawPath(points,smoothPathPreview);
-        if(!planned.Success){errorMessage=drawPathPreviewError=planned.Reason;await StopDrawPathPreview();editablePathPlan=null;await SyncPathSegments();StateHasChanged();return;}
+        if(!planned.Success){errorMessage=drawPathPreviewError=planned.Reason;await StopDrawPathPreview();editablePathPlan=null;await SyncPathSegments();await RecordPathEdit();StateHasChanged();return;}
         var updated=planned.Value!;
-        if(previous is not null && updated.Legs.Count==previous.Legs.Count)updated=updated with{SpeedPoints=previous.SpeedPoints,Rotations=previous.Rotations,ContinuousVelocity=previous.ContinuousVelocity,RampDetail=previous.RampDetail,Behavior=previous.Behavior,Parts=previous.Parts};
-        editablePathPlan=updated;
+        if(previous is not null)updated=updated with{Array=previous.Array,Layers=previous.Layers,Parts=previous.Parts,Rotations=previous.Rotations is null?null:ItemMotionPathProfile.FollowDirection(updated)};
+        if(previous is not null && updated.Legs.Count==previous.Legs.Count)updated=updated with{SpeedPoints=previous.SpeedPoints,Rotations=previous.Rotations,ContinuousVelocity=previous.ContinuousVelocity,RampDetail=previous.RampDetail,Behavior=previous.Behavior,Parts=previous.Parts,Array=previous.Array,Layers=previous.Layers};
+        editablePathPlan=updated;await RecordPathEdit();
         if(playing)await PreviewPlannedPath(updated,smoothPathPreview);else await SyncPathSegments();
         StateHasChanged();
     }
@@ -3238,7 +3262,7 @@ else if (itemModel is null)
         await JS.InvokeVoidAsync("setDrawnPathPoints", points);
         errorMessage = null;
         drawPathStatusMessage = $"{points.Count} points ready. Preview or apply the path.";
-        await RefreshDrawPathPreview();
+        await OnDrawPathChanged();
     }
     private async Task RefreshDrawPathPreview()
     {
@@ -3268,14 +3292,15 @@ else if (itemModel is null)
         if (!planned.Success) { await StopDrawPathPreview(); errorMessage = drawPathPreviewError = planned.Reason; return; }
         var plan = planned.Value!;
         editablePathPlan = plan;
-        smoothPathPreview = smooth;
+        smoothPathPreview = smooth;await RecordPathEdit();
         await PreviewPlannedPath(plan, smooth);
     }
     private async Task EditPathPlan(MotionPathPlan plan)
     {
-        editablePathPlan = plan;
+        editablePathPlan = plan;await RecordPathEdit();
         await PreviewPlannedPath(plan, smoothPathPreview);
     }
+    private Task EnsurePathPreview()=>!drawPathPreviewActive&&editablePathPlan is not null?PreviewPlannedPath(editablePathPlan,smoothPathPreview):Task.CompletedTask;
     private Task PreviewEditedPath() => editablePathPlan is null ? Task.CompletedTask : EditPathPlan(editablePathPlan);
     private Task RefreshPathAnchorPreview() => drawPathPreviewActive && editablePathPlan is not null
         ? PreviewPlannedPath(editablePathPlan, true) : Task.CompletedTask;
@@ -3305,15 +3330,25 @@ else if (itemModel is null)
     {
         if (itemModel is null || compositeViewportMode) return;
         var compiled = ItemMotionPathProfile.Compile(plan);
-        if (!compiled.Success) { errorMessage = drawPathPreviewError = compiled.Reason; return; }
+        if (!compiled.Success) { await StopDrawPathPreview();errorMessage = drawPathPreviewError = compiled.Reason; return; }
         plan = compiled.Value!;
         drawPathPreviewError=null;
-        try { await JS.InvokeVoidAsync("previewDrawPath", new {
-            start = new { x=plan.Start.X, y=plan.Start.Y, z=plan.Start.Z },
-            legs = plan.Legs.Select(l => new { delta = new { x=l.Delta.X,y=l.Delta.Y,z=l.Delta.Z }, l.StartMs,l.MoveMs,l.VelocityRatio }),
-            plan.DurationMs, parts=plan.Parts?.Select(p=>new {p.VisualIndex,p.Kind,p.Axis,p.MinimumAngle,p.MaximumAngle,p.PeriodMs,p.Radius,p.Reverse,pivot=new {x=p.Pivot.X,y=p.Pivot.Y,z=p.Pivot.Z}}), rotations=plan.Rotations, ease=(int)plan.Ease, obstacle=plan.Use == MotionPathUse.Obstacle, curved=smooth
-        }, drawPathAnchorMode == "centre"); }
-        catch(JSException ex) {drawPathPreviewActive=false;errorMessage=drawPathPreviewError="Cannot preview route: "+ex.Message;return;}
+        try {
+            object PreviewDto(MotionPathPlan p,float scale=1,bool reverseWings=false) => new {
+                start = new { x=p.Start.X, y=p.Start.Y, z=p.Start.Z },
+                legs = p.Legs.Select(l => new { delta = new { x=l.Delta.X,y=l.Delta.Y,z=l.Delta.Z }, l.StartMs,l.MoveMs,l.VelocityRatio }),
+                p.DurationMs, scale, layers=p.Layers,
+                parts=p.Parts?.Select(part=>new {part.VisualIndex,part.Kind,part.Axis,part.MinimumAngle,part.MaximumAngle,part.PeriodMs,part.Radius,Reverse=part.Reverse^(reverseWings&&part.Kind==MotionPartKind.Wing),pivot=new {x=part.Pivot.X,y=part.Pivot.Y,z=part.Pivot.Z}}),
+                rotations=p.Rotations, ease=(int)p.Ease, obstacle=p.Use == MotionPathUse.Obstacle, curved=smooth
+            };
+            var copies=ItemMotionArray.Instances(plan);
+            var instances=copies.Select(copy=>{
+                var route=plan.Array is not null?ItemMotionArray.Shift(plan,copy.DelayMs):plan;
+                return PreviewDto(route with{Start=route.Start+copy.Offset},copy.Scale,copy.ReverseWings);
+            }).ToArray();
+            await JS.InvokeVoidAsync("previewDrawPath",new {plan=PreviewDto(plan),instances},drawPathAnchorMode == "centre");
+        }
+        catch(Exception ex) when(ex is JSException or InvalidOperationException) {await StopDrawPathPreview();errorMessage=drawPathPreviewError="Cannot preview route: "+ex.Message;return;}
         drawPathPreviewActive = true;
         await SyncPathSegments();
         errorMessage = null;
