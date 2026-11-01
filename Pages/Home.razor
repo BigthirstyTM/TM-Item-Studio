@@ -210,6 +210,10 @@
                 </div>
                 <div id="threeContainer">
                 </div>
+                @if (editablePathPlan is not null && !compositeViewportMode)
+                {
+                    <MotionPathPlayback Plan="editablePathPlan" EnsurePreview="EnsurePathPreview" />
+                }
             </div>
             @if (!hasMesh)
             {
@@ -795,7 +799,6 @@
                         <small class="text-muted">History restores the route draft. Apply the restored draft to update the item.</small>
                         @if (editablePathPlan is not null)
                         {
-                            <MotionPathPlayback Plan="editablePathPlan" EnsurePreview="EnsurePathPreview" />
                             <MotionPathEditor VisualCount="PathSourceVisualCount" Plan="editablePathPlan" Index="selectedPathSegment" IndexChanged="SelectPathSegment" FullPath="showFullPath" FullPathChanged="ShowFullPath" Changed="EditPathPlan" Preview="PreviewEditedPath" Apply="ApplyEditedPath" />
                         }
                         <div class="border rounded p-2 mb-2">

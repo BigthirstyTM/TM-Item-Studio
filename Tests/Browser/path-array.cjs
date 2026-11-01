@@ -6,6 +6,9 @@ const {chromium}=require('playwright');const assert=require('node:assert/strict'
  await page.getByLabel('Open item files',{exact:true}).setInputFiles(path.resolve('artifacts/template-gallery/Sources/TMIS_Demo_BirdFlight_Source.Item.Gbx'));await page.waitForFunction(()=>typedMotions.length===1);
  await page.getByRole('button',{name:'WaypointType, Gameplay & Kinematics',exact:true}).click();const panel=page.getByTestId('draw-motion-path');await panel.locator(':scope > summary').click();
  await page.getByLabel('Load route draft',{exact:false}).setInputFiles(path.join(out,'BirdFlight.motion-path.json'));await page.waitForFunction(()=>drawPathDraft?.instances?.length===8);
+ const playback=page.getByTestId('path-playback');assert.equal(await playback.count(),1);
+ assert.ok(await playback.evaluate(el=>!!el.closest('.studio-viewport')),'timeline must be inside viewport');
+ const dock=await playback.boundingBox(),canvas=await page.locator('#threeContainer').boundingBox();assert.ok(dock.y>=canvas.y+canvas.height-1,'timeline overlaps canvas');
  const array=page.getByTestId('path-array-editor');await array.locator(':scope > summary').click();
  const number=array.getByLabel('Array Copies',{exact:true});await number.fill('6');await number.press('Tab');await page.waitForFunction(()=>drawPathDraft.instances.length===6);
  await page.getByRole('button',{name:'Undo path edit',exact:true}).click();await page.waitForFunction(()=>drawPathDraft.instances.length===8).catch(async e=>{console.log(await page.locator('body').innerText());throw e;});

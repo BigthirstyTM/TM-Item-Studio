@@ -4,6 +4,8 @@ All notable changes to TM Item Studio are documented in this file.
 
 ## [0.5.14] - 2026-11-01
 
+- Dock the scrubbable path preview timeline below the viewport canvas instead of in the inspector. Playback controls remain visible while browsing path settings.
+
 - Automatically preview route edits, speed changes and smoothing controls, even after stopping or applying the preview. Live array inputs update while typing. Rebuilds retain the playback position and paused scrub state.
 
 - Preserve array settings when switching to or regenerating a smooth path, including direct Apply smooth path.

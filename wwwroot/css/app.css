@@ -286,3 +286,10 @@ input[type="checkbox"] { accent-color: var(--accent); min-width: 16px; min-heigh
 #iconPreviewCanvas {
     background: repeating-conic-gradient(#353b43 0% 25%, #252a31 0% 50%) 0 0 / 16px 16px;
 }
+
+/* Dock the path scrubber below the canvas, outside its pointer/orbit surface. */
+.studio-path-playback { flex: 0 0 auto; padding: 8px 12px; background: var(--panel); border-top: 1px solid var(--border); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+.studio-path-playback > .form-range { grid-column: 1 / -1; width: 100%; margin: 0; }
+.studio-path-playback > .fw-bold { grid-column: 1 / -1; }
+.studio-path-playback > small { grid-column: 1 / -1; }
+@media (max-width: 700px) { .studio-path-playback { grid-template-columns: minmax(0, 1fr); } }
