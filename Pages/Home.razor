@@ -720,8 +720,8 @@
                                         <option value="@KC.AnimEase.QuadOut">Ease out</option>
                                     </select>
                                 </div>
-                                <div class="col-6"><label class="form-label" for="pathSpeed">Average speed (m/s)</label><input id="pathSpeed" aria-label="Path average speed" title="Average speed during each moving leg in metres per second." type="number" min="0.1" max="1000" step="0.1" class="form-control form-control-sm" @bind="drawPathMetersPerSecond" @bind:after="RefreshDrawPathPreview" /></div>
-                                <div class="col-6"><label class="form-label" for="pathPause">Pause at points (ms)</label><input id="pathPause" aria-label="Path waypoint pause" title="Wait at each waypoint in milliseconds." type="number" min="0" max="60000" step="100" class="form-control form-control-sm" @bind="drawPathPauseMs" @bind:after="RefreshDrawPathPreview" /></div>
+                                <div class="col-6"><label class="form-label" for="pathSpeed">Average speed (m/s)</label><input id="pathSpeed" aria-label="Path average speed" title="Average speed during each moving leg in metres per second." type="number" min="0.1" max="1000" step="0.1" class="form-control form-control-sm" @bind="drawPathMetersPerSecond" @bind:event="oninput" @bind:after="RefreshDrawPathPreview" /></div>
+                                <div class="col-6"><label class="form-label" for="pathPause">Pause at points (ms)</label><input id="pathPause" aria-label="Path waypoint pause" title="Wait at each waypoint in milliseconds." type="number" min="0" max="60000" step="100" class="form-control form-control-sm" @bind="drawPathPauseMs" @bind:event="oninput" @bind:after="RefreshDrawPathPreview" /></div>
                                 <div class="col-6"><label class="form-label" for="pathPlane">Drawing plane</label>
                                     <select id="pathPlane" aria-label="Drawing plane" title="Choose the plane on which mouse clicks place route points." class="form-select form-select-sm" @bind="drawPathPlane" @bind:after="UpdateDrawPlane">
                                         <option value="XZ">XZ — horizontal</option><option value="XY">XY — vertical</option><option value="YZ">YZ — vertical</option>
@@ -737,7 +737,7 @@
                                         @foreach(var distance in new[]{16,32,48,64,96,128,256}) { <option value="@distance">@distance</option> }
                                     </select>
                                 </label>
-                                <label class="small">Start delay (ms)<input class="form-control form-control-sm" type="number" min="0" max="60000" step="100" aria-label="Collision start delay" @bind="drawRelayDelay" @bind:after="RefreshDrawPathPreview" /></label>
+                                <label class="small">Start delay (ms)<input class="form-control form-control-sm" type="number" min="0" max="60000" step="100" aria-label="Collision start delay" @bind="drawRelayDelay" @bind:event="oninput" @bind:after="RefreshDrawPathPreview" /></label>
                             }
                             <p class="small text-warning mt-2 mb-2">@(drawPathUse == MotionPathUse.Obstacle
                                 ? "Exactly two points. Aligns the model's local X axis with the line; this can rotate the model. Collision stays directly driven. Test your exported geometry in Trackmania."
@@ -762,7 +762,7 @@
                                     <button class="btn btn-sm @(drawPathView==v ? "btn-primary active" : "btn-outline-primary")" aria-label="@($"Path view {v}")" aria-pressed="@((drawPathView==v).ToString().ToLowerInvariant())" @onclick="()=>SetPathView(v)">@(v=="free"?"Free camera":v=="right"?"Side · locked":v=="top"?"Top · locked":"Front · locked")</button>
                                 }
                             </div>
-                            <small class="d-block text-muted mb-2">Locked views keep the camera still while you drag points; scroll to zoom. Top edits X/Z, front X/Y, side Y/Z. Each point keeps its depth. Preview updates after a drag. Apply is required to change the item.</small>
+                            <small class="d-block text-muted mb-2">Locked views keep the camera still while you drag points; scroll to zoom. Top edits X/Z, front X/Y, side Y/Z. Each point keeps its depth. Preview updates automatically when you change path settings or drag a point. Apply is required to change the item.</small>
                             @if(!string.IsNullOrEmpty(drawPathPreviewError)) { <div class="small text-danger" role="alert">@drawPathPreviewError</div> }
                             <label class="form-label small" for="pathCoordinates">Points: one X Y Z per line (metres, decimal point)</label>
                             <textarea id="pathCoordinates" aria-label="Path coordinates" title="Enter one X Y Z position per line, then choose Use coordinates." class="form-control form-control-sm font-monospace" rows="4" @bind="drawPathCoordinates" placeholder="X Y Z (one point per line)"></textarea>
@@ -779,9 +779,9 @@
                             <summary class="fw-bold">Smooth scenery path</summary>
                             <p class="small text-muted mt-2">Draw or edit control points above. This separate tool rounds corners inward; it keeps open endpoints. Speed, repeat and anchor use the settings above. Movement is linear along sampled curve segments, with fixed orientation and no moving collision or waypoint pauses.</p>
                             <label class="form-label" for="smoothPathAmount">Smoothness: @smoothPathPercent%</label>
-                            <input id="smoothPathAmount" aria-label="Path smoothness" title="Round corners inward from the drawn control polygon; zero keeps sharp corners." class="form-range" type="range" min="0" max="100" step="1" @bind="smoothPathPercent" @bind:event="oninput" @bind:after="RefreshDrawPathPreview" />
+                            <input id="smoothPathAmount" aria-label="Path smoothness" title="Round corners inward from the drawn control polygon; zero keeps sharp corners." class="form-range" type="range" min="0" max="100" step="1" @bind="smoothPathPercent" @bind:event="oninput" @bind:after="RefreshSmoothPathPreview" />
                             <label class="form-label" for="smoothPathDetail">Curve detail</label>
-                            <select id="smoothPathDetail" aria-label="Curve detail" title="Maximum straight samples per rounded corner. Higher detail consumes more of the 128-leg budget." class="form-select form-select-sm mb-2" @bind="smoothPathDetail" @bind:after="RefreshDrawPathPreview">
+                            <select id="smoothPathDetail" aria-label="Curve detail" title="Maximum straight samples per rounded corner. Higher detail consumes more of the 128-leg budget." class="form-select form-select-sm mb-2" @bind="smoothPathDetail" @bind:after="RefreshSmoothPathPreview">
                                 <option value="2">2 segments per corner</option><option value="4">4 segments per corner</option><option value="8">8 segments per corner</option><option value="16">16 segments per corner</option>
                             </select>
                             <small class="d-block text-muted mb-2">Up to 128 total legs, including the return. Short corners use fewer segments to respect native timing limits. Preview uses the same route as export.</small>
@@ -3228,7 +3228,7 @@ else if (itemModel is null)
     private async Task UndoDrawPath() { await JS.InvokeVoidAsync("undoDrawnPathPoint"); await OnDrawPathChanged(); }
     [JSInvokable]
     public async Task OnDrawPathChanged() {
-        var previous=editablePathPlan;var playing=drawPathPreviewActive;
+        var previous=editablePathPlan;
         await ReadDrawPathCoordinates();
         var points=await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
         var planned=PlanDrawPath(points,smoothPathPreview);
@@ -3237,7 +3237,7 @@ else if (itemModel is null)
         if(previous is not null)updated=updated with{Array=previous.Array,Layers=previous.Layers,SampleCollisionRotation=previous.SampleCollisionRotation,Parts=previous.Parts,Rotations=previous.Rotations is null?null:ItemMotionPathProfile.FollowDirection(updated)};
         if(previous is not null && updated.Legs.Count==previous.Legs.Count)updated=updated with{SpeedPoints=previous.SpeedPoints,Rotations=previous.Rotations,ContinuousVelocity=previous.ContinuousVelocity,RampDetail=previous.RampDetail,Behavior=previous.Behavior,Parts=previous.Parts,Array=previous.Array,Layers=previous.Layers,SampleCollisionRotation=previous.SampleCollisionRotation};
         editablePathPlan=updated;await RecordPathEdit();
-        if(playing)await PreviewPlannedPath(updated,smoothPathPreview);else await SyncPathSegments();
+        await PreviewPlannedPath(updated,smoothPathPreview);
         StateHasChanged();
     }
     private async Task ReadDrawPathCoordinates()
@@ -3264,17 +3264,31 @@ else if (itemModel is null)
         drawPathStatusMessage = $"{points.Count} points ready. Preview or apply the path.";
         await OnDrawPathChanged();
     }
+    private async Task<DrawPathPointDto[]> PreviewControlPoints(bool restore = false)
+    {
+        var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
+        if ((!restore && points.Length >= 2) || editablePathPlan is null) return points;
+        var cursor = editablePathPlan.Start;
+        var restored = new List<DrawPathPointDto> { new() { X=cursor.X,Y=cursor.Y,Z=cursor.Z } };
+        foreach (var leg in editablePathPlan.Legs.Take(editablePathPlan.Repeat == MotionPathRepeat.PingPong ? editablePathPlan.Legs.Count / 2 : editablePathPlan.Legs.Count)) {
+            cursor += leg.Delta;
+            restored.Add(new() { X=cursor.X,Y=cursor.Y,Z=cursor.Z });
+        }
+        if (editablePathPlan.Repeat == MotionPathRepeat.Closed) restored.RemoveAt(restored.Count-1);
+        points = restored.ToArray();
+        await JS.InvokeVoidAsync("setDrawnPathPoints", (object)points);
+        return points;
+    }
     private async Task RefreshDrawPathPreview()
     {
         await JS.InvokeVoidAsync("setDrawPathRepeat", drawPathRepeat.ToString());
-        if (drawPathPreviewActive) await PreviewPath(smoothPathPreview);
-        else if (editablePathPlan is not null)
-        {
-            var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
-            var planned = PlanDrawPath(points, smoothPathPreview);
-            if (planned.Success) editablePathPlan = planned.Value;
-            else errorMessage = planned.Reason;
-        }
+        var points = await PreviewControlPoints();
+        if (points.Length >= 2) await PreviewPath(smoothPathPreview);
+    }
+    private Task RefreshSmoothPathPreview()
+    {
+        smoothPathPreview = true;
+        return RefreshDrawPathPreview();
     }
     private Task FitDrawPath() => JS.InvokeVoidAsync("fitDrawPath").AsTask();
     private async Task StopDrawPathPreview()
@@ -3291,12 +3305,15 @@ else if (itemModel is null)
                 drawPathMetersPerSecond, smoothPathPercent / 100, smoothPathDetail)
             : ItemMotionPath.Plan(points.Select(p => new Vector3(p.X,p.Y,p.Z)).ToArray(), drawPathUse, drawPathRepeat,
                 drawPathMetersPerSecond, drawPathEase, drawPathPauseMs, drawPathUse == MotionPathUse.CollisionRelay ? drawRelayDelay : 0, drawRelayParking);
-        if (result.Success && editablePathPlan?.Array is {} array)
+        if (result.Success && editablePathPlan is {} previous)
         {
             var plan = result.Value!;
             result = ItemMotionResult<MotionPathPlan>.Ok(plan with {
-                Array = array,
-                Rotations = plan.Rotations ?? Enumerable.Repeat(new MotionPathRotation(), plan.Legs.Count + 1).ToArray()
+                Array = previous.Array, Layers = previous.Layers, Parts = previous.Parts,
+                SampleCollisionRotation = previous.SampleCollisionRotation,
+                Rotations = previous.Rotations is not null
+                    ? (previous.Legs.Count == plan.Legs.Count ? previous.Rotations : ItemMotionPathProfile.FollowDirection(plan))
+                    : plan.Rotations
             });
         }
         return result;
@@ -3304,7 +3321,7 @@ else if (itemModel is null)
     private async Task PreviewPath(bool smooth)
     {
         if (itemModel is null || compositeViewportMode) return;
-        var points = await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints");
+        var points = await PreviewControlPoints();
         var planned = PlanDrawPath(points, smooth);
         if (!planned.Success) { await StopDrawPathPreview(); errorMessage = drawPathPreviewError = planned.Reason; return; }
         var plan = planned.Value!;
@@ -3319,8 +3336,8 @@ else if (itemModel is null)
     }
     private Task EnsurePathPreview()=>!drawPathPreviewActive&&editablePathPlan is not null?PreviewPlannedPath(editablePathPlan,smoothPathPreview):Task.CompletedTask;
     private Task PreviewEditedPath() => editablePathPlan is null ? Task.CompletedTask : EditPathPlan(editablePathPlan);
-    private Task RefreshPathAnchorPreview() => drawPathPreviewActive && editablePathPlan is not null
-        ? PreviewPlannedPath(editablePathPlan, true) : Task.CompletedTask;
+    private Task RefreshPathAnchorPreview() => editablePathPlan is not null
+        ? PreviewPlannedPath(editablePathPlan, smoothPathPreview) : Task.CompletedTask;
     private Task ApplyEditedPath() => editablePathPlan is null ? Task.CompletedTask : ApplyPlannedPath(ItemMotionResult<MotionPathPlan>.Ok(editablePathPlan));
     private static readonly System.Text.Json.JsonSerializerOptions PathJsonOptions = new() { IncludeFields = true, WriteIndented = true };
     private async Task SavePathDraft()
@@ -3338,6 +3355,13 @@ else if (itemModel is null)
             if (plan is null) { errorMessage = "The route draft is empty."; return; }
             var valid = ItemMotionPath.Validate(plan);
             if (!valid.Success) { errorMessage = valid.Reason; return; }
+            drawPathUse=plan.Use; drawPathRepeat=plan.Repeat; drawPathEase=plan.Ease;
+            drawPathPauseMs=plan.PauseMs; drawRelayDelay=plan.StartDelayMs; drawRelayParking=plan.ParkingDistance;
+            drawPathMetersPerSecond=plan.Legs.Sum(l=>l.Delta.Length()) / (plan.Legs.Sum(l=>l.MoveMs)/1000f);
+            smoothPathPreview=false;
+            editablePathPlan=plan;
+            await PreviewControlPoints(true);
+            await ReadDrawPathCoordinates();
             await EditPathPlan(plan);
         }
         catch (Exception ex) when (ex is System.Text.Json.JsonException or IOException or NotSupportedException)
