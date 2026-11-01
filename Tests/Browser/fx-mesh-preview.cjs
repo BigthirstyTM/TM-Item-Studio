@@ -92,7 +92,7 @@ fs.mkdirSync(output, { recursive: true });
                     'Rendered cyan gizmo uses item coordinates, including owner translation');
                 assert.ok(gizmoMatches(report, report.viewer.fxEmitterPoint),
                     'Loaded cyan gizmo agrees with all three item-space coordinates');
-                await page.getByRole('button', { name: 'Audio, CPlugFx & MediaTracker Triggers', exact: true }).click();
+                await page.getByLabel('Editing section', { exact: true }).selectOption('Audio & effects');
                 const y = page.getByLabel('FX emission point Y', { exact: true });
                 await y.fill('3.25');
                 await page.waitForFunction(async () => Math.abs((await window.studioDebug.getReport()).viewer.runtime.fxEmitters[0].itemPosition[1] - 3.25) < .0001);

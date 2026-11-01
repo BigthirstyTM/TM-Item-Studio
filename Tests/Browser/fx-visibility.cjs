@@ -20,8 +20,8 @@ assert.ok(item && dependencies, 'Usage: fx-visibility.cjs <embedded Item.Gbx> <e
         await page.waitForFunction(() => document.body.innerText.includes('Textures and moods indexed'));
         await page.getByLabel('Open item files', { exact: true }).setInputFiles(item);
         await page.waitForFunction(() => document.querySelector('.studio-variant-filename')?.textContent?.includes('TestItem_Sparkler'));
-        const effects = page.getByRole('button', { name: 'Audio, CPlugFx & MediaTracker Triggers', exact: true });
-        await effects.click();
+        const effects = page.getByLabel('Editing section', { exact: true });
+        await effects.selectOption('Audio & effects');
         await assertText(page, 'Particle system / CPlugFx', 'Present');
         await assertText(page, 'Effect carrier references');
         await assertText(page, 'CPlugFxSystem');
@@ -95,7 +95,7 @@ assert.ok(item && dependencies, 'Usage: fx-visibility.cjs <embedded Item.Gbx> <e
             name: itemDownload.suggestedFilename(), mimeType: 'application/octet-stream', buffer: itemBytes
         });
         await page.waitForFunction(() => document.querySelector('.studio-variant-filename')?.textContent?.includes('TestItem_Sparkler'));
-        if (await page.getByLabel('FX emission point X', { exact: true }).count() === 0) await effects.click();
+        if (await page.getByLabel('FX emission point X', { exact: true }).count() === 0) await effects.selectOption('Audio & effects');
         await page.waitForFunction(() => {
             const value = label => document.querySelector(`input[aria-label="${label}"]`)?.value;
             return value('FX emission point X') === '1.25'

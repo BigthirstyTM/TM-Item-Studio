@@ -48,7 +48,7 @@ const crypto = require('node:crypto');
         await identity('TMIS_Fixes_Export');
         await save('Export selected file', 'TMIS_Export.Item.Gbx', [support]);
         // Keep the same ID/path for the macroblock's external reference.
-        await page.getByRole('button', { name: 'Macroblock export and item instancing', exact: true }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Instances & macroblocks');
         await page.getByLabel('Copies', { exact: true }).fill('2');
         await page.getByLabel('Columns', { exact: true }).fill('2');
         await page.getByLabel('Spacing m', { exact: true }).fill('16');
@@ -81,7 +81,7 @@ const crypto = require('node:crypto');
             await page.getByRole('status').filter({ hasText: 'Icon normalized to 64x64' }).waitFor();
             await save('Export selected file', 'TMIS_Icon.Item.Gbx', [support, 'quadrants.png']);
             await open(support); await identity('TMIS_Fixes_Flag');
-            await page.getByRole('button', { name: 'Flag item conversion', exact: true }).click();
+            await page.getByLabel('Editing section', { exact: true }).selectOption('Flag tools');
             await save('Convert to flag item (.Item.Gbx)', 'TMIS_Flag.Item.Gbx', [support]);
         }
         if (errors.length) throw new Error(errors.join('\n'));

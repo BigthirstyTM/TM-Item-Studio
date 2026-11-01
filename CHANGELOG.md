@@ -2,6 +2,12 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.16] - 2026-11-01
+
+- Reorganize the inspector into five primary editing stages: identity/icon, model/materials, placement/pivots, collision, then motion/paths. A searchable section selector also opens lights, effects, instances, composite tools, flags and socket inspection.
+- Show the purpose of each section, keep the active stage selected, and retain the export action at the bottom. Limit navigation height so the editor content remains usable on smaller screens.
+- Move movement templates before segment timing; place arrays/layers and articulated parts after route orientation and speed. Advanced native constraints remain a separate collapsible tool.
+
 ## [0.5.15] - 2026-11-01
 
 - Route along a model: load a separate reference Item.Gbx or capture a selected mesh, search its parts, align its position and draw/drag points directly on its surface.

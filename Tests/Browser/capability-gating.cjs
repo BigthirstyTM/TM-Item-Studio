@@ -29,7 +29,7 @@ assert.ok(fixture, 'Usage: node capability-gating.cjs <light-capability.Item.Gbx
         assert.equal(await page.evaluate(() => typeof socketsGroup), 'undefined', 'Socket gizmo group still exists in the viewer');
 
         // Lights tab: read-only position, no add/remove, honest labels.
-        await page.getByRole('button', { name: 'Dynamic Real-Time Lights (1)' }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Lights & atmosphere');
         await page.getByText('Existing serialized lights only').waitFor();
         assert.equal(await page.getByRole('button', { name: '+ Add Light' }).count(), 0, 'Add Light button still present');
         assert.equal(await page.getByRole('button', { name: '✕', exact: true }).count(), 0, 'Light remove button still present');
@@ -53,7 +53,7 @@ assert.ok(fixture, 'Usage: node capability-gating.cjs <light-capability.Item.Gbx
         assert.equal(gizmo.attached, false, 'Light gizmo must not attach drag handles');
 
         // Sockets tab: read-only capability note, no authoring controls.
-        await page.getByRole('button', { name: 'Socket authoring capability (read-only)' }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Sockets (inspection)');
         await page.getByText('Socket authoring is not supported.').waitFor();
         assert.equal(await page.getByRole('button', { name: '+ Add Socket' }).count(), 0, 'Add Socket button still present');
         assert.equal(await page.getByRole('button', { name: 'Select in 3D' }).count(), 0, 'Socket select-in-3D control still present');
@@ -72,7 +72,7 @@ assert.ok(fixture, 'Usage: node capability-gating.cjs <light-capability.Item.Gbx
         await page.getByText('Removing the dynamic graph is not supported').waitFor();
 
         // Persisted light controls still round-trip: color, intensity, radius.
-        await page.getByRole('button', { name: 'Dynamic Real-Time Lights (1)' }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Lights & atmosphere');
         await page.getByLabel('Light 1 intensity', { exact: true }).fill('7.5');
         await page.getByLabel('Light 1 intensity', { exact: true }).press('Tab');
         await page.getByLabel('Light 1 radius', { exact: true }).fill('21');
@@ -88,7 +88,7 @@ assert.ok(fixture, 'Usage: node capability-gating.cjs <light-capability.Item.Gbx
         const edited = await exportTo('light-edit.Item.Gbx');
         await page.reload({ waitUntil: 'networkidle' });
         await page.getByLabel('Open item files').setInputFiles(edited);
-        await page.getByRole('button', { name: 'Dynamic Real-Time Lights (1)' }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Lights & atmosphere');
         assert.equal(await page.getByLabel('Light 1 intensity', { exact: true }).inputValue(), '7.5', 'Light intensity edit did not round-trip');
         assert.equal(await page.getByLabel('Light 1 radius', { exact: true }).inputValue(), '21', 'Light radius edit did not round-trip');
         assert.equal(await page.getByLabel('Light 1 color', { exact: true }).inputValue(), '#00ff00', 'Light color edit did not round-trip');
@@ -103,10 +103,10 @@ assert.ok(fixture, 'Usage: node capability-gating.cjs <light-capability.Item.Gbx
         const baseline = await exportTo('preview-baseline.Item.Gbx');
         await page.getByRole('button', { name: /^Pivots \(/ }).click();
         await page.getByRole('button', { name: /^Lights \(\d+\)/ }).click();
-        await page.getByRole('button', { name: 'Socket authoring capability (read-only)' }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Sockets (inspection)');
         await page.getByRole('button', { name: 'PhyModel, CPlugSurface & Collision' }).click();
         await page.getByRole('button', { name: 'WaypointType, Gameplay & Kinematics' }).click();
-        await page.getByRole('button', { name: 'Dynamic Real-Time Lights (1)' }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Lights & atmosphere');
         await page.getByRole('button', { name: 'Select in 3D' }).click();
         const afterPreview = await exportTo('preview-after.Item.Gbx');
         assert.deepEqual(fs.readFileSync(afterPreview), fs.readFileSync(baseline),

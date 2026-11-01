@@ -134,7 +134,7 @@ async function checkWavingFlags(baseUrl, work) {
             await page.goto(baseUrl, { waitUntil: 'networkidle' });
             await page.getByLabel('Open item files', { exact: true }).setInputFiles(fixture);
             await page.getByRole('button', { name: /Export selected file/ }).waitFor();
-            await page.getByRole('button', { name: 'Flag item conversion', exact: true }).click();
+            await page.getByLabel('Editing section', { exact: true }).selectOption('Flag tools');
             await page.getByRole('region', { name: 'Waving flag converter', exact: true }).waitFor();
         };
         await open(unsupportedFixture);
@@ -194,7 +194,7 @@ async function checkWavingFlags(baseUrl, work) {
         const selectedPartPath = selectedPartText.split(/\n/).map(value => value.trim()).filter(value => value.includes('/')).at(-1);
         assert.ok(selectedPartPath, 'Fixture must expose a selectable mesh path');
         await firstPart.click();
-        await page.getByRole('button', { name: 'Flag item conversion', exact: true }).click();
+        await page.getByLabel('Editing section', { exact: true }).selectOption('Flag tools');
         panel = page.getByRole('region', { name: 'Waving flag converter', exact: true });
         await panel.getByLabel('Geometry to convert', { exact: true }).selectOption('selected');
         await panel.getByRole('status').filter({ hasText: 'Selected visual:' }).waitFor();

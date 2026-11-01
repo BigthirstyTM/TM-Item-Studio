@@ -58,7 +58,7 @@ function writeJson(name, value) {
         const loaded = await page.evaluate(() => window.studioDebug.getReport());
         const panel = page.locator('section[aria-label="FX map packaging"]');
         if (!await panel.isVisible())
-            await page.getByRole('button', { name: 'Audio, CPlugFx & MediaTracker Triggers', exact: true }).click();
+            await page.getByLabel('Editing section', { exact: true }).selectOption('Audio & effects');
         await panel.waitFor({ state: 'visible' });
 
         await page.getByLabel('FX item for map packaging', { exact: true }).setInputFiles(itemPath);
