@@ -15,7 +15,7 @@
  </div>
  <label class="small d-block mt-2"><input type="checkbox" checked="@Array.AlternateWings" @onchange="e=>Commit(Plan with{Array=Array with{AlternateWings=e.Value is true}})" /> Alternate wing direction between copies</label>
  <button class="btn btn-sm btn-outline-secondary mt-2" @onclick="()=>Commit(Plan with{Array=null})">Remove array</button>
- <small class="d-block text-muted mt-2">Requires a looping route, no waypoint pauses and linear movement or a speed curve. A delayed copy must leave at least 80 ms on either side of a split segment. Adjust delay if preview reports a short split.</small>
+ <small class="d-block text-muted mt-2">Requires a looping route, no waypoint pauses and linear movement or a speed curve. Timing offsets that would create a segment below 80 ms or 1 cm snap to the nearest route point. At the 128-segment limit offsets also snap to route points. This can slightly change spacing or overlap copies; preview and export use the same adjustment.</small>
 </details>
 <details class="border rounded p-2 my-2" data-testid="path-layers-editor">
  <summary class="fw-bold">Animation layers · sway, bob &amp; spin</summary>
