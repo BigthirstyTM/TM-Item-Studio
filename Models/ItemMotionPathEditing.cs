@@ -7,6 +7,8 @@ public static class ItemMotionPathEditing
 {
     public static ItemMotionResult<MotionPathPlan> ChangeDuration(MotionPathPlan plan, int index, int milliseconds)
     {
+        if (plan.SpeedPoints is not null)
+            return ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, "Edit the speed curve or disable it before changing segment durations.");
         if (index < 0 || index >= plan.Legs.Count || milliseconds < 80)
             return ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, "Choose a segment duration of at least 80 ms.");
         var legs = plan.Legs.ToArray();

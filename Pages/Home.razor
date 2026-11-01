@@ -3271,10 +3271,13 @@ else if (itemModel is null)
     private async Task PreviewPlannedPath(MotionPathPlan plan, bool smooth)
     {
         if (itemModel is null || compositeViewportMode) return;
+        var compiled = ItemMotionPathProfile.Compile(plan);
+        if (!compiled.Success) { errorMessage = compiled.Reason; return; }
+        plan = compiled.Value!;
         await JS.InvokeVoidAsync("previewDrawPath", new {
             start = new { x=plan.Start.X, y=plan.Start.Y, z=plan.Start.Z },
             legs = plan.Legs.Select(l => new { delta = new { x=l.Delta.X,y=l.Delta.Y,z=l.Delta.Z }, l.StartMs,l.MoveMs }),
-            plan.DurationMs, ease=(int)plan.Ease, obstacle=plan.Use == MotionPathUse.Obstacle, curved=smooth
+            plan.DurationMs, rotations=plan.Rotations, ease=(int)plan.Ease, obstacle=plan.Use == MotionPathUse.Obstacle, curved=smooth
         }, drawPathAnchorMode == "centre");
         drawPathPreviewActive = true;
         await SyncPathSegments();

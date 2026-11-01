@@ -2,6 +2,13 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.9] - 2026-11-01
+
+- Collapsible path tilt/rotation editor: follow direction, per-point yaw/pitch/bank and whole-route offsets, with matching draft preview and native export.
+- Whole-route speed timeline with searchable point selection, endpoint speeds, range ramps, sampling detail and a height-based coaster preset. The segment overview shows effective timings while the curve is active. Draft JSON retains all settings.
+- Speed curves use sampled linear movement within the existing 128-segment/80-ms limits. They require zero waypoint pauses. Rotation is visual; experimental relay collision does not continuously tilt with the mesh and passenger handoffs can still launch cars.
+- Correct the experimental bird wing channels to supported QuadInOut easing. Record the full coaster lap with multiple camera positions and a separate close wing-animation proof.
+
 ## [0.5.7] - 2026-10-31
 
 - Collapse the one-click Motion & Path Assistant by default.

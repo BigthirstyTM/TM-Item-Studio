@@ -1,0 +1,38 @@
+[
+  {
+    "run": "HV_Parking48",
+    "observedSeconds": 47.890999999974156,
+    "firstImpulse": 42.890999999974156,
+    "peakUp": 58.082,
+    "lastPosition": [
+      355.028,
+      9.15654,
+      248.015
+    ],
+    "zeroInputs": true
+  },
+  {
+    "run": "HV_Overlap",
+    "observedSeconds": 84.92199999999139,
+    "firstImpulse": null,
+    "peakUp": 0.049,
+    "lastPosition": [
+      394.224,
+      8.014,
+      399.363
+    ],
+    "zeroInputs": true
+  },
+  {
+    "run": "HV_Slow25",
+    "observedSeconds": 94.54699999999139,
+    "firstImpulse": 89.51600000000326,
+    "peakUp": 48.19,
+    "lastPosition": [
+      369.742,
+      9.743,
+      224.951
+    ],
+    "zeroInputs": true
+  }
+]

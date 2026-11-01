@@ -15,6 +15,51 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("speed ramps integrate travel time, preserve route and reject invalid profiles", () =>
+{
+    var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0)],MotionPathUse.Scenery,MotionPathRepeat.Reset,5,KC.AnimEase.Linear).Value!;
+    var ramp=p with {SpeedPoints=[5,15],RampDetail=4,Rotations=[new(0,0,0),new(90,20,30)]};
+    var c=ItemMotionPathProfile.Compile(ramp);
+    Require(c.Success,c.Reason ?? "profile failed");
+    Require(c.Value!.Legs.Count==4 && Math.Abs(c.Value.DurationMs-2197)<=2,"logarithmic ramp travel time");
+    Vector(c.Value.Legs.Aggregate(Vector3.Zero,(v,l)=>v+l.Delta),new(20,0,0));
+    Require(c.Value.Legs[0].MoveMs>c.Value.Legs[^1].MoveMs,"ramp did not accelerate");
+    Require(c.Value.Rotations![2]==new MotionPathRotation(45,10,15),"rotation sample");
+    Require(!ItemMotionPathEditing.ChangeDuration(ramp,0,1000).Success,"duration silently ignored speed curve");
+    Require(!ItemMotionPathProfile.Compile(ramp with{SpeedPoints=[float.NaN,15]}).Success,"NaN accepted");
+    Require(!ItemMotionPathProfile.Compile(ramp with{SpeedPoints=[5]}).Success,"missing point accepted");
+    Require(!ItemMotionPathProfile.Compile(ramp with{Rotations=[new(),new(float.PositiveInfinity)]}).Success,"infinite angle accepted");
+    var uniform=ItemMotionPathProfile.Compile(p with{SpeedPoints=[10,10]}).Value!;
+    Require(uniform.DurationMs==2000 && uniform.Legs.Count==1,"constant speed subdivided");
+    var json=System.Text.Json.JsonSerializer.Serialize(ramp,new System.Text.Json.JsonSerializerOptions{IncludeFields=true});
+    var back=System.Text.Json.JsonSerializer.Deserialize<MotionPathPlan>(json,new System.Text.Json.JsonSerializerOptions{IncludeFields=true})!;
+    Require(ItemMotionPathProfile.Compile(back).Value!.DurationMs==c.Value.DurationMs,"profile JSON roundtrip");
+});
+
+Check("rotating route creates shallow isolated visual branches with native key limits", () =>
+{
+    var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;
+    ((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+    var before=Bytes(KinematicWith(source));
+    foreach(var use in new[]{MotionPathUse.Scenery,MotionPathUse.CollisionRelay}) {
+        var p=ItemMotionPath.Plan([Vector3.Zero,new(20,2,0),new(20,2,20)],use,MotionPathRepeat.Reset,5,KC.AnimEase.Linear).Value!;
+        p=p with{Rotations=ItemMotionPathProfile.FollowDirection(p)};
+        var b=ItemMotionPath.Build(source,p,new(1,2,3));Require(b.Success,b.Reason ?? "pose failed");
+        var bodies=b.Value!.Ents.Where(e=>e.Model is CPlugDynaObjectModel).ToArray();
+        Require(bodies.Length==10,"expected five shallow bodies per leg");
+        var parents=new Dictionary<int,int>();
+        foreach(var e in b.Value.Ents.Where(e=>e.Model is KC)) {
+            var c=(KC)e.Model!;var binding=(NPlugDyna_SPrefabConstraintParams)e.Params!;
+            Require(parents.TryAdd(binding.Ent2,binding.Ent1),"duplicate driver");
+            foreach(var f in new[]{c.TransAnimFunc,c.RotAnimFunc}) Require(f!.SubFuncs.Length<=4 && f.SubFuncs.Sum(k=>k.Duration.TotalMilliseconds)==p.DurationMs,"native timeline");
+        }
+        foreach(var child in parents.Keys) {int at=child,depth=0;while(at>=0){Require(++depth<=5,"deep/cyclic chain");at=parents[at];}}
+        using var output=new MemoryStream();new Gbx<CGameItemModel>(KinematicWith(b.Value)).Save(output);output.Position=0;
+        Require(((CPlugPrefab)Gbx.Parse<CGameItemModel>(output).Node.EntityModel!).Ents.Length==b.Value.Ents.Length,"pose serialization");
+    }
+    Require(before.SequenceEqual(Bytes(KinematicWith(source))),"source mutated by pose");
+});
+
 Check("collision relay preserves geometry, schedule, collider topology and source snapshot", () =>
 {
     var prefab = (CPlugPrefab)KinematicTemplate().EntityModel!;

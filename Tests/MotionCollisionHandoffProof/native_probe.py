@@ -23,6 +23,11 @@ p.add_argument('--item-offset', type=float, nargs=2, default=[0.,0.], metavar=('
 p.add_argument('--cube-spawn', action='store_true', help='Spawn above an 8 m cube without requiring the complete coaster context')
 p.add_argument('--wide-camera', action='store_true', help='Frame the larger two-line/two-arc fixture')
 p.add_argument('--coaster-context', action='store_true', help='Place the known NewCoaster beside the normalized 128-point fixture')
+p.add_argument('--shot-file', type=Path, help='JSON list of fixed camera views with time in seconds')
+p.add_argument('--bird-item', default='TMIS_Coaster_BirdsFinal', help='Registered bird item identifier')
+p.add_argument('--birds', action='store_true', help='Include generated animated bird flock')
+p.add_argument('--empty-cart', action='store_true', help='Spawn observer vehicle away from coaster; no passenger test')
+p.add_argument('--cart-shots', action='store_true', help='Three fixed close views of the initial coaster turns; observation only')
 p.add_argument('--follow-car-camera', action='store_true', help='Move only the observation camera to follow the passive test car')
 p.add_argument('--helper', type=Path, default=Path('C:/Users/PC/OpenplanetPlugins/tm-control-mcp/tools/call.py'))
 a = p.parse_args()
@@ -32,11 +37,17 @@ if any(not -3 <= v <= 3 for v in a.item_offset):
     p.error('Item offsets must be finite and within three metres')
 if a.camera_mode and a.follow_car_camera:
     p.error('Choose native camera or polling camera, not both')
+if a.cart_shots and (a.camera_mode or a.follow_car_camera or not a.coaster_context):
+    p.error('Cart shots require coaster context and no other camera mode')
+if a.birds and not a.coaster_context:
+    p.error('Bird scene requires coaster context')
+if a.shot_file and (a.cart_shots or a.camera_mode or a.follow_car_camera):
+    p.error('Shot file cannot be combined with another camera mode')
 a.output.mkdir(parents=True, exist_ok=True)
 video_path = a.output / (a.label + '.mp4')
 if video_path.exists() or (a.output / (a.label + '-calls.jsonl')).exists():
     p.error('Run label already has evidence; choose a new label')
-(a.output / (a.label+'-request.json')).write_text(json.dumps(dict(item=a.item,label=a.label,seconds=a.seconds,itemOffset=a.item_offset,cubeSpawn=a.cube_spawn,coasterContext=a.coaster_context,cameraMode=a.camera_mode,pollingFollowCamera=a.follow_car_camera,fps=a.fps,stopOnLaunch=a.stop_on_launch),indent=2),encoding='utf-8')
+(a.output / (a.label+'-request.json')).write_text(json.dumps(dict(item=a.item,label=a.label,seconds=a.seconds,itemOffset=a.item_offset,cubeSpawn=a.cube_spawn,coasterContext=a.coaster_context,cameraMode=a.camera_mode,pollingFollowCamera=a.follow_car_camera,cartShots=a.cart_shots,emptyCart=a.empty_cart,birds=a.birds,birdItem=a.bird_item,shotFile=str(a.shot_file) if a.shot_file else None,fps=a.fps,stopOnLaunch=a.stop_on_launch),indent=2),encoding='utf-8')
 
 def call(name, data=None):
     result = subprocess.run([sys.executable, str(a.helper), '--skip-process-check',
@@ -74,7 +85,13 @@ if call('GetMode')['mode'] != 'Menu':
 call('tm-mcp-pack-epp.Ping')
 call('EditNewMap', dict(vista='stadium155-day'))
 for _ in range(20):
-    if call('GetReadiness', dict(want='editor'))['ready']:
+    try:
+        ready=call('GetReadiness', dict(want='editor'))['ready']
+    except RuntimeError as error:
+        if 'Could not reach TM Control MCP' not in str(error): raise
+        time.sleep(.5)
+        continue
+    if ready:
         break
     time.sleep(.5)
 else:
@@ -89,6 +106,14 @@ for _ in range(20):
     time.sleep(.5)
 else:
     raise RuntimeError('Requested fixture is not registered in the native inventory')
+if a.coaster_context:
+    for _ in range(30):
+        inventory = call('tm-mcp-pack-epp.FindInventory', dict(query='NewCoaster', limit=20))
+        if any(entry.get('path') == 'NewCoaster.Item.Gbx' for entry in inventory.get('results', [])):
+            break
+        time.sleep(.5)
+    else:
+        raise RuntimeError('Coaster inventory is not ready; no items placed')
 call('tm-mcp-pack-epp.SetAgentTag', dict(tag='tmis:handoff'))
 call('tm-mcp-pack-epp.PlaceItem', dict(itemPath=a.item,x=400+a.item_offset[0],y=15,z=400+a.item_offset[1],tag='tmis:handoff'))
 items = call('GetItems')
@@ -99,10 +124,14 @@ if a.coaster_context:
     items = call('GetItems')
     if items['total'] != 2 or sorted(i['idName'] for i in items['items']) != sorted([a.item,'NewCoaster.Item.Gbx']):
         raise RuntimeError('Coaster fixture must contain exactly the requested moving item and coaster')
+if a.birds:
+    call('tm-mcp-pack-epp.PlaceItem',dict(itemPath=a.bird_item,x=400,y=15,z=400,tag='tmis:handoff'))
+    if call('GetItems')['total'] != 3: raise RuntimeError('Bird placement missing')
 call('SaveMapAs', dict(fileName=a.label+'.Map.Gbx'))
 if call('GetDialog').get('hasFrame'):
     raise RuntimeError('Save dialog remains; choose a new run label')
 
+shots=json.loads(a.shot_file.read_text(encoding='utf-8')) if a.shot_file else []
 samples = []
 with (a.output / (a.label + '-record.log')).open('w') as log:
     recorder = subprocess.Popen(['ffmpeg','-hide_banner','-n','-f','gdigrab',
@@ -112,12 +141,19 @@ with (a.output / (a.label + '-record.log')).open('w') as log:
     try:
         # The coaster cube is 8 m tall (top Y=19), unlike the thin deck (Y=16).
         # Spawn above it, not inside its collision volume.
-        call('ControlValidation',dict(action='testFromCoord',x=12,y=11 if a.coaster_context or a.cube_spawn else 10,z=12,dir='North'))
+        call('ControlValidation',dict(action='testFromCoord',x=2 if a.empty_cart else 12,y=10 if a.empty_cart else (11 if a.coaster_context or a.cube_spawn else 10),z=2 if a.empty_cart else 12,dir='North'))
         time.sleep(2)
         camera = (dict(x=416,y=70,z=420,target=dict(x=416,y=14,z=388),fov=50)
                   if a.wide_camera else dict(x=432,y=48,z=446,target=dict(x=393,y=14,z=400),fov=55))
         if a.coaster_context:
             camera = dict(x=500,y=240,z=530,target=dict(x=500,y=40,z=310),fov=60)
+        cart_views = [dict(x=405,y=38,z=383,target=dict(x=375,y=12,z=380),fov=65),
+                      dict(x=385,y=65,z=295,target=dict(x=357,y=24,z=281),fov=65),
+                      dict(x=430,y=65,z=250,target=dict(x=391,y=33,z=230),fov=65)]
+        if shots:
+            camera={k:v for k,v in shots[0].items() if k!='time'}
+        elif a.cart_shots:
+            camera = cart_views[0]
         if a.camera_mode:
             camera_result=call('ControlPlayCamera',dict(action='set_mode',mode=a.camera_mode,spectatorCamera='follow'))
             if camera_result.get('after', {}).get('camType', {}).get('name') != a.camera_mode:
@@ -128,11 +164,21 @@ with (a.output / (a.label + '-record.log')).open('w') as log:
         last_camera = -1.
         stopped_early = False
         launch_at = None
+        cart_view = 0
         while time.monotonic()-start < a.seconds-5:
             if (a.output / (a.label + '.stop')).exists():
                 stopped_early = True
                 break
             s = call('GetVehicleState')['state']
+            view = min(2, int((time.monotonic()-start)/30))
+            if shots:
+                shot_index=max(i for i,s in enumerate(shots) if s['time']<=time.monotonic()-start)
+                if shot_index!=cart_view:
+                    call('ControlPlayCamera',dict(action='set_position',**{k:v for k,v in shots[shot_index].items() if k!='time'}))
+                    cart_view=shot_index
+            elif a.cart_shots and view != cart_view:
+                call('ControlPlayCamera',dict(action='set_position',**cart_views[view]))
+                cart_view = view
             samples.append(dict(t=time.monotonic()-start,position=s['position'],
                 velocity=s['worldVel'],gas=s['inputGasPedal'],steer=s['inputSteer'],
                 brake=s['inputBrakePedal'],up=s['up'],direction=s['dir'],wheels=s['wheels']))

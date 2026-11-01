@@ -1,0 +1,31 @@
+{
+  "averageSpeed": 10.000087308828697,
+  "minSpeed": 4.627780268195724,
+  "maxSpeed": 12.865273185071608,
+  "cycleSeconds": 145.002,
+  "cartSegments": 128,
+  "headingMaxError": 7.675680358613e-07,
+  "birds": [
+    {
+      "bird": 0,
+      "minDeckDelta": -19.984864999999996,
+      "maxDeckDelta": 34.11166,
+      "minAbsoluteDeckDelta": 4.9774374999999935,
+      "wingPeriodMs": 620
+    },
+    {
+      "bird": 1,
+      "minDeckDelta": -17.980369999999994,
+      "maxDeckDelta": 36.070105,
+      "minAbsoluteDeckDelta": 6.954828800000001,
+      "wingPeriodMs": 710
+    },
+    {
+      "bird": 2,
+      "minDeckDelta": -15.962264999999995,
+      "maxDeckDelta": 38.122712799999995,
+      "minAbsoluteDeckDelta": 8.937618999999998,
+      "wingPeriodMs": 800
+    }
+  ]
+}

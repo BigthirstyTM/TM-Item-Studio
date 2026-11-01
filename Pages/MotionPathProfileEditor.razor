@@ -1,0 +1,124 @@
+@using System.Globalization
+@using TM_Item_Studio.Models
+
+@if (Plan.Use != MotionPathUse.Obstacle)
+{
+    <details class="border rounded p-2 my-2" data-testid="path-rotation-editor">
+        <summary class="fw-bold">Path tilt &amp; rotation</summary>
+        <p class="small text-muted mt-2">Turn (yaw), slope (pitch) and banking (roll), in degrees. Values interpolate between route points. Follow direction assumes the model faces local +X. Adjust the whole-route offsets for a different model orientation.</p>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-sm btn-outline-primary" @onclick="Follow">Follow route direction</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="()=>Commit(Plan with {Rotations=null})">Disable rotation</button>
+        </div>
+        @if (Plan.Rotations is not null)
+        {
+            @for(int end=0;end<2;end++)
+            {
+                var pi=Index+end; var r=Plan.Rotations[pi];
+                <div class="small fw-bold mt-2">@(end==0?"From":"To") · point @(pi+1)</div>
+                <div class="row g-1">
+                @foreach(var axis in new[]{"Yaw","Pitch","Roll"})
+                {
+                    var name=axis;
+                    <div class="col-4"><label class="small">@axis<input aria-label="@($"Point {pi+1} {axis}")" type="number" step="1" class="form-control form-control-sm" value="@F(axis=="Yaw"?r.Yaw:axis=="Pitch"?r.Pitch:r.Roll)" @onchange="e=>Rotate(pi,name,e)" /></label></div>
+                }
+                </div>
+            }
+            <div class="small fw-bold mt-2">Offset every point (degrees)</div>
+            <div class="row g-1">
+                <div class="col-4"><label class="small">Yaw<input aria-label="Route Yaw offset" class="form-control form-control-sm" type="number" @bind="yawOffset" /></label></div>
+                <div class="col-4"><label class="small">Pitch<input aria-label="Route Pitch offset" class="form-control form-control-sm" type="number" @bind="pitchOffset" /></label></div>
+                <div class="col-4"><label class="small">Roll<input aria-label="Route Roll offset" class="form-control form-control-sm" type="number" @bind="rollOffset" /></label></div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary mt-2" @onclick="Offset">Add offsets to whole route</button>
+        }
+        @if(Plan.Use==MotionPathUse.CollisionRelay) { <p class="small text-warning mt-2">Rotation affects the visible mesh. Collision keeps its fixed source orientation per segment; it does not continuously tilt with the mesh. Passenger handoffs remain experimental.</p> }
+    </details>
+    <details class="border rounded p-2 my-2" data-testid="path-speed-editor">
+        <summary class="fw-bold">Whole-route speed curve</summary>
+        <p class="small text-muted mt-2">Select a point on the timeline, then change its speed. Ramp applies a gradual speed change over a selected range of route points. Export samples the curve into at most 128 native segments; long routes have less ramp detail. Waypoint pauses must be zero.</p>
+        @if(Plan.SpeedPoints is null)
+        {
+            <button class="btn btn-sm btn-outline-primary" @onclick="EnableSpeed">Enable speed curve</button>
+        }
+        else
+        {
+            var speeds=Plan.SpeedPoints; var times=Times(); var total=times[^1]; var max=Math.Max(1,speeds.Max()*1.15);
+            <div style="overflow-x:auto">
+                <svg viewBox="0 0 640 190" style="min-width:480px;width:100%;background:#15202c" role="img" aria-label="Route speed timeline">
+                    <line x1="35" y1="155" x2="620" y2="155" stroke="#789" />
+                    <line x1="35" y1="15" x2="35" y2="155" stroke="#789" />
+                    <polyline points="@string.Join(" ",speeds.Select((v,i)=>$"{F(35+585*times[i]/total)},{F(155-130*v/max)}"))" fill="none" stroke="#54d8ee" stroke-width="2" />
+                    @for(int i=0;i<speeds.Length;i++)
+                    {
+                        var pi=i;
+                        <circle cx="@F(35+585*times[i]/total)" cy="@F(155-130*speeds[i]/max)" r="@(point==i?7:5)" fill="@(point==i?"#ffcb64":"#54d8ee")" role="button" tabindex="0" aria-label="@($"Speed point {i+1}")" @onclick="()=>SelectPoint(pi)" @onkeydown="e=>PointKey(e,pi)"><title>Point @(i+1): @F(times[i]) s · @F(speeds[i]) m/s</title></circle>
+                    }
+                    <text x="38" y="180" fill="white" font-size="12">0 s</text><text x="540" y="180" fill="white" font-size="12">@F(total) s</text>
+                    <text x="40" y="13" fill="white" font-size="12">Speed (m/s)</text>
+                </svg>
+            </div>
+            <div class="small fw-bold mt-2">Speed curve point</div>
+            <SearchableSelect Label="Speed curve point" Options="PointLabels" Value="@PointLabels[point]" ValueChanged="ChoosePoint" />
+            <label class="small d-block">Point @(point+1) speed (m/s)<input aria-label="Curve point speed" type="number" min="0.1" max="1000" step="0.1" value="@F(speeds[point])" class="form-control form-control-sm" @onchange="SetSpeed" /></label>
+            <input aria-label="Curve speed slider" class="form-range" type="range" min="0.1" max="@F(Math.Max(30,speeds.Max()*1.5))" step="0.1" value="@F(speeds[point])" @onchange="SetSpeed" />
+            <details class="my-2"><summary class="small">Speed ramp &amp; presets</summary>
+                <div class="small mt-2">Ramp from point</div>
+                <SearchableSelect Label="Ramp from point" Options="PointLabels" Value="@PointLabels[rampFrom]" ValueChanged="e=>ChooseRamp(e,true)" />
+                <div class="small mt-2">Ramp to point</div>
+                <SearchableSelect Label="Ramp to point" Options="PointLabels" Value="@PointLabels[rampTo]" ValueChanged="e=>ChooseRamp(e,false)" />
+                <div class="row g-1"><div class="col-6"><label class="small">Start m/s<input aria-label="Ramp start speed" class="form-control form-control-sm" type="number" min="0.1" @bind="rampStart" /></label></div>
+                <div class="col-6"><label class="small">End m/s<input aria-label="Ramp end speed" class="form-control form-control-sm" type="number" min="0.1" @bind="rampEnd" /></label></div></div>
+                <button class="btn btn-sm btn-outline-primary mt-2" @onclick="Ramp">Apply speed ramp</button>
+                <button class="btn btn-sm btn-outline-primary mt-2 ms-1" @onclick="Gravity">Coaster: slower uphill, faster downhill</button>
+                <label class="small d-block mt-2">Ramp samples per segment (budget permitting)<input aria-label="Ramp detail" class="form-control form-control-sm" type="number" min="1" max="16" value="@Plan.RampDetail" @onchange="Detail" /></label>
+            </details>
+            @if(compilation.Success) { <p class="small text-muted">Export: @compilation.Value!.Legs.Count segments · @F(compilation.Value.DurationMs/1000d) s. Curves use linear native movement; original easing is overridden.</p> }
+            <button class="btn btn-sm btn-outline-secondary" @onclick="()=>Commit(Plan with {SpeedPoints=null})">Disable curve · restore segment timing</button>
+        }
+    </details>
+}
+@if(error is not null) { <p class="small text-danger" role="alert">@error</p> }
+
+@code {
+    [Parameter,EditorRequired] public MotionPathPlan Plan {get;set;}=default!;
+    [Parameter] public EventCallback<MotionPathPlan> Changed {get;set;}
+    [Parameter] public int Index {get;set;}
+    [Parameter] public EventCallback<int> IndexChanged {get;set;}
+    private int point,rampFrom,rampTo,lastIndex=-1;
+    private float rampStart=5,rampEnd=15;
+    private float yawOffset,pitchOffset,rollOffset;
+    private string? error;
+    private ItemMotionResult<MotionPathPlan> compilation=default!;
+    private string[] PointLabels=>Enumerable.Range(1,Plan.Legs.Count+1).Select(i=>$"Point {i}").ToArray();
+    private static string F(double n)=>n.ToString("0.###",CultureInfo.InvariantCulture);
+    protected override void OnParametersSet() { point=Math.Clamp(point,0,Plan.Legs.Count); rampFrom=Math.Clamp(rampFrom,0,Plan.Legs.Count); rampTo=Math.Clamp(rampTo,1,Plan.Legs.Count); if(lastIndex!=Index) {point=Index;lastIndex=Index;} compilation=ItemMotionPathProfile.Compile(Plan); }
+    private async Task Commit(MotionPathPlan next) { var c=ItemMotionPathProfile.Compile(next); error=c.Reason; if(c.Success) await Changed.InvokeAsync(next); }
+    private Task Follow()=>Commit(Plan with {Rotations=ItemMotionPathProfile.FollowDirection(Plan)});
+    private async Task Offset() { await Commit(Plan with {Rotations=Plan.Rotations!.Select(r=>new MotionPathRotation(r.Yaw+yawOffset,r.Pitch+pitchOffset,r.Roll+rollOffset)).ToArray()}); if(error is null) yawOffset=pitchOffset=rollOffset=0; }
+    private Task Rotate(int index,string axis,ChangeEventArgs e) {
+        if(!float.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var value)) return Invalid();
+        var r=Plan.Rotations!.ToArray();
+        MotionPathRotation Set(MotionPathRotation a,bool offset)=>axis=="Yaw"?a with{Yaw=(offset?a.Yaw:0)+value}:axis=="Pitch"?a with{Pitch=(offset?a.Pitch:0)+value}:a with{Roll=(offset?a.Roll:0)+value};
+        if(index<0) r=r.Select(a=>Set(a,true)).ToArray(); else {
+            var old=r[index]; r[index]=Set(old,false);
+            if(Plan.Repeat!=MotionPathRepeat.Reset && (index==0||index==r.Length-1)) {
+                int other=index==0?r.Length-1:0; var delta=new MotionPathRotation(r[index].Yaw-old.Yaw,r[index].Pitch-old.Pitch,r[index].Roll-old.Roll);
+                r[other]=new(r[other].Yaw+delta.Yaw,r[other].Pitch+delta.Pitch,r[other].Roll+delta.Roll);
+            }
+        }
+        return Commit(Plan with {Rotations=r});
+    }
+    private Task EnableSpeed() { rampTo=Plan.Legs.Count; var s=Plan.Legs.Select(l=>l.Delta.Length()*1000/l.MoveMs).Append(Plan.Legs[^1].Delta.Length()*1000/Plan.Legs[^1].MoveMs).ToArray(); Link(s); return Commit(Plan with {SpeedPoints=s}); }
+    private void Link(float[] s) { if(Plan.Repeat!=MotionPathRepeat.Reset) s[^1]=s[0]; }
+    private async Task SelectPoint(int i) { point=i; lastIndex=Math.Min(i,Plan.Legs.Count-1); await IndexChanged.InvokeAsync(lastIndex); }
+    private Task ChoosePoint(ChangeEventArgs e) {var i=Array.IndexOf(PointLabels,e.Value?.ToString());return i>=0?SelectPoint(i):Task.CompletedTask;}
+    private Task PointKey(KeyboardEventArgs e,int i)=>e.Key is "Enter" or " "?SelectPoint(i):Task.CompletedTask;
+    private Task ChooseRamp(ChangeEventArgs e,bool from) {var i=Array.IndexOf(PointLabels,e.Value?.ToString());if(i>=0){if(from)rampFrom=i;else rampTo=i;}return Task.CompletedTask;}
+    private Task SetSpeed(ChangeEventArgs e) { if(!float.TryParse(e.Value?.ToString(),NumberStyles.Float,CultureInfo.InvariantCulture,out var v))return Invalid(); var s=Plan.SpeedPoints!.ToArray();s[point]=v;if(point==s.Length-1 && Plan.Repeat!=MotionPathRepeat.Reset)s[0]=v;Link(s);return Commit(Plan with{SpeedPoints=s}); }
+    private Task Ramp() { if(rampTo<=rampFrom){error="Choose a ramp end after its start.";return Task.CompletedTask;}var s=Plan.SpeedPoints!.ToArray();var pts=ItemMotionPathEditing.Points(Plan);float length=0;for(int i=rampFrom;i<rampTo;i++)length+=Plan.Legs[i].Delta.Length();float travelled=0;for(int i=rampFrom;i<=rampTo;i++){s[i]=rampStart+(rampEnd-rampStart)*travelled/length;if(i<rampTo)travelled+=Plan.Legs[i].Delta.Length();}if(rampTo==s.Length-1&&Plan.Repeat!=MotionPathRepeat.Reset)s[0]=s[^1];Link(s);return Commit(Plan with{SpeedPoints=s}); }
+    private Task Gravity() {var pts=ItemMotionPathEditing.Points(Plan);var high=pts.Max(p=>p.Y);var s=pts.Select(p=>MathF.Sqrt(25+2*2.2f*(high-p.Y))).ToArray();Link(s);return Commit(Plan with{SpeedPoints=s});}
+    private Task Detail(ChangeEventArgs e)=>int.TryParse(e.Value?.ToString(),out var d)?Commit(Plan with{RampDetail=d}):Invalid();
+    private Task Invalid(){error="Enter a finite number.";return Task.CompletedTask;}
+    private double[] Times() { var schedule=ItemMotionPathProfile.DisplaySchedule(Plan); return schedule.Legs.Select(l=>l.StartMs/1000d).Append(schedule.DurationMs/1000d).ToArray(); }
+}

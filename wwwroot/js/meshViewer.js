@@ -2206,6 +2206,17 @@ function applyDrawPathPreview(timestamp) {
             : plan.ease === 4 ? (x < .5 ? 2*x*x : 1-2*(1-x)*(1-x)) : x;
         position.addScaledVector(new THREE.Vector3(leg.delta.x,leg.delta.y,leg.delta.z),u);
     }
+    if (plan.rotations) {
+        let i = plan.legs.findIndex(leg => t < leg.startMs + leg.moveMs);
+        if (i < 0) i = plan.legs.length - 1;
+        const leg = plan.legs[i], a = plan.rotations[i], b = plan.rotations[i + 1];
+        const x = Math.max(0, Math.min(1, (t-leg.startMs)/leg.moveMs));
+        const u = plan.ease === 2 ? x*x : plan.ease === 3 ? x*(2-x) : plan.ease === 4 ? (x < .5 ? 2*x*x : 1-2*(1-x)*(1-x)) : x;
+        const angle = key => THREE.MathUtils.degToRad(a[key] + (b[key]-a[key])*u);
+        rotation.setFromAxisAngle(new THREE.Vector3(0,1,0),angle('yaw'));
+        rotation.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),angle('pitch')));
+        rotation.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),angle('roll')));
+    }
     position.sub(anchor.clone().applyQuaternion(rotation));
     ghost.matrix.compose(position,rotation,new THREE.Vector3(1,1,1));
     ghost.matrixWorldNeedsUpdate = true;
