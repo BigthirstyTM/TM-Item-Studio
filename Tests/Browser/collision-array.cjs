@@ -7,6 +7,20 @@ const {chromium}=require('playwright');const assert=require('node:assert/strict'
  const array=page.getByTestId('path-array-editor');await array.locator(':scope > summary').click();await page.getByText(/Experimental physical copies:/).waitFor();
  for(const [field,value] of [['Spread X (m)','1'],['Spread Y (m)','0.5'],['Spread Z (m)','1']]){const control=array.getByLabel('Array '+field,{exact:true});await control.fill(value);await control.press('Tab');}
  await page.getByLabel('Path anchor',{exact:true}).selectOption('origin');
+ // Reproduce two followers succeeding and the third creating a 60 ms split.
+ const draft=JSON.parse(require('node:fs').readFileSync(path.join(out,'TMIS_CA_Scaled.json'),'utf8'));
+ draft.StartDelayMs=0;draft.DurationMs=4080;draft.Array.Count=2;draft.Array.DelayMs=1500;
+ draft.Legs.forEach((l,i)=>{l.StartMs=i*1020;l.MoveMs=1020;for(const axis of ['X','Y','Z'])l.Delta[axis]*=10.2/32;});
+ await page.getByLabel('Load route draft',{exact:false}).setInputFiles({name:'short-split.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(draft))});
+ for(const count of [2,3,4,8]){const copies=array.getByLabel('Array Copies',{exact:true});await copies.fill(String(count));await copies.press('Tab');await page.waitForFunction(n=>drawPathDraft?.instances?.length===n,count);}
+ await page.getByRole('button',{name:'Apply path',exact:true}).click();await panel.getByText(/^Applied /).waitFor();
+ // Switching an existing array to a smooth path must retain its copies.
+ await page.evaluate(()=>setDrawnPathPoints([{x:0,y:0,z:0},{x:20,y:0,z:0},{x:20,y:0,z:20},{x:0,y:0,z:20}]));
+ const smooth=page.getByTestId('smooth-motion-path');await smooth.locator(':scope > summary').click();await page.getByLabel('Curve detail',{exact:true}).selectOption('2');
+ await page.getByRole('button',{name:'Preview smooth path',exact:true}).click();await page.waitForFunction(()=>drawPathDraft?.instances?.length===8&&drawPathDraft.plan.legs.length>4).catch(async e=>{console.log(await page.locator('body').innerText());console.log(await page.evaluate(()=>({instances:drawPathDraft?.instances?.length,legs:drawPathDraft?.plan?.legs?.length})));throw e;});
+ await page.getByRole('button',{name:'Apply smooth path',exact:true}).click({timeout:120000});await panel.getByText(/^Applied /).waitFor();
+ // Restore the longer fixture for the physical-layer checks.
+ await page.getByLabel('Load route draft',{exact:false}).setInputFiles(path.join(out,'TMIS_CA_Scaled.json'));await page.waitForFunction(()=>drawPathDraft?.instances?.length===3);
  const timeline=page.getByLabel('Preview timeline',{exact:true});await timeline.fill('12000');await page.waitForFunction(()=>drawPathDraft.paused);const before=await page.evaluate(()=>drawPathDraft.instances.map(i=>i.ghost.matrix.toArray()));assert.notDeepEqual(before[0],before[1]);
  const layers=page.getByTestId('path-layers-editor');await layers.locator(':scope > summary').click();await page.getByText(/Experimental physical layers are sampled/).waitFor();
  await layers.getByRole('button',{name:'Add animation layer',exact:true}).click();await page.waitForFunction(()=>drawPathDraft.plan.collisionPoses?.length===128);

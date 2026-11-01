@@ -15,6 +15,29 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("three or more followers survive near-boundary delay splits",()=>{
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+ foreach(var use in new[]{MotionPathUse.Scenery,MotionPathUse.CollisionRelay}) {
+  var p=ItemMotionPath.Plan([Vector3.Zero,new(10.2f,0,0),new(10.2f,0,10.2f),new(0,0,10.2f)],use,MotionPathRepeat.Closed,10,KC.AnimEase.Linear).Value!;
+  p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray()};
+  var shifted=ItemMotionArray.Shift(p,3000);Require(shifted.Legs.Count==4,"60 ms split was not snapped");Near(shifted.Start.X,10.2f);Near(shifted.Start.Z,0);Require(shifted.DurationMs==p.DurationMs&&shifted.Legs.All(l=>l.MoveMs>=80),"snap changed lap or native timing");
+  foreach(int count in new[]{2,3,4,8}) {var result=ItemMotionPath.Build(source,p with{Array=new(count,1500)});Require(result.Success,$"{use}, {count} copies: {result.Reason}");}
+ }
+});
+Check("full-detail arrays preserve the segment budget when shifting copies",()=>{
+ var points=Enumerable.Range(0,128).Select(i=>new Vector3(100*MathF.Cos(i*MathF.Tau/128),0,100*MathF.Sin(i*MathF.Tau/128))).ToArray();
+ var p=ItemMotionPath.Plan(points,MotionPathUse.CollisionRelay,MotionPathRepeat.Closed,5,KC.AnimEase.Linear,0,8000).Value!;
+ p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),129).ToArray()};
+ var shifted=ItemMotionArray.Shift(p,500);Require(shifted.Legs.Count==128,"phase split exceeded budget");Require(shifted.DurationMs==p.DurationMs&&shifted.StartDelayMs==8000,"loop or dwell changed");Require(ItemMotionPath.Validate(shifted).Success,"invalid shifted full-detail route");
+});
+Check("smoothed routes build arrays with three and eight followers",()=>{
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+ foreach(var detail in new[]{2,8,16}) {
+  var p=ItemMotionSmoothPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20),new(0,0,20)],MotionPathRepeat.Closed,5,.6f,detail).Value!;
+  p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),p.Legs.Count+1).ToArray()};
+  foreach(var count in new[]{3,8}){var built=ItemMotionPath.Build(source,p with{Array=new(count,1000)});Require(built.Success,built.Reason??"smooth array");}
+ }
+});
 Check("array clock rebasing preserves constant acceleration and route closure",()=>{
  var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20),new(0,0,20)],MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;
  p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray()};
@@ -22,7 +45,7 @@ Check("array clock rebasing preserves constant acceleration and route closure",(
  var ramp=p with{ContinuousVelocity=true,Legs=p.Legs.Select(l=>l with{VelocityRatio=.5f}).ToArray()};
  var rampShift=ItemMotionArray.Shift(ramp,1000);Near(rampShift.Start.Z,6.875f);Near(rampShift.Legs[0].VelocityRatio,10f/11f);
  Require((rampShift.Start+rampShift.Legs.Aggregate(Vector3.Zero,(a,l)=>a+l.Delta)-rampShift.Start).Length()<.001,"route not closed");
- bool refused=false;try{ItemMotionArray.Shift(p,1);}catch(InvalidOperationException){refused=true;}Require(refused,"sub-80ms split accepted");
+ var snapped=ItemMotionArray.Shift(p,1);Require(snapped.Legs.Count==p.Legs.Count&&snapped.Start==p.Start,"near-boundary phase should snap without a tiny leg");
 });
 Check("arrays share serialized models, remap bindings and leave the source untouched",()=>{
  var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();

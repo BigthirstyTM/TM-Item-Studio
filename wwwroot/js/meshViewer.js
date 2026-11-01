@@ -2222,6 +2222,10 @@ window.stopDrawPathPreview = function () {
 window.previewDrawPath = function (input, center) {
     const plan=input.plan??input, plans=input.instances??[plan];
     const firstPreview = !drawPathDraft;
+    const now = performance.now();
+    const paused = drawPathDraft?.paused ?? false;
+    const elapsed = drawPathDraft ? (paused ? drawPathDraft.seekMs : now - drawPathDraft.started) : 0;
+    const seekMs = Math.max(0, Math.min(paused ? elapsed : elapsed % plan.durationMs, plan.durationMs - .001));
     const source = drawPathSource();
     window.stopDrawPathPreview();
     const instances=plans.map(plan=>{
@@ -2251,10 +2255,10 @@ window.previewDrawPath = function (input, center) {
     for(const instance of instances)scene.add(instance.ghost);
     const hiddenGroups = retainedPathSource ? [...new Set(typedMotions.flatMap(m => motionGroups.get(m.childPath) ?? []))].map(group => [group, group.visible]) : [];
     for (const [group] of hiddenGroups) group.visible = false;
-    drawPathDraft = { source, ...instances[0], wasVisible, hiddenGroups, plan, instances, started: performance.now() };
+    drawPathDraft = { source, ...instances[0], wasVisible, hiddenGroups, plan, instances, paused, seekMs, started: now - seekMs };
     window.setPathPivotPreview(showPathPivots);
     renderDrawPathVisual();
-    applyDrawPathPreview(drawPathDraft.started);
+    applyDrawPathPreview(now);
     if (firstPreview) window.fitDrawPath();
 };
 window.fitDrawPath = function () {

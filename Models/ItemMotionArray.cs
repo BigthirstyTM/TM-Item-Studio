@@ -56,6 +56,19 @@ public static class ItemMotionArray
         }
         int cut=(p.DurationMs-delayMs%p.DurationMs)%p.DurationMs;
         if(cut==0)return p;
+        // A later follower can land just beside a waypoint even when earlier copies
+        // are valid. Snap that phase to the boundary instead of rejecting the array.
+        // Use the same rebasing for browser preview and export.
+        foreach(var leg in p.Legs) {
+            int end=leg.StartMs+leg.MoveMs;
+            if(cut<=leg.StartMs || cut>=end)continue;
+            float u=(cut-leg.StartMs)/(float)leg.MoveMs;
+            float fraction=leg.VelocityRatio*u+(1-leg.VelocityRatio)*u*u;
+            if(cut-leg.StartMs<80 || end-cut<80 || leg.Delta.Length()*Math.Min(fraction,1-fraction)<.01f || p.Legs.Count>=ItemMotionPath.MaxLegs)
+                cut=(cut-leg.StartMs<=end-cut?leg.StartMs:end)%p.DurationMs;
+            break;
+        }
+        if(cut==0)return p;
         var pieces=new List<(int Time,Vector3 Start,MotionPathLeg Leg,MotionPathRotation A,MotionPathRotation B,Quaternion Pose)>();
         var cursor=p.Start;
         for(int i=0;i<p.Legs.Count;i++){
