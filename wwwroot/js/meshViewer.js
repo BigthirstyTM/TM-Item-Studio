@@ -1069,6 +1069,7 @@ function renderDrawPathVisual() {
     }
 }
 function pickDrawPoint(raycaster, offset = drawPathPlaneY) {
+    if(window.routeSurfacePicking)return window.pickRouteSurface(raycaster);
     const normal = drawPathPlane === 'XY' ? new THREE.Vector3(0, 0, 1)
         : drawPathPlane === 'YZ' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
     const plane = new THREE.Plane(normal, -offset);
@@ -1445,6 +1446,7 @@ function disposeObjectResources(root) {
     textures.forEach(texture => texture.dispose());
 }
 window.dispose3DViewer = function () {
+    window.clearRouteReference?.();
     window.stopDrawPathPreview();
     window.setEditablePathSegments(null,0,true);
     editablePathGroup?.parent?.remove(editablePathGroup);editablePathGroup=null;
