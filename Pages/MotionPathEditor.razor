@@ -4,13 +4,14 @@
 
 <details class="border rounded p-2 my-2" open data-testid="path-segment-editor">
     <summary class="fw-bold">Path segments &amp; timing</summary>
-    <p class="small text-muted mt-2">@Plan.Legs.Count segments · @(Plan.DurationMs / 1000d) s per cycle. Edits update the draft; choose Apply edited route to change the item. Timing changes shift all following segments together. Generating a new straight or smooth route replaces these segment edits. This route editor retains the current session's draft.</p>
+    <p class="small text-muted mt-2">@Plan.Legs.Count segments · @(DisplayPlan.DurationMs / 1000d) s per cycle. Edits update the draft; choose Apply edited route to change the item. Timing changes shift all following segments together. Generating a new straight or smooth route replaces these segment edits. This route editor retains the current session's draft.</p>
     @if (Plan.Use == MotionPathUse.CollisionRelay)
     {
         <p class="small text-warning">Experimental collision relay: handoffs can launch passengers. Inactive colliders must stay inaccessible below terrain.</p>
         <label class="small">Start delay (ms)<input aria-label="Edited collision start delay" class="form-control form-control-sm" type="number" min="0" max="60000" value="@Plan.StartDelayMs" @onchange="ChangeDelay" /></label>
         <label class="small">Parking distance (m)<input aria-label="Edited collision parking distance" class="form-control form-control-sm" type="number" min="16" max="256" value="@F(Plan.ParkingDistance)" @onchange="ChangeParking" /></label>
     }
+    @if (Plan.SpeedPoints is not null) { <p class="small text-info">Speed curve active: timings below show the compiled schedule. Edit speed in Whole-route speed curve, or disable it to restore manual segment timing.</p> }
     <SearchableSelect Label="Path segment" Options="Labels" Value="@SelectedLabel" ValueChanged="SelectSegment" />
     <label class="small mt-2 d-block">Viewport route
         <select aria-label="Viewport route" title="Show every segment or only the selected segment in the viewport." class="form-select form-select-sm" value="@(FullPath ? "full" : "selected")" @onchange="@(e=>FullPathChanged.InvokeAsync(e.Value?.ToString()=="full"))">
@@ -26,7 +27,7 @@
                 @for (var i = 0; i < Plan.Legs.Count; i++)
                 {
                     var index = i;
-                    var l = Plan.Legs[i];
+                    var l = DisplayPlan.Legs[i];
                     <tr class="@(Index == i ? "table-active" : "")" aria-selected="@(Index==i)" data-segment-index="@i" @onclick="()=>IndexChanged.InvokeAsync(index)">
                         <td><button class="btn btn-sm btn-link p-0" aria-label="@($"Select segment {i+1}")" title="Select this segment in the menu and viewport." @onclick:stopPropagation="true" @onclick="()=>IndexChanged.InvokeAsync(index)">@(i+1)</button></td>
                         @for(var end=0;end<2;end++)
@@ -38,8 +39,8 @@
                                 <input aria-label="@($"Route segment {i+1} {(end==0 ? "from" : "to")} {"XYZ"[a]}")" title="Edit a shared endpoint in metres; adjacent segments update too." style="min-width:5rem" class="form-control form-control-sm" type="number" step="any" value="@F(a==0?p.X:a==1?p.Y:p.Z)" @onfocus="()=>IndexChanged.InvokeAsync(index)" @onchange="e=>MovePoint(pi,a,e)" />
                             }</td>
                         }
-                        <td><input aria-label="@($"Route segment {i+1} speed")" title="Change this segment's speed and reschedule the remaining route." style="min-width:5rem" class="form-control form-control-sm" type="number" step="any" value="@F(l.Delta.Length()*1000d/l.MoveMs)" @onfocus="()=>IndexChanged.InvokeAsync(index)" @onchange="e=>ChangeSpeedAt(index,e)" /></td>
-                        <td><input aria-label="@($"Route segment {i+1} duration")" title="Duration in seconds, minimum 0.08." style="min-width:5rem" class="form-control form-control-sm" type="number" step="any" value="@F(l.MoveMs/1000d)" @onfocus="()=>IndexChanged.InvokeAsync(index)" @onchange="e=>ChangeDurationAt(index,e)" /></td>
+                        <td><input aria-label="@($"Route segment {i+1} speed")" disabled="@(Plan.SpeedPoints is not null)" title="Change this segment's speed and reschedule the remaining route." style="min-width:5rem" class="form-control form-control-sm" type="number" step="any" value="@F(l.Delta.Length()*1000d/l.MoveMs)" @onfocus="()=>IndexChanged.InvokeAsync(index)" @onchange="e=>ChangeSpeedAt(index,e)" /></td>
+                        <td><input aria-label="@($"Route segment {i+1} duration")" disabled="@(Plan.SpeedPoints is not null)" title="Duration in seconds, minimum 0.08." style="min-width:5rem" class="form-control form-control-sm" type="number" step="any" value="@F(l.MoveMs/1000d)" @onfocus="()=>IndexChanged.InvokeAsync(index)" @onchange="e=>ChangeDurationAt(index,e)" /></td>
                     </tr>
                 }
             </tbody></table>
@@ -47,7 +48,7 @@
     </details>
     @if (Index >= 0 && Index < Plan.Legs.Count)
     {
-        var leg = Plan.Legs[Index];
+        var leg = DisplayPlan.Legs[Index];
         var points = ItemMotionPathEditing.Points(Plan);
         <div class="row g-2 mt-1">
             @for (var end = 0; end < 2; end++)
@@ -61,11 +62,11 @@
                     <div class="col-4"><label class="small">@("XYZ"[a])<input aria-label="@($"Segment {(end == 0 ? "from" : "to")} {"XYZ"[a]}")" title="Move this shared route point in metres. Adjacent segments update while their durations stay unchanged." class="form-control form-control-sm" type="number" step="any" value="@F(a == 0 ? p.X : a == 1 ? p.Y : p.Z)" @onchange="e=>MovePoint(pointIndex,a,e)" /></label></div>
                 }
             }
-            <div class="col-6"><label class="small">Average speed (m/s)<input aria-label="Segment speed" title="Set average travel speed for this segment. All following start times update together." class="form-control form-control-sm" type="number" min="0.1" step="0.1" value="@F(leg.Delta.Length()*1000d/leg.MoveMs)" @onchange="ChangeSpeed" /></label></div>
-            <div class="col-6"><label class="small">Duration (seconds)<input aria-label="Segment duration" title="Set travel duration for this segment, at least 0.08 seconds. All following start times update together." class="form-control form-control-sm" type="number" min="0.08" step="0.01" value="@F(leg.MoveMs/1000d)" @onchange="ChangeDuration" /></label></div>
+            <div class="col-6"><label class="small">Average speed (m/s)<input aria-label="Segment speed" disabled="@(Plan.SpeedPoints is not null)" title="Set average travel speed for this segment. All following start times update together." class="form-control form-control-sm" type="number" min="0.1" step="0.1" value="@F(leg.Delta.Length()*1000d/leg.MoveMs)" @onchange="ChangeSpeed" /></label></div>
+            <div class="col-6"><label class="small">Duration (seconds)<input aria-label="Segment duration" disabled="@(Plan.SpeedPoints is not null)" title="Set travel duration for this segment, at least 0.08 seconds. All following start times update together." class="form-control form-control-sm" type="number" min="0.08" step="0.01" value="@F(leg.MoveMs/1000d)" @onchange="ChangeDuration" /></label></div>
         </div>
         <p class="small text-muted mt-2">Length @F(leg.Delta.Length()) m · starts at @F(leg.StartMs/1000d) s. Position edits keep duration. Shared endpoints move together; ping-pong geometry stays mirrored. Straight obstacle return timing is linked.</p>
-        <p class="small text-muted">Rotation: fixed orientation for generated paths. Independent rotation per segment is not supported by this compiler. Advanced rotation edits below change native constraints and may change the route; reapplying a generated path replaces those edits.</p>
+        <MotionPathProfileEditor Plan="Plan" Changed="Changed" Index="Index" IndexChanged="IndexChanged" />
     }
     @if (error is not null) { <p class="text-danger small" role="alert">@error</p> }
     <div class="d-flex flex-wrap gap-2">
@@ -84,9 +85,10 @@
     [Parameter] public bool FullPath { get; set; }
     [Parameter] public EventCallback<bool> FullPathChanged { get; set; }
     private string? error;
-    private string[] Labels => Plan.Legs.Select((l,i)=>$"Segment {i+1}: point {i+1} → {i+2} · {F(l.Delta.Length())} m · {F(l.MoveMs/1000d)} s").ToArray();
+    private MotionPathPlan DisplayPlan = default!;
+    private string[] Labels => DisplayPlan.Legs.Select((l,i)=>$"Segment {i+1}: point {i+1} → {i+2} · {F(l.Delta.Length())} m · {F(l.MoveMs/1000d)} s").ToArray();
     private string SelectedLabel => Labels[Math.Clamp(Index,0,Plan.Legs.Count-1)];
-    protected override void OnParametersSet() => Index = Math.Clamp(Index,0,Plan.Legs.Count-1);
+    protected override void OnParametersSet() { Index = Math.Clamp(Index,0,Plan.Legs.Count-1); DisplayPlan = ItemMotionPathProfile.DisplaySchedule(Plan); }
     private async Task SelectSegment(ChangeEventArgs e) { var index=Array.IndexOf(Labels,e.Value?.ToString()); if(index>=0) await IndexChanged.InvokeAsync(index); }
     private static string F(double n) => n.ToString("0.###",CultureInfo.InvariantCulture);
     private static string Position(Vector3 p) => $"{F(p.X)} {F(p.Y)} {F(p.Z)}";

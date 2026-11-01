@@ -113,7 +113,7 @@ public static class ItemMotionCollisionRelay
         catch (Exception e) { return Fail("Cannot build this experimental collision path: " + e.Message); }
     }
 
-    private static CPlugSolid2Model CheckMesh(CPlugDynaObjectModel body)
+    internal static CPlugSolid2Model CheckMesh(CPlugDynaObjectModel body)
     {
         if (body.Mesh is not CPlugSolid2Model solid || solid.Visuals is not { Count: > 0 } || solid.Boxes is { Length: > 0 })
             throw new NotSupportedException("A decoded static triangle mesh without skeletal boxes is required.");

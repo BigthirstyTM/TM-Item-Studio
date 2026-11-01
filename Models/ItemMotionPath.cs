@@ -9,9 +9,10 @@ namespace TM_Item_Studio.Models;
 
 public enum MotionPathUse { Obstacle, Scenery, CollisionRelay }
 public enum MotionPathRepeat { PingPong, Closed, Reset }
-public sealed record MotionPathLeg(Vector3 Delta, int StartMs, int MoveMs);
+public sealed record MotionPathLeg(Vector3 Delta, int StartMs, int MoveMs, int SourceIndex = -1);
 public sealed record MotionPathPlan(Vector3 Start, MotionPathUse Use, MotionPathRepeat Repeat,
-    KC.AnimEase Ease, IReadOnlyList<MotionPathLeg> Legs, int DurationMs, int PauseMs, int StartDelayMs = 0, float ParkingDistance = 64);
+    KC.AnimEase Ease, IReadOnlyList<MotionPathLeg> Legs, int DurationMs, int PauseMs, int StartDelayMs = 0, float ParkingDistance = 64,
+    float[]? SpeedPoints = null, MotionPathRotation[]? Rotations = null, int RampDetail = 4);
 
 /// <summary>
 /// Compiles paths into native scalar channels. Parent motion is visual-only in the
@@ -62,6 +63,8 @@ public static class ItemMotionPath
     public static ItemMotionResult<MotionPathPlan> Validate(MotionPathPlan plan)
     {
         ItemMotionResult<MotionPathPlan> Fail(string reason) => ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, reason);
+        var profileError = ItemMotionPathProfile.Validate(plan);
+        if (profileError is not null) return Fail(profileError);
         if (!Enum.IsDefined(plan.Use) || !Enum.IsDefined(plan.Repeat) || !Finite(plan.Start)
             || plan.Start.Length() > 10000 || plan.PauseMs < 0 || plan.PauseMs > 60000
             || plan.Ease is not (KC.AnimEase.Linear or KC.AnimEase.QuadIn or KC.AnimEase.QuadOut or KC.AnimEase.QuadInOut)
@@ -111,6 +114,10 @@ public static class ItemMotionPath
             || binding.Pos1 != default || binding.Pos2 != default || source.Version != 0 || source.SubVersion != 3
             || bodyEntry.Model is not CPlugDynaObjectModel { Mesh: not null, LocAnim: null, DynamizeOnSpawn: false })
             return Fail("This body's binding, driver, anchors or shader animation cannot safely be replaced with a path.");
+        var profiled = ItemMotionPathProfile.Compile(plan);
+        if (!profiled.Success) return Fail(profiled.Reason!);
+        plan = profiled.Value!;
+        if (plan.Rotations is not null) return ItemMotionPathPose.Build(original, plan, anchor);
         if (plan.Use == MotionPathUse.CollisionRelay) return ItemMotionCollisionRelay.Build(original, plan, anchor);
         // Clone before changing anything. Rejected builds never alter the live document.
         CPlugPrefab prefab;

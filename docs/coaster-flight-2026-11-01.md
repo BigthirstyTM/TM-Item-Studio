@@ -14,7 +14,7 @@ A long accumulated carrier-chain prototype was rejected after native observation
 
 ## Birds
 
-Three original low-poly gull-like models fly separate phase-offset loops over the western coaster area, at 12, 13 and 14 m/s. Each has a body/head/beak/tail and two actual moving wing meshes. The wings rotate oppositely around the forward axis, between -25 and +40 degrees, using SineInOut half-strokes. Their full periods are 620, 710 and 800 ms. These are native GBX animation channels, not an external script moving the models.
+Three original low-poly gull-like models fly separate phase-offset loops over the western coaster area, at 12, 13 and 14 m/s. Each has a body/head/beak/tail and two actual moving wing meshes. The wings rotate oppositely around the forward axis, between -25 and +40 degrees, using QuadInOut half-strokes (corrected from the original unverified SineInOut channels). Their full periods are 620, 710 and 800 ms. These are native GBX animation channels, not an external script moving the models.
 
 Flight paths pass both above and below the track. A periodic height bump clears an intermediate crossing. Independent sampled centreline checks measure at least 4.98 m vertical separation where the route is within 4 m horizontally of the deck centreline. This does not prove clearance against every support beam or the entire banked deck mesh. Final wingspan is approximately 2.58 m (the initial oversized observation model was reduced to 30%). Birds are scenery with only compatibility micro-shapes, not usable obstacles.
 
@@ -34,8 +34,17 @@ The 54-second demonstration combines final-scale cart/bird footage with ten seco
 - Independent schedule/geometry checks: average speed, monotonic timing, altitude-speed relationship, waypoint heading reconstruction and bird over/under crossings.
 - Native run `Cart_GravityC`: initial bends/sections and flying birds visible.
 - Native full-route run `CoasterFlight_Full`: 180-second capture, cart observed around the route and into its next lap, with changing heading/pitch/bank. Fixed cameras keep most sections visible; this is visual evidence, not millimetre wheel-contact measurement.
-- Bird normals/periodic crossing correction: verified in `CoasterFlight_FinalB`. Final reduced-scale models were recorded in `CoasterFlight_Delivery` and `CoasterBird_Tracked`. Close tracking shows changing wing poses, flight above the low track and descent below the elevated track between its supports. Camera-only tracking uses discrete MCP updates; the bird animation itself is native. All successful runners finish in Menu.
+- Bird normals/periodic crossing correction: verified in `CoasterFlight_FinalB`. Final reduced-scale models were recorded in `CoasterFlight_Delivery` and `CoasterBird_Tracked`. The original recordings did not establish reliable wing oscillation; the user correctly reported apparently stationary wings. The corrected FlapV2 evidence below supersedes that claim. The flight route itself passes above low track and below elevated track between supports. Camera-only tracking uses discrete MCP updates; the bird animation itself is native. All successful runners finish in Menu.
 
 The map is a visual test fixture without a race start/finish. Use the editor's test-from-cursor mode to watch the animation. This is not a validated race map.
 
 The saved delivery map reparses with exactly three anchored objects and embeds all three model files. The first editor readiness query after several restarts suffered a transient MCP connection reset while the game remained responsive; read-only readiness retries are now bounded in the runner. No game/plugin production code was changed.
+
+
+## Follow-up: corrected wings and Studio controls
+
+The original `BirdsFinal` wing channels used SineInOut, outside the easing range validated by the Studio/native tests. `TMIS_Coaster_BirdsFlapV2` uses QuadInOut. In `CoasterBird_FlapV2_Close.mp4`, frames sampled every 0.1 seconds from 3.0?4.1 seconds show down/level/up/down wing poses on the same flying bird. This is visible native motion, not just different flight headings or different birds. It does not establish that every SineInOut channel is unsupported by every game build.
+
+`Coaster_FullRun_V2.mp4` records 160 seconds at 1280?720, 60 fps, with fixed cameras changing approximately every eight seconds. It includes the complete 145.002-second cart cycle, into the next lap, with final-scale FlapV2 birds. No time compression or interpolated frames were used. The accompanying map was saved by the game and reparses with exactly three placed/embedded models. The observer car remains remote; no passenger claim is made.
+
+Production Studio 0.5.9 adds the independently tested path rotation/speed profile editor described in `path-profiles-2026-11-01.md`. The original coaster research exporter remains separate from that UI compiler; a real browser-exported ramp/rotation item was tested separately as `Studio_RampPose`.

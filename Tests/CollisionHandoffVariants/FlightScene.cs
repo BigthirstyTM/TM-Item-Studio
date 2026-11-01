@@ -77,7 +77,7 @@ static class FlightScene {
    KC Hold()=>new(){Version=0,SubVersion=3,TransAxis=KC.EAxis.X,RotAxis=KC.EAxis.X,TransAnimFunc=new(){IsDuration=true,SubFuncs=[Key(KC.AnimEase.Constant,plan.DurationMs)]},RotAnimFunc=new(){IsDuration=true,SubFuncs=[Key(KC.AnimEase.Constant,plan.DurationMs)]}};
    drivers.Add(new(){Model=Hold(),Rotation=Quat.Identity,Params=new NPlugDyna_SPrefabConstraintParams{Version=0,Ent1=parent,Ent2=visible}});
    if(left!=null&&right!=null)foreach(var (wing,sign) in new[]{(left,1f),(right,-1f)}){
-    var child=bodies.Count;bodies.Add(new(){Model=wing,Position=V(cursor),Rotation=Quat.Identity,Params=Instance()});var c=Hold();c.AngleMinDeg=-25*sign;c.AngleMaxDeg=40*sign;c.RotAnimFunc!.SubFuncs=[Key(KC.AnimEase.SineInOut,half),Key(KC.AnimEase.SineInOut,half,true)];
+    var child=bodies.Count;bodies.Add(new(){Model=wing,Position=V(cursor),Rotation=Quat.Identity,Params=Instance()});var c=Hold();c.AngleMinDeg=-25*sign;c.AngleMaxDeg=40*sign;c.RotAnimFunc!.SubFuncs=[Key(KC.AnimEase.QuadInOut,half),Key(KC.AnimEase.QuadInOut,half,true)];
     drivers.Add(new(){Model=c,Rotation=Quat.Identity,Params=new NPlugDyna_SPrefabConstraintParams{Version=0,Ent1=visible,Ent2=child}});
    }
    cursor+=leg.Delta;
@@ -125,7 +125,7 @@ static class FlightScene {
    routeEvidence.Add(new{bird,speed=12+bird,wingPeriodMs=2*(310+bird*45),points=pts.Select(p=>new[]{p.X+400,p.Y+15,p.Z+400})});
    Merge(combined,prefab);
   }
-  item.EntityModel=combined;Save(item,"TMIS_Coaster_BirdsFinal",output);
+  item.EntityModel=combined;Save(item,"TMIS_Coaster_BirdsFlapV2",output);
   File.WriteAllText(Path.Combine(output,"bird-routes.json"),JsonSerializer.Serialize(routeEvidence));
  }
  static void Merge(CPlugPrefab target,CPlugPrefab extra){var offset=target.Ents.Count(e=>e.Model is CPlugDynaObjectModel);foreach(var e in extra.Ents)if(e.Params is NPlugDyna_SPrefabConstraintParams p){if(p.Ent1>=0)p.Ent1+=offset;p.Ent2+=offset;}target.Ents=[..target.Ents,..extra.Ents];}

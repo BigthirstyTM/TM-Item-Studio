@@ -1,0 +1,69 @@
+{
+  "version": "0.5.9",
+  "files": {
+    "TMIS_Cart_GravitySmooth.Item.Gbx": {
+      "bytes": 115970,
+      "sha256": "1b2a93f48a55b46b0f80c568485b3ab5f4b7cdfbeb12f04d47d2d0bbc169632c"
+    },
+    "TMIS_Coaster_BirdsFlapV2.Item.Gbx": {
+      "bytes": 132280,
+      "sha256": "47d138f0a5a5edbe75e9716daa34fc1628a14077dd1364dbd638d7387c582f2d"
+    },
+    "Coaster_FullRun_V2.Map.Gbx": {
+      "bytes": 1515931,
+      "sha256": "96886f9279bf88981b496becb6e0c59803f6f958e405280113bdc78f4b64a7df"
+    },
+    "Coaster_FullRun_V2.mp4": {
+      "bytes": 12397299,
+      "sha256": "0ae38c499c0b2f85049b71c62ed7564b9d1c7455e846c818cfd15c844151a76d"
+    },
+    "Vogels-vleugelslag.mp4": {
+      "bytes": 2811795,
+      "sha256": "4e19d0ca528a2b14b8dc32258f96b8c18d7a83effd04a75072a9fea522f9ae0f"
+    },
+    "profile/TMIS_Profile_RampPose.Item.Gbx": {
+      "bytes": 59204,
+      "sha256": "d20dc404803c712f7f9301129bebca73f807d783814129f835cc6fd40c3cc15f"
+    },
+    "profile/Studio_RampPose.Map.Gbx": {
+      "bytes": 93185,
+      "sha256": "f951f4f8ea16ddaab16020d25c774ec97071b81cdc8527d0614ab17dda0426f0"
+    },
+    "profile/ramp-pose.motion-path.json": {
+      "bytes": 1324,
+      "sha256": "4a5ddf29e8ed66eee8ca45410a9828574b2a1627cf71ef5012ea7732f5f23e0d"
+    }
+  },
+  "browserMatrixMaxError": 9.98705341773154e-07,
+  "nativeRuns": {
+    "Coaster_FullRun_V2": {
+      "videoSeconds": 160,
+      "width": 1280,
+      "height": 720,
+      "fps": 60,
+      "wholeCartCycleMs": 145002,
+      "embeddedModels": 3
+    },
+    "CoasterBird_FlapV2_Close": {
+      "observation": "same bird, alternating wing poses at 0.1 second samples"
+    },
+    "Studio_RampPose": {
+      "browserExportObserved": true,
+      "passengerTest": false
+    }
+  },
+  "tests": {
+    "ItemMotion": "43 passed",
+    "VariantExport": "38 passed after transient concurrent build retest",
+    "browser": [
+      "path-profile",
+      "path-segment-edits",
+      "smooth-motion-path"
+    ]
+  },
+  "limitations": [
+    "Sampled speed ramps, 128-leg budget, 80ms minimum",
+    "Rotation is visual; collision does not continuously tilt",
+    "Passenger launches remain unresolved"
+  ]
+}

@@ -12,7 +12,7 @@ if(args.Length==2 && args[0]=="verify-flight-map"){
  using var zip=map.OpenReadEmbeddedZipData();
  if(map.AnchoredObjects?.Count!=3)throw new Exception("Expected cart, birds and coaster");
  foreach(var entry in zip.Entries)Console.WriteLine($"Embedded: {entry.FullName} ({entry.Length} bytes)");
- if(!zip.Entries.Any(e=>e.FullName.Contains("TMIS_Cart_GravitySmooth"))||!zip.Entries.Any(e=>e.FullName.Contains("TMIS_Coaster_BirdsFinal"))||!zip.Entries.Any(e=>e.FullName.Contains("NewCoaster")))throw new Exception("Missing embedded models");
+ if(!zip.Entries.Any(e=>e.FullName.Contains("TMIS_Cart_GravitySmooth"))||!zip.Entries.Any(e=>e.FullName.Contains("TMIS_Coaster_Birds"))||!zip.Entries.Any(e=>e.FullName.Contains("NewCoaster")))throw new Exception("Missing embedded models");
  Console.WriteLine("PASS three placed and embedded models");return;
 }
 
