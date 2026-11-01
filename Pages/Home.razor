@@ -195,6 +195,7 @@
                             <button class="btn btn-sm btn-outline-secondary" title="Right view (Numpad 3)" data-helper="Right-side view along the X axis. Keyboard shortcut: Numpad 3." @onclick="@(() => SetViewportView("right"))">Right</button>
                         </div>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="ResetCamera">Reset Camera</button>
+                        @if(SelectedSource?.IsReadOnly==false && !IsOpaqueFxCarrier){<button class="btn btn-sm btn-outline-info" aria-label="Add linked item instance" @onclick="AddLinkedInstance">+ Instance</button>}
                         @if (hasMesh)
                         {
                             <button class="btn btn-sm btn-outline-success" @onclick="DownloadObj">.OBJ</button>
@@ -1653,12 +1654,15 @@
 
                 @if (activeTab == "macroblock")
                 {
+                    <div class="alert alert-info small" data-testid="instance-root">Root source: <strong>@(SelectedSource?.FileName)</strong><br />All instances below share this source model. Geometry/material edits affect every linked instance; placement is independent. A separate file clone is independent.</div>
+                    <button class="btn btn-sm btn-primary mb-2" @onclick="AddLinkedInstance">Add linked instance</button>
+                    <div id="instance-selection-status" class="small text-info" role="status"></div>
                     <h6 class="border-bottom pb-1 text-primary">Macroblock & item instancing <span class="text-muted" title="A macroblock stores one spawn per copy. Each spawn references the item by its ident instead of embedding its mesh, so copies never duplicate geometry.">?</span></h6>
                     <p class="small text-muted mb-2">
                         Every copy below is exported as an <code>ObjectSpawn</code> that references
                         <strong>@(itemModel is null ? "the loaded item" : string.IsNullOrWhiteSpace(itemModel.Ident?.Id) ? itemModel.Name : itemModel.Ident!.Id)</strong>
                         and is drawn in the 3D viewport at its own position and rotation.
-                        Duplicating therefore costs about 15 bytes per copy instead of a second copy of the item.
+                        Each copy adds reference and transform data; the exact file-size overhead depends on the export format. Static placement previews do not reproduce independent kinematic playback.
                     </p>
 
                     <div class="mb-2">
@@ -1698,7 +1702,7 @@
                                 var index = i;
                                 var instance = macroblockInstances[index];
                                 <div class="d-flex flex-wrap align-items-center gap-1 mb-1" @key="instance">
-                                    <span style="width:1.6rem">@(index + 1)</span>
+                                    <button class="btn btn-sm btn-outline-info" aria-label="@($"Select instance {index + 1}")" @onclick="()=>SelectLinkedInstance(index)">@(index + 1)</button>
                                     <input aria-label="@($"Instance {index + 1} X")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="x" @bind="instance.PosX" @bind:after="RefreshMacroblockViewport" />
                                     <input aria-label="@($"Instance {index + 1} Y")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="y" @bind="instance.PosY" @bind:after="RefreshMacroblockViewport" />
                                     <input aria-label="@($"Instance {index + 1} Z")" type="number" step="any" class="form-control form-control-sm" style="width:4.6rem" data-help-key="z" @bind="instance.PosZ" @bind:after="RefreshMacroblockViewport" />
@@ -3869,7 +3873,7 @@ else if (itemModel is null)
                      isCollision = part.geometry.IsCollision && !forcedRenderableGeometryPaths.Contains(part.geometry.Path),
                     meshMode = GetMeshPartMode(part.geometry.Path),
                     enabled = GetMeshPartConfig(part.geometry.Path).Enabled,
-                    visible = GetMeshPartConfig(part.geometry.Path).Visible,
+                    visible = GetMeshPartConfig(part.geometry.Path).Visible && (useComposite || macroblockInstances.Count == 0),
                     collidable = GetMeshPartConfig(part.geometry.Path).Collidable,
                     effect = GetMeshPartConfig(part.geometry.Path).Effect,
                     waypoint = GetMeshPartConfig(part.geometry.Path).Waypoint,
@@ -3947,7 +3951,7 @@ else if (itemModel is null)
                 positionsBytes = ViewerBuffers.Pack(p.Positions), indicesBytes = ViewerBuffers.Pack(p.Indices),
                 meshMode = GetMeshPartMode(p.Path),
                 enabled = GetMeshPartConfig(p.Path).Enabled,
-                visible = GetMeshPartConfig(p.Path).Visible,
+                visible = GetMeshPartConfig(p.Path).Visible && macroblockInstances.Count == 0,
                 collidable = GetMeshPartConfig(p.Path).Collidable,
                 effect = GetMeshPartConfig(p.Path).Effect,
                 waypoint = GetMeshPartConfig(p.Path).Waypoint,
@@ -5560,6 +5564,14 @@ else if (itemModel is null)
         }
     }
 
+    private async Task AddLinkedInstance()
+    {
+        if(macroblockInstances.Count==0)macroblockInstances.Add(new ItemMacroblockInstance{Label="Instance 1"});
+        await DuplicateLastMacroblockInstance();
+        activeTab="macroblock";
+        await JS.InvokeVoidAsync("selectStudioInstance",macroblockInstances.Count-1);
+    }
+    private async Task SelectLinkedInstance(int index)=>await JS.InvokeVoidAsync("selectStudioInstance",index);
     private async Task AddMacroblockInstance()
     {
         var last = macroblockInstances.Count > 0 ? macroblockInstances[^1] : null;
@@ -5650,11 +5662,10 @@ else if (itemModel is null)
     {
         if (macroblockInstances.Count == 0) return Array.Empty<object>();
 
-        var geometry = scene.Preview.Geometry.Where(part => !part.IsCollision).ToArray();
-        if (geometry.Length == 0) geometry = scene.Preview.Geometry.ToArray();
+        var geometry = scene.Preview.Geometry.ToArray();
 
         var parts = new List<object>(geometry.Length * macroblockInstances.Count);
-        foreach (var instance in macroblockInstances)
+        foreach (var (instance, instanceIndex) in macroblockInstances.Select((value,index)=>(value,index)))
         {
             var placed = ItemMacroblock.Placement(instance);
             foreach (var part in geometry)
@@ -5667,7 +5678,9 @@ else if (itemModel is null)
                 var shared = part.GeometryId.HasValue;
                 parts.Add(new
                 {
-                    path = part.Path,
+                    path = $"instance/{instanceIndex}/{part.Path}",
+                    sourcePath = part.Path,
+                    instanceIndex,
                     entityPath = (string?)null,
                     sourceIndex,
                     groupId = (int?)null,
@@ -5699,14 +5712,16 @@ else if (itemModel is null)
         if (macroblockInstances.Count == 0 || modelParts.Count == 0) return Array.Empty<object>();
 
         var parts = new List<object>(modelParts.Count * macroblockInstances.Count);
-        foreach (var instance in macroblockInstances)
+        foreach (var (instance, instanceIndex) in macroblockInstances.Select((value,index)=>(value,index)))
         {
             var placed = ItemMacroblock.Placement(instance);
             foreach (var part in modelParts)
             {
                 parts.Add(new
                 {
-                    path = part.Path,
+                    path = $"instance/{instanceIndex}/{part.Path}",
+                    sourcePath = part.Path,
+                    instanceIndex,
                     name = part.Name,
                     isMoving = false,
                     positionsBytes = ViewerBuffers.Pack(TransformPositions(part.Positions, placed)),

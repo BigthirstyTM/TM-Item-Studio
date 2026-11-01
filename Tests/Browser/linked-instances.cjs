@@ -1,0 +1,20 @@
+const {chromium}=require('playwright');const assert=require('node:assert/strict');const path=require('node:path');
+(async()=>{const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});try{
+const page=await browser.newPage({viewport:{width:1500,height:1000},acceptDownloads:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto(process.env.STUDIO_BASE_URL,{waitUntil:'networkidle'});
+await page.getByLabel('Open item files',{exact:true}).setInputFiles(path.resolve('Tests/Browser/Fixtures/animation-static-first.Item.Gbx'));
+await page.getByRole('button',{name:'Add linked item instance',exact:true}).click();
+await page.getByLabel('Instance 2 X',{exact:true}).waitFor();
+await page.getByTestId('instance-root').waitFor();
+const inspect=()=>page.evaluate(()=>{const meshes=[];for(const g of [staticGroup,movingGroup])g?.traverse(m=>{if(m.isMesh&&m.visible&&!m.userData.isCollision)meshes.push(m)});return meshes.map(m=>({path:m.userData.path,instance:m.userData.instanceIndex,source:m.userData.sourcePath,geo:m.geometry.uuid}));});
+let data=await inspect();assert.ok(data.some(m=>m.instance===0));assert.ok(data.some(m=>m.instance===1));for(const m of data.filter(m=>m.instance===1))assert.equal(m.geo,data.find(n=>n.instance===0&&n.source===m.source).geo,'instances must share buffers');assert.ok(data.every(m=>m.instance!=null),'unplaced source must not duplicate identity placement');
+await page.getByRole('button',{name:'Add linked instance',exact:true}).click();await page.getByLabel('Instance 3 X',{exact:true}).fill('50');await page.getByLabel('Instance 3 X',{exact:true}).press('Tab');
+await page.getByRole('button',{name:'Select instance 3',exact:true}).click();await page.waitForFunction(()=>selectedMeshObject?.userData.instanceIndex===2);
+await page.evaluate(()=>{window.instancePayloadBeforeClick=currentPayload;selectMeshObject(selectedMeshObject,true);});
+await page.waitForFunction(()=>currentPayload!==window.instancePayloadBeforeClick&&selectedMeshObject?.userData.instanceIndex===2);
+const project=path.resolve('artifacts/experimental-items/instances.tmisproject');let download=page.waitForEvent('download');await page.getByRole('button',{name:'Save Studio project',exact:true}).click();await(await download).saveAs(project);
+await page.reload({waitUntil:'networkidle'});await page.getByLabel('Open Studio project',{exact:true}).setInputFiles(project);await page.getByText(/Project restored/).waitFor();
+await page.getByRole('button',{name:'Instances',exact:true}).click();assert.equal(await page.getByLabel('Instance 3 X',{exact:true}).inputValue(),'50');
+await page.getByRole('button',{name:'Select instance 3',exact:true}).click();await page.waitForFunction(()=>selectedMeshObject?.userData.instanceIndex===2);
+assert.deepEqual(errors,[]);console.log('PASS linked placement, unique selection, project roundtrip');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1});

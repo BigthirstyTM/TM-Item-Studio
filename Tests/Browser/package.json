@@ -25,6 +25,7 @@
     "test:model-route": "node model-route-unit.cjs && node model-route.cjs",
     "test:path-authoring-project": "node path-authoring-project.cjs",
     "test:viewer-capabilities": "node viewer-capabilities.cjs",
+    "test:linked-instances": "node linked-instances.cjs",
     "test:editor-workflow": "node editor-workflow.cjs"
   },
   "devDependencies": {

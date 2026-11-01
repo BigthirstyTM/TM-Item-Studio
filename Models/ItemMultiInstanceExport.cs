@@ -133,9 +133,10 @@ public static class ItemMultiInstance
                 continue;
             }
 
+            var entryOffset = newEnts.Count;
             foreach (var source in sourceEnts)
             {
-                var model = source.Model ?? source.Model
+                var model = source.Model
                     ?? throw new InvalidOperationException(
                         "A prefab entry references an external model that cannot be embedded. " +
                         "Export the source file with its dependencies first.");
@@ -156,7 +157,9 @@ public static class ItemMultiInstance
                     Model = model,
                     Rotation = new Quat(combined.X, combined.Y, combined.Z, combined.W),
                     Position = new Vec3(position.X, position.Y, position.Z),
-                    Params = source.Params,
+                    Params = source.Params is NPlugDyna_SPrefabConstraintParams constraint
+                        ? RemapConstraint(constraint, entryOffset, sourceEnts.Length, placement, origin)
+                        : source.Params,
                     U01 = source.U01
                 });
             }
@@ -206,6 +209,21 @@ public static class ItemMultiInstance
 
         return new ItemMultiInstanceExport(
             bytes, id + ".Item.Gbx", id, usable.Count, newEnts.Count, warnings);
+    }
+
+    private static NPlugDyna_SPrefabConstraintParams RemapConstraint(
+        NPlugDyna_SPrefabConstraintParams source, int offset, int count, Quaternion rotation, Vector3 origin)
+    {
+        int Entity(int index) => index == -1 ? -1 : index >= 0 && index < count
+            ? checked(index + offset) : throw new InvalidOperationException("A constraint references an entity outside its source prefab.");
+        Vec3 Anchor(int entity, Vec3 point)
+        {
+            if (entity != -1) return point;
+            var placed = Vector3.Transform(new Vector3(point.X, point.Y, point.Z), rotation) + origin;
+            return new(placed.X, placed.Y, placed.Z);
+        }
+        return new() { Version = source.Version, Ent1 = Entity(source.Ent1), Ent2 = Entity(source.Ent2),
+            Pos1 = Anchor(source.Ent1, source.Pos1), Pos2 = Anchor(source.Ent2, source.Pos2) };
     }
 
     public static void Verify(byte[] bytes, string expectedId, int expectedInstances, int entriesPerInstance)

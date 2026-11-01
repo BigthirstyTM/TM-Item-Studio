@@ -12,7 +12,7 @@ public partial class Home
 {
     private sealed record ProjectManifest(int Version,string FileName,int Variant,MotionPathPlan? Route,
         DrawPathPointDto[] Points,bool Smooth,string Anchor,float Smoothness,int SmoothDetail,
-        JsonElement Authoring);
+        JsonElement Authoring,ItemMacroblockInstance[]? Instances=null);
     private sealed record PendingProject(ProjectManifest Manifest);
     private PendingProject? pendingProject;
     private async Task SaveStudioProject()
@@ -27,8 +27,9 @@ public partial class Home
             var stateError=await JS.InvokeAsync<string?>("validatePathAuthoringState",authoring);
             if(stateError is not null)throw new InvalidDataException(stateError);
             if(source.Length>50*1024*1024)throw new InvalidDataException("Project item exceeds the 50 MB import limit.");
+            ValidateProjectInstances(macroblockInstances);
             var manifest=new ProjectManifest(1,SelectedSource.FileName+".Gbx",SelectedSource.VariantNumber,editablePathPlan,
-                await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints"),smoothPathPreview,drawPathAnchorMode,smoothPathPercent,smoothPathDetail,authoring);
+                await JS.InvokeAsync<DrawPathPointDto[]>("getDrawnPathPoints"),smoothPathPreview,drawPathAnchorMode,smoothPathPercent,smoothPathDetail,authoring,macroblockInstances.Select(i=>i.Copy()).ToArray());
             using var output=new MemoryStream();
             using(var zip=new ZipArchive(output,ZipArchiveMode.Create,true)){
                 void Add(string name,byte[] bytes){if(bytes.Length>64*1024*1024)throw new InvalidDataException("Project entry exceeds 64 MB: "+name);using var entry=zip.CreateEntry(name,CompressionLevel.Optimal).Open();entry.Write(bytes);}
@@ -50,6 +51,7 @@ public partial class Home
             if(string.IsNullOrWhiteSpace(manifest.FileName)||manifest.FileName.Length>255||manifest.Version!=1||manifest.Variant<1||manifest.Points is null||manifest.Points.Length>129||manifest.Anchor is not ("centre" or "origin")||!float.IsFinite(manifest.Smoothness)||manifest.Smoothness is <0 or >100||manifest.SmoothDetail is <2 or >16)throw new InvalidDataException("Unsupported or invalid project settings.");
             if(manifest.Points.Any(p=>!float.IsFinite(p.X)||!float.IsFinite(p.Y)||!float.IsFinite(p.Z)||new System.Numerics.Vector3(p.X,p.Y,p.Z).Length()>10000))throw new InvalidDataException("Invalid route coordinates.");
             if(manifest.Route is {} route&&!ItemMotionPathProfile.Compile(route).Success)throw new InvalidDataException("Invalid project route.");
+            ValidateProjectInstances(manifest.Instances);
             // Validate guide/handle payload before replacing the open item.
             var valid=await JS.InvokeAsync<string?>("validatePathAuthoringState",manifest.Authoring);
             if(valid is not null)throw new InvalidDataException(valid);
@@ -76,6 +78,8 @@ public partial class Home
             bezierSettings=JsonSerializer.Deserialize<BezierSettings>(await JS.InvokeAsync<string>("getBezierState"),PathJsonOptions)??new();
             editablePathPlan=p.Route;
             if(p.Route is {} plan){drawPathUse=plan.Use;drawPathRepeat=plan.Repeat;drawPathEase=plan.Ease;drawPathPauseMs=plan.PauseMs;drawRelayDelay=plan.StartDelayMs;drawRelayParking=plan.ParkingDistance;drawPathMetersPerSecond=plan.Legs.Sum(l=>l.Delta.Length())/(plan.Legs.Sum(l=>l.MoveMs)/1000f);}
+            macroblockInstances.Clear();macroblockInstances.AddRange(p.Instances??[]);
+            if(macroblockInstances.Count>0)await RefreshMacroblockViewport();
             authoringRevision++;
             await ReadDrawPathCoordinates();ResetPathHistory();await RecordPathEdit();activeTab="gameplay";
             if(editablePathPlan is not null)await PreviewPlannedPath(editablePathPlan,smoothPathPreview);
@@ -83,6 +87,11 @@ public partial class Home
             statusMessage="Project restored. The route remains editable; Apply path updates the saved item. Reload external textures/dependencies if required.";
             StateHasChanged();
         }catch(Exception ex){errorMessage="Project item loaded, but authoring state could not be restored: "+ex.Message;}
+    }
+    private static void ValidateProjectInstances(IReadOnlyCollection<ItemMacroblockInstance>? copies)
+    {
+        if(copies is not null&&(copies.Count>1024||copies.Any(i=>i is null||new[]{i.PosX,i.PosY,i.PosZ,i.PitchDeg,i.YawDeg,i.RollDeg,i.Scale}.Any(v=>!float.IsFinite(v)||Math.Abs(v)>100000)||i.Scale<=0)))
+            throw new InvalidDataException("Invalid project instances: use at most 1024 finite placements with positive scale.");
     }
     private sealed class ProjectBrowserFile(string name,byte[] bytes):IBrowserFile
     {

@@ -2,6 +2,13 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.19] - 2026-11-02
+
+- Add one-click linked instances, identify the root source and select individual placements in the viewport. Save their transforms in Studio projects.
+- Keep source geometry shared and prevent scene filters from revealing the hidden original beneath the instances. Show collision geometry at each instance placement.
+- Remap exported prefab constraints to each copy's own entity indices and transform world anchors without changing body-local anchors.
+- Record controlled native checkpoint experiments, a GameData item catalog, and pickup/audio research candidates. Moving triggers, pickup gameplay, item audio and emitted-particle rendering are not claimed as working features.
+
 ## [0.5.18] - 2026-11-01
 
 - Fit the visible model on initial load and camera reset without expanding the frame to distant pivot, light or motion helper points. Collision-only items retain a fallback.
