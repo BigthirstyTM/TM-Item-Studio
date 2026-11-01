@@ -15,6 +15,27 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("array clock rebasing preserves constant acceleration and route closure",()=>{
+ var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20),new(0,0,20)],MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;
+ p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray()};
+ var shifted=ItemMotionArray.Shift(p,1000);Near(shifted.Start.Z,5);Near(shifted.Start.X,0);Require(shifted.Legs.Count==5,"split missing");Require(shifted.Legs.Sum(l=>l.MoveMs)==16000,"period changed");
+ var ramp=p with{ContinuousVelocity=true,Legs=p.Legs.Select(l=>l with{VelocityRatio=.5f}).ToArray()};
+ var rampShift=ItemMotionArray.Shift(ramp,1000);Near(rampShift.Start.Z,6.875f);Near(rampShift.Legs[0].VelocityRatio,10f/11f);
+ Require((rampShift.Start+rampShift.Legs.Aggregate(Vector3.Zero,(a,l)=>a+l.Delta)-rampShift.Start).Length()<.001,"route not closed");
+ bool refused=false;try{ItemMotionArray.Shift(p,1);}catch(InvalidOperationException){refused=true;}Require(refused,"sub-80ms split accepted");
+});
+Check("arrays share serialized models, remap bindings and leave the source untouched",()=>{
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+ var p=ItemMotionPath.Plan([Vector3.Zero,new(20,0,0),new(20,0,20),new(0,0,20)],MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;
+ p=p with{Rotations=Enumerable.Repeat(new MotionPathRotation(),5).ToArray(),Array=new(4,1000),Layers=[new("Bob",Kind:MotionLayerKind.Translate,Axis:KC.EAxis.Y,Amplitude:1)]};
+ var built=ItemMotionPath.Build(source,p);Require(built.Success,built.Reason??"build");
+ using var bytes=new MemoryStream();new Gbx<CPlugPrefab>(built.Value!).Save(bytes);bytes.Position=0;var read=Gbx.Parse<CPlugPrefab>(bytes).Node;
+ var bodies=read.Ents.Where(e=>e.Model is CPlugDynaObjectModel).ToArray();Require(bodies.Length>80,"missing followers");Require(bodies.Select(e=>((CPlugDynaObjectModel)e.Model!).Mesh).Distinct().Count()<10,"mesh models duplicated per copy");
+ foreach(var e in read.Ents.Where(e=>e.Model is KC)){var c=(NPlugDyna_SPrefabConstraintParams)e.Params!;Require(c.Ent2<bodies.Length&&c.Ent1<bodies.Length,"native body index must exclude constraint entries");Require(c.Ent1==-1||read.Ents[c.Ent1].Model is CPlugDynaObjectModel,"parent remap");Require(read.Ents[c.Ent2].Model is CPlugDynaObjectModel,"child remap");var driver=(KC)e.Model!;Require(driver.TransAnimFunc!.SubFuncs.Length<=4&&driver.RotAnimFunc!.SubFuncs.Length<=4,"native key limit");}
+ Require(source.Ents.Length==2,"source changed");
+ var settings=p with{Array=new(8,1000,new(2,1,3),.5f,1.5f,3,123,true)};Require(ItemMotionArray.Instances(settings).SequenceEqual(ItemMotionArray.Instances(settings)),"spread nondeterministic");Require(ItemMotionArray.Instances(settings).Select(i=>i.Scale).Distinct().Count()<=3,"too many scale variants");
+ Require(!ItemMotionPath.Validate(p with{Use=MotionPathUse.CollisionRelay}).Success,"collidable array incorrectly accepted");
+});
 foreach(var kind in Enum.GetValues<MotionBehaviorKind>()) Check($"template {kind} compiles and serializes on a closed route",()=>{
     var points=Enumerable.Range(0,32).Select(i=>new Vector3(20*MathF.Cos(i*MathF.PI/16),5+2*MathF.Sin(i*MathF.PI/8),20*MathF.Sin(i*MathF.PI/16))).ToArray();
     var p=ItemMotionPath.Plan(points,MotionPathUse.Scenery,MotionPathRepeat.Closed,5,KC.AnimEase.Linear).Value!;

@@ -78,6 +78,16 @@ public static class ItemMotionPathPose
                     c.RotAnimFunc!.SubFuncs=keys.ToArray();
                     drivers.Add(Driver(c,parent,child)); parent=child;
                 }
+                foreach(var layer in plan.Layers??[]) {
+                    if(!layer.Enabled)continue;
+                    int child=bodies.Count;bodies.Add(Body(ItemKinematicEntityTemplate.CreateCarrierBody(),cursor));
+                    var c=Hold(plan.DurationMs);float amplitude=layer.Amplitude*(layer.Reverse?-1:1);
+                    var keys=new[]{Key(KC.AnimEase.QuadInOut,layer.PeriodMs/2),Key(KC.AnimEase.QuadInOut,layer.PeriodMs-layer.PeriodMs/2,true)};
+                    if(layer.Kind==MotionLayerKind.Translate){c.TransAxis=layer.Axis;c.TransMin=-amplitude;c.TransMax=amplitude;c.TransAnimFunc!.SubFuncs=keys;}
+                    else {c.RotAxis=layer.Axis;c.AngleMinDeg=layer.Kind==MotionLayerKind.Spin?0:-amplitude;c.AngleMaxDeg=layer.Kind==MotionLayerKind.Spin?360*(layer.Reverse?-1:1):amplitude;
+                        c.RotAnimFunc!.SubFuncs=layer.Kind==MotionLayerKind.Spin?[Key(KC.AnimEase.Linear,layer.PeriodMs)]:keys;}
+                    drivers.Add(Driver(c,parent,child));parent=child;
+                }
                 int visible=bodies.Count;
                 bodies.Add(Body(visual,cursor-anchor));
                 var instance=(NPlugDynaObjectModel_SInstanceParams)bodies[^1].Params!;

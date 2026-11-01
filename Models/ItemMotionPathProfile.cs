@@ -10,6 +10,7 @@ public static class ItemMotionPathProfile
 {
     public static string? Validate(MotionPathPlan p)
     {
+        var groupError=ItemMotionArray.Validate(p);if(groupError is not null)return groupError;
         if(p.Behavior is {} behavior && !Enum.IsDefined(behavior.Kind))return "Unknown movement template kind.";
         var partError=ItemMotionParts.Validate(p);if(partError is not null)return partError;
         if (p.Legs is null) return "Missing route segments.";

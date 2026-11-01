@@ -12,7 +12,7 @@ public enum MotionPathRepeat { PingPong, Closed, Reset }
 public sealed record MotionPathLeg(Vector3 Delta, int StartMs, int MoveMs, int SourceIndex = -1, float VelocityRatio = 1);
 public sealed record MotionPathPlan(Vector3 Start, MotionPathUse Use, MotionPathRepeat Repeat,
     KC.AnimEase Ease, IReadOnlyList<MotionPathLeg> Legs, int DurationMs, int PauseMs, int StartDelayMs = 0, float ParkingDistance = 64,
-    float[]? SpeedPoints = null, MotionPathRotation[]? Rotations = null, int RampDetail = 4, MotionBehaviorSettings? Behavior = null, bool ContinuousVelocity = false, MotionPathPart[]? Parts = null);
+    float[]? SpeedPoints = null, MotionPathRotation[]? Rotations = null, int RampDetail = 4, MotionBehaviorSettings? Behavior = null, bool ContinuousVelocity = false, MotionPathPart[]? Parts = null, MotionPathArray? Array = null, MotionPathLayer[]? Layers = null);
 
 /// <summary>
 /// Compiles paths into native scalar channels. Parent motion is visual-only in the
@@ -117,6 +117,7 @@ public static class ItemMotionPath
         var profiled = ItemMotionPathProfile.Compile(plan);
         if (!profiled.Success) return Fail(profiled.Reason!);
         plan = profiled.Value!;
+        if (plan.Array is not null) return ItemMotionArray.Build(original, plan, anchor);
         if (plan.Rotations is not null) return ItemMotionPathPose.Build(original, plan, anchor);
         if (plan.Use == MotionPathUse.CollisionRelay) return ItemMotionCollisionRelay.Build(original, plan, anchor);
         // Clone before changing anything. Rejected builds never alter the live document.
