@@ -10,10 +10,12 @@
 @code {
  [Parameter,EditorRequired] public MotionPathPlan Plan{get;set;}=default!;
  [Parameter]public EventCallback EnsurePreview{get;set;}
- private MotionPathPlan? last;private int time;private bool paused;private bool pivots;
+ private bool sync;private MotionPathPlan? last;private int time;private bool paused;private bool pivots;
  private async Task Pivots()=>await JS.InvokeVoidAsync("setPathPivotPreview",pivots);
  private int Total=>ItemMotionPathProfile.DisplaySchedule(Plan).DurationMs;
- protected override void OnParametersSet(){if(!ReferenceEquals(last,Plan)){last=Plan;time=Math.Clamp(time,0,Total);}}
+ protected override void OnParametersSet(){sync=true;if(!ReferenceEquals(last,Plan)){last=Plan;time=Math.Clamp(time,0,Total);}}
+ private sealed record PlaybackState(bool Paused,int Time);
+ protected override async Task OnAfterRenderAsync(bool firstRender){if(!sync)return;sync=false;var state=await JS.InvokeAsync<PlaybackState?>("getPathPlaybackState");if(state is not null&&(paused!=state.Paused||time!=state.Time)){paused=state.Paused;time=state.Time;StateHasChanged();}}
  private async Task Seek(ChangeEventArgs e){if(int.TryParse(e.Value?.ToString(),out var ms)){await EnsurePreview.InvokeAsync();time=Math.Clamp(ms,0,Total);paused=true;await JS.InvokeVoidAsync("seekDrawPathPreview",time);}}
  private async Task Toggle(){await EnsurePreview.InvokeAsync();paused=!paused;await JS.InvokeVoidAsync("pauseDrawPathPreview",paused);}
  private async Task Restart(){await EnsurePreview.InvokeAsync();time=0;paused=true;await JS.InvokeVoidAsync("seekDrawPathPreview",0);}

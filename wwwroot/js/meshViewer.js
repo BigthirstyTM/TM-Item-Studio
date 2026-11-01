@@ -1035,6 +1035,7 @@ function clearDrawPathVisual() {
     drawPathPointMarkers = [];
 }
 function renderDrawPathVisual() {
+    window.drawBezierHandles?.();
     clearDrawPathVisual();
     if (!waypointsGroup || drawPathPoints.length === 0) return;
     const pointRadius = Math.max(.12, markerScaleForBounds(new THREE.Box3().setFromPoints(drawPathPoints)) * .5);
@@ -1446,6 +1447,7 @@ function disposeObjectResources(root) {
     textures.forEach(texture => texture.dispose());
 }
 window.dispose3DViewer = function () {
+    window.disposePathAuthoring?.();
     window.clearRouteReference?.();
     window.stopDrawPathPreview();
     window.setEditablePathSegments(null,0,true);
@@ -2284,6 +2286,7 @@ window.setPathPivotPreview=function(enabled){
 window.seekDrawPathPreview=function(ms){if(!drawPathDraft)return;drawPathDraft.paused=true;drawPathDraft.seekMs=Math.max(0,Math.min(drawPathDraft.plan.durationMs-.001,ms));applyDrawPathPreview(performance.now());};
 window.pauseDrawPathPreview=function(paused){if(!drawPathDraft)return;const now=performance.now();if(paused&&!drawPathDraft.paused)drawPathDraft.seekMs=(now-drawPathDraft.started);if(!paused&&drawPathDraft.paused)drawPathDraft.started=now-drawPathDraft.seekMs;drawPathDraft.paused=paused;applyDrawPathPreview(now);};
 function applyDrawPathPreview(timestamp) {
+    if(typeof clearanceBusy!=="undefined" && clearanceBusy)return;
     if (!drawPathDraft) return;
     const { plan, started } = drawPathDraft;
     const elapsed = drawPathDraft.paused ? drawPathDraft.seekMs : timestamp - started;

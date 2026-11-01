@@ -2,6 +2,13 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.17] - 2026-11-01
+
+- Add draggable, optionally linked Bezier handles with adjustable sampling detail and path undo/redo.
+- Add fixed look-at targets, baked into route orientation and recalculated for array copies.
+- Check clearance across the preview route against followers and reference geometry, with a distance/overlap slider and clickable conflict times. This samples visual bounding envelopes, not native collision physics.
+- Save/open `.tmisproject` files containing the selected item, editable motion source, route, handles, reference geometry, clearance settings and viewport state. External textures and GameData dependencies are not bundled.
+
 ## [0.5.16] - 2026-11-01
 
 - Reorganize the inspector into five primary editing stages: identity/icon, model/materials, placement/pivots, collision, then motion/paths. A searchable section selector also opens lights, effects, instances, composite tools, flags and socket inspection.

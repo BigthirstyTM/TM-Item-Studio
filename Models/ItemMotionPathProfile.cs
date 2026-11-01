@@ -10,6 +10,8 @@ public static class ItemMotionPathProfile
 {
     public static string? Validate(MotionPathPlan p)
     {
+        if(p.LookAtTarget is {} target && (!float.IsFinite(target.Length())||target.Length()>10000||p.Use==MotionPathUse.Obstacle))return "Look-at requires a finite target within 10,000 m in scenery or collision relay mode.";
+        if(p.LookAtTarget is not null && p.Use==MotionPathUse.CollisionRelay && (p.SampleCollisionRotation||p.Layers?.Any(l=>l.Enabled)==true) && p.Array?.Spread.Length()>0)return "Look-at with sampled collision layers currently requires zero array spread.";
         var groupError=ItemMotionArray.Validate(p);if(groupError is not null)return groupError;
         if(p.Behavior is {} behavior && !Enum.IsDefined(behavior.Kind))return "Unknown movement template kind.";
         var partError=ItemMotionParts.Validate(p);if(partError is not null)return partError;
@@ -38,7 +40,7 @@ public static class ItemMotionPathProfile
         ItemMotionResult<MotionPathPlan> Fail(string s) => ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid, s);
         var valid = ItemMotionPath.Validate(p);
         if (!valid.Success) return Fail(valid.Reason!);
-        if (p.SpeedPoints is null) return ItemMotionCollisionLayers.Compile(p);
+        if (p.SpeedPoints is null) return CompileOrientation(p);
         var legs = new List<MotionPathLeg>();
         var rotations = p.Rotations is null ? null : new List<MotionPathRotation> { p.Rotations[0] };
         long elapsed = p.StartDelayMs;
@@ -67,9 +69,14 @@ public static class ItemMotionPathProfile
             }
         }
         var compiled=ItemMotionPath.Validate(p with { Legs = legs, DurationMs = (int)elapsed, SpeedPoints = null, Rotations = rotations?.ToArray(), Ease = KC.AnimEase.Linear });
-        return compiled.Success?ItemMotionCollisionLayers.Compile(compiled.Value!):compiled;
+        return compiled.Success?CompileOrientation(compiled.Value!):compiled;
     }
 
+    private static ItemMotionResult<MotionPathPlan> CompileOrientation(MotionPathPlan p)
+    {
+        try { return ItemMotionCollisionLayers.Compile(ItemMotionAuthoring.LookAt(p)); }
+        catch(InvalidOperationException e){return ItemMotionResult<MotionPathPlan>.Fail(ItemMotionStatus.Invalid,e.Message);}
+    }
     public static MotionPathRotation Lerp(MotionPathRotation a, MotionPathRotation b, float t) => new(a.Yaw + (b.Yaw-a.Yaw)*t, a.Pitch + (b.Pitch-a.Pitch)*t, a.Roll + (b.Roll-a.Roll)*t);
 
     /// <summary>Show effective timings on the original editable route, without replacing its points.</summary>
