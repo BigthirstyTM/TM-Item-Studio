@@ -23,6 +23,7 @@
     "test:long-motion-path": "node long-motion-path.cjs",
     "test:searchable-materials": "node searchable-materials.cjs",
     "test:model-route": "node model-route-unit.cjs && node model-route.cjs",
+    "test:path-authoring-project": "node path-authoring-project.cjs",
     "test:editor-workflow": "node editor-workflow.cjs"
   },
   "devDependencies": {

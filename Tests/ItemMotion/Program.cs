@@ -15,6 +15,24 @@ int passed = 0, failed = 0;
 Gbx.LZO ??= new GBX.NET.LZO.MiniLZO();
 Console.WriteLine("Bundled parser SHA256: " + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(Gbx).Assembly.Location))).ToLowerInvariant());
 
+Check("Bezier samples cubic handles and enforces native route limits",()=>{
+ var handles=new[]{new BezierHandle(Vector3.Zero,new(0,0,10)),new BezierHandle(new(0,0,10),Vector3.Zero)};
+ var settings=new BezierSettings(true,2,true,handles);
+ var p=ItemMotionAuthoring.Bezier([Vector3.Zero,new(10,0,0)],settings,MotionPathUse.Scenery,MotionPathRepeat.Reset,5,KC.AnimEase.Linear,0,0,64);
+ Require(p.Success,p.Reason??"Bezier failed");Vector(p.Value!.Legs[0].Delta,new(5,0,7.5f));Vector(p.Value.Legs.Aggregate(Vector3.Zero,(a,l)=>a+l.Delta),new(10,0,0));
+ Require(!ItemMotionAuthoring.Bezier([Vector3.Zero,new(10,0,0)],settings,MotionPathUse.Scenery,MotionPathRepeat.Reset,5,KC.AnimEase.Linear,100,0,64).Success,"pauses on samples accepted");
+ var points=Enumerable.Range(0,20).Select(i=>new Vector3(i*10,0,i%2*10)).ToArray();
+ Require(!ItemMotionAuthoring.Bezier(points,new(true,16,true,points.Select(_=>new BezierHandle(Vector3.Zero,Vector3.Zero)).ToArray()),MotionPathUse.Scenery,MotionPathRepeat.Reset,1,KC.AnimEase.Linear,0,0,64).Success,"Bezier exceeded 128 legs");
+});
+Check("look-at compiles fixed targets into native orientation and shifted followers",()=>{
+ var p=ItemMotionPath.Plan([Vector3.Zero,new(10,0,0)],MotionPathUse.Scenery,MotionPathRepeat.PingPong,5,KC.AnimEase.Linear).Value! with{LookAtTarget=new Vector3(0,0,10)};
+ var compiled=ItemMotionPathProfile.Compile(p);Require(compiled.Success,compiled.Reason??"look-at");Near(compiled.Value!.Rotations![0].Yaw,-90);Near(compiled.Value.Rotations[1].Yaw,-135);
+ var moved=ItemMotionAuthoring.LookAt(compiled.Value with{Start=new(0,10,0)});Near(moved.Rotations![0].Pitch,-45);
+ var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
+ var built=ItemMotionPath.Build(source,p);Require(built.Success,built.Reason??"look-at export");using var stream=new MemoryStream();new Gbx<CPlugPrefab>(built.Value!).Save(stream);stream.Position=0;Require(Gbx.Parse<CPlugPrefab>(stream).Node.Ents.Length>2,"look-at export missing drivers");
+ Require(!ItemMotionPathProfile.Compile(p with{LookAtTarget=Vector3.Zero}).Success,"coincident target accepted");
+ Require(!ItemMotionPath.Validate(p with{LookAtTarget=new(float.NaN,0,0)}).Success,"nonfinite target accepted");
+});
 Check("three or more followers survive near-boundary delay splits",()=>{
  var source=(CPlugPrefab)KinematicTemplate().EntityModel!;source.Ents[0].Rotation=Quat.Identity;((CPlugDynaObjectModel)source.Ents[0].Model!).Mesh=RelaySolid();
  foreach(var use in new[]{MotionPathUse.Scenery,MotionPathUse.CollisionRelay}) {

@@ -10,7 +10,7 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         await page.goto(process.env.STUDIO_BASE_URL || 'http://127.0.0.1:5183/', { waitUntil: 'networkidle' });
-        await page.locator('input[type=file]').first().setInputFiles({ name: 'typed.Item.Gbx', mimeType: 'application/octet-stream', buffer: syntheticItem });
+        await page.locator('#item-upload').setInputFiles({ name: 'typed.Item.Gbx', mimeType: 'application/octet-stream', buffer: syntheticItem });
         await page.waitForFunction(() => typeof renderer !== 'undefined' && renderer?.domElement.isConnected);
         const results = await page.evaluate(() => {
             dispose3DViewer();

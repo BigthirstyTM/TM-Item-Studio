@@ -1,0 +1,61 @@
+@using System.Numerics
+@using TM_Item_Studio.Models
+@inject IJSRuntime JS
+<details class="border rounded p-2 mb-2" data-testid="bezier-editor">
+ <summary class="fw-bold">Bezier handles</summary>
+ <label class="small d-block mt-2"><input aria-label="Enable Bezier handles" type="checkbox" checked="@Bezier.Enabled" @onchange="e=>Configure(e.Value is true,Bezier.Detail,Bezier.Linked)" /> Shape the route with handles</label>
+ <label class="small d-block"><input aria-label="Linked Bezier handles" type="checkbox" checked="@Bezier.Linked" @onchange="e=>Configure(Bezier.Enabled,Bezier.Detail,e.Value is true)" /> Link incoming and outgoing handles</label>
+ <label class="small d-block">Curve samples per segment<select class="form-select form-select-sm" aria-label="Bezier detail" value="@Bezier.Detail" @onchange="e=>Configure(Bezier.Enabled,int.Parse(e.Value!.ToString()!),Bezier.Linked)">@foreach(var detail in new[]{2,4,8,16}){<option value="@detail">@detail</option>}</select></label>
+ <button class="btn btn-sm btn-outline-secondary mt-1" @onclick="ResetHandles">Reset handles to automatic tangents</button>
+ <p class="small text-muted mt-2 mb-0">Drag purple/cyan handles in the viewport. Use Top, Front or Side to choose the editing plane. Changes preview on release. Export uses sampled straight segments (maximum 128); reduce detail or speed if timing is too short. Bezier replaces corner smoothing and requires zero waypoint pauses.</p>
+</details>
+@if(Plan is not null){
+<details class="border rounded p-2 mb-2" data-testid="look-at-editor">
+ <summary class="fw-bold">Look-at target</summary>
+ <label class="small d-block mt-2"><input aria-label="Enable look-at target" type="checkbox" checked="@(Plan.LookAtTarget is not null)" @onchange="e=>Target(e.Value is true)" /> Face a fixed world-space target</label>
+ <div class="row g-1">
+  <div class="col-4"><label class="small">X<input aria-label="Look-at X" class="form-control form-control-sm" type="number" @bind="x" @bind:after="UpdateTarget" /></label></div>
+  <div class="col-4"><label class="small">Y<input aria-label="Look-at Y" class="form-control form-control-sm" type="number" @bind="y" @bind:after="UpdateTarget" /></label></div>
+  <div class="col-4"><label class="small">Z<input aria-label="Look-at Z" class="form-control form-control-sm" type="number" @bind="z" @bind:after="UpdateTarget" /></label></div>
+ </div>
+ <button class="btn btn-sm btn-outline-secondary mt-1" @onclick="SelectionTarget">Use selected mesh / reference centre</button>
+ <p class="small text-muted mt-2 mb-0">Local +X faces the yellow target. Yaw/pitch are baked at route samples and interpolated; roll is retained. More route samples improve accuracy. The target stays fixed in item coordinates, not attached to another in-game object. Collision rotation retains its experimental limits.</p>
+</details>
+<details class="border rounded p-2 mb-2" data-testid="clearance-editor">
+ <summary class="fw-bold">Clearance &amp; overlap check</summary>
+ <label class="small d-block mt-2">Margin: @margin.ToString("0.00") m<input aria-label="Clearance margin" type="range" class="form-range" min="-2" max="10" step="0.05" @bind="margin" @bind:after="MarginChanged" /></label>
+ <small class="text-muted">Positive: keep extra space. Zero: flag contact. Negative: shrink the tested envelope to tolerate limited overlap.</small>
+ <label class="small d-block mt-1">Samples over one loop<select class="form-select form-select-sm" aria-label="Clearance samples" @bind="samples" @bind:after="StoreClearance">@foreach(var n in new[]{16,32,64,128,256}){<option value="@n">@n</option>}</select></label>
+ <button disabled="@checking" class="btn btn-sm btn-outline-primary mt-2" @onclick="Check">@(checking?"Checking…":"Check full route")</button>
+ <p class="small text-muted mt-2">Checks every follower against other followers and the selected reference part. Red markers show possible conflicts. Uses world-aligned visual bounds and discrete time samples: empty space inside a model can cause warnings, and motion between samples can be missed. Negative margins describe envelope overlap, not exact collision penetration. This is not an in-game physics test.</p>
+ @if(report is not null){<div role="status" class="small">Last check: @report.Count possible conflicts across @report.Samples time samples. Recheck after changing the route, model or reference.</div>
+ <div style="max-height:12rem;overflow:auto">@foreach(var issue in report.Issues.Take(30)){<button class="btn btn-sm btn-outline-secondary m-1" @onclick="()=>Seek(issue.Time)">@(issue.Time/1000d)s · copy @issue.Copy / @issue.Other</button>}</div>}
+</details>
+}
+@if(error is not null){<p role="alert" class="small text-danger">@error</p>}
+@code{
+ [Parameter]public int Revision{get;set;}
+ private int lastRevision=-1;
+ protected override async Task OnAfterRenderAsync(bool firstRender){if(lastRevision==Revision)return;lastRevision=Revision;var state=await JS.InvokeAsync<ClearanceSettings>("getClearanceSettings");margin=state.Margin;samples=state.Samples;StateHasChanged();}
+ public sealed record ClearanceSettings(float Margin,int Samples);
+ [Parameter]public MotionPathPlan? Plan{get;set;}
+ [Parameter]public BezierSettings Bezier{get;set;}=new();
+ [Parameter]public EventCallback BezierChanged{get;set;}
+ [Parameter]public EventCallback<MotionPathPlan> Changed{get;set;}
+ [Parameter]public EventCallback EnsurePreview{get;set;}
+ private float x=10,y=5,z,margin=.2f;private int samples=64;private bool checking;private string? error;private ClearanceReport? report;
+ public sealed record ClearanceIssue(int Time,int Copy,string Other);
+ public sealed record ClearanceReport(int Count,int Samples,ClearanceIssue[] Issues);
+ protected override void OnParametersSet(){if(Plan?.LookAtTarget is {} target){x=target.X;y=target.Y;z=target.Z;}}
+ private async Task Run(Func<Task> action){error=null;try{await action();}catch(Exception ex){error=ex.Message;}}
+ private Task Configure(bool enabled,int detail,bool linked)=>Run(async()=>{await JS.InvokeVoidAsync("configureBezier",enabled,detail,linked);await BezierChanged.InvokeAsync();});
+ private Task ResetHandles()=>Run(async()=>{await JS.InvokeVoidAsync("resetBezierHandles");await BezierChanged.InvokeAsync();});
+ private Task Target(bool enabled)=>Run(async()=>{if(Plan is not null)await Changed.InvokeAsync(Plan with{LookAtTarget=enabled?new Vector3(x,y,z):null});});
+ private Task UpdateTarget()=>Plan?.LookAtTarget is not null?Target(true):Task.CompletedTask;
+ private Task SelectionTarget()=>Run(async()=>{var p=await JS.InvokeAsync<TargetPoint>("getLookAtSelection");x=p.X;y=p.Y;z=p.Z;await Target(true);});
+ public sealed record TargetPoint(float X,float Y,float Z);
+ private async Task StoreClearance()=>await JS.InvokeVoidAsync("configureClearance",margin,samples);
+ private async Task MarginChanged(){await StoreClearance();if(report is not null)await Check();}
+ private Task Check()=>Run(async()=>{checking=true;try{await EnsurePreview.InvokeAsync();report=await JS.InvokeAsync<ClearanceReport>("checkPathClearance",margin,samples);}finally{checking=false;}});
+ private async Task Seek(int time){await EnsurePreview.InvokeAsync();await JS.InvokeVoidAsync("seekDrawPathPreview",time);}
+}

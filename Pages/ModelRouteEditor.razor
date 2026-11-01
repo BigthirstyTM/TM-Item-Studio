@@ -30,6 +30,10 @@
  @if(error is not null){<div class="small text-danger" role="alert">@error</div>}
 </details>
 @code {
+ [Parameter]public int Revision{get;set;}
+ private int lastRevision=-1;
+ protected override async Task OnAfterRenderAsync(bool firstRender){if(lastRevision==Revision)return;lastRevision=Revision;var state=await JS.InvokeAsync<ReferenceUi>("getRouteReferenceUi");parts=state.Parts;part=state.Part;x=state.X;y=state.Y;z=state.Z;drawing=state.Drawing;StateHasChanged();}
+ public sealed record ReferenceUi(string[] Parts,string Part,float X,float Y,float Z,bool Drawing);
  [Parameter]public EventCallback Changed{get;set;}
  [Parameter]public EventCallback<bool> Generated{get;set;}
  [Parameter]public EventCallback StartDrawing{get;set;}

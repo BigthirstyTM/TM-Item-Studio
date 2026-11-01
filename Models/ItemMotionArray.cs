@@ -113,6 +113,7 @@ public static class ItemMotionArray
             foreach(var instance in Instances(p)){
                 var route=Shift(p,instance.DelayMs) with{Array=null};
                 route=route with{Start=route.Start+instance.Offset,Parts=route.Parts?.Select(part=>part with{Pivot=part.Pivot*instance.Scale,Radius=part.Radius*instance.Scale,Reverse=part.Reverse^(instance.ReverseWings&&part.Kind==MotionPartKind.Wing)}).ToArray()};
+                route=ItemMotionAuthoring.LookAt(route);
                 var scaled=Clone(source);Scale((CPlugDynaObjectModel)scaled.Ents.Single(e=>e.Model is CPlugDynaObjectModel).Model!,instance.Scale,p.Use==MotionPathUse.CollisionRelay);
                 var built=ItemMotionPathPose.Build(scaled,route,anchor*instance.Scale);
                 if(!built.Success)return built;result??=built.Value!;

@@ -28,8 +28,8 @@ const syntheticItem = Buffer.from('R0JYBgBCVUNSACAALgAAAAABAAAAAAAAAAQAAAAIAAAAF
             window.cancelAnimationFrame = id => { testCancelledFrames.add(id); return cancel(id); };
         });
         await page.goto(process.env.STUDIO_BASE_URL || 'http://127.0.0.1:5183/', { waitUntil: 'networkidle' });
-        const input = page.locator('input[type=file]').first();
-        await input.waitFor();
+        const input = page.locator('#item-upload');
+        await input.waitFor({state:'attached'});
         const baselineHandlers = await page.evaluate(() => testResizeHandlers.size);
         await input.setInputFiles({ name: 'first.Item.Gbx', mimeType: 'application/octet-stream', buffer: syntheticItem });
         await page.waitForFunction(() => typeof renderer !== 'undefined' && renderer?.domElement.isConnected);
