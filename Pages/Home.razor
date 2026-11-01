@@ -253,71 +253,23 @@
         <!-- ================= RECHTERKOLOM: TABBED INSPECTOR ================= -->
         <div class="studio-inspector">
             
-            <div class="studio-inspector-tabs p-2 bg-light border-bottom">
-                <div>
-                    <button aria-label="Item Identification & Collector Metadata" aria-expanded="@((activeTab == "general").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "general" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("general"))">
-                        <span>Identity</span><span>@(activeTab == "general" ? "−" : "+")</span>
-                    </button>
+            <nav class="studio-workflow-nav p-2 border-bottom" aria-label="Item editing workflow">
+                <div class="studio-inspector-tabs">
+                    @foreach (var section in EditorSections.Where(s => s.Primary))
+                    {
+                        <button aria-label="@section.AccessibleName" aria-expanded="@((activeTab==section.Key).ToString().ToLowerInvariant())"
+                                class="btn btn-sm text-start @(activeTab==section.Key ? "btn-primary" : "btn-outline-secondary")"
+                                @onclick="()=>ToggleTab(section.Key)">@section.Label</button>
+                    }
                 </div>
-                <div>
-                    <button aria-label="Placement Parameters & PivotPositions" aria-expanded="@((activeTab == "placement").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "placement" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("placement"))">
-                        <span>Placement & pivots</span><span>@(activeTab == "placement" ? "−" : "+")</span>
-                    </button>
-                </div>
-                <div>
-                    <button aria-label="WaypointType, Gameplay & Kinematics" aria-expanded="@((activeTab == "gameplay").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "gameplay" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("gameplay"))">
-                        <span>Kinematics</span><span>@(activeTab == "gameplay" ? "−" : "+")</span>
-                    </button>
-                </div>
-                <div>
-                    <button aria-label="@($"Dynamic Real-Time Lights ({detectedLights.Count})")" aria-expanded="@((activeTab == "lights").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "lights" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("lights"))">
-                        <span>Lights (@detectedLights.Count)</span><span>@(activeTab == "lights" ? "−" : "+")</span>
-                    </button>
-                </div>
-                <div>
-                    <button aria-label="Socket authoring capability (read-only)" aria-expanded="@((activeTab == "sockets").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "sockets" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("sockets"))">
-                        <span>Sockets</span><span>@(activeTab == "sockets" ? "−" : "+")</span>
-                    </button>
-                </div>
-                <div>
-                    <button aria-label="PhyModel, CPlugSurface & Collision" aria-expanded="@((activeTab == "physics").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "physics" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("physics"))">
-                        <span>Collision</span><span>@(activeTab == "physics" ? "−" : "+")</span>
-                    </button>
-                </div>
-                <div>
-                    <button aria-label="VisModel, Materials & LOD" aria-expanded="@((activeTab == "visual").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "visual" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("visual"))">
-                        <span>Materials & LOD</span><span>@(activeTab == "visual" ? "−" : "+")</span>
-                    </button>
-                </div>
-                @if (CanCombineFiles)
-                {
-                    <div>
-                        <button aria-label="Composite world transforms and group motion"
-                                aria-expanded="@((activeTab == "composite").ToString().ToLowerInvariant())"
-                                class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "composite" ? "btn-primary" : "btn-outline-secondary")"
-                                @onclick="@(() => ToggleTab("composite"))">
-                            <span>Composite transforms</span><span>@(activeTab == "composite" ? "−" : "+")</span>
-                        </button>
-                    </div>
-                }
-                <div>
-                    <button aria-label="Audio, CPlugFx & MediaTracker Triggers" aria-expanded="@((activeTab == "extras").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "extras" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("extras"))">
-                        <span>Audio & effects</span><span>@(activeTab == "extras" ? "−" : "+")</span>
-                    </button>
-                </div>
-                <div>
-                    <button aria-label="Macroblock export and item instancing" aria-expanded="@((activeTab == "macroblock").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "macroblock" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("macroblock"))">
-                        <span>Macroblock & instances (@macroblockInstances.Count)</span><span>@(activeTab == "macroblock" ? "−" : "+")</span>
-                    </button>
-                </div>
-                <div>
-                    <button aria-label="Flag item conversion" aria-expanded="@((activeTab == "flag").ToString().ToLowerInvariant())" class="btn btn-sm text-start d-flex justify-content-between align-items-center @(activeTab == "flag" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ToggleTab("flag"))">
-                        <span>Flag item</span><span>@(activeTab == "flag" ? "−" : "+")</span>
-                    </button>
-                </div>
-            </div>
+                <SearchableSelect Label="Editing section" SearchPlaceholder="Search tools: lights, effects, flags?" Options="EditorSections.Select(s=>s.Label)" Value="@CurrentEditorSection.Label" ValueChanged="SelectEditorSection" Placeholder="Choose an editing section" />
+            </nav>
 
             <div class="studio-inspector-content p-3" style="overflow-y: auto; flex-grow: 1; font-size: 0.9em;">
+                <div class="studio-section-intro mb-3" data-testid="editing-section-intro">
+                    <strong>@CurrentEditorSection.Label</strong>
+                    <p class="small text-muted mb-0">@CurrentEditorSection.Description</p>
+                </div>
                 @if (SelectedSource?.IsReadOnly == true)
                 {
                     <div class="alert alert-info small" role="status"><strong>Vanilla asset preview</strong><p class="mb-0 text-break">@SelectedSource.PreviewDescription</p><p class="mb-0">Mesh parts: @modelParts.Count · Materials: @detectedMaterials.Count. Original file retained unchanged.</p></div>
@@ -329,7 +281,7 @@
                 
                 @if (activeTab == "general" && SelectedSource?.IsReadOnly != true)
                 {
-                    <h6 class="border-bottom pb-1 text-primary">1. Ident (Id, Author, Collection) <span class="text-muted" title="Defines the item's internal ID, author and context collection.">?</span></h6>
+                    <h6 class="border-bottom pb-1 text-primary">Identity &amp; icon <span class="text-muted" title="Defines the item's internal ID, author and context collection.">?</span></h6>
                     <div class="mb-2">
                         <label for="ident-id" class="form-label mb-0 fw-bold" data-help-key="identidfilename">Ident.Id / File name</label>
                         <input id="ident-id" type="text" class="form-control form-control-sm" @bind="identId" @bind:after="UpdateIdent" />
@@ -452,7 +404,7 @@
 
                 @if (activeTab == "placement")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">2. CGameItemPlacementParam <span class="text-muted" title="Controls placement, snapping and PivotPositions in the Trackmania editor.">?</span></h6>
+                    <h6 class="border-bottom pb-1 text-primary">Placement &amp; pivots <span class="text-muted" title="Controls placement, snapping and PivotPositions in the Trackmania editor.">?</span></h6>
                     @if (itemModel.DefaultPlacement != null)
                     {
                         <div class="row g-2 mb-2">
@@ -696,7 +648,8 @@
                         </select>
                     </div>
 
-                    <h6 class="border-bottom pb-1 text-primary">@(authoredConstraints.Count > 0 ? "Kinematic controls" : "Motion capability")</h6>
+                    <h6 class="border-bottom pb-1 text-primary">Build and refine motion</h6>
+                    <p class="small text-muted">Create or load a route, refine timing and orientation, then add followers or moving parts. Preview stays below the viewport; Apply writes the motion to the item.</p>
                     <div class="@(authoredConstraints.Count > 0 ? "authored-motion-shell" : "card p-3 bg-light mb-3")">
                         <details class="card p-2 mb-3" data-testid="draw-motion-path">
                             <summary class="fw-bold">Draw motion path</summary>
@@ -1216,7 +1169,7 @@
 
                 @if (activeTab == "physics")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">PhyModel, CPlugSurface & Collision <span class="text-muted" title="These nodes define collision, physics surfaces and vehicle interaction.">?</span></h6>
+                    <h6 class="border-bottom pb-1 text-primary">Collision &amp; surface properties <span class="text-muted" title="These nodes define collision, physics surfaces and vehicle interaction.">?</span></h6>
                     <div class="alert @(CollisionInventory.Count > 0 ? "alert-success" : "alert-secondary") small">
                         @(CollisionInventory.Count > 0
                             ? $"Collision inventory: {CollisionInventory.Count} entr{(CollisionInventory.Count == 1 ? "y" : "ies")} found in this item."
@@ -1244,7 +1197,7 @@
 
                 @if (activeTab == "visual")
                 {
-                    <h6 class="border-bottom pb-1 text-primary">VisModel, Materials & LOD <span class="text-muted" title="Visual geometry, materials, UV data and LOD nodes belong to the visual model.">?</span></h6>
+                    <h6 class="border-bottom pb-1 text-primary">Model parts, materials &amp; detail <span class="text-muted" title="Visual geometry, materials, UV data and LOD nodes belong to the visual model.">?</span></h6>
                     <div class="row g-2 mb-2">
                         <div class="col-6"><div class="card bg-light p-2 small"><strong>Visual geometry</strong><br />@vertexCount vertices</div></div>
                         <div class="col-6"><div class="card bg-light p-2 small"><strong>LOD</strong><br />@(HasNode("LOD", "Lod") ? "Present" : "Not found")</div></div>
@@ -4090,10 +4043,31 @@ else if (itemModel is null)
         }
     }
 
+    private sealed record EditorSection(string Key,string Label,string AccessibleName,string Description,bool Primary=false);
+    private IEnumerable<EditorSection> EditorSections => new EditorSection[] {
+        new("general","1. Identity & icon","Item Identification & Collector Metadata","Set the item name, author and icon before export.",true),
+        new("visual","2. Model & materials","VisModel, Materials & LOD","Inspect parts, choose materials and textures, then adjust UVs and detail.",true),
+        new("placement","3. Placement & pivots","Placement Parameters & PivotPositions","Choose how the item snaps, rotates and anchors in the Trackmania editor.",true),
+        new("physics","4. Collision","PhyModel, CPlugSurface & Collision","Review collision geometry and surface behaviour before adding movement.",true),
+        new("gameplay","5. Motion & paths","WaypointType, Gameplay & Kinematics","Create the route, refine speed and rotation, then add groups and animation layers.",true),
+        new("lights","Lights & atmosphere","Lights","Adjust existing lights after the model and its motion are ready."),
+        new("extras","Audio & effects","Effects","Inspect and configure supported effects and sound references."),
+        new("macroblock","Instances & macroblocks","Instances","Arrange static copies and export them as a macroblock or combined item."),
+        new("composite","Combine items & groups","Composite","Position and group loaded items before merging them."),
+        new("flag","Flag tools","Flags","Convert compatible models to flag items and configure flag-specific properties."),
+        new("sockets","Sockets (inspection)","Sockets","Inspect attachment points; socket authoring is currently read-only.")
+    }.Where(s=>(s.Key!="composite"||CanCombineFiles) && (SelectedSource?.IsReadOnly!=true || s.Key is "general" or "visual" or "extras"));
+    private EditorSection CurrentEditorSection => EditorSections.FirstOrDefault(s=>s.Key==activeTab) ?? EditorSections.First();
+    private Task SelectEditorSection(ChangeEventArgs e)
+    {
+        var section=EditorSections.FirstOrDefault(s=>s.Label==e.Value?.ToString());
+        if(section is not null)ToggleTab(section.Key);
+        return Task.CompletedTask;
+    }
     private void ToggleTab(string tab)
     {
         if (SelectedSource?.IsReadOnly == true && tab is not ("model" or "general" or "visual" or "extras")) return;
-        activeTab = activeTab == tab ? string.Empty : tab;
+        activeTab = tab;
     }
 
     private async Task ToggleHelperMode()

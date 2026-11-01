@@ -1,6 +1,6 @@
 <div class="searchable-select">
     <input type="search" class="form-control form-control-sm mb-1" aria-label="@($"Search {Label}")" data-helper="Filter choices by name or full path. Your current selection is retained until you choose another option."
-           placeholder="Search by name or full path…" disabled="@Disabled" @bind="query" @bind:event="oninput" />
+           placeholder="@SearchPlaceholder" disabled="@Disabled" @bind="query" @bind:event="oninput" />
     <select id="@Id" class="form-select form-select-sm" aria-label="@Label" data-helper="Choose a matching entry. Use the search field above to narrow the list." disabled="@Disabled" value="@Value" @onchange="Changed">
         <option value="">@Placeholder</option>
         @if (!string.IsNullOrEmpty(Value) && !Visible.Contains(Value, StringComparer.OrdinalIgnoreCase))
@@ -27,6 +27,7 @@
     [Parameter] public IEnumerable<string> Options { get; set; } = [];
     [Parameter] public string Value { get; set; } = "";
     [Parameter] public string Label { get; set; } = "Option";
+    [Parameter] public string SearchPlaceholder { get; set; } = "Search by name or full path?";
     [Parameter] public string Placeholder { get; set; } = "Choose an option…";
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public EventCallback<ChangeEventArgs> ValueChanged { get; set; }
