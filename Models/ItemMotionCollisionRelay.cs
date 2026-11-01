@@ -38,7 +38,10 @@ public static class ItemMotionCollisionRelay
                 var leg = plan.Legs[i];
                 var x = Vector3.Normalize(leg.Delta);
                 var cross = Vector3.Cross(x, Vector3.UnitY);
-                if (cross.Length() < .05f) return Fail("Experimental collision paths cannot use vertical or near-vertical segments.");
+                if (cross.Length() < .05f) {
+                    if(plan.Use!=MotionPathUse.Scenery) return Fail("Experimental collision paths cannot use vertical or near-vertical segments.");
+                    cross=Vector3.Cross(x,Vector3.UnitZ);
+                }
                 var z = Vector3.Normalize(cross); var y = Vector3.Cross(z, x);
                 var rotation = Quaternion.CreateFromRotationMatrix(new Matrix4x4(x.X,x.Y,x.Z,0,y.X,y.Y,y.Z,0,z.X,z.Y,z.Z,0,0,0,0,1));
                 var inverse = Quaternion.Inverse(rotation);

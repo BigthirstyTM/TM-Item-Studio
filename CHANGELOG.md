@@ -2,6 +2,13 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.11] - 2026-11-01
+
+- Eight additional movement presets: lift/platform, cable car, drone/helicopter, fish, butterfly, robot, spinning ride and conveyor. Station presets stop smoothly and wait at route points; sway presets add geometry samples when needed.
+- Save named custom movement templates locally, search by category/name, import/export JSON and adapt profiles by relative route distance. Optionally restore the complete route and explicitly reuse part mappings.
+- Vertical scenery carriers support lift routes; vertical collision relay remains refused.
+- Fourteen procedural demo models, browser exports, one embedded native showcase map and a 53-second in-game compilation. See `docs/template-library-showcase-2026-11-01.md`.
+
 ## [0.5.10] - 2026-11-01
 
 - Movement templates for rollercoasters, birds, cars, boats and trains, with editable speeds, braking, corner banking and a marked coaster lift. Coaster speed carries momentum between segments, gains speed downhill and loses it uphill.

@@ -8,7 +8,7 @@
         <div class="col-6"><label class="small">@(settings.Kind==MotionBehaviorKind.Rollercoaster?"Starting speed (open route)":"Cruising speed") m/s<input aria-label="Template speed" class="form-control form-control-sm" type="number" step="0.5" @bind="speed" /></label></div>
         <div class="col-6"><label class="small">Maximum speed m/s<input aria-label="Template maximum speed" class="form-control form-control-sm" type="number" step="1" @bind="maximum" /></label></div>
         <div class="col-6"><label class="small">Minimum speed m/s<input aria-label="Template minimum speed" class="form-control form-control-sm" type="number" step="0.1" @bind="minimum" /></label></div>
-        <div class="col-6"><label class="small">Braking m/s²<input aria-label="Template braking" class="form-control form-control-sm" type="number" step="0.1" @bind="braking" /></label></div>
+        @if(!Stations) { <div class="col-6"><label class="small">Braking m/s²<input aria-label="Template braking" class="form-control form-control-sm" type="number" step="0.1" @bind="braking" /></label></div> }
     </div>
     @if(settings.Kind==MotionBehaviorKind.Rollercoaster)
     {
@@ -25,11 +25,22 @@
             <div class="small">Last lift segment</div><SearchableSelect Label="Last lift segment" Options="Segments" Value="@Segments[liftTo]" ValueChanged="e=>SetLift(e,false)" />
         }
     }
-    else {
+    else if(!Stations) {
         <label class="small d-block mt-2">Cornering / acceleration limit m/s²<input aria-label="Template corner acceleration" class="form-control form-control-sm" type="number" step="0.5" @bind="corner" /></label>
         @if(settings.Kind==MotionBehaviorKind.CarBody) { <p class="small text-muted">Car body follows the road, brakes for corners and leans slightly outward. Wheel animation requires separate wheel meshes; this whole-item template does not identify or split wheels automatically.</p> }
         @if(settings.Kind==MotionBehaviorKind.BirdFlight) { <p class="small text-muted">Flight direction and banking apply to the whole bird. Wing flapping needs separate wings and hinge pivots; a fused mesh cannot flap independently.</p> }
     }
+    @if(settings.Kind is MotionBehaviorKind.LiftPlatform or MotionBehaviorKind.Conveyor or MotionBehaviorKind.Drone) {
+        <label class="small d-block">Wait at each route point (ms)<input aria-label="Template station wait" type="number" min="0" max="60000" class="form-control form-control-sm" @bind="stopMs" /></label>
+        <p class="small text-muted">Smooth start/stop at every point. Use Ping-pong for a return journey. This preset replaces speed curves with station timing.</p>
+    }
+    @if(settings.Kind is MotionBehaviorKind.CableCar or MotionBehaviorKind.Fish or MotionBehaviorKind.Butterfly or MotionBehaviorKind.Robot or MotionBehaviorKind.Ride) {
+        <label class="small d-block">Sway amplitude (degrees)<input aria-label="Template sway" type="number" min="0" max="60" class="form-control form-control-sm" @bind="sway" /></label>
+        <label class="small d-block">Sway cycles per route<input aria-label="Template cycles" type="number" min="1" max="16" class="form-control form-control-sm" @bind="cycles" /></label>
+        <p class="small text-muted">Sway adds samples along existing segments when needed, within the 128-segment limit. It does not round corners. Independent legs, tails and rotors are configured under Separate moving parts.</p>
+    }
+    @if(settings.Kind==MotionBehaviorKind.Ride) { <label class="small d-block">Cabin turns per loop<input aria-label="Template turns" type="number" min="-20" max="20" class="form-control form-control-sm" @bind="turns" /></label> }
+    @if(!Stations) {
     <details class="my-2"><summary class="small">Orientation &amp; smoothness</summary>
         <label class="small d-block">Bank strength (negative = outward)<input aria-label="Template bank strength" class="form-control form-control-sm" type="number" min="-3" max="3" step="0.1" @bind="bank" /></label>
         <label class="small d-block">Maximum bank degrees<input aria-label="Template maximum bank" class="form-control form-control-sm" type="number" min="0" max="85" @bind="maxBank" /></label>
@@ -38,27 +49,29 @@
         @if(Plan.Use==MotionPathUse.Scenery) { <p class="small text-info">Scenery templates use continuous acceleration inside each segment, so no extra speed samples are needed. You can switch back to sampled ramps in the speed-curve settings.</p> }
         <p class="small text-muted">Higher detail requests more ramp samples, within 128 segments and 80 ms per segment. It does not round the geometry: use the separate Smooth path tool for rounded corners. More samples increase animation data and runtime work. The visible mesh is shared in rotating scenery; collision shapes are duplicated per relay segment.</p>
     </details>
+    }
     <button class="btn btn-sm btn-primary" @onclick="Apply">Apply movement template</button>
     @if(error is not null) { <p class="small text-danger" role="alert">@error</p> }
 </details>
 @code {
     [Parameter,EditorRequired] public MotionPathPlan Plan {get;set;}=default!;
     [Parameter] public EventCallback<MotionPathPlan> Changed {get;set;}
-    private static readonly string[] Names=["Rollercoaster · lift & gravity","Bird · flight & banking","Car · road & cornering","Boat · level & banking","Train · gentle cornering"];
+    private static readonly string[] Names=["Rollercoaster · lift & gravity","Bird · flight & banking","Car · road & cornering","Boat · level & banking","Train · gentle cornering","Lift / platform - stations","Cable car - upright & sway","Drone / helicopter - hover stops","Fish - swimming","Butterfly - fluttering","Robot - walking sway","Ride - spinning cabin","Conveyor - workstations"];
     private MotionBehaviorSettings settings=new();
     private MotionBehaviorSettings? loaded;
     private bool initialized,lift,followSlope;
-    private int liftFrom,liftTo,detail;
-    private float speed,minimum,maximum,gravity,resistance,liftSpeed,braking,corner,bank,maxBank;
+    private int liftFrom,liftTo,detail,stopMs,cycles,turns;
+    private float speed,minimum,maximum,gravity,resistance,liftSpeed,braking,corner,bank,maxBank,sway;
+    private bool Stations=>settings.Kind is MotionBehaviorKind.LiftPlatform or MotionBehaviorKind.Conveyor or MotionBehaviorKind.Drone;
     private string? error;
     private string[] Segments=>Enumerable.Range(1,Plan.Legs.Count).Select(i=>$"Segment {i}").ToArray();
     protected override void OnParametersSet() {
         if(!initialized || Plan.Behavior!=loaded){Load(Plan.Behavior??new());loaded=Plan.Behavior;initialized=true;}
         liftFrom=Math.Clamp(liftFrom,0,Plan.Legs.Count-1);liftTo=Math.Clamp(liftTo,0,Plan.Legs.Count-1);
     }
-    private void Load(MotionBehaviorSettings s){settings=s;speed=s.Speed;minimum=s.MinimumSpeed;maximum=s.MaximumSpeed;gravity=s.Gravity;resistance=s.Resistance;liftSpeed=s.LiftSpeed;braking=s.Braking;corner=s.CornerAcceleration;bank=s.BankStrength;maxBank=s.MaximumBank;followSlope=s.FollowSlope;detail=s.Detail;lift=s.LiftFrom>=0;liftFrom=Math.Max(0,s.LiftFrom);liftTo=Math.Max(0,s.LiftTo);}
+    private void Load(MotionBehaviorSettings s){settings=s;stopMs=s.StopMs;sway=s.SwayDegrees;cycles=s.Cycles;turns=s.Turns;speed=s.Speed;minimum=s.MinimumSpeed;maximum=s.MaximumSpeed;gravity=s.Gravity;resistance=s.Resistance;liftSpeed=s.LiftSpeed;braking=s.Braking;corner=s.CornerAcceleration;bank=s.BankStrength;maxBank=s.MaximumBank;followSlope=s.FollowSlope;detail=s.Detail;lift=s.LiftFrom>=0;liftFrom=Math.Max(0,s.LiftFrom);liftTo=Math.Max(0,s.LiftTo);}
     private Task Choose(ChangeEventArgs e){int i=Array.IndexOf(Names,e.Value?.ToString());if(i>=0)Load(ItemMotionBehavior.Defaults((MotionBehaviorKind)i));return Task.CompletedTask;}
     private void DetectLift(){var range=ItemMotionBehavior.FirstLift(Plan);lift=range.From>=0;liftFrom=Math.Max(0,range.From);liftTo=Math.Max(0,range.To);error=lift?null:"No uphill section found.";}
     private Task SetLift(ChangeEventArgs e,bool first){int i=Array.IndexOf(Segments,e.Value?.ToString());if(i>=0){if(first)liftFrom=i;else liftTo=i;}return Task.CompletedTask;}
-    private async Task Apply(){var s=new MotionBehaviorSettings(settings.Kind,speed,minimum,maximum,gravity,resistance,liftSpeed,lift?liftFrom:-1,lift?liftTo:-1,braking,corner,bank,maxBank,followSlope,detail);var result=ItemMotionBehavior.Apply(Plan,s);error=result.Reason;if(result.Success)await Changed.InvokeAsync(result.Value!);}
+    private async Task Apply(){var s=new MotionBehaviorSettings(settings.Kind,speed,minimum,maximum,gravity,resistance,liftSpeed,lift?liftFrom:-1,lift?liftTo:-1,braking,corner,bank,maxBank,followSlope,detail,stopMs,sway,cycles,turns);var result=ItemMotionBehavior.Apply(Plan,s);error=result.Reason;if(result.Success)await Changed.InvokeAsync(result.Value!);}
 }

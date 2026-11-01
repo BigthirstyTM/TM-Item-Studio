@@ -1,0 +1,48 @@
+@using TM_Item_Studio.Models
+@using System.Text.Json
+@inject IJSRuntime JS
+<details class="border rounded p-2 my-2" data-testid="custom-template-library">
+ <summary class="fw-bold">My movement templates</summary>
+ <p class="small text-muted">Save the current edited profile. Profiles adapt by relative distance along another route; including the route restores the exact saved path. Stored in this browser; export JSON for a backup.</p>
+ <SearchableSelect Label="Saved movement template" Options="Labels" Value="@selected" ValueChanged="Select" />
+ <label class="small d-block">Name<input aria-label="Custom template name" maxlength="80" class="form-control form-control-sm" @bind="name" /></label>
+ <label class="small d-block">Category<input aria-label="Custom template category" maxlength="80" class="form-control form-control-sm" @bind="category" /></label>
+ <label class="small d-block">Description<input aria-label="Custom template description" maxlength="1000" class="form-control form-control-sm" @bind="description" /></label>
+ <label class="small d-block"><input type="checkbox" @bind="route" /> Include route (otherwise adapt to current route)</label>
+ <label class="small d-block"><input type="checkbox" @bind="speed" /> Include speed profile</label>
+ <label class="small d-block"><input type="checkbox" @bind="rotation" /> Include rotation and banking</label>
+ <label class="small d-block"><input type="checkbox" @bind="timing" /> Include total time, waits and pauses</label>
+ <label class="small d-block"><input type="checkbox" @bind="parts" /> Include separate part settings</label>
+ <p class="small text-muted">An included route restores its complete timing and orientation. Part indices and pivots belong to the original mesh. Review them before reusing on another model.</p>
+ <label class="small d-block"><input aria-label="Reuse saved part mapping" type="checkbox" @bind="mapParts" /> Reuse saved mesh indices and pivots on this model</label>
+ <div class="d-flex flex-wrap gap-2 my-2">
+ <button class="btn btn-sm btn-primary" @onclick="Save">Save as new template</button>
+ <button class="btn btn-sm btn-outline-primary" disabled="@(Current is null)" @onclick="Apply">Apply saved template</button>
+ <button class="btn btn-sm btn-outline-secondary" disabled="@(Current is null)" @onclick="Export">Export template JSON</button>
+ <button class="btn btn-sm btn-outline-danger" disabled="@(Current is null)" @onclick="Remove">Delete selected template</button>
+ </div>
+ <label class="small">Import template JSON<InputFile OnChange="Import" accept=".json" aria-label="Import custom template" /></label>
+ @if(message is not null){<p class="small" role="status">@message</p>}
+</details>
+@code {
+ [Parameter,EditorRequired] public MotionPathPlan Plan {get;set;}=default!;
+ [Parameter] public EventCallback<MotionPathPlan> Changed {get;set;}
+ [Parameter] public int VisualCount {get;set;}
+ private const string Key="tmis.motionTemplates.v1";
+ private List<MotionCustomTemplate> templates=[];
+ private string name="My movement",category="Custom",description="",selected="";
+ private bool route,speed=true,rotation=true,timing=true,parts,mapParts;
+ private string? message;
+ private string Label(MotionCustomTemplate t)=>$"{t.Category} / {t.Name}";
+ private string[] Labels=>templates.Select(Label).ToArray();
+ private MotionCustomTemplate? Current=>templates.FirstOrDefault(t=>Label(t)==selected);
+ protected override async Task OnAfterRenderAsync(bool first){if(!first)return;try{var json=await JS.InvokeAsync<string?>("localStorage.getItem",Key);if(json is not null){var saved=JsonSerializer.Deserialize<List<MotionCustomTemplate>>(json,ItemMotionCustomTemplate.Json)??[];templates=saved.Take(100).Where(t=>t is not null&&ItemMotionCustomTemplate.Validate(t)==null).ToList();}}catch(Exception ex)when(ex is JSException or JsonException or NotSupportedException){message="Could not read saved templates. Import your JSON backup.";}StateHasChanged();}
+ private Task Select(ChangeEventArgs e){selected=e.Value?.ToString()??"";mapParts=false;if(Current is {} t){name=t.Name;category=t.Category;description=t.Description;route=t.IncludeRoute;speed=t.IncludeSpeed;rotation=t.IncludeRotation;timing=t.IncludeTiming;parts=t.IncludeParts;}return Task.CompletedTask;}
+ private async Task Store(List<MotionCustomTemplate> next){await JS.InvokeVoidAsync("localStorage.setItem",Key,JsonSerializer.Serialize(next,ItemMotionCustomTemplate.Json));templates=next;}
+ private async Task Add(MotionCustomTemplate t){var error=ItemMotionCustomTemplate.Validate(t);if(error!=null){message=error;return;}if(templates.Count>=100){message="Maximum 100 templates. Export and remove unused templates.";return;}if(templates.Any(x=>Label(x)==Label(t))){message="That name already exists in this category. Choose a different name.";return;}try{await Store([..templates,t]);selected=Label(t);message="Template saved in this browser.";}catch(JSException){message="Browser storage is unavailable or full. Export your existing templates first.";}}
+ private Task Save()=>Add(new(name.Trim(),description,category.Trim(),Plan,route,speed,rotation,timing,parts));
+ private async Task Apply(){if(Current is not {} t)return;if(mapParts&&t.IncludeParts&&t.Profile.Parts?.Any(p=>p.VisualIndex>=VisualCount)==true){message="Saved parts do not match this model. Disable reuse and assign its parts manually.";return;}var result=ItemMotionCustomTemplate.Apply(t,Plan,mapParts);message=result.Success?"Template applied to draft. Review the preview before export.":result.Reason;if(result.Success)await Changed.InvokeAsync(result.Value!);}
+ private async Task Remove(){if(Current is not {} t)return;try{await Store(templates.Where(x=>x!=t).ToList());selected="";message="Template removed.";}catch(JSException){message="Could not update browser storage.";}}
+ private async Task Export(){if(Current is {} t)await JS.InvokeVoidAsync("downloadBinaryGbx","movement.motion-template.json",Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(t,ItemMotionCustomTemplate.Json)));}
+ private async Task Import(InputFileChangeEventArgs e){try{await using var stream=e.File.OpenReadStream(1_000_000);var t=await JsonSerializer.DeserializeAsync<MotionCustomTemplate>(stream,ItemMotionCustomTemplate.Json);if(t is null){message="Empty template.";return;}await Add(t);}catch(Exception ex)when(ex is JsonException or IOException or NotSupportedException){message="Could not import template: invalid JSON or file larger than 1 MB.";}}
+}

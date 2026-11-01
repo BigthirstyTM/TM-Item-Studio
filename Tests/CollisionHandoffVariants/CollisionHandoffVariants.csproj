@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../Models/FlagPackaging/MapArchive.cs" Link="MapArchive.cs" />
+    <Compile Include="../../Models/FlagPackaging/PackagingGuard.cs" Link="PackagingGuard.cs" />
+    <Compile Include="../../Models/FlagPackaging/RawZip.cs" Link="RawZip.cs" />
     <Compile Include="../../Models/ItemMotion*.cs" Link="Models/%(Filename)%(Extension)" />
     <Compile Include="../../Models/ItemScene*.cs" Link="Models/%(Filename)%(Extension)" />
     <Compile Include="../../Models/AuthoredMotionPreview.cs" Link="Models/AuthoredMotionPreview.cs" />
