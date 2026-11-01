@@ -1,0 +1,86 @@
+{
+  "source": "Trackmania 2020 Stadium GameData, local extraction",
+  "purpose": "Viewport mood preview only; not embedded into exported items",
+  "files": [
+    {
+      "path": "Day/Mood.MoodSetting.xml",
+      "bytes": 2565,
+      "sha256": "fb8e72f6891c2be5622b0bed849753d3fa860fd8a995b65b05ab66b6d2ce33e1"
+    },
+    {
+      "path": "Day/SkyColor.dds",
+      "bytes": 699236,
+      "sha256": "d91bea7dd4ce0f3098d304d7628bb349291d0bc726230e862afab035057a1156"
+    },
+    {
+      "path": "Day/SkyClouds.dds",
+      "bytes": 1398256,
+      "sha256": "88a934f82133c1d49fcd8379182983c98536d99904d2143add4dc7c105057d63"
+    },
+    {
+      "path": "Day/EnvCubicHdr.dds",
+      "bytes": 2097268,
+      "sha256": "8762ab5b3d7a174761bb6a82f3b2bb32b8f9854cfd42757a6d1fc1554cf54b31"
+    },
+    {
+      "path": "Night/Mood.MoodSetting.xml",
+      "bytes": 2523,
+      "sha256": "707b95dc8041afa8b28b0a4382c4f2817700670adab61e4522828e7d0e404a22"
+    },
+    {
+      "path": "Night/SkyColor.dds",
+      "bytes": 699236,
+      "sha256": "01aaf912a4a1b66a7eac2c1054c5f133aa3f7ee8c63a5d54fc5278dda57faec2"
+    },
+    {
+      "path": "Night/SkyClouds.dds",
+      "bytes": 1398256,
+      "sha256": "1a877376f2da5e69baf4811c64e7d3fd8560a51bfd1f1a5a5e1c40e2f67bbca1"
+    },
+    {
+      "path": "Night/EnvCubicHdr.dds",
+      "bytes": 2097268,
+      "sha256": "6dea19bade887063a6b1e43f168061d120edc9a8413b5374e80a298f54d9214e"
+    },
+    {
+      "path": "Sunrise/Mood.MoodSetting.xml",
+      "bytes": 2526,
+      "sha256": "561368d8c90a96a7287d2c20be8c43582a7616d93e6cd8a4480b97703075d6a8"
+    },
+    {
+      "path": "Sunrise/SkyColor.dds",
+      "bytes": 699236,
+      "sha256": "0c27a2cd0a6d5a8105f85226022ad2ea7b6c9334f20a08bbc5ae8eb3a8889231"
+    },
+    {
+      "path": "Sunrise/SkyClouds.dds",
+      "bytes": 1398256,
+      "sha256": "e4a640df5c719a91032defc659cc53c8759e1470d70423e86fdf3ad52a73166c"
+    },
+    {
+      "path": "Sunrise/EnvCubicHdr.dds",
+      "bytes": 2097268,
+      "sha256": "5aadb04e3b5a1d1522d68cb2749ff1da4596176f6c795dda7b6ed56cbcb36da4"
+    },
+    {
+      "path": "Sunset/Mood.MoodSetting.xml",
+      "bytes": 2501,
+      "sha256": "1bfc9fb76f4a26b2a0292b6dbba47d7f21d0547a081f9eb7c873ffd211103c95"
+    },
+    {
+      "path": "Sunset/SkyColor.dds",
+      "bytes": 699236,
+      "sha256": "17df944f704364420015abaa71d33722f62960953b701c56ff5acc9e8d24049b"
+    },
+    {
+      "path": "Sunset/SkyClouds.dds",
+      "bytes": 1398256,
+      "sha256": "356d54f6e1da502e159cab07a87d92511f604d43206fe28c64de0ab67b233719"
+    },
+    {
+      "path": "Sunset/EnvCubicHdr.dds",
+      "bytes": 2097268,
+      "sha256": "ef8b713a81c4ff9298834c1c520c087bf65c47eac226643dbbfca57d1c895802"
+    }
+  ]
+}

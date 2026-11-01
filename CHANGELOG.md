@@ -2,6 +2,14 @@
 
 All notable changes to TM Item Studio are documented in this file.
 
+## [0.5.18] - 2026-11-01
+
+- Fit the visible model on initial load and camera reset without expanding the frame to distant pivot, light or motion helper points. Collision-only items retain a fallback.
+- Bundle the four Stadium viewport mood sets (about 16 MiB) for on-demand loading without a local GameData folder. Local mood files remain preferred when supplied.
+- Restore direct buttons for all available inspector sections while keeping the searchable selector.
+- Explain ItemType limitations, the distinction between archetype references and inventory folders, audio inspection and unverified moving waypoint triggers.
+- Add reproducible enum/trigger research fixtures and record native loader results separately from gameplay support.
+
 ## [0.5.17] - 2026-11-01
 
 - Add draggable, optionally linked Bezier handles with adjustable sampling detail and path undo/redo.

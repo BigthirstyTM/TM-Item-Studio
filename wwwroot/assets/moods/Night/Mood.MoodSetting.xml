@@ -1,0 +1,61 @@
+<Mood>
+	<Light EnableStars="1" Latitude="45" DayTime01="0.15" LocalLightX="1" HelperHdrX="0.5">
+		<LAmbient HdrColor="0.00406201 0.00426893 0.00539485"/>
+		<LDirSun HdrColor="0 0 0"/>
+		<LDirMoon HdrColor="0.0314011 0.0456443 0.100007"/>
+		<T3SpecularLocal ScaleIntens="1" ScaleExponent="1"/>
+		<T3LightMap MaxHDR="3.5" BounceFactor="2" SkyFactor="1" SkyUseClouds="1"/>
+		<HdrScales Player="1"/>
+	</Light>
+	<Atmo MoonHdrScale="1" FxSmSelfIllumScaleGamePlay="2" FogUseLighting="1">
+		<HdrSun Power="300000">
+			<Atmo1 Power="1500" Color="92acff" Scale="0.400044"/>
+			<Atmo2 Power="4" Color="8aa6ff" Scale="0.0400044"/>
+		</HdrSun>
+		<Clouds MinRgb="" MinRgbX="1" MaxRgb="ffffff" MaxRgbX="1.00018" GodLightIntens="0.04" SunThroughIntens="1">
+			<EdgeLight>
+				<Layer0 Power="200" Scale="5"/>
+				<Layer1 Power="16" Scale="1"/>
+				<Layer2 Power="1" Scale="1"/>
+			</EdgeLight>
+			<LDirFront Back_Dot="0.484" Back_Intens="0" Front_Dot="1" Front_Intens="0.096"/>
+			<LDirBack Back_Dot="-0.776" Back_Intens="0" Front_Dot="0.968" Front_Intens="0.338"/>
+		</Clouds>
+		<CloudsX2 MinRgb="edefff" MinRgbX="0.376072" MaxRgb="f1f4ff" MaxRgbX="0.600108"/>
+		<CloudsVortex MinRgb="" MaxRgb="ffffff"/>
+		<FogMatter Count="1">
+			<Matter0 Id="IceFog" Density="0.1" Color="ffffff" Diffuse="e9e9e9"/>
+		</FogMatter>
+	</Atmo>
+	<Fog Version="1" Enabled="1" DepthMin="2" DepthMax="4000" Exponant="1" IntensMin="0" IntensMax="0.6" ExpDensity="0" Diffuse_sRGB="3b3b4f" Color="353547">
+		<Height YBottom="-600" YTop="500" MulBottom="1" MulTop="1"/>
+		<Clouds DepthMax="60000" Exponant="1.5" IntensMax="0.868"/>
+		<SkyClouds GlobalIntens="0"/>
+		<WaterFog Version="1" CausticIntens="10" CausticSize="3" CausticPeriodMs="2500"/>
+		<Noise Speed="5 5 5" Size="256"/>
+	</Fog>
+	<Fx>
+		<T3Bloom StreaksIntens="1.5" StreaksAttenuation="0.75">
+			<HdrNorm_to_Intens>
+				<Key In="0" Out="0"/>
+				<Key In="0.5" Out="0.02"/>
+				<Key In="1" Out="0.5"/>
+				<Key In="4" Out="0.015"/>
+				<Key In="32" Out="0"/>
+			</HdrNorm_to_Intens>
+		</T3Bloom>
+		<T3ToneMap FilmCurve="Preset3">
+			<AutoExp MinExposure="-4" MaxExposure="1" SecondsToMidFalloff="0.3">
+				<AvgLumi_to_KeyValue>
+					<Key In="0.001" Out="0.02"/>
+					<Key In="0.003" Out="0.008"/>
+					<Key In="0.01" Out="0.015"/>
+					<Key In="0.07" Out="0.08"/>
+					<Key In="0.17" Out="0.18"/>
+					<Key In="0.4" Out="0.3"/>
+				</AvgLumi_to_KeyValue>
+			</AutoExp>
+		</T3ToneMap>
+		<ColorGrading FileName="" Intensity="1"/>
+	</Fx>
+</Mood>

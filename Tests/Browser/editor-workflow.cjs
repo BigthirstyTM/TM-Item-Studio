@@ -4,7 +4,7 @@ const {chromium}=require('playwright');const assert=require('node:assert/strict'
  await page.goto(process.env.STUDIO_BASE_URL,{waitUntil:'networkidle'});
  await page.getByLabel('Open item files',{exact:true}).setInputFiles(path.resolve('artifacts/handoff-cart/fixtures/TMIS_Cart_Source.Item.Gbx'));
  const nav=page.getByRole('navigation',{name:'Item editing workflow'});await nav.waitFor();
- const buttons=nav.getByRole('button');assert.deepEqual(await buttons.allTextContents(),['1. Identity & icon','2. Model & materials','3. Placement & pivots','4. Collision','5. Motion & paths']);
+ const buttons=nav.getByRole('button');assert.deepEqual(await buttons.allTextContents(),['1. Identity & icon','2. Model & materials','3. Placement & pivots','4. Collision','5. Motion & paths','Lights & atmosphere','Audio & effects','Instances & macroblocks','Flag tools','Sockets (inspection)']);
  for(let i=0;i<5;i++){await buttons.nth(i).click();await page.waitForFunction(n=>document.querySelector('[data-testid="editing-section-intro"] strong')?.textContent.startsWith(String(n)),i+1);assert.equal(await buttons.nth(i).getAttribute('aria-expanded'),'true');}
  const search=page.getByLabel('Search Editing section',{exact:true}),select=page.getByLabel('Editing section',{exact:true});
  await search.fill('flag');await select.selectOption('Flag tools');await page.getByTestId('editing-section-intro').getByText('Flag tools',{exact:true}).waitFor();

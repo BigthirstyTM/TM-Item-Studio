@@ -45,9 +45,16 @@ window.disposeStudioMood = function () {
     studioMoodResources = [];
     if (scene) scene.environment = null;
 };
+async function moodFile(path) {
+    const local = gameFile(path);
+    if (local) return local;
+    const relative = path.replace(/^Stadium\/Media\/Moods\//, 'assets/moods/');
+    const response = await fetch(new URL(relative, document.baseURI));
+    if (!response.ok) throw new Error(`Could not load bundled mood: ${response.status} ${relative}`);
+    return [relative, await response.blob()];
+}
 async function moodDds(path) {
-    const found = gameFile(path);
-    if (!found) throw new Error(`Missing GameData file: ${path}`);
+    const found = await moodFile(path);
     const data = await found[1].arrayBuffer(), view = new DataView(data);
     const width = view.getUint32(16, true), height = view.getUint32(12, true);
     const mips = Math.max(1, view.getUint32(28, true));
@@ -90,8 +97,7 @@ async function loadMood(name) {
     const folder = { morning: 'Sunrise', day: 'Day', evening: 'Sunset', night: 'Night' }[name];
     if (!folder) throw new Error('Unknown Trackmania mood.');
     const prefix = `Stadium/Media/Moods/${folder}/`;
-    const xmlFile = gameFile(prefix + 'Mood.MoodSetting.xml');
-    if (!xmlFile) throw new Error('Choose the extracted GameData or Stadium folder to load the original Trackmania moods.');
+    const xmlFile = await moodFile(prefix + 'Mood.MoodSetting.xml');
     const xml = new DOMParser().parseFromString(await xmlFile[1].text(), 'application/xml');
     const color = tag => (xml.querySelector(tag)?.getAttribute('HdrColor') || '0 0 0').split(/\s+/).map(Number);
     const [sky, clouds, environment] = await Promise.all([moodDds(prefix + 'SkyColor.dds'), moodDds(prefix + 'SkyClouds.dds'), moodDds(prefix + 'EnvCubicHdr.dds')]);

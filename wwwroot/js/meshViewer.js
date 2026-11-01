@@ -2094,7 +2094,7 @@ function renderPayload(input, preserveCamera) {
         selectMeshObject(null, false);
     }
     renderDrawPathVisual();
-    applyTypedMotion(); applySceneFilter(); applyCompositeVisualState(); applyLayerVisibility(); updateWaypointHighlights(); if (!preserveCamera) frameCamera(bounds);
+    applyTypedMotion(); applySceneFilter(); applyCompositeVisualState(); applyLayerVisibility(); updateWaypointHighlights(); if (!preserveCamera) { const modelBounds = visibleModelBounds(); frameCamera(modelBounds.isEmpty() ? bounds : modelBounds); }
     const renderVersion = ++textureRenderVersion;
     void applyLocalTextures(data, renderVersion);
 }
@@ -2422,13 +2422,19 @@ window.toggleWireframe = function () {
     isWireframe = !isWireframe;
     for (const group of [staticGroup, movingGroup]) group?.traverse(child => { if (child.isMesh) child.material.wireframe = isWireframe; });
 };
-window.resetCamera = function () {
-    if (!camera || !controls) return;
+function visibleModelBounds() {
     const bounds = new THREE.Box3();
-    for (const group of [staticGroup, movingGroup, collisionGroup]) group?.traverse(mesh => {
+    for (const group of [staticGroup, movingGroup]) group?.traverse(mesh => {
         if (isSelectableMesh(mesh)) bounds.expandByObject(mesh);
     });
-    frameCamera(bounds);
+    if (bounds.isEmpty()) collisionGroup?.traverse(mesh => {
+        if (isSelectableMesh(mesh)) bounds.expandByObject(mesh);
+    });
+    return bounds;
+}
+window.resetCamera = function () {
+    if (!camera || !controls) return;
+    frameCamera(visibleModelBounds());
 };
 window.setStudioView = function (view, reverse = false) {
     if (!camera || !controls) return;
